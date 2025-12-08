@@ -63,7 +63,7 @@ async function generateWithOpenAI(
     style: options.style || 'natural',
   });
 
-  return response.data.map((image) => ({
+  return (response.data || []).map((image: { url?: string }) => ({
     url: image.url!,
     prompt: options.prompt,
   }));

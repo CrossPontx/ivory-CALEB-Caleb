@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { createSession } from '@/lib/auth';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -51,6 +52,16 @@ export async function POST(request: Request) {
 
     // Create session
     await createSession(newUser[0].id);
+
+    // Send welcome email (don't block on this)
+    sendWelcomeEmail({
+      email: newUser[0].email,
+      username: newUser[0].username,
+      userType: newUser[0].userType,
+    }).catch((error) => {
+      console.error('Failed to send welcome email:', error);
+      // Don't fail the signup if email fails
+    });
 
     return NextResponse.json({
       id: newUser[0].id,

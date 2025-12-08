@@ -135,17 +135,35 @@ FROM_EMAIL=noreply@yourdomain.com
 
 **Install dependencies**:
 ```bash
-yarn add resend
+yarn add resend nodemailer
 ```
+
+**Features**:
+- ✅ **Welcome Emails**: Automatically sent on user signup
+  - Personalized for clients vs nail techs
+  - Includes quick start guides and CTAs
+- ✅ **Password Reset**: Secure reset flow with time-limited tokens
+- ✅ **Responsive Templates**: Mobile-friendly HTML emails
 
 **Usage**:
 ```typescript
-import { sendEmail, emailTemplates } from '@/lib/email';
+import { sendWelcomeEmail, sendPasswordResetEmail } from '@/lib/email';
 
-await sendEmail({
-  to: 'user@example.com',
-  ...emailTemplates.welcome('John'),
+// Welcome email (sent automatically on signup)
+await sendWelcomeEmail({
+  email: 'user@example.com',
+  username: 'JohnDoe',
+  userType: 'client', // or 'tech'
 });
+
+// Password reset
+await sendPasswordResetEmail('user@example.com', 'reset-token-123');
+```
+
+**Test Email Service**:
+```bash
+# Update test email in scripts/test-email.ts, then run:
+npx tsx scripts/test-email.ts
 ```
 
 **Pricing**: 
@@ -270,20 +288,26 @@ export async function POST(request: Request) {
 ```
 
 ### Test Email
+```bash
+# Run the test script
+npx tsx scripts/test-email.ts
+```
+
+Or create a test API route:
 ```typescript
 // app/api/test/email/route.ts
-import { sendEmail } from '@/lib/email';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
-  const { to } = await request.json();
+  const { email, username, userType } = await request.json();
   
-  await sendEmail({
-    to,
-    subject: 'Test Email',
-    html: '<p>This is a test email from Ivory</p>',
+  const result = await sendWelcomeEmail({
+    email,
+    username,
+    userType: userType || 'client',
   });
   
-  return Response.json({ success: true });
+  return Response.json(result);
 }
 ```
 

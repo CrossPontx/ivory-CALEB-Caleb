@@ -5,9 +5,11 @@ import { eq } from 'drizzle-orm';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     // Get request with related look and user data
     const result = await db
       .select({
@@ -22,7 +24,7 @@ export async function GET(
       .from(designRequests)
       .leftJoin(looks, eq(designRequests.lookId, looks.id))
       .leftJoin(users, eq(designRequests.clientId, users.id))
-      .where(eq(designRequests.id, parseInt(params.id)));
+      .where(eq(designRequests.id, parseInt(id)));
 
     if (result.length === 0) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 });

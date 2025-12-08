@@ -1,134 +1,230 @@
-// Email utilities using Resend
-// Fallback to SMTP if Resend is not configured
-
+import { Resend } from 'resend';
 import { env } from './env';
 
-export type EmailProvider = 'resend' | 'smtp' | null;
+// Initialize Resend lazily to avoid build-time errors
+let resend: Resend | null = null;
 
-// Detect which email provider is configured
-export function getEmailProvider(): EmailProvider {
-  if (env.RESEND_API_KEY) return 'resend';
-  if (env.SMTP_HOST && env.SMTP_USER) return 'smtp';
-  return null;
-}
-
-export interface SendEmailOptions {
-  to: string | string[];
-  subject: string;
-  html: string;
-  text?: string;
-  from?: string;
-  replyTo?: string;
-}
-
-// Send email using configured provider
-export async function sendEmail(options: SendEmailOptions): Promise<void> {
-  const provider = getEmailProvider();
-
-  if (!provider) {
-    console.warn('No email provider configured. Email not sent.');
-    return;
+function getResendClient() {
+  if (!resend && env.RESEND_API_KEY) {
+    resend = new Resend(env.RESEND_API_KEY);
   }
+  return resend;
+}
 
-  const from = options.from || env.FROM_EMAIL || 'noreply@ivory.app';
+export interface WelcomeEmailProps {
+  email: string;
+  username: string;
+  userType: 'client' | 'tech';
+}
 
-  switch (provider) {
-    case 'resend':
-      await sendWithResend({ ...options, from });
-      break;
-    case 'smtp':
-      await sendWithSMTP({ ...options, from });
-      break;
+export async function sendWelcomeEmail({ email, username, userType }: WelcomeEmailProps) {
+  try {
+    const client = getResendClient();
+    
+    if (!client) {
+      console.warn('Resend API key not configured, skipping welcome email');
+      return { success: false, error: 'Resend API key not configured' };
+    }
+
+    const subject = userType === 'tech' 
+      ? '🎨 Welcome to Mirro - Start Showcasing Your Nail Art!'
+      : '💅 Welcome to Mirro - Your Nail Design Journey Begins!';
+
+    const htmlContent = userType === 'tech'
+      ? getTechWelcomeEmail(username)
+      : getClientWelcomeEmail(username);
+
+    const { data, error } = await client.emails.send({
+      from: env.FROM_EMAIL || 'noreply@mirro2.com',
+      to: email,
+      subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      console.error('Error sending welcome email:', error);
+      return { success: false, error };
+    }
+
+    console.log('Welcome email sent successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+    return { success: false, error };
   }
 }
 
-// Send email with Resend
-async function sendWithResend(options: SendEmailOptions): Promise<void> {
-  const { Resend } = await import('resend');
-  const resend = new Resend(env.RESEND_API_KEY);
-
-  await resend.emails.send({
-    from: options.from!,
-    to: Array.isArray(options.to) ? options.to : [options.to],
-    subject: options.subject,
-    html: options.html,
-    text: options.text,
-    reply_to: options.replyTo,
-  });
+function getClientWelcomeEmail(username: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Mirro</title>
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 32px;">💅 Welcome to Mirro!</h1>
+        </div>
+        
+        <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+          <h2 style="color: #667eea; margin-top: 0;">Hi ${username}! 👋</h2>
+          
+          <p style="font-size: 16px; margin-bottom: 20px;">
+            We're thrilled to have you join Mirro, where your dream nail designs come to life!
+          </p>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <h3 style="color: #333; margin-top: 0;">🎨 Get Started:</h3>
+            <ul style="padding-left: 20px; margin: 10px 0;">
+              <li style="margin-bottom: 10px;">Capture or upload photos of your hands</li>
+              <li style="margin-bottom: 10px;">Design custom nail art with our editor</li>
+              <li style="margin-bottom: 10px;">Use AI to generate unique designs</li>
+              <li style="margin-bottom: 10px;">Share your designs with nail techs</li>
+              <li style="margin-bottom: 10px;">Book appointments with verified professionals</li>
+            </ul>
+          </div>
+          
+          <p style="font-size: 16px; margin: 25px 0;">
+            Ready to create your first design? Let's get started!
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${env.BASE_URL}/capture" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 25px; font-weight: 600; display: inline-block; font-size: 16px;">
+              Start Designing
+            </a>
+          </div>
+          
+          <p style="font-size: 14px; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+            Need help? Reply to this email or visit our <a href="${env.BASE_URL}" style="color: #667eea;">help center</a>.
+          </p>
+          
+          <p style="font-size: 14px; color: #666; margin-top: 10px;">
+            Happy designing! ✨<br>
+            The Mirro Team
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
 }
 
-// Send email with SMTP (using nodemailer)
-async function sendWithSMTP(options: SendEmailOptions): Promise<void> {
-  const nodemailer = await import('nodemailer');
-
-  const transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT || 587,
-    secure: env.SMTP_PORT === 465,
-    auth: {
-      user: env.SMTP_USER,
-      pass: env.SMTP_PASSWORD,
-    },
-  });
-
-  await transporter.sendMail({
-    from: options.from,
-    to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
-    subject: options.subject,
-    html: options.html,
-    text: options.text,
-    replyTo: options.replyTo,
-  });
+function getTechWelcomeEmail(username: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Mirro</title>
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 32px;">🎨 Welcome to Mirro!</h1>
+        </div>
+        
+        <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+          <h2 style="color: #667eea; margin-top: 0;">Hi ${username}! 👋</h2>
+          
+          <p style="font-size: 16px; margin-bottom: 20px;">
+            Welcome to Mirro! We're excited to help you grow your nail art business and connect with clients who love your work.
+          </p>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <h3 style="color: #333; margin-top: 0;">🚀 Build Your Profile:</h3>
+            <ul style="padding-left: 20px; margin: 10px 0;">
+              <li style="margin-bottom: 10px;">Complete your business profile</li>
+              <li style="margin-bottom: 10px;">Upload your portfolio and showcase your best work</li>
+              <li style="margin-bottom: 10px;">Set your services and pricing</li>
+              <li style="margin-bottom: 10px;">Receive design requests from clients</li>
+              <li style="margin-bottom: 10px;">Manage appointments and grow your business</li>
+            </ul>
+          </div>
+          
+          <p style="font-size: 16px; margin: 25px 0;">
+            Let's set up your profile and start receiving client requests!
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${env.BASE_URL}/tech/dashboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 25px; font-weight: 600; display: inline-block; font-size: 16px;">
+              Go to Dashboard
+            </a>
+          </div>
+          
+          <p style="font-size: 14px; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+            Need help getting started? Reply to this email or visit our <a href="${env.BASE_URL}" style="color: #667eea;">help center</a>.
+          </p>
+          
+          <p style="font-size: 14px; color: #666; margin-top: 10px;">
+            Here's to your success! ✨<br>
+            The Mirro Team
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
 }
 
-// Email templates
-export const emailTemplates = {
-  // Welcome email for new users
-  welcome: (username: string) => ({
-    subject: 'Welcome to Ivory!',
-    html: `
-      <h1>Welcome to Ivory, ${username}!</h1>
-      <p>We're excited to have you join our community of nail art enthusiasts.</p>
-      <p>Get started by creating your first nail design or browsing our gallery.</p>
-      <a href="${env.BASE_URL}/home">Go to Ivory</a>
-    `,
-    text: `Welcome to Ivory, ${username}! We're excited to have you join our community.`,
-  }),
+export async function sendPasswordResetEmail(email: string, resetToken: string) {
+  try {
+    const client = getResendClient();
+    
+    if (!client) {
+      console.warn('Resend API key not configured, skipping password reset email');
+      return { success: false, error: 'Resend API key not configured' };
+    }
 
-  // Design request notification for nail techs
-  designRequest: (techName: string, clientName: string, designUrl: string) => ({
-    subject: 'New Design Request',
-    html: `
-      <h1>New Design Request</h1>
-      <p>Hi ${techName},</p>
-      <p>${clientName} has sent you a new nail design request.</p>
-      <a href="${env.BASE_URL}/tech/dashboard">View Request</a>
-    `,
-    text: `Hi ${techName}, ${clientName} has sent you a new nail design request.`,
-  }),
+    const resetUrl = `${env.BASE_URL}/reset-password?token=${resetToken}`;
+    
+    const { data, error } = await client.emails.send({
+      from: env.FROM_EMAIL || 'noreply@mirro2.com',
+      to: email,
+      subject: '🔐 Reset Your Mirro Password',
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #667eea; padding: 30px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: white; margin: 0;">Reset Your Password</h1>
+            </div>
+            
+            <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+              <p style="font-size: 16px;">
+                We received a request to reset your password. Click the button below to create a new password:
+              </p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="background: #667eea; color: white; padding: 14px 32px; text-decoration: none; border-radius: 25px; font-weight: 600; display: inline-block;">
+                  Reset Password
+                </a>
+              </div>
+              
+              <p style="font-size: 14px; color: #666;">
+                This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.
+              </p>
+              
+              <p style="font-size: 14px; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                The Mirro Team
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
 
-  // Request approved notification for clients
-  requestApproved: (clientName: string, techName: string) => ({
-    subject: 'Your Design Request Was Approved!',
-    html: `
-      <h1>Great News!</h1>
-      <p>Hi ${clientName},</p>
-      <p>${techName} has approved your nail design request.</p>
-      <a href="${env.BASE_URL}/home">View Details</a>
-    `,
-    text: `Hi ${clientName}, ${techName} has approved your nail design request.`,
-  }),
+    if (error) {
+      console.error('Error sending password reset email:', error);
+      return { success: false, error };
+    }
 
-  // Password reset email
-  passwordReset: (resetLink: string) => ({
-    subject: 'Reset Your Password',
-    html: `
-      <h1>Reset Your Password</h1>
-      <p>Click the link below to reset your password:</p>
-      <a href="${resetLink}">Reset Password</a>
-      <p>This link will expire in 1 hour.</p>
-      <p>If you didn't request this, please ignore this email.</p>
-    `,
-    text: `Reset your password: ${resetLink}`,
-  }),
-};
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to send password reset email:', error);
+    return { success: false, error };
+  }
+}

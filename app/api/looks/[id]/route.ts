@@ -5,13 +5,15 @@ import { eq } from 'drizzle-orm';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const look = await db
       .select()
       .from(looks)
-      .where(eq(looks.id, parseInt(params.id)));
+      .where(eq(looks.id, parseInt(id)));
 
     if (look.length === 0) {
       return NextResponse.json({ error: 'Look not found' }, { status: 404 });
@@ -25,12 +27,14 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const deleted = await db
       .delete(looks)
-      .where(eq(looks.id, parseInt(params.id)))
+      .where(eq(looks.id, parseInt(id)))
       .returning();
 
     if (deleted.length === 0) {
