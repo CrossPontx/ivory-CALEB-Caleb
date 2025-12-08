@@ -54,7 +54,17 @@ yarn install
 ```
 
 ### 2. Environment Variables
-The `.env.local` file already contains your Neon database connection string.
+The `.env.local` file contains your configuration. See [Environment Guide](docs/ENVIRONMENT.md) for detailed setup.
+
+**Required:**
+- `DATABASE_URL` - Your Neon PostgreSQL connection string ✅
+
+**Optional (for future features):**
+- `CLOUDINARY_*` - For image uploads
+- `OPENAI_API_KEY` - For AI generation
+- `SMTP_*` - For email notifications
+
+For a complete list and setup instructions, see [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)
 
 ### 3. Database Schema
 The schema has already been pushed to your Neon database with these tables:
