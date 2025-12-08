@@ -135,6 +135,15 @@ export const reviews = pgTable('reviews', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Sessions for persistent login
+export const sessions = pgTable('sessions', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  token: varchar('token', { length: 500 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Notifications
 export const notifications = pgTable('notifications', {
   id: serial('id').primaryKey(),

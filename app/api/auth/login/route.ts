@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { createSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -26,6 +27,9 @@ export async function POST(request: Request) {
     if (user[0].passwordHash !== password) {
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }
+
+    // Create session
+    await createSession(user[0].id);
 
     return NextResponse.json({
       id: user[0].id,

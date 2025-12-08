@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,35 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [isChecking, setIsChecking] = useState(true)
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session')
+        const data = await response.json()
+        
+        if (data.user) {
+          // User is already logged in, redirect them
+          localStorage.setItem("ivoryUser", JSON.stringify(data.user))
+          if (data.user.userType === 'tech') {
+            router.push('/tech/dashboard')
+          } else if (data.user.userType === 'client') {
+            router.push('/home')
+          } else {
+            router.push('/user-type')
+          }
+        }
+      } catch (error) {
+        console.error('Session check error:', error)
+      } finally {
+        setIsChecking(false)
+      }
+    }
+    
+    checkSession()
+  }, [router])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,6 +116,15 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Social auth error:', error)
     }
+  }
+
+  // Show loading state while checking session
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush flex items-center justify-center">
+        <div className="text-charcoal">Loading...</div>
+      </div>
+    )
   }
 
   return (

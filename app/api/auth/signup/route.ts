@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { createSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -33,6 +34,9 @@ export async function POST(request: Request) {
         userType: 'client', // Default to client, can be changed
       })
       .returning();
+
+    // Create session
+    await createSession(newUser[0].id);
 
     return NextResponse.json({
       id: newUser[0].id,
