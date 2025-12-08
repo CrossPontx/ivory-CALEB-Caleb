@@ -78,42 +78,42 @@ export default function LookDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10">
-        <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10 safe-top">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="active:scale-95 transition-transform">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="font-serif text-xl font-bold text-charcoal">{look.title}</h1>
+          <h1 className="font-serif text-lg sm:text-xl font-bold text-charcoal line-clamp-1">{look.title}</h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <Card className="overflow-hidden border-0 bg-white shadow-xl mb-6">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
+        <Card className="overflow-hidden border-0 bg-white shadow-xl mb-4 sm:mb-6">
           <div className="aspect-square relative">
             <Image src={look.imageUrl || "/placeholder.svg"} alt={look.title} fill className="object-cover" />
           </div>
         </Card>
 
-        <div className="space-y-3">
-          <Button size="lg" className="w-full" onClick={handleSendToTech}>
+        <div className="space-y-2.5 sm:space-y-3">
+          <Button size="lg" className="w-full h-12 sm:h-14 text-base font-semibold active:scale-95 transition-transform" onClick={handleSendToTech}>
             <Send className="w-5 h-5 mr-2" />
             Send to Nail Tech
           </Button>
 
-          <Button size="lg" variant="outline" className="w-full bg-transparent" onClick={handleShare}>
+          <Button size="lg" variant="outline" className="w-full h-12 sm:h-14 text-base bg-transparent active:scale-95 transition-transform" onClick={handleShare}>
             <Share2 className="w-5 h-5 mr-2" />
             Share with Friends
           </Button>
 
-          <Button size="lg" variant="outline" className="w-full bg-transparent text-destructive" onClick={handleDelete}>
+          <Button size="lg" variant="outline" className="w-full h-12 sm:h-14 text-base bg-transparent text-destructive active:scale-95 transition-transform" onClick={handleDelete}>
             <Trash2 className="w-5 h-5 mr-2" />
             Delete Design
           </Button>
         </div>
 
-        <div className="mt-8 p-4 bg-white/60 backdrop-blur-sm rounded-lg">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-white/60 backdrop-blur-sm rounded-lg">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Created on{" "}
             {new Date(look.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </p>

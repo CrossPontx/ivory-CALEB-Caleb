@@ -130,24 +130,24 @@ export default function EditorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush pb-96">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10">
-        <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10 safe-top">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Button variant="ghost" size="icon" onClick={() => router.back()} className="active:scale-95 transition-transform">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="font-serif text-xl font-bold text-charcoal">Design Editor</h1>
+            <h1 className="font-serif text-lg sm:text-xl font-bold text-charcoal">Design Editor</h1>
           </div>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} className="h-9 sm:h-10 active:scale-95 transition-transform">
             <Save className="w-4 h-4 mr-2" />
-            Save
+            <span className="hidden sm:inline">Save</span>
           </Button>
         </div>
       </header>
 
       {/* Main Canvas */}
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <Card className="overflow-hidden border-0 bg-white shadow-xl mb-6 relative">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <Card className="overflow-hidden border-0 bg-white shadow-xl mb-4 sm:mb-6 relative touch-none">
           <div className="aspect-[3/4] relative">
             <Image src={image || "/placeholder.svg"} alt="Hand photo" fill className="object-cover" />
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
@@ -157,7 +157,7 @@ export default function EditorPage() {
                 type="button"
                 key={nail.id}
                 onClick={() => handleNailClick(nail.id)}
-                className={`absolute w-8 h-8 rounded-full border-2 transition-all ${
+                className={`absolute w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 transition-all active:scale-110 ${
                   nail.selected ? "border-white scale-125" : "border-white/60"
                 }`}
                 style={{
@@ -171,40 +171,40 @@ export default function EditorPage() {
           </div>
         </Card>
 
-        <p className="text-sm text-center text-muted-foreground mb-4">Tap on nails to select, then choose a design</p>
+        <p className="text-xs sm:text-sm text-center text-muted-foreground mb-4 px-4">Tap on nails to select, then choose a design</p>
       </main>
 
       {/* Bottom Drawer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl safe-bottom z-20">
         <div className="max-w-2xl mx-auto">
-          <div className="h-1 w-12 bg-border rounded-full mx-auto my-3"></div>
+          <div className="h-1 w-12 bg-border rounded-full mx-auto my-2 sm:my-3"></div>
 
           <Tabs defaultValue="colors" className="w-full">
-            <TabsList className="w-full justify-start px-4 bg-transparent border-b rounded-none h-12">
-              <TabsTrigger value="colors" className="flex items-center gap-2">
-                <Palette className="w-4 h-4" />
+            <TabsList className="w-full justify-start px-4 sm:px-6 bg-transparent border-b rounded-none h-12 sm:h-14 overflow-x-auto">
+              <TabsTrigger value="colors" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
+                <Palette className="w-4 h-4 sm:w-5 sm:h-5" />
                 Colors
               </TabsTrigger>
-              <TabsTrigger value="ai" className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
+              <TabsTrigger value="ai" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 AI Designs
               </TabsTrigger>
-              <TabsTrigger value="upload" className="flex items-center gap-2">
-                <Upload className="w-4 h-4" />
+              <TabsTrigger value="upload" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
+                <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
                 Upload
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="colors" className="p-4 space-y-6 max-h-80 overflow-y-auto">
+            <TabsContent value="colors" className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-h-80 overflow-y-auto">
               <div>
-                <h3 className="text-sm font-semibold text-charcoal mb-3">Classic Palette</h3>
-                <div className="flex gap-3">
+                <h3 className="text-xs sm:text-sm font-semibold text-charcoal mb-2.5 sm:mb-3">Classic Palette</h3>
+                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2">
                   {colorPalettes.classic.map((color) => (
                     <button
                       type="button"
                       key={color}
                       onClick={() => applyColorToSelected(color)}
-                      className={`w-14 h-14 rounded-full border-4 transition-all ${
+                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 transition-all active:scale-110 flex-shrink-0 ${
                         selectedColor === color ? "border-primary scale-110" : "border-white"
                       }`}
                       style={{ backgroundColor: color }}
@@ -214,14 +214,14 @@ export default function EditorPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-charcoal mb-3">Seasonal</h3>
-                <div className="flex gap-3">
+                <h3 className="text-xs sm:text-sm font-semibold text-charcoal mb-2.5 sm:mb-3">Seasonal</h3>
+                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2">
                   {colorPalettes.seasonal.map((color) => (
                     <button
                       type="button"
                       key={color}
                       onClick={() => applyColorToSelected(color)}
-                      className={`w-14 h-14 rounded-full border-4 transition-all ${
+                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 transition-all active:scale-110 flex-shrink-0 ${
                         selectedColor === color ? "border-primary scale-110" : "border-white"
                       }`}
                       style={{ backgroundColor: color }}
@@ -231,14 +231,14 @@ export default function EditorPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-charcoal mb-3">Branded Collections</h3>
-                <div className="flex gap-3">
+                <h3 className="text-xs sm:text-sm font-semibold text-charcoal mb-2.5 sm:mb-3">Branded Collections</h3>
+                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2">
                   {colorPalettes.branded.map((color) => (
                     <button
                       type="button"
                       key={color}
                       onClick={() => applyColorToSelected(color)}
-                      className={`w-14 h-14 rounded-full border-4 transition-all ${
+                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 transition-all active:scale-110 flex-shrink-0 ${
                         selectedColor === color ? "border-primary scale-110" : "border-white"
                       }`}
                       style={{ backgroundColor: color }}
@@ -248,23 +248,23 @@ export default function EditorPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="ai" className="p-4 max-h-80 overflow-y-auto space-y-4">
+            <TabsContent value="ai" className="p-4 sm:p-6 max-h-80 overflow-y-auto space-y-4">
               <div>
-                <h3 className="font-serif text-lg font-bold text-charcoal mb-2">Describe your style</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal mb-1.5 sm:mb-2">Describe your style</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                   Tell Ivory what kind of nail art you want and it will generate unique designs
                 </p>
 
-                <div className="flex gap-2 mb-6">
+                <div className="flex gap-2 mb-4 sm:mb-6">
                   <Input
-                    placeholder="e.g. minimalist floral with gold accents..."
+                    placeholder="e.g. minimalist floral..."
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
-                    className="flex-1"
+                    className="flex-1 h-11 sm:h-12 text-sm sm:text-base"
                     onKeyDown={(e) => e.key === "Enter" && generateAIDesign()}
                   />
-                  <Button onClick={generateAIDesign} disabled={isGenerating || !aiPrompt.trim()}>
-                    {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  <Button onClick={generateAIDesign} disabled={isGenerating || !aiPrompt.trim()} className="h-11 sm:h-12 px-3 sm:px-4 active:scale-95 transition-transform">
+                    {isGenerating ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </Button>
                 </div>
 

@@ -41,45 +41,45 @@ export default function UserTypePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-2xl">
-        <div className="text-center mb-12">
-          <h1 className="font-serif text-5xl font-bold text-charcoal mb-3">Welcome to Ivory</h1>
-          <p className="text-lg text-foreground/70">How would you like to use the app?</p>
+        <div className="text-center mb-8 sm:mb-12 px-4">
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-charcoal mb-2 sm:mb-3">Welcome to Ivory</h1>
+          <p className="text-base sm:text-lg text-foreground/70">How would you like to use the app?</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           <Card
-            className="border-2 border-border hover:border-primary hover:shadow-xl transition-all cursor-pointer bg-white/95 backdrop-blur"
+            className="border-2 border-border hover:border-primary active:border-primary hover:shadow-xl active:scale-95 transition-all cursor-pointer bg-white/95 backdrop-blur"
             onClick={() => selectUserType("client")}
           >
-            <CardContent className="p-8 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
-                <Sparkles className="w-10 h-10 text-white" />
+            <CardContent className="p-6 sm:p-8 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
+                <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
-              <h2 className="font-serif text-2xl font-bold text-charcoal mb-3">Design My Nails</h2>
-              <p className="text-muted-foreground mb-6">
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-charcoal mb-2 sm:mb-3">Design My Nails</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                 Create stunning nail designs with AI, share with friends, and connect with nail techs
               </p>
-              <Button className="w-full" size="lg">
+              <Button className="w-full h-11 sm:h-12 text-base font-semibold" size="lg">
                 Get Started
               </Button>
             </CardContent>
           </Card>
 
           <Card
-            className="border-2 border-border hover:border-primary hover:shadow-xl transition-all cursor-pointer bg-white/95 backdrop-blur"
+            className="border-2 border-border hover:border-primary active:border-primary hover:shadow-xl active:scale-95 transition-all cursor-pointer bg-white/95 backdrop-blur"
             onClick={() => selectUserType("tech")}
           >
-            <CardContent className="p-8 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-charcoal to-primary flex items-center justify-center">
-                <Scissors className="w-10 h-10 text-white" />
+            <CardContent className="p-6 sm:p-8 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-charcoal to-primary flex items-center justify-center">
+                <Scissors className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
-              <h2 className="font-serif text-2xl font-bold text-charcoal mb-3">I'm a Nail Tech</h2>
-              <p className="text-muted-foreground mb-6">
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-charcoal mb-2 sm:mb-3">I'm a Nail Tech</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                 Receive client designs, manage appointments, and showcase your portfolio
               </p>
-              <Button className="w-full bg-transparent" size="lg" variant="outline">
+              <Button className="w-full h-11 sm:h-12 text-base font-semibold bg-transparent" size="lg" variant="outline">
                 Get Started
               </Button>
             </CardContent>

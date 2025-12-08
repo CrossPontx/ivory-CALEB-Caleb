@@ -28,37 +28,37 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10">
-        <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10 safe-top">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="active:scale-95 transition-transform">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="font-serif text-xl font-bold text-charcoal">Profile</h1>
+          <h1 className="font-serif text-lg sm:text-xl font-bold text-charcoal">Profile</h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
         {/* Profile Card */}
-        <Card className="p-8 text-center mb-6 bg-white">
-          <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
-            <span className="text-3xl font-bold text-white">{username.charAt(0).toUpperCase()}</span>
+        <Card className="p-6 sm:p-8 text-center mb-4 sm:mb-6 bg-white">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
+            <span className="text-2xl sm:text-3xl font-bold text-white">{username.charAt(0).toUpperCase()}</span>
           </div>
-          <h2 className="font-serif text-2xl font-bold text-charcoal mb-1">{username}</h2>
-          <p className="text-sm text-muted-foreground capitalize">{userType === "tech" ? "Nail Tech" : "User"}</p>
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-charcoal mb-1">{username}</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground capitalize">{userType === "tech" ? "Nail Tech" : "User"}</p>
         </Card>
 
         {/* Menu Options */}
-        <div className="space-y-2 mb-6">
+        <div className="space-y-2 sm:space-y-2.5 mb-4 sm:mb-6">
           {userType === "tech" && (
             <Button
               variant="outline"
-              className="w-full justify-start h-14 text-left bg-white"
+              className="w-full justify-start h-16 sm:h-18 text-left bg-white active:scale-95 transition-transform"
               onClick={() => router.push("/tech/profile-setup")}
             >
-              <Settings className="w-5 h-5 mr-3" />
-              <div className="flex-1">
-                <div className="font-semibold">Tech Profile Setup</div>
+              <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-3 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm sm:text-base">Tech Profile Setup</div>
                 <div className="text-xs text-muted-foreground">Services, prices, and gallery</div>
               </div>
             </Button>
@@ -66,12 +66,12 @@ export default function ProfilePage() {
 
           <Button
             variant="outline"
-            className="w-full justify-start h-14 text-left bg-white"
+            className="w-full justify-start h-16 sm:h-18 text-left bg-white active:scale-95 transition-transform"
             onClick={() => router.push("/settings")}
           >
-            <Settings className="w-5 h-5 mr-3" />
-            <div>
-              <div className="font-semibold">Settings</div>
+            <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-3 flex-shrink-0" />
+            <div className="min-w-0">
+              <div className="font-semibold text-sm sm:text-base">Settings</div>
               <div className="text-xs text-muted-foreground">Preferences and notifications</div>
             </div>
           </Button>
@@ -80,7 +80,7 @@ export default function ProfilePage() {
         {/* Logout */}
         <Button
           variant="outline"
-          className="w-full text-destructive hover:text-destructive bg-transparent"
+          className="w-full h-12 sm:h-14 text-base text-destructive hover:text-destructive bg-transparent active:scale-95 transition-transform"
           onClick={handleLogout}
         >
           <LogOut className="w-5 h-5 mr-2" />

@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   title: "Ivory - AI Nail Design",
   description: "Design stunning nail art with AI and connect with professional nail techs",
   generator: "v0.app",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: "cover",
+  },
   icons: {
     icon: [
       {
@@ -28,6 +35,11 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Ivory",
+  },
 }
 
 export default function RootLayout({
@@ -37,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased touch-manipulation`}>
         {children}
         <Analytics />
       </body>

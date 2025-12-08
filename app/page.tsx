@@ -90,22 +90,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush flex items-center justify-center p-4 sm:p-6">
       <Card className="w-full max-w-md border-0 shadow-2xl bg-white/95 backdrop-blur">
-        <CardContent className="p-8">
-          <div className="text-center mb-8">
-            <h1 className="font-serif text-4xl font-bold text-charcoal mb-2">Ivory</h1>
-            <p className="text-sm text-muted-foreground">{isSignUp ? "Create your account" : "Welcome back"}</p>
+        <CardContent className="p-6 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal mb-2">Ivory</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">{isSignUp ? "Create your account" : "Welcome back"}</p>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={handleAuth} className="space-y-3 sm:space-y-4">
             <div>
               <Input
                 type="text"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="h-12"
+                className="h-12 sm:h-14 text-base"
                 required
               />
             </div>
@@ -115,12 +115,12 @@ export default function LoginPage() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-12"
+                className="h-12 sm:h-14 text-base"
                 required
               />
             </div>
 
-            <Button type="submit" className="w-full h-12 text-base">
+            <Button type="submit" className="w-full h-12 sm:h-14 text-base font-semibold">
               {isSignUp ? "Sign Up" : "Log In"}
             </Button>
           </form>
@@ -134,11 +134,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 bg-transparent"
+              className="w-full h-12 sm:h-14 bg-transparent text-base"
               onClick={() => handleSocialAuth("google")}
             >
               <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
@@ -165,7 +165,7 @@ export default function LoginPage() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 bg-transparent"
+              className="w-full h-12 sm:h-14 bg-transparent text-base"
               onClick={() => handleSocialAuth("apple")}
             >
               <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
