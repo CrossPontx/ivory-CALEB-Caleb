@@ -23,19 +23,28 @@ export default function SharePage() {
   const [shareLink, setShareLink] = useState("")
 
   useEffect(() => {
-    // Load the specific look
-    const savedLooks = localStorage.getItem("ivoryLooks")
-    if (savedLooks) {
-      const looks = JSON.parse(savedLooks)
-      const foundLook = looks.find((l: NailLook) => l.id === params.id)
-      setLook(foundLook || null)
+    const loadLook = async () => {
+      try {
+        const response = await fetch(`/api/looks/${params.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setLook({
+            id: data.id.toString(),
+            imageUrl: data.imageUrl,
+            title: data.title,
+            createdAt: data.createdAt,
+          })
 
-      // Generate share link
-      if (foundLook) {
-        const link = `${window.location.origin}/shared/${params.id}`
-        setShareLink(link)
+          // Generate share link
+          const link = `${window.location.origin}/shared/${params.id}`
+          setShareLink(link)
+        }
+      } catch (error) {
+        console.error('Error loading look:', error)
       }
     }
+
+    loadLook()
   }, [params.id])
 
   const copyLink = async () => {

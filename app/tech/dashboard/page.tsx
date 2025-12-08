@@ -18,31 +18,57 @@ type ClientRequest = {
   date: string
 }
 
-const mockRequests: ClientRequest[] = [
-  {
-    id: "1",
-    clientName: "Emma Wilson",
-    designImage: "/elegant-french-manicure-nails.jpg",
-    message: "Would love this for my wedding next week!",
-    status: "pending",
-    date: "2024-01-20",
-  },
-  {
-    id: "2",
-    clientName: "Sophia Lee",
-    designImage: "/pink-ombre-nail-design.jpg",
-    message: "Can we add some sparkle?",
-    status: "pending",
-    date: "2024-01-19",
-  },
-]
-
 export default function TechDashboardPage() {
   const router = useRouter()
-  const [requests, setRequests] = useState<ClientRequest[]>(mockRequests)
+  const [requests, setRequests] = useState<ClientRequest[]>([])
 
-  const handleApprove = (id: string) => {
-    setRequests(requests.map((req) => (req.id === id ? { ...req, status: "approved" as const } : req)))
+  useState(() => {
+    const loadRequests = async () => {
+      try {
+        const userStr = localStorage.getItem("ivoryUser")
+        if (!userStr) {
+          router.push("/")
+          return
+        }
+
+        const user = JSON.parse(userStr)
+        const response = await fetch(`/api/design-requests?techId=${user.id}`)
+        
+        if (response.ok) {
+          const data = await response.json()
+          // Transform data to match component format
+          const formattedRequests = data.map((req: any) => ({
+            id: req.id.toString(),
+            clientName: `Client ${req.clientId}`, // Would need to join with users table
+            designImage: req.lookId ? "/placeholder.svg" : "/placeholder.svg", // Would need to join with looks table
+            message: req.clientMessage || "",
+            status: req.status,
+            date: req.createdAt,
+          }))
+          setRequests(formattedRequests)
+        }
+      } catch (error) {
+        console.error('Error loading requests:', error)
+      }
+    }
+
+    loadRequests()
+  })
+
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await fetch('/api/design-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: 'approved' }),
+      })
+
+      if (response.ok) {
+        setRequests(requests.map((req) => (req.id === id ? { ...req, status: "approved" as const } : req)))
+      }
+    } catch (error) {
+      console.error('Error approving request:', error)
+    }
   }
 
   const handleRequestModification = (id: string) => {

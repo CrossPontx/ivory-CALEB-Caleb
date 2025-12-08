@@ -17,35 +17,79 @@ type NailTech = {
   rating: number
 }
 
-const mockTechs: NailTech[] = [
-  { id: "1", name: "Sarah Chen", avatar: "/nail-tech-avatar-1.jpg", location: "Downtown Salon", rating: 4.9 },
-  { id: "2", name: "Maria Rodriguez", avatar: "/nail-tech-avatar-2.jpg", location: "Beauty Studio", rating: 4.8 },
-  { id: "3", name: "Jessica Park", avatar: "/nail-tech-avatar-3.jpg", location: "Luxury Nails", rating: 5.0 },
-]
-
 export default function SendToTechPage() {
   const router = useRouter()
   const params = useParams()
   const [lookImage, setLookImage] = useState<string>("")
+  const [techs, setTechs] = useState<NailTech[]>([])
   const [searchTech, setSearchTech] = useState("")
   const [selectedTech, setSelectedTech] = useState<NailTech | null>(null)
   const [message, setMessage] = useState("")
   const [sent, setSent] = useState(false)
 
   useEffect(() => {
-    const savedLooks = localStorage.getItem("ivoryLooks")
-    if (savedLooks) {
-      const looks = JSON.parse(savedLooks)
-      const look = looks.find((l: { id: string }) => l.id === params.id)
-      if (look) setLookImage(look.imageUrl)
+    const loadData = async () => {
+      try {
+        // Load the look
+        const lookResponse = await fetch(`/api/looks/${params.id}`)
+        if (lookResponse.ok) {
+          const look = await lookResponse.json()
+          setLookImage(look.imageUrl)
+        }
+
+        // Load available nail techs
+        const techsResponse = await fetch('/api/tech-profiles')
+        if (techsResponse.ok) {
+          const data = await techsResponse.json()
+          const formattedTechs = data.map((tech: any) => ({
+            id: tech.userId.toString(),
+            name: tech.username || tech.businessName || 'Nail Tech',
+            avatar: tech.avatar || '/placeholder-user.jpg',
+            location: tech.location || 'Location not set',
+            rating: parseFloat(tech.rating) || 0,
+          }))
+          setTechs(formattedTechs)
+        }
+      } catch (error) {
+        console.error('Error loading data:', error)
+      }
     }
+
+    loadData()
   }, [params.id])
 
-  const handleSend = () => {
-    if (selectedTech) {
-      // In real app, this would send via API
-      setSent(true)
-      setTimeout(() => router.push("/home"), 2000)
+  const handleSend = async () => {
+    if (!selectedTech) return
+
+    try {
+      const userStr = localStorage.getItem("ivoryUser")
+      if (!userStr) {
+        router.push("/")
+        return
+      }
+
+      const user = JSON.parse(userStr)
+
+      const response = await fetch('/api/design-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lookId: params.id,
+          clientId: user.id,
+          techId: selectedTech.id,
+          clientMessage: message,
+        }),
+      })
+
+      if (response.ok) {
+        setSent(true)
+        setTimeout(() => router.push("/home"), 2000)
+      } else {
+        alert('Failed to send design request')
+      }
+    } catch (error) {
+      console.error('Error sending request:', error)
+      alert('An error occurred')
     }
   }
 
@@ -100,7 +144,7 @@ export default function SendToTechPage() {
 
         {/* Nail Tech List */}
         <div className="space-y-3 mb-6">
-          {mockTechs
+          {techs
             .filter((tech) => tech.name.toLowerCase().includes(searchTech.toLowerCase()))
             .map((tech) => (
               <Card

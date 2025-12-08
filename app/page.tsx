@@ -14,17 +14,79 @@ export default function LoginPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Hardcoded authentication - always succeeds
-    localStorage.setItem("ivoryUser", JSON.stringify({ username, id: "user-1" }))
-    router.push("/user-type")
+    
+    try {
+      if (isSignUp) {
+        // Sign up - create new user
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, authProvider: 'email' }),
+        })
+        
+        if (!response.ok) {
+          const error = await response.json()
+          alert(error.error || 'Failed to sign up')
+          return
+        }
+        
+        const user = await response.json()
+        localStorage.setItem("ivoryUser", JSON.stringify(user))
+        router.push("/user-type")
+      } else {
+        // Log in - find existing user
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        })
+        
+        if (!response.ok) {
+          const error = await response.json()
+          alert(error.error || 'Failed to log in')
+          return
+        }
+        
+        const user = await response.json()
+        localStorage.setItem("ivoryUser", JSON.stringify(user))
+        
+        // If user already has a type, go to home, otherwise select type
+        if (user.userType) {
+          router.push(user.userType === 'tech' ? '/tech/dashboard' : '/home')
+        } else {
+          router.push("/user-type")
+        }
+      }
+    } catch (error) {
+      console.error('Auth error:', error)
+      alert('An error occurred. Please try again.')
+    }
   }
 
-  const handleSocialAuth = (provider: string) => {
-    // Mock social authentication
-    localStorage.setItem("ivoryUser", JSON.stringify({ username: `${provider}_user`, id: "user-1" }))
-    router.push("/user-type")
+  const handleSocialAuth = async (provider: string) => {
+    // For now, create a user with social provider
+    // In production, this would use OAuth flow
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          username: `${provider}_${Date.now()}`, 
+          password: '', 
+          authProvider: provider 
+        }),
+      })
+      
+      if (response.ok) {
+        const user = await response.json()
+        localStorage.setItem("ivoryUser", JSON.stringify(user))
+        router.push("/user-type")
+      }
+    } catch (error) {
+      console.error('Social auth error:', error)
+    }
   }
 
   return (

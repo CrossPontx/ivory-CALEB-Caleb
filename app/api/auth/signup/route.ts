@@ -1,0 +1,48 @@
+import { NextResponse } from 'next/server';
+import { db } from '@/db';
+import { users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { username, password, authProvider = 'email' } = body;
+
+    if (!username) {
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
+    }
+
+    // Check if user already exists
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+
+    if (existingUser.length > 0) {
+      return NextResponse.json({ error: 'Username already exists' }, { status: 400 });
+    }
+
+    // Create new user (userType will be set later)
+    const newUser = await db
+      .insert(users)
+      .values({
+        username,
+        email: `${username}@ivory.app`, // Temporary email, can be updated later
+        passwordHash: password, // In production, hash this with bcrypt
+        authProvider,
+        userType: 'client', // Default to client, can be changed
+      })
+      .returning();
+
+    return NextResponse.json({
+      id: newUser[0].id,
+      username: newUser[0].username,
+      email: newUser[0].email,
+      userType: newUser[0].userType,
+      avatar: newUser[0].avatar,
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+  }
+}

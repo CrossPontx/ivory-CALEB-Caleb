@@ -13,18 +13,15 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const user = localStorage.getItem("ivoryUser")
-    const type = localStorage.getItem("ivoryUserType")
     if (user) {
-      setUsername(JSON.parse(user).username)
-    }
-    if (type) {
-      setUserType(type as "client" | "tech")
+      const userData = JSON.parse(user)
+      setUsername(userData.username)
+      setUserType(userData.userType || 'client')
     }
   }, [])
 
   const handleLogout = () => {
     localStorage.removeItem("ivoryUser")
-    localStorage.removeItem("ivoryUserType")
     router.push("/")
   }
 

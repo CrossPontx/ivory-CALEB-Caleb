@@ -20,13 +20,24 @@ export default function LookDetailPage() {
   const [look, setLook] = useState<NailLook | null>(null)
 
   useEffect(() => {
-    // Load the specific look
-    const savedLooks = localStorage.getItem("ivoryLooks")
-    if (savedLooks) {
-      const looks = JSON.parse(savedLooks)
-      const foundLook = looks.find((l: NailLook) => l.id === params.id)
-      setLook(foundLook || null)
+    const loadLook = async () => {
+      try {
+        const response = await fetch(`/api/looks/${params.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setLook({
+            id: data.id.toString(),
+            imageUrl: data.imageUrl,
+            title: data.title,
+            createdAt: data.createdAt,
+          })
+        }
+      } catch (error) {
+        console.error('Error loading look:', error)
+      }
     }
+
+    loadLook()
   }, [params.id])
 
   const handleShare = () => {
@@ -37,14 +48,23 @@ export default function LookDetailPage() {
     router.push(`/send-to-tech/${params.id}`)
   }
 
-  const handleDelete = () => {
-    const savedLooks = localStorage.getItem("ivoryLooks")
-    if (savedLooks) {
-      const looks = JSON.parse(savedLooks)
-      const updatedLooks = looks.filter((l: NailLook) => l.id !== params.id)
-      localStorage.setItem("ivoryLooks", JSON.stringify(updatedLooks))
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this design?')) return
+
+    try {
+      const response = await fetch(`/api/looks/${params.id}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        router.push("/home")
+      } else {
+        alert('Failed to delete design')
+      }
+    } catch (error) {
+      console.error('Error deleting look:', error)
+      alert('An error occurred')
     }
-    router.push("/home")
   }
 
   if (!look) {

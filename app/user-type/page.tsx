@@ -8,9 +8,36 @@ import { Sparkles, Scissors } from "lucide-react"
 export default function UserTypePage() {
   const router = useRouter()
 
-  const selectUserType = (type: "client" | "tech") => {
-    localStorage.setItem("ivoryUserType", type)
-    router.push("/permissions")
+  const selectUserType = async (type: "client" | "tech") => {
+    try {
+      const userStr = localStorage.getItem("ivoryUser")
+      if (!userStr) {
+        router.push("/")
+        return
+      }
+
+      const user = JSON.parse(userStr)
+      
+      // Update user type in database
+      const response = await fetch('/api/users/update-type', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, userType: type }),
+      })
+
+      if (response.ok) {
+        const updatedUser = await response.json()
+        localStorage.setItem("ivoryUser", JSON.stringify(updatedUser))
+        
+        if (type === 'tech') {
+          router.push("/tech/profile-setup")
+        } else {
+          router.push("/permissions")
+        }
+      }
+    } catch (error) {
+      console.error('Error updating user type:', error)
+    }
   }
 
   return (

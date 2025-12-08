@@ -19,34 +19,29 @@ export default function HomePage() {
   const [looks, setLooks] = useState<NailLook[]>([])
 
   useEffect(() => {
-    // Load saved looks from localStorage
-    const savedLooks = localStorage.getItem("ivoryLooks")
-    if (savedLooks) {
-      setLooks(JSON.parse(savedLooks))
-    } else {
-      // Mock initial looks
-      setLooks([
-        {
-          id: "1",
-          imageUrl: "/elegant-french-manicure-nails.jpg",
-          title: "French Classic",
-          createdAt: "2024-01-15",
-        },
-        {
-          id: "2",
-          imageUrl: "/pink-ombre-nail-design.jpg",
-          title: "Pink Ombre",
-          createdAt: "2024-01-10",
-        },
-        {
-          id: "3",
-          imageUrl: "/glitter-accent-nails.jpg",
-          title: "Glitter Party",
-          createdAt: "2024-01-05",
-        },
-      ])
+    // Load user's looks from database
+    const loadLooks = async () => {
+      try {
+        const userStr = localStorage.getItem("ivoryUser")
+        if (!userStr) {
+          router.push("/")
+          return
+        }
+
+        const user = JSON.parse(userStr)
+        const response = await fetch(`/api/looks?userId=${user.id}`)
+        
+        if (response.ok) {
+          const data = await response.json()
+          setLooks(data)
+        }
+      } catch (error) {
+        console.error('Error loading looks:', error)
+      }
     }
-  }, [])
+
+    loadLooks()
+  }, [router])
 
   const startNewDesign = () => {
     router.push("/capture")

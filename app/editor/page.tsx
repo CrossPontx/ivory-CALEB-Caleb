@@ -83,21 +83,40 @@ export default function EditorPage() {
     }
   }
 
-  const handleSave = () => {
-    // In a real app, this would combine the image with nail overlays
-    const newLook = {
-      id: Date.now().toString(),
-      imageUrl: image || "/placeholder.svg",
-      title: `Design ${new Date().toLocaleDateString()}`,
-      createdAt: new Date().toISOString(),
+  const handleSave = async () => {
+    try {
+      const userStr = localStorage.getItem("ivoryUser")
+      if (!userStr) {
+        router.push("/")
+        return
+      }
+
+      const user = JSON.parse(userStr)
+      
+      // Save look to database
+      const response = await fetch('/api/looks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          title: `Design ${new Date().toLocaleDateString()}`,
+          imageUrl: image || "/placeholder.svg",
+          originalImageUrl: image,
+          nailPositions: nails,
+          aiPrompt: aiPrompt || null,
+          isPublic: false,
+        }),
+      })
+
+      if (response.ok) {
+        router.push("/home")
+      } else {
+        alert('Failed to save design')
+      }
+    } catch (error) {
+      console.error('Error saving look:', error)
+      alert('An error occurred while saving')
     }
-
-    const savedLooks = localStorage.getItem("ivoryLooks")
-    const looks = savedLooks ? JSON.parse(savedLooks) : []
-    looks.unshift(newLook)
-    localStorage.setItem("ivoryLooks", JSON.stringify(looks))
-
-    router.push("/home")
   }
 
   if (!image) {

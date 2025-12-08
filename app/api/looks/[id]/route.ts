@@ -1,0 +1,44 @@
+import { NextResponse } from 'next/server';
+import { db } from '@/db';
+import { looks } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const look = await db
+      .select()
+      .from(looks)
+      .where(eq(looks.id, parseInt(params.id)));
+
+    if (look.length === 0) {
+      return NextResponse.json({ error: 'Look not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(look[0]);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch look' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const deleted = await db
+      .delete(looks)
+      .where(eq(looks.id, parseInt(params.id)))
+      .returning();
+
+    if (deleted.length === 0) {
+      return NextResponse.json({ error: 'Look not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete look' }, { status: 500 });
+  }
+}
