@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Save, Palette, Sparkles, Upload, Loader2 } from "lucide-react"
 import Image from "next/image"
 
@@ -17,30 +17,49 @@ type Nail = {
   color: string
 }
 
-const colorPalettes = {
-  classic: ["#FF6B9D", "#C44569", "#A8E6CF", "#FFD93D", "#6C5CE7"],
-  seasonal: ["#E17055", "#FDCB6E", "#74B9FF", "#A29BFE", "#FD79A8"],
-  branded: ["#2C3E50", "#E74C3C", "#3498DB", "#F39C12", "#16A085"],
+type DesignSettings = {
+  nailLength: string
+  nailShape: string
+  baseColor: string
+  finish: string
+  texture: string
+  patternType: string
+  styleVibe: string
+  accentColor: string
 }
+
+const baseColors = ["#FF6B9D", "#C44569", "#A8E6CF", "#FFD93D", "#6C5CE7", "#E17055", "#FDCB6E", "#74B9FF"]
 
 export default function EditorPage() {
   const router = useRouter()
   const [image, setImage] = useState<string | null>(null)
   const [nails, setNails] = useState<Nail[]>([])
-  const [selectedColor, setSelectedColor] = useState("#FF6B9D")
   const [aiPrompt, setAiPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedDesigns, setGeneratedDesigns] = useState<string[]>([])
+  const [selectedDesignImage, setSelectedDesignImage] = useState<string | null>(null)
   const [dalleImage, setDalleImage] = useState<string | null>(null)
   const [expandedImage, setExpandedImage] = useState<'original' | 'dalle' | null>(null)
   const [isGeneratingDalle, setIsGeneratingDalle] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Design settings
+  const [designSettings, setDesignSettings] = useState<DesignSettings>({
+    nailLength: 'medium',
+    nailShape: 'oval',
+    baseColor: '#FF6B9D',
+    finish: 'glossy',
+    texture: 'smooth',
+    patternType: 'solid',
+    styleVibe: 'elegant',
+    accentColor: '#FFFFFF'
+  })
 
   useEffect(() => {
     const savedImage = localStorage.getItem("currentEditingImage")
     if (savedImage) {
       setImage(savedImage)
-      // Mock nail positions (in a real app, this would use MediaPipe)
       setNails([
         { id: 1, x: 30, y: 40, selected: false, color: "#FF6B9D" },
         { id: 2, x: 45, y: 35, selected: false, color: "#FF6B9D" },
@@ -51,35 +70,23 @@ export default function EditorPage() {
     }
   }, [])
 
-  const handleNailClick = (nailId: number) => {
-    setNails(
-      nails.map((nail) => {
-        if (nail.id === nailId) {
-          return { ...nail, selected: !nail.selected, color: nail.selected ? nail.color : selectedColor }
-        }
-        return nail
-      }),
-    )
+  const buildPrompt = (settings: DesignSettings) => {
+    return `Ultra-detailed nail art design applied ONLY inside a fingernail area. Nail length: ${settings.nailLength}, Nail shape: ${settings.nailShape}. Base color: ${settings.baseColor}. Finish: ${settings.finish}. Texture: ${settings.texture}. Design style: ${settings.patternType} pattern, ${settings.styleVibe} aesthetic. Accent color: ${settings.accentColor}. Highly realistic nail polish appearance: smooth polish, clean edges, even color distribution, professional salon quality, subtle natural reflections. Design must: stay strictly within the nail surface, follow realistic nail curvature, respect nail boundaries, appear physically painted onto the nail. High resolution, realistic lighting, natural skin reflection preserved.`
   }
 
-  const applyColorToSelected = async (color: string) => {
-    setSelectedColor(color)
-    setNails(nails.map((nail) => (nail.selected ? { ...nail, color } : nail)))
-    
-    // Generate DALL-E preview when color is applied
-    await generateDallePreview(color)
-  }
-
-  const generateDallePreview = async (color?: string) => {
+  const generateAIPreview = async (settings: DesignSettings, selectedImage?: string) => {
     setIsGeneratingDalle(true)
     try {
-      const selectedNails = nails.filter(n => n.selected)
-      const prompt = `Professional nail art design on human hand, ${selectedNails.length} nails painted with ${color || selectedColor} color, realistic photography, high quality, studio lighting`
+      const prompt = buildPrompt(settings)
       
       const response = await fetch('/api/generate-nail-design', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, originalImage: image }),
+        body: JSON.stringify({ 
+          prompt, 
+          originalImage: image,
+          selectedDesignImage: selectedImage || selectedDesignImage
+        }),
       })
 
       if (response.ok) {
@@ -87,26 +94,76 @@ export default function EditorPage() {
         setDalleImage(imageUrl)
       }
     } catch (error) {
-      console.error('Error generating DALL-E preview:', error)
+      console.error('Error generating AI preview:', error)
     } finally {
       setIsGeneratingDalle(false)
     }
   }
 
-  const generateAIDesign = async () => {
+  const handleDesignSettingChange = (key: keyof DesignSettings, value: string) => {
+    const newSettings = { ...designSettings, [key]: value }
+    setDesignSettings(newSettings)
+    generateAIPreview(newSettings)
+  }
+
+  const generateAIDesigns = async () => {
     if (!aiPrompt.trim()) return
 
     setIsGenerating(true)
     try {
-      // Simulate AI generation - in production this would call an AI API
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch('/api/analyze-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: aiPrompt }),
+      })
 
-      // Mock generated designs
-      const mockDesigns = ["/abstract-nail-art-design.jpg", "/floral-pattern-nails.jpg", "/geometric-nail-design.jpg"]
-
-      setGeneratedDesigns(mockDesigns)
+      if (response.ok) {
+        const { designs, inferredSettings } = await response.json()
+        setGeneratedDesigns(designs)
+        
+        // Update design settings based on AI inference
+        if (inferredSettings) {
+          setDesignSettings(prev => ({ ...prev, ...inferredSettings }))
+        }
+      }
     } catch (error) {
-      console.error("Error generating design:", error)
+      console.error("Error generating designs:", error)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleDesignSelect = async (designUrl: string) => {
+    setSelectedDesignImage(designUrl)
+    await generateAIPreview(designSettings, designUrl)
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsGenerating(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/analyze-design-image', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (response.ok) {
+        const { imageUrl, inferredSettings } = await response.json()
+        setSelectedDesignImage(imageUrl)
+        
+        if (inferredSettings) {
+          setDesignSettings(prev => ({ ...prev, ...inferredSettings }))
+        }
+        
+        await generateAIPreview({ ...designSettings, ...inferredSettings }, imageUrl)
+      }
+    } catch (error) {
+      console.error('Error uploading design:', error)
     } finally {
       setIsGenerating(false)
     }
@@ -122,16 +179,15 @@ export default function EditorPage() {
 
       const user = JSON.parse(userStr)
       
-      // Save look to database
       const response = await fetch('/api/looks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           title: `Design ${new Date().toLocaleDateString()}`,
-          imageUrl: image || "/placeholder.svg",
+          imageUrl: dalleImage || image || "/placeholder.svg",
           originalImageUrl: image,
-          nailPositions: nails,
+          designSettings,
           aiPrompt: aiPrompt || null,
           isPublic: false,
         }),
@@ -185,28 +241,8 @@ export default function EditorPage() {
             }`}
           >
             <div className="aspect-[3/4] relative bg-white">
-              <Image src={image || "/placeholder.svg"} alt="Original" fill className="object-cover" />
+              <Image src={image} alt="Original" fill className="object-cover" />
               <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-              {/* Nail overlay indicators */}
-              {nails.map((nail) => (
-                <button
-                  type="button"
-                  key={nail.id}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleNailClick(nail.id)
-                  }}
-                  className={`absolute w-6 h-6 rounded-full border-2 transition-all active:scale-110 ${
-                    nail.selected ? "border-white scale-125" : "border-white/60"
-                  }`}
-                  style={{
-                    left: `${nail.x}%`,
-                    top: `${nail.y}%`,
-                    backgroundColor: nail.color,
-                    transform: nail.selected ? "scale(1.25)" : "scale(1)",
-                  }}
-                />
-              ))}
             </div>
             <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-2 text-center font-semibold">
               Original
@@ -231,7 +267,7 @@ export default function EditorPage() {
               ) : (
                 <div className="text-center px-4">
                   <Sparkles className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <p className="text-xs text-muted-foreground">Select colors to generate AI preview</p>
+                  <p className="text-xs text-muted-foreground">Configure design to generate AI preview</p>
                 </div>
               )}
             </div>
@@ -242,7 +278,7 @@ export default function EditorPage() {
         </div>
 
         <p className="text-xs sm:text-sm text-center text-muted-foreground mb-4 px-4">
-          Tap images to expand • Select nails and choose colors below
+          Tap images to expand • Configure design below
         </p>
       </main>
 
@@ -251,11 +287,11 @@ export default function EditorPage() {
         <div className="max-w-2xl mx-auto">
           <div className="h-1 w-12 bg-border rounded-full mx-auto my-2 sm:my-3"></div>
 
-          <Tabs defaultValue="colors" className="w-full">
+          <Tabs defaultValue="design" className="w-full">
             <TabsList className="w-full justify-start px-4 sm:px-6 bg-transparent border-b rounded-none h-12 sm:h-14 overflow-x-auto">
-              <TabsTrigger value="colors" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
+              <TabsTrigger value="design" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
                 <Palette className="w-4 h-4 sm:w-5 sm:h-5" />
-                Colors
+                Design
               </TabsTrigger>
               <TabsTrigger value="ai" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -267,17 +303,51 @@ export default function EditorPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="colors" className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-h-80 overflow-y-auto">
+            <TabsContent value="design" className="p-4 sm:p-6 space-y-4 max-h-80 overflow-y-auto">
+              {/* Nail Length */}
               <div>
-                <h3 className="text-xs sm:text-sm font-semibold text-charcoal mb-2.5 sm:mb-3">Classic Palette</h3>
-                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2">
-                  {colorPalettes.classic.map((color) => (
+                <label className="text-xs sm:text-sm font-semibold text-charcoal mb-2 block">Nail Length</label>
+                <Select value={designSettings.nailLength} onValueChange={(v) => handleDesignSettingChange('nailLength', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="long">Long</SelectItem>
+                    <SelectItem value="extra-long">Extra Long</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Nail Shape */}
+              <div>
+                <label className="text-xs sm:text-sm font-semibold text-charcoal mb-2 block">Nail Shape</label>
+                <Select value={designSettings.nailShape} onValueChange={(v) => handleDesignSettingChange('nailShape', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="oval">Oval</SelectItem>
+                    <SelectItem value="square">Square</SelectItem>
+                    <SelectItem value="round">Round</SelectItem>
+                    <SelectItem value="almond">Almond</SelectItem>
+                    <SelectItem value="stiletto">Stiletto</SelectItem>
+                    <SelectItem value="coffin">Coffin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Base Color */}
+              <div>
+                <label className="text-xs sm:text-sm font-semibold text-charcoal mb-2 block">Base Color</label>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {baseColors.map((color) => (
                     <button
-                      type="button"
                       key={color}
-                      onClick={() => applyColorToSelected(color)}
-                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 transition-all active:scale-110 flex-shrink-0 ${
-                        selectedColor === color ? "border-primary scale-110" : "border-white"
+                      onClick={() => handleDesignSettingChange('baseColor', color)}
+                      className={`w-12 h-12 rounded-full border-4 transition-all flex-shrink-0 ${
+                        designSettings.baseColor === color ? "border-primary scale-110" : "border-white"
                       }`}
                       style={{ backgroundColor: color }}
                     />
@@ -285,111 +355,93 @@ export default function EditorPage() {
                 </div>
               </div>
 
+              {/* Finish */}
               <div>
-                <h3 className="text-xs sm:text-sm font-semibold text-charcoal mb-2.5 sm:mb-3">Seasonal</h3>
-                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2">
-                  {colorPalettes.seasonal.map((color) => (
-                    <button
-                      type="button"
-                      key={color}
-                      onClick={() => applyColorToSelected(color)}
-                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 transition-all active:scale-110 flex-shrink-0 ${
-                        selectedColor === color ? "border-primary scale-110" : "border-white"
-                      }`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
+                <label className="text-xs sm:text-sm font-semibold text-charcoal mb-2 block">Finish</label>
+                <Select value={designSettings.finish} onValueChange={(v) => handleDesignSettingChange('finish', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="glossy">Glossy</SelectItem>
+                    <SelectItem value="matte">Matte</SelectItem>
+                    <SelectItem value="satin">Satin</SelectItem>
+                    <SelectItem value="metallic">Metallic</SelectItem>
+                    <SelectItem value="chrome">Chrome</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
+              {/* Texture */}
               <div>
-                <h3 className="text-xs sm:text-sm font-semibold text-charcoal mb-2.5 sm:mb-3">Branded Collections</h3>
-                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2">
-                  {colorPalettes.branded.map((color) => (
-                    <button
-                      type="button"
-                      key={color}
-                      onClick={() => applyColorToSelected(color)}
-                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 transition-all active:scale-110 flex-shrink-0 ${
-                        selectedColor === color ? "border-primary scale-110" : "border-white"
-                      }`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
+                <label className="text-xs sm:text-sm font-semibold text-charcoal mb-2 block">Texture</label>
+                <Select value={designSettings.texture} onValueChange={(v) => handleDesignSettingChange('texture', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="smooth">Smooth</SelectItem>
+                    <SelectItem value="glitter">Glitter</SelectItem>
+                    <SelectItem value="shimmer">Shimmer</SelectItem>
+                    <SelectItem value="textured">Textured</SelectItem>
+                    <SelectItem value="holographic">Holographic</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              <Button 
+                onClick={() => generateAIPreview(designSettings)} 
+                className="w-full"
+                disabled={isGeneratingDalle}
+              >
+                {isGeneratingDalle ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                Generate Preview
+              </Button>
             </TabsContent>
 
             <TabsContent value="ai" className="p-4 sm:p-6 max-h-80 overflow-y-auto space-y-4">
               <div>
                 <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal mb-1.5 sm:mb-2">Describe your style</h3>
                 <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-                  Tell Ivory what kind of nail art you want and it will generate unique designs
+                  AI will analyze your prompt and generate design options
                 </p>
 
-                <div className="flex gap-2 mb-4 sm:mb-6">
+                <div className="flex gap-2 mb-4">
                   <Input
-                    placeholder="e.g. minimalist floral..."
+                    placeholder="e.g. minimalist floral with pink tones..."
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
                     className="flex-1 h-11 sm:h-12 text-sm sm:text-base"
-                    onKeyDown={(e) => e.key === "Enter" && generateAIDesign()}
+                    onKeyDown={(e) => e.key === "Enter" && generateAIDesigns()}
                   />
-                  <Button onClick={generateAIDesign} disabled={isGenerating || !aiPrompt.trim()} className="h-11 sm:h-12 px-3 sm:px-4 active:scale-95 transition-transform">
+                  <Button onClick={generateAIDesigns} disabled={isGenerating || !aiPrompt.trim()} className="h-11 sm:h-12 px-3 sm:px-4">
                     {isGenerating ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </Button>
                 </div>
 
-                {/* Quick prompts */}
-                {generatedDesigns.length === 0 && !isGenerating && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      Popular Styles
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {["Minimalist chic", "Floral garden", "Geometric modern", "Holographic glam", "French twist"].map(
-                        (style) => (
-                          <Button
-                            key={style}
-                            variant="outline"
-                            size="sm"
-                            className="bg-transparent"
-                            onClick={() => {
-                              setAiPrompt(style)
-                              setGeneratedDesigns([])
-                            }}
-                          >
-                            {style}
-                          </Button>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Loading state */}
                 {isGenerating && (
                   <div className="text-center py-8">
                     <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Generating your designs...</p>
+                    <p className="text-sm text-muted-foreground">Analyzing and generating designs...</p>
                   </div>
                 )}
 
-                {/* Generated designs */}
                 {generatedDesigns.length > 0 && (
                   <div className="space-y-3">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      Generated Designs
+                      Select a Design
                     </p>
                     <div className="grid grid-cols-3 gap-3">
                       {generatedDesigns.map((design, index) => (
                         <button
-                          type="button"
                           key={index}
-                          className="aspect-square relative rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-all"
+                          onClick={() => handleDesignSelect(design)}
+                          className={`aspect-square relative rounded-lg overflow-hidden border-2 transition-all ${
+                            selectedDesignImage === design ? 'border-primary' : 'border-border'
+                          }`}
                         >
                           <Image
-                            src={design || "/placeholder.svg"}
+                            src={design}
                             alt={`Design ${index + 1}`}
                             fill
                             className="object-cover"
@@ -397,9 +449,6 @@ export default function EditorPage() {
                         </button>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full bg-transparent" onClick={() => generateAIDesign()}>
-                      Generate More
-                    </Button>
                   </div>
                 )}
               </div>
@@ -411,8 +460,17 @@ export default function EditorPage() {
                   <Upload className="w-10 h-10 text-white" />
                 </div>
                 <h3 className="font-serif text-xl font-bold text-charcoal mb-2">Upload Custom Design</h3>
-                <p className="text-sm text-muted-foreground mb-4">Upload your own nail art patterns</p>
-                <Button variant="outline">Choose File</Button>
+                <p className="text-sm text-muted-foreground mb-4">AI will analyze and apply it to your nails</p>
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                  Choose File
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
               </div>
             </TabsContent>
           </Tabs>

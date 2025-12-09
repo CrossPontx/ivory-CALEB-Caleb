@@ -7,16 +7,24 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, originalImage } = await request.json()
+    const { prompt, originalImage, selectedDesignImage } = await request.json()
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
     }
 
+    // If there's a selected design image, we need to preserve the hand from original
+    // and apply the design. For now, we'll use the prompt directly with DALL-E 3
+    // In production, you might want to use image editing APIs or more advanced techniques
+    
+    const finalPrompt = selectedDesignImage 
+      ? `${prompt} Apply this exact nail design to a realistic human hand, preserving natural skin tones and hand position.`
+      : prompt
+
     // Generate image with DALL-E 3
     const response = await openai.images.generate({
       model: 'dall-e-3',
-      prompt: prompt,
+      prompt: finalPrompt,
       n: 1,
       size: '1024x1024',
       quality: 'standard',
