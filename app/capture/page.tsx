@@ -289,8 +289,8 @@ export default function CapturePage() {
             alt="Hand reference"
             className="hand-outline object-contain"
             style={{
-              width: '190%',
-              height: '190%',
+              width: '290%',
+              height: '290%',
               mixBlendMode: 'screen',
               filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) brightness(1.2)',
             }}
