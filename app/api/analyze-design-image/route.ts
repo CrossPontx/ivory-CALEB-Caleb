@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { put } from '@vercel/blob'
+import { uploadFile, generateFilename } from '@/lib/storage'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -15,9 +15,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File is required' }, { status: 400 })
     }
 
-    // Upload to blob storage
-    const blob = await put(file.name, file, {
-      access: 'public',
+    // Upload to R2 storage
+    const filename = generateFilename(file.name, 'design')
+    const { url } = await uploadFile(file, filename, {
+      folder: 'designs',
+      contentType: file.type,
     })
 
     // Use GPT-4 with vision to analyze the uploaded design image
@@ -34,7 +36,7 @@ export async function POST(request: NextRequest) {
             {
               type: 'image_url',
               image_url: {
-                url: blob.url
+                url: url
               }
             }
           ]
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
     const inferredSettings = JSON.parse(content)
 
     return NextResponse.json({ 
-      imageUrl: blob.url,
+      imageUrl: url,
       inferredSettings: {
         nailLength: inferredSettings.nail_length,
         nailShape: inferredSettings.nail_shape,
