@@ -15,11 +15,11 @@ export async function POST(request: NextRequest) {
 
     // Use GPT to analyze the prompt and extract design parameters
     const analysisResponse = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: 'You are a nail art design expert. Analyze user prompts and extract: nail_length (short/medium/long/extra-long), nail_shape (oval/square/round/almond/stiletto/coffin), base_color (hex code), finish (glossy/matte/satin/metallic/chrome), texture (smooth/glitter/shimmer/textured/holographic), pattern_type, style_vibe, accent_color (hex code). Return as JSON.'
+          content: 'You are a nail art design expert. Analyze user prompts and extract: nail_length (short/medium/long/extra-long), nail_shape (oval/square/round/almond/stiletto/coffin), base_color (hex code), finish (glossy/matte/satin/metallic/chrome), texture (smooth/glitter/shimmer/textured/holographic), pattern_type, style_vibe, accent_color (hex code). Return ONLY valid JSON with these exact keys.'
         },
         {
           role: 'user',
@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
       response_format: { type: 'json_object' }
     })
 
-    const inferredSettings = JSON.parse(analysisResponse.choices[0]?.message?.content || '{}')
+    const content = analysisResponse.choices[0]?.message?.content || '{}'
+    const inferredSettings = JSON.parse(content)
 
     // Generate 3 design variations based on the prompt
     const designPrompts = [
@@ -66,10 +67,10 @@ export async function POST(request: NextRequest) {
         accentColor: inferredSettings.accent_color
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Prompt analysis error:', error)
     return NextResponse.json(
-      { error: 'Failed to analyze prompt' },
+      { error: error?.message || 'Failed to analyze prompt' },
       { status: 500 }
     )
   }

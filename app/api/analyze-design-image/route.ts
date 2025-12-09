@@ -20,16 +20,16 @@ export async function POST(request: NextRequest) {
       access: 'public',
     })
 
-    // Use GPT-4 Vision to analyze the uploaded design image
+    // Use GPT-4 with vision to analyze the uploaded design image
     const analysisResponse = await openai.chat.completions.create({
-      model: 'gpt-4-vision-preview',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: 'Analyze this nail design image and extract: nail_length (short/medium/long/extra-long), nail_shape (oval/square/round/almond/stiletto/coffin), base_color (hex code), finish (glossy/matte/satin/metallic/chrome), texture (smooth/glitter/shimmer/textured/holographic), pattern_type, style_vibe, accent_color (hex code). Return as JSON.'
+              text: 'Analyze this nail design image and extract: nail_length (short/medium/long/extra-long), nail_shape (oval/square/round/almond/stiletto/coffin), base_color (hex code), finish (glossy/matte/satin/metallic/chrome), texture (smooth/glitter/shimmer/textured/holographic), pattern_type, style_vibe, accent_color (hex code). Return ONLY valid JSON with these exact keys.'
             },
             {
               type: 'image_url',
@@ -40,10 +40,12 @@ export async function POST(request: NextRequest) {
           ]
         }
       ],
-      max_tokens: 500
+      max_tokens: 500,
+      response_format: { type: 'json_object' }
     })
 
-    const inferredSettings = JSON.parse(analysisResponse.choices[0]?.message?.content || '{}')
+    const content = analysisResponse.choices[0]?.message?.content || '{}'
+    const inferredSettings = JSON.parse(content)
 
     return NextResponse.json({ 
       imageUrl: blob.url,
@@ -58,10 +60,10 @@ export async function POST(request: NextRequest) {
         accentColor: inferredSettings.accent_color
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Image analysis error:', error)
     return NextResponse.json(
-      { error: 'Failed to analyze design image' },
+      { error: error?.message || 'Failed to analyze design image' },
       { status: 500 }
     )
   }
