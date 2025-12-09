@@ -287,8 +287,10 @@ export default function CapturePage() {
           <img
             src={`/ref${handReference}.png`}
             alt="Hand reference"
-            className="hand-outline w-full h-full object-contain"
+            className="hand-outline object-contain"
             style={{
+              width: '160%',
+              height: '160%',
               mixBlendMode: 'screen',
               filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) brightness(1.2)',
             }}
