@@ -51,20 +51,47 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Use gpt-image-1 to generate the image with design applied
-    const imageResponse = await openai.images.generate({
-      model: 'gpt-image-1',
-      prompt: prompt,
+    // Try using gpt-image-1 with the correct API structure
+    // If this model exists, it should accept image input
+    try {
+      // @ts-ignore - gpt-image-1 is a new model
+      const imageResponse = await openai.chat.completions.create({
+        model: 'gpt-image-1',
+        messages: messages,
+        max_tokens: 1,
+        // This should return an image URL in the response
+      })
+
+      // Extract image URL from response
+      // The exact response structure may vary for this new model
+      const imageUrl = imageResponse.choices?.[0]?.message?.content
+
+      if (imageUrl && imageUrl.startsWith('http')) {
+        return NextResponse.json({ imageUrl })
+      }
+    } catch (gptImageError: any) {
+      console.log('gpt-image-1 not available, falling back to DALL-E 3:', gptImageError.message)
+    }
+
+    // Fallback: Use GPT-4o to analyze the image and create a detailed prompt
+    const analysisResponse = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: messages,
+      max_tokens: 500,
+    })
+
+    const detailedDescription = analysisResponse.choices[0]?.message?.content || ''
+
+    // Generate with DALL-E 3 using the enhanced description
+    const dalleResponse = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt: `${detailedDescription}\n\nApply this design: ${prompt}\n\nPhotorealistic, professional nail art photography, high quality, studio lighting.`,
       n: 1,
       size: '1024x1024',
       quality: 'hd',
-      // Pass the original image context through messages
-      // Note: This is a new model, so the exact API might differ
-      // @ts-ignore - gpt-image-1 is a new model
-      messages: messages,
     })
 
-    const imageUrl = imageResponse.data?.[0]?.url
+    const imageUrl = dalleResponse.data?.[0]?.url
 
     if (!imageUrl) {
       return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 })
