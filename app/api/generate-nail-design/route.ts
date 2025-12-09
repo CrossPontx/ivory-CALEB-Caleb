@@ -51,12 +51,12 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Try using gpt-image-1 with the correct API structure
+    // Try using gpt-image-1-mini with the correct API structure
     // If this model exists, it should accept image input
     try {
-      // @ts-ignore - gpt-image-1 is a new model
+      // @ts-ignore - gpt-image-1-mini is a new model
       const imageResponse = await openai.chat.completions.create({
-        model: 'gpt-image-1',
+        model: 'gpt-image-1-mini',
         messages: messages,
         max_tokens: 1,
         // This should return an image URL in the response
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ imageUrl })
       }
     } catch (gptImageError: any) {
-      console.log('gpt-image-1 not available, falling back to DALL-E 3:', gptImageError.message)
+      console.log('gpt-image-1-mini not available, falling back to DALL-E 3:', gptImageError.message)
     }
 
     // Fallback: Use GPT-4o to analyze the image and create a detailed prompt
