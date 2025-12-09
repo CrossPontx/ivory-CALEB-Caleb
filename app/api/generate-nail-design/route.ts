@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY
@@ -9,45 +10,60 @@ function getOpenAIClient() {
   return new OpenAI({ apiKey })
 }
 
+function getR2Client() {
+  return new S3Client({
+    region: 'auto',
+    endpoint: process.env.R2_ENDPOINT,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    },
+  })
+}
+
+async function uploadToR2(buffer: Buffer, filename: string): Promise<string> {
+  const r2Client = getR2Client()
+  const key = `generated/${filename}`
+  
+  await r2Client.send(
+    new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: key,
+      Body: buffer,
+      ContentType: 'image/png',
+    })
+  )
+  
+  return `${process.env.R2_PUBLIC_URL}/${key}`
+}
+
 async function fetchImageAsBase64(imageUrl: string): Promise<string> {
   try {
     console.log('📥 Fetching image from:', imageUrl)
     
-    // If it's a data URL, convert directly
     if (imageUrl.startsWith('data:')) {
       console.log('  - Detected data URL, converting directly')
       const base64Part = imageUrl.split(',')[1]
       if (!base64Part) {
         throw new Error('Invalid data URL format')
       }
-      console.log('  - Base64 length:', base64Part.length, 'characters')
       return base64Part
     }
     
     const imageResponse = await fetch(imageUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Ivory/1.0)',
-      },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Ivory/1.0)' },
     })
     
     if (!imageResponse.ok) {
-      throw new Error(`Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`)
+      throw new Error(`Failed to fetch image: ${imageResponse.status}`)
     }
     
-    console.log('  - Response status:', imageResponse.status)
-    console.log('  - Content-Type:', imageResponse.headers.get('content-type'))
-    
     const imageBuffer = await imageResponse.arrayBuffer()
-    console.log('  - Image buffer size:', imageBuffer.byteLength, 'bytes')
-    
     if (imageBuffer.byteLength === 0) {
       throw new Error('Image buffer is empty')
     }
     
-    const base64Image = Buffer.from(imageBuffer).toString('base64')
-    console.log('  - Base64 length:', base64Image.length, 'characters')
-    
-    return base64Image
+    return Buffer.from(imageBuffer).toString('base64')
   } catch (error: any) {
     console.error('Error fetching image:', error)
     throw new Error(`Failed to fetch image: ${error.message}`)
@@ -59,118 +75,64 @@ export async function POST(request: NextRequest) {
     const openai = getOpenAIClient()
     const { prompt, originalImage, selectedDesignImage } = await request.json()
 
-    console.log('🔍 DEBUG: Received request for nail design generation')
-    console.log('  - Prompt:', prompt?.substring(0, 100) + '...')
-    console.log('  - Original Image URL:', originalImage)
-    console.log('  - Selected Design Image:', selectedDesignImage)
+    console.log('🔍 Received request for nail design generation')
 
     if (!prompt || !originalImage) {
       return NextResponse.json({ error: 'Prompt and original image are required' }, { status: 400 })
     }
 
-    // Fetch the original image and convert to base64
-    const base64Image = await fetchImageAsBase64(originalImage)
-
-    // Extract nail length and shape from the prompt (it contains the design settings)
+    // Extract nail length and shape from the prompt
     const nailLengthMatch = prompt.match(/Nail length: (\w+(?:-\w+)?)/i)
     const nailShapeMatch = prompt.match(/Nail shape: (\w+)/i)
     const nailLength = nailLengthMatch ? nailLengthMatch[1] : 'medium'
     const nailShape = nailShapeMatch ? nailShapeMatch[1] : 'oval'
 
-    // Build the instruction text using your exact structure
-    let instructionText = `Use the exact hand in the uploaded image. Do NOT add any extra hands, fingers, arms, bodies, props, or backgrounds. Do NOT change the pose, angle, lighting, skin tone, or environment unless I explicitly say so.
+    const instructionText = `Create a professional nail art design visualization.
 
-Your ONLY task is to:
-1. Detect the fingernails on the hand in the image.
-2. Apply the following nail design strictly inside the nail boundaries while keeping everything else unchanged.
-
-Nail design I want:
+Design specifications:
 ${prompt}
 
-Rules:
-– Keep my hand exactly as it appears.
-– Do not generate a second hand.
-– Do not reposition or reshape my fingers.
-– Add no jewelry unless specified.
-– Keep nail length: ${nailLength}.
-– Keep nail shape: ${nailShape}.
-– Apply design as if professionally painted on my real nails.
-– Respect natural nail curvature and realistic lighting reflections.
-– No alterations to skin, background, or camera framing.
+Style requirements:
+- Nail length: ${nailLength}
+- Nail shape: ${nailShape}
+- Professional salon quality finish
+- Realistic nail polish appearance with smooth edges
+- Natural lighting and reflections
+- High resolution, detailed nail art
 
-Deliver only ONE edited version of the same hand.`
+Generate a beautiful, realistic nail design that a nail technician could recreate.`
 
-    // Build input content array
-    const inputContent: any[] = [
-      {
-        type: 'text',
-        text: instructionText
-      },
-      {
-        type: 'input_image',
-        image_url: `data:image/png;base64,${base64Image}`
-      }
-    ]
-
-    console.log('📝 Built input content with', inputContent.length, 'items')
-    console.log('📏 Extracted nail length:', nailLength)
-    console.log('📐 Extracted nail shape:', nailShape)
-
-    // If there's a selected design image, add it as reference
-    if (selectedDesignImage) {
-      try {
-        console.log('🎨 Adding selected design image as reference')
-        const base64Design = await fetchImageAsBase64(selectedDesignImage)
-        
-        inputContent.splice(2, 0, {
-          type: 'text',
-          text: 'Reference design image to replicate:'
-        })
-        inputContent.splice(3, 0, {
-          type: 'input_image',
-          image_url: `data:image/png;base64,${base64Design}`
-        })
-        console.log('  - Total input items now:', inputContent.length)
-      } catch (error: any) {
-        console.warn('Failed to fetch design image, continuing without it:', error.message)
-      }
-    }
-
-    // Use DALL-E 3 for image generation with the prompt
-    console.log('🤖 Using DALL-E 3 for nail design generation...')
+    console.log('🤖 Generating nail design with DALL-E 3...')
     
-    try {
-      const response = await openai.images.generate({
-        model: 'dall-e-3',
-        prompt: instructionText,
-        n: 1,
-        size: '1024x1024',
-        quality: 'standard',
-        response_format: 'b64_json',
-      })
+    const response = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt: instructionText,
+      n: 1,
+      size: '1024x1024',
+      quality: 'standard',
+      response_format: 'b64_json',
+    })
 
-      console.log('✅ DALL-E 3 response received')
-      
-      const outputBase64 = response.data[0]?.b64_json
+    const outputBase64 = response.data?.[0]?.b64_json
 
-      if (!outputBase64) {
-        console.error('No image in response')
-        throw new Error('No image generated by DALL-E 3')
-      }
-
-      console.log('🖼️  Got output image, length:', outputBase64.length)
-      // Convert base64 to data URL
-      const imageUrl = `data:image/png;base64,${outputBase64}`
-      return NextResponse.json({ imageUrl })
-    } catch (apiError: any) {
-      console.error('OpenAI API error:', apiError)
-      throw new Error(`OpenAI API failed: ${apiError.message}`)
+    if (!outputBase64) {
+      throw new Error('No image generated by DALL-E 3')
     }
+
+    console.log('✅ DALL-E 3 response received, uploading to R2...')
+    
+    // Convert base64 to buffer and upload to R2
+    const imageBuffer = Buffer.from(outputBase64, 'base64')
+    const filename = `nail-design-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`
+    
+    const permanentUrl = await uploadToR2(imageBuffer, filename)
+    
+    console.log('✅ Uploaded to R2:', permanentUrl)
+    
+    return NextResponse.json({ imageUrl: permanentUrl })
   } catch (error: any) {
     console.error('❌ Image generation error:', error)
-    console.error('Error stack:', error?.stack)
     
-    // Provide detailed error messages for debugging
     let errorMessage = error?.message || 'Failed to generate nail design'
     
     if (error?.status === 401) {
