@@ -128,7 +128,7 @@ export default function EditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush pb-96">
+    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10 safe-top">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
@@ -146,7 +146,7 @@ export default function EditorPage() {
       </header>
 
       {/* Main Canvas */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-[450px]">
         <Card className="overflow-hidden border-0 bg-white shadow-xl mb-4 sm:mb-6 relative touch-none">
           <div className="aspect-[3/4] relative">
             <Image src={image || "/placeholder.svg"} alt="Hand photo" fill className="object-cover" />
