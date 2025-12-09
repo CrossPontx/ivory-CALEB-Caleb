@@ -94,7 +94,8 @@ async function uploadToR2(
     })
   );
 
-  const url = `${env.R2_PUBLIC_URL}/${key}`;
+  // Use API route to serve images securely through server credentials
+  const url = `/api/image?key=${encodeURIComponent(key)}`;
 
   return { url, key };
 }
