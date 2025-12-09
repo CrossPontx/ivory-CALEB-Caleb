@@ -154,6 +154,13 @@ export default function EditorPage() {
 
       if (response.ok) {
         const { imageUrl, inferredSettings } = await response.json()
+        
+        // Console log the received data
+        console.log('=== DESIGN UPLOAD RESULT ===')
+        console.log('Uploaded Image URL:', imageUrl)
+        console.log('Extracted Settings:', inferredSettings)
+        console.log('===========================')
+        
         setSelectedDesignImage(imageUrl)
         
         if (inferredSettings) {

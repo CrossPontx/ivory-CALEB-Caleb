@@ -49,6 +49,13 @@ export async function POST(request: NextRequest) {
     const content = analysisResponse.choices[0]?.message?.content || '{}'
     const inferredSettings = JSON.parse(content)
 
+    // Console log the original image URL and extracted text
+    console.log('=== DESIGN ANALYSIS ===')
+    console.log('Original Image URL:', url)
+    console.log('Extracted Design Text:', content)
+    console.log('Parsed Settings:', inferredSettings)
+    console.log('======================')
+
     return NextResponse.json({ 
       imageUrl: url,
       inferredSettings: {
