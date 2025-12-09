@@ -7,10 +7,11 @@ import { useRouter } from "next/navigation"
 export default function CapturePage() {
   const router = useRouter()
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
   const [isFlipping, setIsFlipping] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [showZoomIndicator, setShowZoomIndicator] = useState(false)
+  const [handReference, setHandReference] = useState<1 | 2>(1)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -272,6 +273,28 @@ export default function CapturePage() {
           }}
         />
 
+        {/* Hand Reference Overlay */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-[5]">
+          <style jsx>{`
+            @keyframes blink-outline {
+              0%, 100% { opacity: 0.5; }
+              50% { opacity: 0.9; }
+            }
+            .hand-outline {
+              animation: blink-outline 2s ease-in-out infinite;
+            }
+          `}</style>
+          <img
+            src={`/ref${handReference}.png`}
+            alt="Hand reference"
+            className="hand-outline w-full h-full object-contain"
+            style={{
+              mixBlendMode: 'screen',
+              filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) brightness(1.2)',
+            }}
+          />
+        </div>
+
         {isFlipping && (
           <div className="absolute inset-0 bg-black flex items-center justify-center">
             <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -308,8 +331,9 @@ export default function CapturePage() {
           </div>
         )}
 
-        {/* Flip Camera Button */}
-        <div className="absolute right-5 top-1/2 transform -translate-y-1/2 z-10">
+        {/* Right Side Controls */}
+        <div className="absolute right-5 top-1/2 transform -translate-y-1/2 z-10 flex flex-col gap-3">
+          {/* Flip Camera Button */}
           <button
             onClick={flipCamera}
             disabled={isFlipping}
@@ -322,6 +346,17 @@ export default function CapturePage() {
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
+          </button>
+
+          {/* Hand Reference Toggle */}
+          <button
+            onClick={() => setHandReference(handReference === 1 ? 2 : 1)}
+            className="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-md hover:bg-black/50 text-white shadow-lg flex flex-col items-center justify-center transition-all duration-200 active:scale-95"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <span className="text-[10px] font-semibold mt-0.5">{handReference}</span>
           </button>
         </div>
 
