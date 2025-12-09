@@ -195,13 +195,51 @@ export default function EditorPage() {
 
       const user = JSON.parse(userStr)
       
+      // If we have a generated design image, we need to upload it to R2 first
+      let finalImageUrl = image || "/placeholder.svg"
+      
+      if (dalleImage) {
+        try {
+          // Convert data URL to blob if it's a data URL
+          let imageBlob: Blob
+          
+          if (dalleImage.startsWith('data:')) {
+            // It's a data URL from OpenAI response
+            const response = await fetch(dalleImage)
+            imageBlob = await response.blob()
+          } else {
+            // It's a URL, fetch it
+            const response = await fetch(dalleImage)
+            imageBlob = await response.blob()
+          }
+          
+          // Upload to R2
+          const formData = new FormData()
+          formData.append('file', imageBlob, `design-${Date.now()}.png`)
+          formData.append('type', 'design')
+          
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          })
+          
+          if (uploadResponse.ok) {
+            const { url } = await uploadResponse.json()
+            finalImageUrl = url
+          }
+        } catch (uploadError) {
+          console.error('Error uploading design image to R2:', uploadError)
+          // Fall back to original image if upload fails
+        }
+      }
+      
       const response = await fetch('/api/looks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           title: `Design ${new Date().toLocaleDateString()}`,
-          imageUrl: dalleImage || image || "/placeholder.svg",
+          imageUrl: finalImageUrl,
           originalImageUrl: image,
           designSettings,
           aiPrompt: aiPrompt || null,
