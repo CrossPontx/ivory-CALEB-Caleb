@@ -36,8 +36,34 @@ export async function POST(request: NextRequest) {
     console.log('  - Base64 length:', base64Image.length, 'characters')
     console.log('  - Base64 preview:', base64Image.substring(0, 50) + '...')
 
-    // Build the instruction text
-    let instructionText = `Use the exact hand in the image. Do NOT change pose, skin tone, lighting, or background. Detect the fingernails and apply the following design: ${prompt}. Do not alter anything outside the nail boundaries. The result must look like professional nail art photography with the design seamlessly applied only to the nails.`
+    // Extract nail length and shape from the prompt (it contains the design settings)
+    const nailLengthMatch = prompt.match(/Nail length: (\w+(?:-\w+)?)/i)
+    const nailShapeMatch = prompt.match(/Nail shape: (\w+)/i)
+    const nailLength = nailLengthMatch ? nailLengthMatch[1] : 'medium'
+    const nailShape = nailShapeMatch ? nailShapeMatch[1] : 'oval'
+
+    // Build the instruction text using your exact structure
+    let instructionText = `Use the exact hand in the uploaded image. Do NOT add any extra hands, fingers, arms, bodies, props, or backgrounds. Do NOT change the pose, angle, lighting, skin tone, or environment unless I explicitly say so.
+
+Your ONLY task is to:
+1. Detect the fingernails on the hand in the image.
+2. Apply the following nail design strictly inside the nail boundaries while keeping everything else unchanged.
+
+Nail design I want:
+${prompt}
+
+Rules:
+– Keep my hand exactly as it appears.
+– Do not generate a second hand.
+– Do not reposition or reshape my fingers.
+– Add no jewelry unless specified.
+– Keep nail length: ${nailLength}.
+– Keep nail shape: ${nailShape}.
+– Apply design as if professionally painted on my real nails.
+– Respect natural nail curvature and realistic lighting reflections.
+– No alterations to skin, background, or camera framing.
+
+Deliver only ONE edited version of the same hand.`
 
     // Build input content array
     const inputContent: any[] = [
@@ -52,6 +78,8 @@ export async function POST(request: NextRequest) {
     ]
 
     console.log('📝 Built input content with', inputContent.length, 'items')
+    console.log('📏 Extracted nail length:', nailLength)
+    console.log('📐 Extracted nail shape:', nailShape)
 
     // If there's a selected design image, add it as reference
     if (selectedDesignImage) {
@@ -60,11 +88,11 @@ export async function POST(request: NextRequest) {
       const designBuffer = await designResponse.arrayBuffer()
       const base64Design = Buffer.from(designBuffer).toString('base64')
       
-      inputContent.push({
+      inputContent.splice(2, 0, {
         type: 'text',
-        text: 'Use this design style as a reference:'
+        text: 'Reference design image to replicate:'
       })
-      inputContent.push({
+      inputContent.splice(3, 0, {
         type: 'input_image',
         image_url: `data:image/png;base64,${base64Design}`
       })
@@ -135,7 +163,7 @@ export async function POST(request: NextRequest) {
     // Generate with DALL-E 3 using the enhanced description
     const dalleResponse = await openai.images.generate({
       model: 'dall-e-3',
-      prompt: `${detailedDescription}\n\nApply this design: ${prompt}\n\nPhotorealistic, professional nail art photography, high quality, studio lighting.`,
+      prompt: `${detailedDescription}\n\nBuild upon the current nail state and apply this design: ${prompt}\n\nMaintain the existing nail shape and length. The design should look naturally applied to these specific nails. Photorealistic, professional nail art photography, high quality, studio lighting.`,
       n: 1,
       size: '1024x1024',
       quality: 'hd',

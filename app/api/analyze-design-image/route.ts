@@ -24,14 +24,14 @@ export async function POST(request: NextRequest) {
 
     // Use GPT-4 with vision to analyze the uploaded design image
     const analysisResponse = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-image-1-mini',
       messages: [
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: 'Analyze this nail design image and extract: nail_length (short/medium/long/extra-long), nail_shape (oval/square/round/almond/stiletto/coffin), base_color (hex code), finish (glossy/matte/satin/metallic/chrome), texture (smooth/glitter/shimmer/textured/holographic), pattern_type, style_vibe, accent_color (hex code). Return ONLY valid JSON with these exact keys.'
+              text: 'Analyze this reference nail design image (inspiration/example design) and extract the design characteristics to replicate: nail_length (short/medium/long/extra-long), nail_shape (oval/square/round/almond/stiletto/coffin), base_color (hex code of the main color), finish (glossy/matte/satin/metallic/chrome), texture (smooth/glitter/shimmer/textured/holographic), pattern_type (describe the pattern/design style), style_vibe (describe the overall aesthetic like elegant, bold, minimalist, etc.), accent_color (hex code of accent colors used). Return ONLY valid JSON with these exact keys.'
             },
             {
               type: 'image_url',
