@@ -342,9 +342,8 @@ export default function CapturePage() {
     }
   }
 
-  const handleDesignSelect = async (designUrl: string) => {
+  const handleDesignSelect = (designUrl: string) => {
     setSelectedDesignImage(designUrl)
-    await generateAIPreview(designSettings, designUrl)
   }
 
   const handleDesignUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -366,7 +365,7 @@ export default function CapturePage() {
         const { imageUrl } = data
         
         setSelectedDesignImage(imageUrl)
-        await generateAIPreview(designSettings, imageUrl)
+        // Don't auto-generate - user must click "Generate Preview"
       }
     } catch (error) {
       console.error('Error uploading design:', error)
