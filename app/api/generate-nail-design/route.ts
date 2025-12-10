@@ -122,12 +122,12 @@ Apply the design as if professionally painted by an expert nail artist. Respect 
     
     // Use the correct images.edit() API for gpt-image-1
     // Note: gpt-image-1 always returns base64, no response_format parameter needed
-    // Using 1792x1024 for higher quality and better detail preservation
+    // Using 1536x1024 for higher quality (supported sizes: 1024x1024, 1024x1536, 1536x1024, auto)
     const response = await openai.images.edit({
       model: 'gpt-image-1',
       image: images,
       prompt: enhancedPrompt,
-      size: '1792x1024',
+      size: '1536x1024',
       n: 1
     })
 
