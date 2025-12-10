@@ -538,7 +538,7 @@ export default function CapturePage() {
         </div>
 
         {/* Bottom Drawer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl z-20">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl z-20 touch-action-pan-y">
           <div className="max-w-2xl mx-auto">
             <div className="h-1 w-12 bg-border rounded-full mx-auto my-3"></div>
 
@@ -569,7 +569,7 @@ export default function CapturePage() {
               </div>
 
               {designMode === 'design' && (
-                <div className="p-6 space-y-4 max-h-80 overflow-y-auto">
+                <div className="p-6 space-y-4 max-h-[500px] overflow-y-auto overscroll-contain">
                   {/* Generate Preview Button */}
                   {!isGenerating ? (
                     <Button 
@@ -697,7 +697,7 @@ export default function CapturePage() {
               )}
 
               {designMode === 'ai-design' && (
-                <div className="p-6 max-h-80 overflow-y-auto space-y-4">
+                <div className="p-6 max-h-[500px] overflow-y-auto overscroll-contain space-y-4">
                   {/* Generate Preview Button */}
                   {!isGenerating ? (
                     <Button 
