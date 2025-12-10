@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import OpenAI, { toFile } from 'openai'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { config } from '@/lib/config'
 
@@ -91,22 +91,12 @@ Apply the design as if professionally painted. Respect natural nail curvature an
     }
     
     const imageBlob = await originalImageResponse.blob()
-    const arrayBuffer = await imageBlob.arrayBuffer()
-    const handBase64 = Buffer.from(arrayBuffer).toString('base64')
+    const imageFile = await toFile(imageBlob, 'hand.png', { type: imageBlob.type })
     
-    console.log('📥 Hand image converted to base64, length:', handBase64.length)
+    console.log('📥 Hand image converted to file object')
     
-    // Prepare content array for the request
-    const contentArray: any[] = [
-      {
-        type: 'input_text',
-        text: enhancedPrompt
-      },
-      {
-        type: 'input_image',
-        image_base64: handBase64
-      }
-    ]
+    // Prepare images array
+    const images: any[] = [imageFile]
     
     // If reference design image is provided, fetch and add it
     if (selectedDesignImage) {
@@ -118,41 +108,31 @@ Apply the design as if professionally painted. Respect natural nail curvature an
       
       if (designImageResponse.ok) {
         const designBlob = await designImageResponse.blob()
-        const designArrayBuffer = await designBlob.arrayBuffer()
-        const designBase64 = Buffer.from(designArrayBuffer).toString('base64')
+        const designFile = await toFile(designBlob, 'design.png', { type: designBlob.type })
         
-        console.log('📥 Reference design converted to base64, length:', designBase64.length)
-        
-        contentArray.push({
-          type: 'input_image',
-          image_base64: designBase64
-        })
+        console.log('📥 Reference design converted to file object')
+        images.push(designFile)
       } else {
         console.warn('⚠️ Failed to fetch reference design, continuing without it')
       }
     }
     
-    console.log('🎨 Calling OpenAI responses.create() with gpt-image-1...')
-    console.log('📊 Content items:', contentArray.length, '(text + images)')
+    console.log('🎨 Calling OpenAI images.edit() with gpt-image-1...')
+    console.log('📊 Number of images:', images.length)
     
-    // Using gpt-image-1 with responses.create() for image editing
-    // This is the correct API for image-to-image editing with gpt-image-1
-    // @ts-ignore - responses API is new and not yet in TypeScript definitions
-    const response = await openai.responses.create({
+    // Use the correct images.edit() API for gpt-image-1
+    const response = await openai.images.edit({
       model: 'gpt-image-1',
-      // @ts-ignore
-      input: [
-        {
-          role: 'user',
-          content: contentArray
-        }
-      ]
+      image: images,
+      prompt: enhancedPrompt,
+      size: '1024x1024',
+      response_format: 'b64_json',
+      n: 1
     })
 
     console.log('✅ OpenAI response received')
     
-    // @ts-ignore
-    const base64Image = response.output?.[0]?.image?.base64
+    const base64Image = response.data?.[0]?.b64_json
 
     if (!base64Image) {
       console.error('❌ No image in response:', response)
