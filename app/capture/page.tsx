@@ -603,9 +603,21 @@ export default function CapturePage() {
               <div className="relative overflow-hidden rounded-2xl border-2 border-border">
                 <div className="aspect-[3/4] relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
                   {isGenerating ? (
-                    <div className="text-center">
-                      <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-primary" />
-                      <p className="text-xs text-muted-foreground">Generating...</p>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Image 
+                        src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGdkNWtib3JrcXhvcHFiaHdraHR5aDJsN3Bzcmx2ajZyNWJlemM1biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ljj4pInW5JllK/giphy.gif"
+                        alt="Generating..."
+                        fill
+                        className="object-cover"
+                        unoptimized
+                        onError={(e) => {
+                          // Fallback to second GIF if first one fails
+                          const target = e.target as HTMLImageElement;
+                          if (target.src !== "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjZlOXJvZThrOXpndThicm83NXM5N2V4cWpjaXFkNXQ1MHNiZ2dwaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QaDc2Wn7tfLFu/giphy.gif") {
+                            target.src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjZlOXJvZThrOXpndThicm83NXM5N2V4cWpjaXFkNXQ1MHNiZ2dwaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QaDc2Wn7tfLFu/giphy.gif";
+                          }
+                        }}
+                      />
                     </div>
                   ) : finalPreview ? (
                     <Image src={finalPreview} alt="AI Generated" fill className="object-cover" />
