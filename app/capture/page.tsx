@@ -627,21 +627,20 @@ export default function CapturePage() {
 
                   {/* Uploaded Design Preview */}
                   {selectedDesignImage && (
-                    <div className="relative rounded-lg overflow-hidden border-2 border-primary">
-                      <div className="aspect-square relative bg-white">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-border">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-primary flex-shrink-0">
                         <Image src={selectedDesignImage} alt="Uploaded Design" fill className="object-cover" />
                       </div>
-                      <div className="absolute top-2 right-2">
-                        <button
-                          onClick={() => setSelectedDesignImage(null)}
-                          className="bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-all"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-charcoal">Uploaded Design</p>
+                        <p className="text-xs text-muted-foreground truncate">Ready to generate</p>
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-2 text-center font-semibold">
-                        Uploaded Design
-                      </div>
+                      <button
+                        onClick={() => setSelectedDesignImage(null)}
+                        className="bg-gray-200 hover:bg-gray-300 text-charcoal rounded-full p-1.5 transition-all flex-shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
 
@@ -775,21 +774,20 @@ export default function CapturePage() {
 
                   {/* Uploaded Design Preview */}
                   {selectedDesignImage && !generatedDesigns.length && (
-                    <div className="relative rounded-lg overflow-hidden border-2 border-primary">
-                      <div className="aspect-square relative bg-white">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-border">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-primary flex-shrink-0">
                         <Image src={selectedDesignImage} alt="Uploaded Design" fill className="object-cover" />
                       </div>
-                      <div className="absolute top-2 right-2">
-                        <button
-                          onClick={() => setSelectedDesignImage(null)}
-                          className="bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-all"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-charcoal">Uploaded Design</p>
+                        <p className="text-xs text-muted-foreground truncate">Ready to generate</p>
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-2 text-center font-semibold">
-                        Uploaded Design
-                      </div>
+                      <button
+                        onClick={() => setSelectedDesignImage(null)}
+                        className="bg-gray-200 hover:bg-gray-300 text-charcoal rounded-full p-1.5 transition-all flex-shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
 
