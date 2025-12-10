@@ -58,6 +58,7 @@ export default function CapturePage() {
   const designUploadRef = useRef<HTMLInputElement>(null)
   const lastTouchDistanceRef = useRef<number>(0)
   const zoomIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Auto-start camera on mount
   useEffect(() => {
@@ -222,6 +223,9 @@ export default function CapturePage() {
   const generateAIPreview = async (settings: DesignSettings, selectedImage?: string) => {
     if (!capturedImage) return
     
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController()
+    
     setIsGenerating(true)
     try {
       const prompt = buildPrompt(settings)
@@ -234,15 +238,28 @@ export default function CapturePage() {
           originalImage: capturedImage,
           selectedDesignImage: selectedImage || selectedDesignImage
         }),
+        signal: abortControllerRef.current.signal
       })
 
       if (response.ok) {
         const { imageUrl } = await response.json()
         setFinalPreview(imageUrl)
       }
-    } catch (error) {
-      console.error('Error generating AI preview:', error)
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Generation cancelled by user')
+      } else {
+        console.error('Error generating AI preview:', error)
+      }
     } finally {
+      setIsGenerating(false)
+      abortControllerRef.current = null
+    }
+  }
+
+  const cancelGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
       setIsGenerating(false)
     }
   }
@@ -319,12 +336,16 @@ export default function CapturePage() {
   const generateAIDesigns = async () => {
     if (!aiPrompt.trim()) return
 
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController()
+
     setIsGenerating(true)
     try {
       const response = await fetch('/api/analyze-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: aiPrompt }),
+        signal: abortControllerRef.current.signal
       })
 
       if (response.ok) {
@@ -335,10 +356,15 @@ export default function CapturePage() {
           setDesignSettings(prev => ({ ...prev, ...inferredSettings }))
         }
       }
-    } catch (error) {
-      console.error("Error generating designs:", error)
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('AI design generation cancelled by user')
+      } else {
+        console.error("Error generating designs:", error)
+      }
     } finally {
       setIsGenerating(false)
+      abortControllerRef.current = null
     }
   }
 
@@ -545,14 +571,24 @@ export default function CapturePage() {
               {designMode === 'design' && (
                 <div className="p-6 space-y-4 max-h-80 overflow-y-auto">
                   {/* Generate Preview Button */}
-                  <Button 
-                    onClick={() => generateAIPreview(designSettings)} 
-                    className="w-full"
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                    Generate Preview
-                  </Button>
+                  {!isGenerating ? (
+                    <Button 
+                      onClick={() => generateAIPreview(designSettings)} 
+                      className="w-full"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate Preview
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={cancelGeneration}
+                      variant="destructive"
+                      className="w-full"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel Generation
+                    </Button>
+                  )}
 
                   {/* Upload Design Image */}
                   <Button 
@@ -663,14 +699,24 @@ export default function CapturePage() {
               {designMode === 'ai-design' && (
                 <div className="p-6 max-h-80 overflow-y-auto space-y-4">
                   {/* Generate Preview Button */}
-                  <Button 
-                    onClick={() => generateAIPreview(designSettings)} 
-                    className="w-full"
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                    Generate Preview
-                  </Button>
+                  {!isGenerating ? (
+                    <Button 
+                      onClick={() => generateAIPreview(designSettings)} 
+                      className="w-full"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate Preview
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={cancelGeneration}
+                      variant="destructive"
+                      className="w-full"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel Generation
+                    </Button>
+                  )}
 
                   {/* Upload Design Image */}
                   <Button 
