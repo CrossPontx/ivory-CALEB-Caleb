@@ -121,12 +121,12 @@ Apply the design as if professionally painted. Respect natural nail curvature an
     console.log('📊 Number of images:', images.length)
     
     // Use the correct images.edit() API for gpt-image-1
+    // Note: gpt-image-1 always returns base64, no response_format parameter needed
     const response = await openai.images.edit({
       model: 'gpt-image-1',
       image: images,
       prompt: enhancedPrompt,
       size: '1024x1024',
-      response_format: 'b64_json',
       n: 1
     })
 
