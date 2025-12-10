@@ -11,7 +11,7 @@ export default function CapturePage() {
   const [isFlipping, setIsFlipping] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [showZoomIndicator, setShowZoomIndicator] = useState(false)
-  const [handReference, setHandReference] = useState<1 | 2>(1)
+  const [handReference, setHandReference] = useState<1 | 2 | 3>(3)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -359,7 +359,7 @@ export default function CapturePage() {
 
           {/* Hand Reference Toggle */}
           <button
-            onClick={() => setHandReference(handReference === 1 ? 2 : 1)}
+            onClick={() => setHandReference(handReference === 3 ? 2 : handReference === 2 ? 1 : 3)}
             className="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-md hover:bg-black/50 text-white shadow-lg flex flex-col items-center justify-center transition-all duration-200 active:scale-95"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
