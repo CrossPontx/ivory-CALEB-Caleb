@@ -1,5 +1,9 @@
 # AI Model Summary - At a Glance
 
+## ⚠️ Current Implementation (December 2025)
+
+**Note**: This document describes the target architecture. See [CURRENT_IMPLEMENTATION.md](./CURRENT_IMPLEMENTATION.md) for what's actually running today.
+
 ## 🎯 The Big Picture
 
 ```
@@ -12,7 +16,37 @@
 
 ---
 
-## 🤖 Three Models, Three Jobs
+## 🤖 Current: Two Models (Today)
+
+### 1. gpt-image-1 🎨
+**Job**: All image generation (concepts + previews)
+
+**When**: 
+- Design tab: Generate nail design previews
+- AI Designs tab: Generate 3 concept images
+- Upload tab: Generate preview with uploaded design
+
+**Why this model**: Only publicly available image model
+
+**Status**: ✅ In production
+
+---
+
+### 2. gpt-4o-mini 🧠
+**Job**: Understand what the user wants (the "translator")
+
+**When**: Only in AI Designs tab before generating concepts
+- User types: "minimalist floral with pink tones"
+- Model extracts: length=medium, shape=oval, color=#FF6B9D, etc.
+- Returns: Structured JSON with all settings
+
+**Why this model**: Super cheap, excellent at understanding text
+
+**Status**: ✅ In production
+
+---
+
+## 🔮 Future: Three Models (When Available)
 
 ### 1. gpt-image-1-mini 🏃‍♂️💨
 **Job**: Apply designs to user's hand (the "preview engine")
@@ -23,6 +57,8 @@
 - Upload tab: User uploads design → apply to their hand
 
 **Why this model**: Fast + cheap = perfect for real-time updates
+
+**Status**: ❌ Not yet public (will replace gpt-image-1 for previews)
 
 ---
 
@@ -36,6 +72,8 @@
 
 **Why this model**: Higher quality for creative concepts
 
+**Status**: ✅ In production (currently used for everything)
+
 ---
 
 ### 3. gpt-4o-mini 🧠
@@ -47,6 +85,8 @@
 - Returns: Structured JSON with all settings
 
 **Why this model**: Super cheap, excellent at understanding text
+
+**Status**: ✅ In production
 
 ---
 

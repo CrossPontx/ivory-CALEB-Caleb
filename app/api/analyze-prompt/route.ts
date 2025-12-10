@@ -78,31 +78,17 @@ export async function POST(request: NextRequest) {
       try {
         console.log(`🎨 Generating design concept ${i + 1}/3 with gpt-image-1...`)
         
-        // @ts-ignore - responses API is new and not yet in TypeScript definitions
-        const response = await openai.responses.create({
+        // Using gpt-image-1 for high-quality concept generation
+        // Future: Will migrate to responses.create() when it becomes publicly available
+        const response = await openai.images.generate({
           model: 'gpt-image-1',
-          // @ts-ignore
-          modalities: ['image'],
-          // @ts-ignore
-          image: {
-            size: '1024x1024',
-            quality: 'standard'
-          },
-          input: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'input_text',
-                  text: designPrompt
-                }
-              ]
-            }
-          ]
+          prompt: designPrompt,
+          n: 1,
+          size: '1024x1024',
+          response_format: 'b64_json',
         })
 
-        // @ts-ignore
-        const outputBase64 = response.output?.[0]?.image?.base64
+        const outputBase64 = response.data?.[0]?.b64_json
         if (outputBase64) {
           // Upload to R2 for permanent storage
           const imageBuffer = Buffer.from(outputBase64, 'base64')
