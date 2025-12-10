@@ -55,72 +55,72 @@ export default function CapturePage() {
   })
 
   // Influence weights for each input type
-  // Note: designImage and baseColor are inversely linked (sum to 100)
-  // In Smart Styling: designImage, stylePrompt, and baseColor share 100%
+  // Nail Editor: designImage and baseColor are inversely linked (sum to 100)
+  // Smart Styling: stylePrompt, designImage, and baseColor share 100% (independent from Nail Editor)
   const [influenceWeights, setInfluenceWeights] = useState({
-    designImage: 0,
-    stylePrompt: 33,
-    baseColor: 100,
-    finish: 100,
-    texture: 100
+    // Nail Editor weights
+    nailEditor_designImage: 0,
+    nailEditor_baseColor: 100,
+    nailEditor_finish: 100,
+    nailEditor_texture: 100,
+    // Smart Styling weights
+    smartStyling_stylePrompt: 100,
+    smartStyling_designImage: 0,
+    smartStyling_baseColor: 0
   })
 
-  // Handle linked sliders - when design image changes, adjust base color
-  const handleDesignImageInfluence = (value: number) => {
-    if (designMode === 'ai-design' && aiPrompt) {
-      // Smart Styling: distribute 100% among designImage, stylePrompt, baseColor
-      const remaining = 100 - value
-      const stylePromptShare = Math.round(remaining * (influenceWeights.stylePrompt / (influenceWeights.stylePrompt + influenceWeights.baseColor)))
-      const baseColorShare = remaining - stylePromptShare
-      setInfluenceWeights(prev => ({
-        ...prev,
-        designImage: value,
-        stylePrompt: stylePromptShare,
-        baseColor: baseColorShare
-      }))
-    } else {
-      // Nail Editor: inverse relationship between designImage and baseColor
-      setInfluenceWeights(prev => ({
-        ...prev,
-        designImage: value,
-        baseColor: 100 - value
-      }))
-    }
-  }
-
-  const handleStylePromptInfluence = (value: number) => {
-    // Smart Styling: distribute 100% among designImage, stylePrompt, baseColor
-    const remaining = 100 - value
-    const designImageShare = Math.round(remaining * (influenceWeights.designImage / (influenceWeights.designImage + influenceWeights.baseColor)))
-    const baseColorShare = remaining - designImageShare
+  // Nail Editor handlers - independent from Smart Styling
+  const handleNailEditorDesignImageInfluence = (value: number) => {
     setInfluenceWeights(prev => ({
       ...prev,
-      stylePrompt: value,
-      designImage: designImageShare,
-      baseColor: baseColorShare
+      nailEditor_designImage: value,
+      nailEditor_baseColor: 100 - value
     }))
   }
 
-  const handleBaseColorInfluence = (value: number) => {
-    if (designMode === 'ai-design' && aiPrompt) {
-      // Smart Styling: distribute 100% among designImage, stylePrompt, baseColor
-      const remaining = 100 - value
-      const designImageShare = Math.round(remaining * (influenceWeights.designImage / (influenceWeights.designImage + influenceWeights.stylePrompt)))
-      const stylePromptShare = remaining - designImageShare
-      setInfluenceWeights(prev => ({
-        ...prev,
-        baseColor: value,
-        designImage: designImageShare,
-        stylePrompt: stylePromptShare
-      }))
-    } else {
-      // Nail Editor: inverse relationship between baseColor and designImage
-      setInfluenceWeights(prev => ({
-        ...prev,
-        baseColor: value,
-        designImage: 100 - value
-      }))
-    }
+  const handleNailEditorBaseColorInfluence = (value: number) => {
+    setInfluenceWeights(prev => ({
+      ...prev,
+      nailEditor_baseColor: value,
+      nailEditor_designImage: 100 - value
+    }))
+  }
+
+  // Smart Styling handlers - independent from Nail Editor
+  const handleSmartStylingStylePromptInfluence = (value: number) => {
+    const remaining = 100 - value
+    const designImageShare = Math.round(remaining * (influenceWeights.smartStyling_designImage / (influenceWeights.smartStyling_designImage + influenceWeights.smartStyling_baseColor || 1)))
+    const baseColorShare = remaining - designImageShare
+    setInfluenceWeights(prev => ({
+      ...prev,
+      smartStyling_stylePrompt: value,
+      smartStyling_designImage: designImageShare,
+      smartStyling_baseColor: baseColorShare
+    }))
+  }
+
+  const handleSmartStylingDesignImageInfluence = (value: number) => {
+    const remaining = 100 - value
+    const stylePromptShare = Math.round(remaining * (influenceWeights.smartStyling_stylePrompt / (influenceWeights.smartStyling_stylePrompt + influenceWeights.smartStyling_baseColor || 1)))
+    const baseColorShare = remaining - stylePromptShare
+    setInfluenceWeights(prev => ({
+      ...prev,
+      smartStyling_designImage: value,
+      smartStyling_stylePrompt: stylePromptShare,
+      smartStyling_baseColor: baseColorShare
+    }))
+  }
+
+  const handleSmartStylingBaseColorInfluence = (value: number) => {
+    const remaining = 100 - value
+    const stylePromptShare = Math.round(remaining * (influenceWeights.smartStyling_stylePrompt / (influenceWeights.smartStyling_stylePrompt + influenceWeights.smartStyling_designImage || 1)))
+    const designImageShare = remaining - stylePromptShare
+    setInfluenceWeights(prev => ({
+      ...prev,
+      smartStyling_baseColor: value,
+      smartStyling_stylePrompt: stylePromptShare,
+      smartStyling_designImage: designImageShare
+    }))
   }
   
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -309,6 +309,25 @@ export default function CapturePage() {
     try {
       const prompt = buildPrompt(settings)
       
+      // Build weights based on current mode
+      const weights = designMode === 'ai-design' ? {
+        designImage: influenceWeights.smartStyling_designImage,
+        stylePrompt: influenceWeights.smartStyling_stylePrompt,
+        baseColor: influenceWeights.smartStyling_baseColor,
+        finish: 100, // Always 100 in Smart Styling
+        texture: 100, // Always 100 in Smart Styling
+        nailLength: 100,
+        nailShape: 100
+      } : {
+        designImage: influenceWeights.nailEditor_designImage,
+        stylePrompt: 0, // Not used in Nail Editor
+        baseColor: influenceWeights.nailEditor_baseColor,
+        finish: influenceWeights.nailEditor_finish,
+        texture: influenceWeights.nailEditor_texture,
+        nailLength: 100,
+        nailShape: 100
+      }
+      
       const response = await fetch('/api/generate-nail-design', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -316,7 +335,7 @@ export default function CapturePage() {
           prompt, 
           originalImage: capturedImage,
           selectedDesignImage: selectedImage || selectedDesignImage,
-          influenceWeights
+          influenceWeights: weights
         }),
         signal: abortControllerRef.current.signal
       })
@@ -458,8 +477,12 @@ export default function CapturePage() {
 
   const handleDesignSelect = (designUrl: string) => {
     setSelectedDesignImage(designUrl)
-    // When design image is selected, set its influence to 100 and base color to 0
-    handleDesignImageInfluence(100)
+    // When design image is selected in Smart Styling, set its influence to 100
+    if (designMode === 'ai-design') {
+      handleSmartStylingDesignImageInfluence(100)
+    } else {
+      handleNailEditorDesignImageInfluence(100)
+    }
   }
 
   const handleDesignUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -481,8 +504,12 @@ export default function CapturePage() {
         const { imageUrl } = data
         
         setSelectedDesignImage(imageUrl)
-        // When design image is uploaded, set its influence to 100 and base color to 0
-        handleDesignImageInfluence(100)
+        // When design image is uploaded, set its influence to 100
+        if (designMode === 'ai-design') {
+          handleSmartStylingDesignImageInfluence(100)
+        } else {
+          handleNailEditorDesignImageInfluence(100)
+        }
         // Don't auto-generate - user must click "Generate Preview"
       }
     } catch (error) {
@@ -789,7 +816,7 @@ export default function CapturePage() {
                             <p className="text-sm font-semibold text-charcoal">Uploaded Design</p>
                             <p className="text-xs text-muted-foreground">Tap to adjust influence</p>
                           </div>
-                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">{influenceWeights.designImage}%</span>
+                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">{influenceWeights.nailEditor_designImage}%</span>
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ml-2 ${expandedSection === 'design-image' ? 'rotate-180' : ''}`} />
                       </button>
@@ -797,18 +824,18 @@ export default function CapturePage() {
                         <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-2">
                           <div className="flex justify-between items-center mb-2">
                             <label className="text-xs font-medium text-muted-foreground">Design Image</label>
-                            <span className="text-xs font-bold text-primary">{influenceWeights.designImage}%</span>
+                            <span className="text-xs font-bold text-primary">{influenceWeights.nailEditor_designImage}%</span>
                           </div>
                           <Slider
-                            value={[influenceWeights.designImage]}
-                            onValueChange={(value) => handleDesignImageInfluence(value[0])}
+                            value={[influenceWeights.nailEditor_designImage]}
+                            onValueChange={(value) => handleNailEditorDesignImageInfluence(value[0])}
                             min={0}
                             max={100}
                             step={5}
                             className="w-full"
                           />
                           <p className="text-[10px] text-muted-foreground">
-                            Base Color: {influenceWeights.baseColor}%
+                            Base Color: {influenceWeights.nailEditor_baseColor}%
                           </p>
                           <button
                             onClick={() => setSelectedDesignImage(null)}
@@ -922,7 +949,7 @@ export default function CapturePage() {
                             <span className="text-xs text-muted-foreground">{designSettings.baseColor}</span>
                           </div>
                         </div>
-                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mr-2">{influenceWeights.baseColor}%</span>
+                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mr-2">{influenceWeights.nailEditor_baseColor}%</span>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expandedSection === 'color' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedSection === 'color' && (
@@ -951,18 +978,18 @@ export default function CapturePage() {
                           <div className="border-t pt-3">
                             <div className="flex justify-between items-center mb-2">
                               <label className="text-xs font-medium text-muted-foreground">Base Color</label>
-                              <span className="text-xs font-bold text-primary">{influenceWeights.baseColor}%</span>
+                              <span className="text-xs font-bold text-primary">{influenceWeights.nailEditor_baseColor}%</span>
                             </div>
                             <Slider
-                              value={[influenceWeights.baseColor]}
-                              onValueChange={(value) => handleBaseColorInfluence(value[0])}
+                              value={[influenceWeights.nailEditor_baseColor]}
+                              onValueChange={(value) => handleNailEditorBaseColorInfluence(value[0])}
                               min={0}
                               max={100}
                               step={5}
                               className="w-full"
                             />
                             <p className="text-[10px] text-muted-foreground mt-1">
-                              {selectedDesignImage && `Design Image: ${influenceWeights.designImage}%`}
+                              {selectedDesignImage && `Design Image: ${influenceWeights.nailEditor_designImage}%`}
                             </p>
                           </div>
                         </div>
@@ -979,7 +1006,7 @@ export default function CapturePage() {
                           <span className="text-sm font-semibold text-charcoal">Finish</span>
                           <span className="text-xs text-muted-foreground capitalize">{designSettings.finish}</span>
                         </div>
-                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mr-2">{influenceWeights.finish}%</span>
+                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mr-2">{influenceWeights.nailEditor_finish}%</span>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expandedSection === 'finish' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedSection === 'finish' && (
@@ -1009,11 +1036,11 @@ export default function CapturePage() {
                           <div className="border-t pt-3">
                             <div className="flex justify-between items-center mb-2">
                               <label className="text-xs font-medium text-muted-foreground">Influence</label>
-                              <span className="text-xs font-bold text-primary">{influenceWeights.finish}%</span>
+                              <span className="text-xs font-bold text-primary">{influenceWeights.nailEditor_finish}%</span>
                             </div>
                             <Slider
-                              value={[influenceWeights.finish]}
-                              onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, finish: value[0] }))}
+                              value={[influenceWeights.nailEditor_finish]}
+                              onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, nailEditor_finish: value[0] }))}
                               min={0}
                               max={100}
                               step={5}
@@ -1034,7 +1061,7 @@ export default function CapturePage() {
                           <span className="text-sm font-semibold text-charcoal">Texture</span>
                           <span className="text-xs text-muted-foreground capitalize">{designSettings.texture}</span>
                         </div>
-                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mr-2">{influenceWeights.texture}%</span>
+                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mr-2">{influenceWeights.nailEditor_texture}%</span>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expandedSection === 'texture' ? 'rotate-180' : ''}`} />
                       </button>
                       {expandedSection === 'texture' && (
@@ -1066,11 +1093,11 @@ export default function CapturePage() {
                           <div className="border-t pt-3">
                             <div className="flex justify-between items-center mb-2">
                               <label className="text-xs font-medium text-muted-foreground">Influence</label>
-                              <span className="text-xs font-bold text-primary">{influenceWeights.texture}%</span>
+                              <span className="text-xs font-bold text-primary">{influenceWeights.nailEditor_texture}%</span>
                             </div>
                             <Slider
-                              value={[influenceWeights.texture]}
-                              onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, texture: value[0] }))}
+                              value={[influenceWeights.nailEditor_texture]}
+                              onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, nailEditor_texture: value[0] }))}
                               min={0}
                               max={100}
                               step={5}
@@ -1131,18 +1158,18 @@ export default function CapturePage() {
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <div className="flex justify-between items-center mb-2">
                             <label className="text-xs font-medium text-muted-foreground">Style Prompt</label>
-                            <span className="text-xs font-bold text-primary">{influenceWeights.stylePrompt}%</span>
+                            <span className="text-xs font-bold text-primary">{influenceWeights.smartStyling_stylePrompt}%</span>
                           </div>
                           <Slider
-                            value={[influenceWeights.stylePrompt]}
-                            onValueChange={(value) => handleStylePromptInfluence(value[0])}
+                            value={[influenceWeights.smartStyling_stylePrompt]}
+                            onValueChange={(value) => handleSmartStylingStylePromptInfluence(value[0])}
                             min={0}
                             max={100}
                             step={5}
                             className="w-full"
                           />
                           <p className="text-[10px] text-muted-foreground mt-1">
-                            Base Color: {influenceWeights.baseColor}% {selectedDesignImage && `• Design Image: ${influenceWeights.designImage}%`}
+                            Base Color: {influenceWeights.smartStyling_baseColor}% {selectedDesignImage && `• Design Image: ${influenceWeights.smartStyling_designImage}%`}
                           </p>
                         </div>
                       )}
@@ -1220,7 +1247,7 @@ export default function CapturePage() {
                             <p className="text-sm font-semibold text-charcoal">Uploaded Design</p>
                             <p className="text-xs text-muted-foreground">Tap to adjust influence</p>
                           </div>
-                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">{influenceWeights.designImage}%</span>
+                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">{influenceWeights.smartStyling_designImage}%</span>
                         </div>
                         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ml-2 ${expandedSection === 'ai-design-image' ? 'rotate-180' : ''}`} />
                       </button>
@@ -1228,18 +1255,18 @@ export default function CapturePage() {
                         <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-2">
                           <div className="flex justify-between items-center mb-2">
                             <label className="text-xs font-medium text-muted-foreground">Design Image</label>
-                            <span className="text-xs font-bold text-primary">{influenceWeights.designImage}%</span>
+                            <span className="text-xs font-bold text-primary">{influenceWeights.smartStyling_designImage}%</span>
                           </div>
                           <Slider
-                            value={[influenceWeights.designImage]}
-                            onValueChange={(value) => handleDesignImageInfluence(value[0])}
+                            value={[influenceWeights.smartStyling_designImage]}
+                            onValueChange={(value) => handleSmartStylingDesignImageInfluence(value[0])}
                             min={0}
                             max={100}
                             step={5}
                             className="w-full"
                           />
                           <p className="text-[10px] text-muted-foreground">
-                            Base Color: {influenceWeights.baseColor}% • Style Prompt: {influenceWeights.stylePrompt}%
+                            Base Color: {influenceWeights.smartStyling_baseColor}% • Style Prompt: {influenceWeights.smartStyling_stylePrompt}%
                           </p>
                           <button
                             onClick={() => setSelectedDesignImage(null)}
