@@ -635,24 +635,22 @@ export default function CapturePage() {
               <div className="w-full flex px-6 bg-transparent border-b h-14 gap-2">
                 <button
                   onClick={() => toggleDesignMode('design')}
-                  className={`flex-1 flex items-center justify-center gap-2 transition-all border-b-2 ${
+                  className={`flex-1 flex items-center justify-center transition-all border-b-2 ${
                     designMode === 'design' 
                       ? 'border-primary text-primary' 
                       : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <Palette className="w-5 h-5" />
                   <span className="font-semibold">Nail Editor</span>
                 </button>
                 <button
                   onClick={() => toggleDesignMode('ai-design')}
-                  className={`flex-1 flex items-center justify-center gap-2 transition-all border-b-2 ${
+                  className={`flex-1 flex items-center justify-center transition-all border-b-2 ${
                     designMode === 'ai-design' 
                       ? 'border-primary text-primary' 
                       : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <Sparkles className="w-5 h-5" />
                   <span className="font-semibold">Smart Styling</span>
                 </button>
               </div>
