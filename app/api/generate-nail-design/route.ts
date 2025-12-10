@@ -69,14 +69,14 @@ CRITICAL REQUIREMENTS:
 - Preserve the original hand, fingers, skin, pose, and background EXACTLY
 - Only modify the nail surfaces
 - Apply the design with ${nailLength} length and ${nailShape} shape
-- Professional salon quality finish
-- Realistic nail polish appearance with smooth edges
+- Professional salon quality finish with ULTRA-HIGH DETAIL
+- Realistic nail polish appearance with smooth edges and crisp details
 - Natural lighting and reflections matching the original image
 - Keep all other elements of the photo unchanged
 
-${selectedDesignImage ? 'IMPORTANT: A reference design image was provided. Use its style, colors, and patterns as inspiration for the nail art.' : ''}
+${selectedDesignImage ? 'IMPORTANT: A reference design image was provided. REPLICATE its exact style, colors, patterns, and fine details with MAXIMUM FIDELITY. Preserve all intricate design elements, textures, and color gradients from the reference. Apply the design with professional precision and clarity, maintaining sharp edges and high-resolution details. The nail art should look exactly like the reference design, just adapted to fit the natural nail shape and curvature.' : ''}
 
-Apply the design as if professionally painted. Respect natural nail curvature and realistic lighting. Deliver ONE edited version.`
+Apply the design as if professionally painted by an expert nail artist. Respect natural nail curvature and realistic lighting. Use high-resolution detail and crisp, clear rendering. Deliver ONE edited version with maximum quality and detail preservation.`
 
     console.log('🤖 Generating nail design preview with gpt-image-1...')
     console.log('📥 Fetching original hand image:', originalImage)
@@ -122,11 +122,12 @@ Apply the design as if professionally painted. Respect natural nail curvature an
     
     // Use the correct images.edit() API for gpt-image-1
     // Note: gpt-image-1 always returns base64, no response_format parameter needed
+    // Using 1792x1024 for higher quality and better detail preservation
     const response = await openai.images.edit({
       model: 'gpt-image-1',
       image: images,
       prompt: enhancedPrompt,
-      size: '1024x1024',
+      size: '1792x1024',
       n: 1
     })
 
