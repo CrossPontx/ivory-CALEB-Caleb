@@ -642,7 +642,7 @@ export default function CapturePage() {
                   }`}
                 >
                   <Palette className="w-5 h-5" />
-                  <span className="font-semibold">Design</span>
+                  <span className="font-semibold">Nail Editor</span>
                 </button>
                 <button
                   onClick={() => toggleDesignMode('ai-design')}
@@ -653,7 +653,7 @@ export default function CapturePage() {
                   }`}
                 >
                   <Sparkles className="w-5 h-5" />
-                  <span className="font-semibold">AI Design</span>
+                  <span className="font-semibold">Smart Styling</span>
                 </button>
               </div>
 
@@ -1129,7 +1129,7 @@ export default function CapturePage() {
 
               {!designMode && (
                 <div className="p-6 text-center text-muted-foreground">
-                  <p className="text-sm">Select Design or AI Design to get started</p>
+                  <p className="text-sm">Select Nail Editor or Smart Styling to get started</p>
                 </div>
               )}
             </div>
