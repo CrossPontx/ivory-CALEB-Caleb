@@ -794,39 +794,49 @@ export default function CapturePage() {
                       )}
                     </div>
 
-                    {/* Base Color Sliders */}
-                    <div className="mb-4">
-                      <label className="text-sm font-semibold text-charcoal mb-2 block">Base Color</label>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-xs text-muted-foreground mb-1.5 block">Hue</label>
-                          <Slider
-                            value={[hexToHsl(designSettings.baseColor).hue]}
-                            onValueChange={handleHueChange}
-                            max={360}
-                            step={1}
-                            className="w-full"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs text-muted-foreground mb-1.5 block">Lightness</label>
-                          <Slider
-                            value={[colorLightness]}
-                            onValueChange={handleLightnessChange}
-                            max={100}
-                            min={10}
-                            step={1}
-                            className="w-full"
-                          />
-                        </div>
+                    {/* Base Color - Collapsible */}
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedSection(expandedSection === 'color' ? null : 'color')}
+                        className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                      >
                         <div className="flex items-center gap-3">
-                          <div 
-                            className="w-12 h-12 rounded-full border-2 border-border"
-                            style={{ backgroundColor: designSettings.baseColor }}
-                          />
-                          <span className="text-sm text-muted-foreground">{designSettings.baseColor}</span>
+                          <span className="text-sm font-semibold text-charcoal">Base Color</span>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-6 h-6 rounded-full border-2 border-border"
+                              style={{ backgroundColor: designSettings.baseColor }}
+                            />
+                            <span className="text-xs text-muted-foreground">{designSettings.baseColor}</span>
+                          </div>
                         </div>
-                      </div>
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expandedSection === 'color' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedSection === 'color' && (
+                        <div className="mt-2 space-y-3 p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1.5 block">Hue</label>
+                            <Slider
+                              value={[hexToHsl(designSettings.baseColor).hue]}
+                              onValueChange={handleHueChange}
+                              max={360}
+                              step={1}
+                              className="w-full"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1.5 block">Lightness</label>
+                            <Slider
+                              value={[colorLightness]}
+                              onValueChange={handleLightnessChange}
+                              max={100}
+                              min={10}
+                              step={1}
+                              className="w-full"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Finish */}
@@ -1086,39 +1096,49 @@ export default function CapturePage() {
                         </div>
                       </div>
 
-                      {/* Base Color Sliders */}
+                      {/* Base Color - Collapsible Compact */}
                       <div>
-                        <label className="text-xs font-semibold text-charcoal mb-2 block">Base Color</label>
-                        <div className="space-y-2">
-                          <div>
-                            <label className="text-[10px] text-muted-foreground mb-1 block">Hue</label>
-                            <Slider
-                              value={[hexToHsl(designSettings.baseColor).hue]}
-                              onValueChange={handleHueChange}
-                              max={360}
-                              step={1}
-                              className="w-full"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] text-muted-foreground mb-1 block">Lightness</label>
-                            <Slider
-                              value={[colorLightness]}
-                              onValueChange={handleLightnessChange}
-                              max={100}
-                              min={10}
-                              step={1}
-                              className="w-full"
-                            />
-                          </div>
+                        <button
+                          onClick={() => setExpandedSection(expandedSection === 'ai-color' ? null : 'ai-color')}
+                          className="w-full flex items-center justify-between p-2 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                        >
                           <div className="flex items-center gap-2">
-                            <div 
-                              className="w-8 h-8 rounded-full border-2 border-border"
-                              style={{ backgroundColor: designSettings.baseColor }}
-                            />
-                            <span className="text-xs text-muted-foreground">{designSettings.baseColor}</span>
+                            <span className="text-xs font-semibold text-charcoal">Base Color</span>
+                            <div className="flex items-center gap-1.5">
+                              <div 
+                                className="w-5 h-5 rounded-full border-2 border-border"
+                                style={{ backgroundColor: designSettings.baseColor }}
+                              />
+                              <span className="text-[10px] text-muted-foreground">{designSettings.baseColor}</span>
+                            </div>
                           </div>
-                        </div>
+                          <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${expandedSection === 'ai-color' ? 'rotate-180' : ''}`} />
+                        </button>
+                        {expandedSection === 'ai-color' && (
+                          <div className="mt-1.5 space-y-2 p-2 bg-white rounded-lg">
+                            <div>
+                              <label className="text-[10px] text-muted-foreground mb-1 block">Hue</label>
+                              <Slider
+                                value={[hexToHsl(designSettings.baseColor).hue]}
+                                onValueChange={handleHueChange}
+                                max={360}
+                                step={1}
+                                className="w-full"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-muted-foreground mb-1 block">Lightness</label>
+                              <Slider
+                                value={[colorLightness]}
+                                onValueChange={handleLightnessChange}
+                                max={100}
+                                min={10}
+                                step={1}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
