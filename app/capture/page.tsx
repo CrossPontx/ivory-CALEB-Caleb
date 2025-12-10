@@ -53,6 +53,17 @@ export default function CapturePage() {
     styleVibe: 'elegant',
     accentColor: '#FFFFFF'
   })
+
+  // Influence weights for each input type
+  const [influenceWeights, setInfluenceWeights] = useState({
+    designImage: 100,
+    stylePrompt: 100,
+    nailLength: 100,
+    nailShape: 100,
+    baseColor: 100,
+    finish: 100,
+    texture: 100
+  })
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -246,7 +257,8 @@ export default function CapturePage() {
         body: JSON.stringify({ 
           prompt, 
           originalImage: capturedImage,
-          selectedDesignImage: selectedImage || selectedDesignImage
+          selectedDesignImage: selectedImage || selectedDesignImage,
+          influenceWeights
         }),
         signal: abortControllerRef.current.signal
       })
@@ -719,6 +731,104 @@ export default function CapturePage() {
                     </div>
                   )}
 
+                  {/* Influence Controls */}
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 space-y-3 border border-purple-200">
+                    <h4 className="text-sm font-bold text-charcoal">Design Influence Controls</h4>
+                    <p className="text-xs text-muted-foreground">Adjust how much each input affects the final design</p>
+                    
+                    {selectedDesignImage && (
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-xs font-semibold text-charcoal">Uploaded Design</label>
+                          <span className="text-xs font-bold text-primary">{influenceWeights.designImage}%</span>
+                        </div>
+                        <Slider
+                          value={[influenceWeights.designImage]}
+                          onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, designImage: value[0] }))}
+                          min={0}
+                          max={100}
+                          step={5}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Nail Length</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.nailLength}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.nailLength]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, nailLength: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Nail Shape</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.nailShape}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.nailShape]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, nailShape: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Base Color</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.baseColor}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.baseColor]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, baseColor: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Finish</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.finish}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.finish]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, finish: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Texture</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.texture}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.texture]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, texture: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+
                   <div className="border-t pt-4">
                     <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Design Parameters</p>
 
@@ -989,6 +1099,121 @@ export default function CapturePage() {
                       </button>
                     </div>
                   )}
+
+                  {/* Influence Controls */}
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 space-y-3 border border-purple-200">
+                    <h4 className="text-sm font-bold text-charcoal">Design Influence Controls</h4>
+                    <p className="text-xs text-muted-foreground">Adjust how much each input affects the final design</p>
+                    
+                    {selectedDesignImage && (
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-xs font-semibold text-charcoal">Uploaded Design</label>
+                          <span className="text-xs font-bold text-primary">{influenceWeights.designImage}%</span>
+                        </div>
+                        <Slider
+                          value={[influenceWeights.designImage]}
+                          onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, designImage: value[0] }))}
+                          min={0}
+                          max={100}
+                          step={5}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+
+                    {aiPrompt && (
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-xs font-semibold text-charcoal">Style Description</label>
+                          <span className="text-xs font-bold text-primary">{influenceWeights.stylePrompt}%</span>
+                        </div>
+                        <Slider
+                          value={[influenceWeights.stylePrompt]}
+                          onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, stylePrompt: value[0] }))}
+                          min={0}
+                          max={100}
+                          step={5}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Nail Length</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.nailLength}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.nailLength]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, nailLength: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Nail Shape</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.nailShape}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.nailShape]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, nailShape: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Base Color</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.baseColor}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.baseColor]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, baseColor: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Finish</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.finish}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.finish]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, finish: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-semibold text-charcoal">Texture</label>
+                        <span className="text-xs font-bold text-primary">{influenceWeights.texture}%</span>
+                      </div>
+                      <Slider
+                        value={[influenceWeights.texture]}
+                        onValueChange={(value) => setInfluenceWeights(prev => ({ ...prev, texture: value[0] }))}
+                        min={0}
+                        max={100}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
 
                   <div className="border-t pt-4">
                     <h3 className="font-serif text-lg font-bold text-charcoal mb-2">Describe your style</h3>

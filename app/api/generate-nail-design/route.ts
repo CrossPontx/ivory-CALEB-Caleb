@@ -58,8 +58,12 @@ export async function POST(request: NextRequest) {
     // Default influence weights if not provided
     const weights = influenceWeights || {
       designImage: selectedDesignImage ? 100 : 0,
-      stylePrompt: 50,
-      manualParams: 100
+      stylePrompt: 100,
+      nailLength: 100,
+      nailShape: 100,
+      baseColor: 100,
+      finish: 100,
+      texture: 100
     }
 
     // Build enhanced prompt for nail design editing
@@ -83,9 +87,21 @@ Influence Weight: ${weights.stylePrompt}% - ${weights.stylePrompt === 0 ? 'IGNOR
 
 3. Manual Design Parameters
 These are direct selections the user makes in the UI:
+
 - Nail Length: ${nailLength.toUpperCase()}
+  Influence Weight: ${weights.nailLength}% - ${weights.nailLength === 0 ? 'IGNORE nail length completely, use natural length.' : weights.nailLength === 100 ? 'Apply this length with FULL PRIORITY.' : `Consider this length at ${weights.nailLength}% strength.`}
+
 - Nail Shape: ${nailShape.toUpperCase()}
-- Manual Parameter Influence Weight: ${weights.manualParams}% - ${weights.manualParams === 0 ? 'IGNORE manual settings completely.' : weights.manualParams === 100 ? 'Apply them with FULL PRIORITY over other inputs.' : `Use them as general guidance at ${weights.manualParams}% strength.`}
+  Influence Weight: ${weights.nailShape}% - ${weights.nailShape === 0 ? 'IGNORE nail shape completely, keep natural shape.' : weights.nailShape === 100 ? 'Apply this shape with FULL PRIORITY.' : `Consider this shape at ${weights.nailShape}% strength.`}
+
+- Base Color: ${prompt.match(/Base color: (#[0-9A-Fa-f]{6})/)?.[1] || 'Not specified'}
+  Influence Weight: ${weights.baseColor}% - ${weights.baseColor === 0 ? 'IGNORE base color completely.' : weights.baseColor === 100 ? 'Apply this color with FULL PRIORITY.' : `Consider this color at ${weights.baseColor}% strength.`}
+
+- Finish: ${prompt.match(/Finish: (\w+)/)?.[1] || 'Not specified'}
+  Influence Weight: ${weights.finish}% - ${weights.finish === 0 ? 'IGNORE finish completely.' : weights.finish === 100 ? 'Apply this finish with FULL PRIORITY.' : `Consider this finish at ${weights.finish}% strength.`}
+
+- Texture: ${prompt.match(/Texture: (\w+)/)?.[1] || 'Not specified'}
+  Influence Weight: ${weights.texture}% - ${weights.texture === 0 ? 'IGNORE texture completely.' : weights.texture === 100 ? 'Apply this texture with FULL PRIORITY.' : `Consider this texture at ${weights.texture}% strength.`}
 
 Rules:
 – Keep my hand exactly as it appears.
