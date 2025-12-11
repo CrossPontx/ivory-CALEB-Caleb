@@ -95,7 +95,11 @@ export async function POST(request: NextRequest) {
 
 You are editing a photo of a hand to apply nail art designs. Your ONLY task is to modify the fingernails while preserving everything else EXACTLY as it appears.
 
-STRICT RULES:
+${selectedDesignImage ? `IMAGE INPUTS:
+- Image 1: The hand photo to edit (preserve everything except nails)
+- Image 2: The reference nail design to replicate EXACTLY onto the nails in Image 1
+
+` : ''}STRICT RULES:
 1. Use the EXACT hand shown in the image - same number of fingers, same pose, same angle
 2. DO NOT add, remove, or duplicate any fingers
 3. DO NOT change the hand position, pose, or angle
@@ -107,13 +111,18 @@ NAIL DESIGN APPLICATION:
 ${selectedDesignImage ? `
 DESIGN IMAGE PROVIDED (Influence: ${weights.designImage}%):
 ${weights.designImage === 0 ? '- IGNORE the design image completely.' : 
-  weights.designImage === 100 ? `- Apply the design from the reference image DIRECTLY ONTO THE FINGERNAILS
-- The design should appear AS IF PAINTED ON THE NAIL SURFACE
-- Match the colors, patterns, and style from the reference image EXACTLY
-- Adapt the design to fit each nail's shape and curvature naturally
-- Maintain professional nail art quality with crisp edges and clear details
-- The design belongs ON THE NAILS, not on the background or skin
-- DO NOT apply any base color - use ONLY the colors and patterns from the reference design` : 
+  weights.designImage === 100 ? `- CRITICAL: You MUST replicate the design from the reference image with MAXIMUM ACCURACY
+- Copy EVERY detail from the reference design: exact colors, patterns, shapes, lines, and decorative elements
+- The reference design shows the EXACT nail art that must appear on the fingernails
+- DO NOT interpret, simplify, or modify the design - COPY IT PRECISELY
+- Match color values EXACTLY as they appear in the reference
+- Replicate all patterns, gradients, textures, and details with PERFECT FIDELITY
+- If the reference shows specific nail art elements (flowers, lines, dots, etc.), reproduce them IDENTICALLY
+- The design should look like a professional nail technician perfectly recreated the reference design
+- Adapt the design to fit each nail's shape while maintaining ALL design details
+- DO NOT add any base color, background color, or additional elements not in the reference
+- USE ONLY what you see in the reference design image - nothing more, nothing less
+- This is a DIRECT COPY operation, not an interpretation or inspiration` : 
   `- Use the design image as ${weights.designImage}% inspiration, blending with other parameters`}
 ` : '- No design image provided'}
 
@@ -125,8 +134,10 @@ QUALITY REQUIREMENTS:
 - Clean, crisp edges at nail boundaries
 - Consistent application across all visible nails
 - Natural lighting and shadows preserved
+${weights.designImage === 100 ? `- ACCURACY IS PARAMOUNT: The result must be a faithful reproduction of the reference design
+- Every color, pattern, and detail from the reference must be present in the output` : ''}
 
-OUTPUT: Return ONE image with the same hand, same number of fingers, with nail art applied ONLY to the fingernail surfaces.`
+OUTPUT: Return ONE image with the same hand, same number of fingers, with nail art applied ONLY to the fingernail surfaces.${weights.designImage === 100 ? ' The nail design must be an EXACT REPLICA of the reference design provided.' : ''}`
 
     console.log('🤖 Generating nail design preview with gpt-image-1...')
     console.log('📥 Fetching original hand image:', originalImage)
@@ -169,6 +180,7 @@ OUTPUT: Return ONE image with the same hand, same number of fingers, with nail a
     
     console.log('🎨 Calling OpenAI images.edit() with gpt-image-1...')
     console.log('📊 Number of images:', images.length)
+    console.log('📝 Prompt preview:', enhancedPrompt.substring(0, 500) + '...')
     
     // Use the correct images.edit() API for gpt-image-1
     // Note: gpt-image-1 always returns base64, no response_format parameter needed
