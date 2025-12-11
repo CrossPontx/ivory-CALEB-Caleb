@@ -2,12 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CAPACITOR_DEBUG</key>
+	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Ivory</string>
+	<string>Ivory</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -31,6 +31,7 @@
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
+		<string></string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -47,33 +48,31 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	
-	<!-- Camera and Photo Library Permissions -->
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to capture photos of your hands for nail design visualization</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs photo library access to save and load nail designs</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs permission to save nail designs to your photo library</string>
-	
-	<!-- Push Notifications -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>This app needs notification access to send you updates about your nail designs and appointments</string>
-	
-	<!-- Sign in with Apple -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.ivory.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>ivory</string>
 				<string>com.ivory.app</string>
 			</array>
 		</dict>
-		<!-- Google Sign-In URL Scheme -->
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
@@ -83,12 +82,8 @@
 			</array>
 		</dict>
 	</array>
-	
-	<!-- Google Sign-In Configuration -->
 	<key>GIDClientID</key>
 	<string>YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com</string>
-	
-	<!-- Allow HTTP requests for development -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -96,8 +91,6 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	
-	<!-- Queries for external apps -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>googlechrome</string>
