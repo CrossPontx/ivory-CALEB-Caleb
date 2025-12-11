@@ -37,6 +37,7 @@ export default function CapturePage() {
   const [designMode, setDesignMode] = useState<DesignMode>(null)
   const [aiPrompt, setAiPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generationProgress, setGenerationProgress] = useState(0)
   const [generatedDesigns, setGeneratedDesigns] = useState<string[]>([])
   const [selectedDesignImage, setSelectedDesignImage] = useState<string | null>(null)
   const [finalPreview, setFinalPreview] = useState<string | null>(null)
@@ -263,6 +264,16 @@ export default function CapturePage() {
     abortControllerRef.current = new AbortController()
     
     setIsGenerating(true)
+    setGenerationProgress(0)
+    
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setGenerationProgress(prev => {
+        if (prev >= 90) return prev
+        return prev + Math.random() * 15
+      })
+    }, 500)
+    
     try {
       const prompt = buildPrompt(settings)
       
@@ -290,6 +301,7 @@ export default function CapturePage() {
       })
 
       if (response.ok) {
+        setGenerationProgress(100)
         const { imageUrl } = await response.json()
         setFinalPreview(imageUrl)
       }
@@ -300,7 +312,9 @@ export default function CapturePage() {
         console.error('Error generating AI preview:', error)
       }
     } finally {
+      clearInterval(progressInterval)
       setIsGenerating(false)
+      setGenerationProgress(0)
       abortControllerRef.current = null
     }
   }
@@ -309,6 +323,7 @@ export default function CapturePage() {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
       setIsGenerating(false)
+      setGenerationProgress(0)
     }
   }
 
@@ -395,6 +410,16 @@ export default function CapturePage() {
     abortControllerRef.current = new AbortController()
 
     setIsGenerating(true)
+    setGenerationProgress(0)
+    
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setGenerationProgress(prev => {
+        if (prev >= 90) return prev
+        return prev + Math.random() * 15
+      })
+    }, 500)
+    
     try {
       const response = await fetch('/api/analyze-prompt', {
         method: 'POST',
@@ -404,6 +429,7 @@ export default function CapturePage() {
       })
 
       if (response.ok) {
+        setGenerationProgress(100)
         const { designs, inferredSettings } = await response.json()
         setGeneratedDesigns(designs)
         
@@ -418,7 +444,9 @@ export default function CapturePage() {
         console.error("Error generating designs:", error)
       }
     } finally {
+      clearInterval(progressInterval)
       setIsGenerating(false)
+      setGenerationProgress(0)
       abortControllerRef.current = null
     }
   }
@@ -636,20 +664,85 @@ export default function CapturePage() {
                 <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center h-full">
                   {isGenerating ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Image 
-                        src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGdkNWtib3JrcXhvcHFiaHdraHR5aDJsN3Bzcmx2ajZyNWJlemM1biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ljj4pInW5JllK/giphy.gif"
-                        alt="Generating..."
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        onError={(e) => {
-                          // Fallback to second GIF if first one fails
-                          const target = e.target as HTMLImageElement;
-                          if (target.src !== "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjZlOXJvZThrOXpndThicm83NXM5N2V4cWpjaXFkNXQ1MHNiZ2dwaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QaDc2Wn7tfLFu/giphy.gif") {
-                            target.src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjZlOXJvZThrOXpndThicm83NXM5N2V4cWpjaXFkNXQ1MHNiZ2dwaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QaDc2Wn7tfLFu/giphy.gif";
-                          }
-                        }}
-                      />
+                      {/* Dimmed GIF Background */}
+                      <div className="absolute inset-0 opacity-30">
+                        <Image 
+                          src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGdkNWtib3JrcXhvcHFiaHdraHR5aDJsN3Bzcmx2ajZyNWJlemM1biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ljj4pInW5JllK/giphy.gif"
+                          alt="Generating..."
+                          fill
+                          className="object-cover"
+                          unoptimized
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (target.src !== "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjZlOXJvZThrOXpndThicm83NXM5N2V4cWpjaXFkNXQ1MHNiZ2dwaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QaDc2Wn7tfLFu/giphy.gif") {
+                              target.src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjZlOXJvZThrOXpndThicm83NXM5N2V4cWpjaXFkNXQ1MHNiZ2dwaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QaDc2Wn7tfLFu/giphy.gif";
+                            }
+                          }}
+                        />
+                      </div>
+                      
+                      {/* Loading Overlay with Percentage */}
+                      <div className="relative z-10 flex flex-col items-center justify-center gap-4 px-6">
+                        {/* Circular Progress */}
+                        <div className="relative w-32 h-32">
+                          {/* Background Circle */}
+                          <svg className="w-32 h-32 transform -rotate-90">
+                            <circle
+                              cx="64"
+                              cy="64"
+                              r="56"
+                              stroke="rgba(255, 255, 255, 0.2)"
+                              strokeWidth="8"
+                              fill="none"
+                            />
+                            {/* Progress Circle */}
+                            <circle
+                              cx="64"
+                              cy="64"
+                              r="56"
+                              stroke="url(#gradient)"
+                              strokeWidth="8"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeDasharray={`${2 * Math.PI * 56}`}
+                              strokeDashoffset={`${2 * Math.PI * 56 * (1 - generationProgress / 100)}`}
+                              className="transition-all duration-300 ease-out"
+                            />
+                            <defs>
+                              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#FF6B9D" />
+                                <stop offset="100%" stopColor="#C44569" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                          
+                          {/* Percentage Text */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="text-4xl font-bold text-white drop-shadow-lg">
+                                {Math.round(generationProgress)}%
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Loading Text */}
+                        <div className="text-center">
+                          <p className="text-white font-semibold text-lg drop-shadow-lg mb-1">
+                            Creating Your Design
+                          </p>
+                          <p className="text-white/80 text-sm drop-shadow">
+                            This may take a moment...
+                          </p>
+                        </div>
+                        
+                        {/* Animated Sparkles */}
+                        <div className="flex gap-2">
+                          <Sparkles className="w-5 h-5 text-white animate-pulse" style={{ animationDelay: '0ms' }} />
+                          <Sparkles className="w-5 h-5 text-white animate-pulse" style={{ animationDelay: '150ms' }} />
+                          <Sparkles className="w-5 h-5 text-white animate-pulse" style={{ animationDelay: '300ms' }} />
+                        </div>
+                      </div>
                     </div>
                   ) : finalPreview ? (
                     <Image src={finalPreview} alt="AI Generated" fill className="object-contain" />
