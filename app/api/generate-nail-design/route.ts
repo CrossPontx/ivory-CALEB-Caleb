@@ -67,6 +67,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Build enhanced prompt for nail design editing
+    const baseColorValue = prompt.match(/Base color: (#[0-9A-Fa-f]{6})/)?.[1] || '#FF6B9D'
+    const finishValue = prompt.match(/Finish: (\w+)/)?.[1] || 'glossy'
+    const textureValue = prompt.match(/Texture: (\w+)/)?.[1] || 'smooth'
+    
+    // Build design parameters section - only include parameters with non-zero weights
+    let designParamsSection = 'DESIGN PARAMETERS:\n'
+    designParamsSection += `- Nail Length: ${nailLength} (Weight: ${weights.nailLength}%)\n`
+    designParamsSection += `- Nail Shape: ${nailShape} (Weight: ${weights.nailShape}%)\n`
+    
+    // Only include base color if it has influence
+    if (weights.baseColor > 0) {
+      designParamsSection += `- Base Color: ${baseColorValue} (Weight: ${weights.baseColor}%)\n`
+    }
+    
+    // Only include finish if it has influence
+    if (weights.finish > 0) {
+      designParamsSection += `- Finish: ${finishValue} (Weight: ${weights.finish}%)\n`
+    }
+    
+    // Only include texture if it has influence
+    if (weights.texture > 0) {
+      designParamsSection += `- Texture: ${textureValue} (Weight: ${weights.texture}%)\n`
+    }
+    
     const enhancedPrompt = `CRITICAL INSTRUCTIONS - READ CAREFULLY:
 
 You are editing a photo of a hand to apply nail art designs. Your ONLY task is to modify the fingernails while preserving everything else EXACTLY as it appears.
@@ -88,17 +112,12 @@ ${weights.designImage === 0 ? '- IGNORE the design image completely.' :
 - Match the colors, patterns, and style from the reference image EXACTLY
 - Adapt the design to fit each nail's shape and curvature naturally
 - Maintain professional nail art quality with crisp edges and clear details
-- The design belongs ON THE NAILS, not on the background or skin` : 
+- The design belongs ON THE NAILS, not on the background or skin
+- DO NOT apply any base color - use ONLY the colors and patterns from the reference design` : 
   `- Use the design image as ${weights.designImage}% inspiration, blending with other parameters`}
 ` : '- No design image provided'}
 
-DESIGN PARAMETERS:
-- Nail Length: ${nailLength} (Weight: ${weights.nailLength}%)
-- Nail Shape: ${nailShape} (Weight: ${weights.nailShape}%)
-- Base Color: ${prompt.match(/Base color: (#[0-9A-Fa-f]{6})/)?.[1] || 'Not specified'} (Weight: ${weights.baseColor}%)
-- Finish: ${prompt.match(/Finish: (\w+)/)?.[1] || 'glossy'} (Weight: ${weights.finish}%)
-- Texture: ${prompt.match(/Texture: (\w+)/)?.[1] || 'smooth'} (Weight: ${weights.texture}%)
-
+${designParamsSection}
 QUALITY REQUIREMENTS:
 - Professional salon-quality nail art
 - Realistic nail polish appearance with proper reflections
