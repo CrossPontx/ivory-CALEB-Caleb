@@ -771,22 +771,13 @@ export default function CapturePage() {
             <div className="h-1 w-12 bg-border rounded-full mx-auto my-3 flex-shrink-0"></div>
 
             <div className="w-full flex-1 flex flex-col overflow-hidden">
-              <div className="w-full flex px-6 bg-transparent border-b h-14 gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setDesignMode('design')}
-                  className="flex-1 flex items-center justify-center transition-all border-b-2 border-primary text-primary"
-                >
-                  <span className="font-light text-lg tracking-wide">Nail Editor</span>
-                </button>
-              </div>
-
               {(designMode === 'design' || designMode === null) && (
                 <div className="p-6 space-y-4 overflow-y-auto overscroll-contain flex-1">
                   {/* Generate Preview Button */}
                   {!isGenerating ? (
                     <Button 
                       onClick={() => generateAIPreview(designSettings)} 
-                      className="w-full"
+                      className="w-full rounded-2xl"
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
                       Generate Preview
@@ -795,7 +786,7 @@ export default function CapturePage() {
                     <Button 
                       onClick={cancelGeneration}
                       variant="destructive"
-                      className="w-full"
+                      className="w-full rounded-2xl"
                     >
                       <X className="w-4 h-4 mr-2" />
                       Cancel Generation
@@ -806,7 +797,7 @@ export default function CapturePage() {
                   <Button 
                     variant="outline" 
                     onClick={() => designUploadRef.current?.click()}
-                    className="w-full"
+                    className="w-full rounded-2xl"
                     disabled={isGenerating}
                   >
                     <Upload className="w-4 h-4 mr-2" />
@@ -818,7 +809,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'design-image' ? null : 'design-image')}
-                        className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                        className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-white hover:border-primary/50 transition-all"
                       >
                         <div className="flex items-center gap-3">
                           <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-primary flex-shrink-0">
@@ -867,7 +858,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'length' ? null : 'length')}
-                        className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                        className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-white hover:border-primary/50 transition-all"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-charcoal tracking-wide">Nail Length</span>
@@ -906,7 +897,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'shape' ? null : 'shape')}
-                        className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                        className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-white hover:border-primary/50 transition-all"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-charcoal tracking-wide">Nail Shape</span>
@@ -949,7 +940,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'color' ? null : 'color')}
-                        className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                        className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-white hover:border-primary/50 transition-all"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-charcoal tracking-wide">Base Color</span>
@@ -1012,7 +1003,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'finish' ? null : 'finish')}
-                        className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                        className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-white hover:border-primary/50 transition-all"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-charcoal tracking-wide">Finish</span>
@@ -1067,7 +1058,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'texture' ? null : 'texture')}
-                        className="w-full flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:border-primary/50 transition-all"
+                        className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-white hover:border-primary/50 transition-all"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-charcoal tracking-wide">Texture</span>
