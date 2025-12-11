@@ -609,13 +609,13 @@ export default function CapturePage() {
         </div>
 
         {/* Image Preview - Side by Side */}
-        <div className="flex-1 pt-24 pb-[450px] px-4 overflow-y-auto">
-          <div className="max-w-2xl mx-auto">
-            <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="pt-20 pb-4 px-4 overflow-y-auto" style={{ height: 'calc(50vh - 80px)', minHeight: '300px' }}>
+          <div className="max-w-2xl mx-auto h-full">
+            <div className="grid grid-cols-2 gap-3 h-full">
               {/* Original Image */}
-              <div className="relative overflow-hidden rounded-2xl border-2 border-border group">
-                <div className="aspect-[3/4] relative bg-white">
-                  <Image src={capturedImage} alt="Original" fill className="object-cover" />
+              <div className="relative overflow-hidden rounded-2xl border-2 border-border group h-full">
+                <div className="relative bg-white h-full">
+                  <Image src={capturedImage} alt="Original" fill className="object-contain" />
                   {/* Change Photo Overlay */}
                   <button
                     onClick={changePhoto}
@@ -632,8 +632,8 @@ export default function CapturePage() {
               </div>
 
               {/* Preview Image */}
-              <div className="relative overflow-hidden rounded-2xl border-2 border-border">
-                <div className="aspect-[3/4] relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+              <div className="relative overflow-hidden rounded-2xl border-2 border-border h-full">
+                <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center h-full">
                   {isGenerating ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Image 
@@ -652,7 +652,7 @@ export default function CapturePage() {
                       />
                     </div>
                   ) : finalPreview ? (
-                    <Image src={finalPreview} alt="AI Generated" fill className="object-cover" />
+                    <Image src={finalPreview} alt="AI Generated" fill className="object-contain" />
                   ) : (
                     <div className="text-center px-4">
                       <Sparkles className="w-8 h-8 mx-auto mb-2 text-primary" />
@@ -671,12 +671,12 @@ export default function CapturePage() {
         </div>
 
         {/* Bottom Drawer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl z-20 touch-action-pan-y">
-          <div className="max-w-2xl mx-auto">
-            <div className="h-1 w-12 bg-border rounded-full mx-auto my-3"></div>
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl z-20 touch-action-pan-y" style={{ height: '50vh', minHeight: '400px' }}>
+          <div className="max-w-2xl mx-auto h-full flex flex-col">
+            <div className="h-1 w-12 bg-border rounded-full mx-auto my-3 flex-shrink-0"></div>
 
-            <div className="w-full">
-              <div className="w-full flex px-6 bg-transparent border-b h-14 gap-2">
+            <div className="w-full flex-1 flex flex-col overflow-hidden">
+              <div className="w-full flex px-6 bg-transparent border-b h-14 gap-2 flex-shrink-0">
                 <button
                   onClick={() => setDesignMode('design')}
                   className="flex-1 flex items-center justify-center transition-all border-b-2 border-primary text-primary"
@@ -686,7 +686,7 @@ export default function CapturePage() {
               </div>
 
               {(designMode === 'design' || designMode === null) && (
-                <div className="p-6 space-y-4 max-h-[500px] overflow-y-auto overscroll-contain">
+                <div className="p-6 space-y-4 overflow-y-auto overscroll-contain flex-1">
                   {/* Generate Preview Button */}
                   {!isGenerating ? (
                     <Button 
