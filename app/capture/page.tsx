@@ -645,7 +645,7 @@ export default function CapturePage() {
         </div>
 
         {/* Image Preview - Side by Side */}
-        <div className="pt-20 pb-4 px-4 overflow-y-auto" style={{ height: 'calc(50vh - 80px)', minHeight: '300px' }}>
+        <div className="pt-20 pb-4 px-4 overflow-y-auto" style={{ height: 'calc(60vh - 80px)', minHeight: '350px' }}>
           <div className="max-w-2xl mx-auto h-full">
             <div className="grid grid-cols-2 gap-3 h-full">
               {/* Original Image */}
@@ -661,9 +661,6 @@ export default function CapturePage() {
                       <Upload className="w-6 h-6 text-charcoal" />
                     </div>
                   </button>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-2 text-center font-semibold">
-                  Original
                 </div>
               </div>
 
@@ -763,16 +760,13 @@ export default function CapturePage() {
                     </div>
                   )}
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-2 text-center font-semibold">
-                  AI Preview
-                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Drawer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl z-20 touch-action-pan-y" style={{ height: '50vh', minHeight: '400px' }}>
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl z-20 touch-action-pan-y" style={{ height: '40vh', minHeight: '350px', maxHeight: '500px' }}>
           <div className="max-w-2xl mx-auto h-full flex flex-col">
             <div className="h-1 w-12 bg-border rounded-full mx-auto my-3 flex-shrink-0"></div>
 
