@@ -5,7 +5,9 @@ const config: CapacitorConfig = {
   appName: 'Ivory',
   webDir: 'out',
   server: {
-    // For development, you can use your local server
+    // Production URL
+    url: 'https://ivory-blond.vercel.app',
+    // For local development, uncomment below:
     // url: 'http://localhost:3000',
     // cleartext: true
   },
