@@ -266,11 +266,15 @@ export default function CapturePage() {
     setIsGenerating(true)
     setGenerationProgress(0)
     
-    // Simulate progress updates
+    // Simulate progress updates - 70 seconds to reach 95%
+    // Update every 500ms, so 140 updates total
+    // 95% / 140 updates = ~0.68% per update
     const progressInterval = setInterval(() => {
       setGenerationProgress(prev => {
-        if (prev >= 90) return prev
-        return prev + Math.random() * 15
+        if (prev >= 95) return prev
+        // Gradually slow down as we approach 95%
+        const increment = (95 - prev) * 0.015 + 0.3
+        return Math.min(prev + increment, 95)
       })
     }, 500)
     
@@ -412,11 +416,15 @@ export default function CapturePage() {
     setIsGenerating(true)
     setGenerationProgress(0)
     
-    // Simulate progress updates
+    // Simulate progress updates - 70 seconds to reach 95%
+    // Update every 500ms, so 140 updates total
+    // 95% / 140 updates = ~0.68% per update
     const progressInterval = setInterval(() => {
       setGenerationProgress(prev => {
-        if (prev >= 90) return prev
-        return prev + Math.random() * 15
+        if (prev >= 95) return prev
+        // Gradually slow down as we approach 95%
+        const increment = (95 - prev) * 0.015 + 0.3
+        return Math.min(prev + increment, 95)
       })
     }, 500)
     
