@@ -1,20 +1,85 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Edit2, Heart } from "lucide-react"
+import { Edit2, Heart, Loader2 } from "lucide-react"
 import Image from "next/image"
+
+type Look = {
+  id: number
+  title: string
+  imageUrl: string
+  originalImageUrl: string | null
+  userId: number
+  createdAt: string
+  user?: {
+    username: string
+  }
+}
 
 export default function SharedDesignPage() {
   const router = useRouter()
   const params = useParams()
   const [liked, setLiked] = useState(false)
+  const [look, setLook] = useState<Look | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchLook = async () => {
+      try {
+        const response = await fetch(`/api/looks/${params.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setLook(data)
+        } else {
+          setError('Design not found')
+        }
+      } catch (err) {
+        console.error('Error fetching look:', err)
+        setError('Failed to load design')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (params.id) {
+      fetchLook()
+    }
+  }, [params.id])
 
   const handleEdit = () => {
-    // In a real app, this would fork the design for the current user
+    // Store the design in localStorage for editing
+    if (look) {
+      localStorage.setItem("currentEditingImage", look.originalImageUrl || look.imageUrl)
+      localStorage.setItem("generatedPreview", look.imageUrl)
+    }
     router.push("/editor")
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
+          <p className="text-muted-foreground">Loading design...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !look) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush flex items-center justify-center">
+        <Card className="p-8 max-w-md mx-4">
+          <h2 className="text-xl font-bold text-charcoal mb-2">Design Not Found</h2>
+          <p className="text-muted-foreground mb-4">{error || 'This design may have been removed or is no longer available.'}</p>
+          <Button onClick={() => router.push('/')}>Go to Home</Button>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -30,13 +95,28 @@ export default function SharedDesignPage() {
       <main className="max-w-2xl mx-auto px-4 py-8">
         <Card className="overflow-hidden border-0 bg-white shadow-xl mb-6">
           <div className="aspect-square relative">
-            <Image src="/elegant-french-manicure-nails.jpg" alt="Shared nail design" fill className="object-cover" />
+            <Image 
+              src={look.imageUrl} 
+              alt={look.title} 
+              fill 
+              className="object-cover" 
+              unoptimized
+            />
           </div>
           <div className="p-4">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <h2 className="font-serif text-2xl font-bold text-charcoal mb-1">French Classic</h2>
-                <p className="text-sm text-muted-foreground">Shared by @username</p>
+                <h2 className="font-serif text-2xl font-bold text-charcoal mb-1">{look.title}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {look.user?.username ? `Shared by @${look.user.username}` : 'Shared design'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {new Date(look.createdAt).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </p>
               </div>
               <Button
                 variant="ghost"
