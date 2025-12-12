@@ -41,7 +41,7 @@ export function ReferralCard() {
   const getReferralLink = () => {
     if (!stats) return '';
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${baseUrl}/signup?ref=${stats.referralCode}`;
+    return `${baseUrl}/?ref=${stats.referralCode}`;
   };
 
   const copyToClipboard = async () => {
@@ -57,12 +57,12 @@ export function ReferralCard() {
 
   const shareReferralLink = async () => {
     const link = getReferralLink();
-    const text = `Join me on NailAI and get 8 free credits to create amazing nail designs! Use my referral link: ${link}`;
+    const text = `Join me on Ivory and get 8 free credits to create amazing nail designs! Use my referral link: ${link}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join NailAI',
+          title: 'Join Ivory',
           text,
           url: link,
         });

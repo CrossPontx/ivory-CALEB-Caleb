@@ -16,9 +16,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isChecking, setIsChecking] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
 
-  // Check for existing session on mount
+  // Check for existing session and referral code on mount
   useEffect(() => {
+    // Get referral code from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const refCode = urlParams.get('ref')
+    if (refCode) {
+      setReferralCode(refCode)
+      setIsSignUp(true) // Auto-switch to signup mode if there's a referral code
+    }
+
     const checkSession = async () => {
       try {
         const response = await fetch('/api/auth/session')
@@ -59,7 +68,13 @@ export default function LoginPage() {
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password, authProvider: 'email' }),
+          body: JSON.stringify({ 
+            username, 
+            email, 
+            password, 
+            authProvider: 'email',
+            referralCode: referralCode || undefined 
+          }),
         })
         
         if (!response.ok) {
@@ -142,7 +157,9 @@ export default function LoginPage() {
         <CardContent className="p-6 sm:p-8">
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal mb-2">Ivory</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">{isSignUp ? "Create your account" : "Welcome back"}</p>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              {referralCode ? "🎉 You've been invited! Get 8 free credits" : isSignUp ? "Create your account" : "Welcome back"}
+            </p>
           </div>
 
           <form onSubmit={handleAuth} className="space-y-3 sm:space-y-4">
