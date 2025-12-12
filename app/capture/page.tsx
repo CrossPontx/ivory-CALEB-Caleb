@@ -632,6 +632,15 @@ export default function CapturePage() {
           <div className="text-charcoal font-semibold text-lg hidden sm:block">Design Your Nails</div>
           <div className="flex items-center gap-2">
             <Button 
+              onClick={() => saveDesign(false)} 
+              size="sm" 
+              variant="outline"
+              disabled={!finalPreview}
+            >
+              <Save className="w-4 h-4 mr-1" />
+              Save
+            </Button>
+            <Button 
               onClick={() => saveDesign(true)} 
               size="sm" 
               variant="outline"
