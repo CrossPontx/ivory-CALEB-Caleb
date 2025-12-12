@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Palette, Sparkles, Upload, Loader2, X, Save, ChevronDown } from "lucide-react"
 import Image from "next/image"
 import { Slider } from "@/components/ui/slider"
+import { CreditsDisplay } from "@/components/credits-display"
+import { useCredits } from "@/hooks/use-credits"
+import { toast } from "sonner"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -28,6 +31,7 @@ const baseColors = ["#FF6B9D", "#C44569", "#A8E6CF", "#FFD93D", "#6C5CE7", "#E17
 
 export default function CapturePage() {
   const router = useRouter()
+  const { credits, hasCredits, refresh: refreshCredits } = useCredits()
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
   const [isFlipping, setIsFlipping] = useState(false)
@@ -260,6 +264,18 @@ export default function CapturePage() {
   const generateAIPreview = async (settings: DesignSettings, selectedImage?: string) => {
     if (!capturedImage) return
     
+    // Check credits before generating
+    if (!hasCredits(1)) {
+      toast.error('Insufficient credits', {
+        description: 'You need 1 credit to generate a design. Refer friends to earn more!',
+        action: {
+          label: 'Get Credits',
+          onClick: () => router.push('/settings/credits'),
+        },
+      })
+      return
+    }
+    
     // Create new abort controller for this request
     abortControllerRef.current = new AbortController()
     
@@ -306,8 +322,21 @@ export default function CapturePage() {
 
       if (response.ok) {
         setGenerationProgress(100)
-        const { imageUrl } = await response.json()
+        const { imageUrl, creditsRemaining } = await response.json()
         setFinalPreview(imageUrl)
+        
+        // Refresh credits display
+        refreshCredits()
+        
+        // Show success message with remaining credits
+        toast.success('Design generated successfully!', {
+          description: `You have ${creditsRemaining} credit${creditsRemaining !== 1 ? 's' : ''} remaining.`,
+        })
+      } else {
+        const error = await response.json()
+        toast.error('Generation failed', {
+          description: error.error || 'Failed to generate design',
+        })
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
@@ -629,7 +658,10 @@ export default function CapturePage() {
             <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">Change Photo</span>
           </Button>
-          <div className="text-charcoal font-semibold text-lg hidden sm:block">Design Your Nails</div>
+          <div className="flex items-center gap-3">
+            <div className="text-charcoal font-semibold text-lg hidden sm:block">Design Your Nails</div>
+            <CreditsDisplay showLabel={false} />
+          </div>
           <div className="flex items-center gap-2">
             <Button 
               onClick={() => saveDesign(false)} 
@@ -792,14 +824,52 @@ export default function CapturePage() {
             <div className="w-full flex-1 flex flex-col overflow-hidden">
               {(designMode === 'design' || designMode === null) && (
                 <div className="p-6 space-y-4 overflow-y-auto overscroll-contain flex-1">
+                  {/* Low Credits Warning */}
+                  {credits !== null && credits <= 2 && credits > 0 && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-3 text-sm">
+                      <p className="text-yellow-800 font-medium">⚠️ Low on credits!</p>
+                      <p className="text-yellow-700 text-xs mt-1">
+                        You have {credits} credit{credits !== 1 ? 's' : ''} left. 
+                        <button 
+                          onClick={() => router.push('/settings/credits')}
+                          className="underline ml-1 font-medium"
+                        >
+                          Get more
+                        </button>
+                      </p>
+                    </div>
+                  )}
+
+                  {/* No Credits Warning */}
+                  {credits !== null && credits === 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-2xl p-3 text-sm">
+                      <p className="text-red-800 font-medium">❌ No credits remaining</p>
+                      <p className="text-red-700 text-xs mt-1">
+                        Refer 3 friends to earn 1 free credit!
+                        <button 
+                          onClick={() => router.push('/settings/credits')}
+                          className="underline ml-1 font-medium"
+                        >
+                          Learn more
+                        </button>
+                      </p>
+                    </div>
+                  )}
+
                   {/* Generate Preview Button */}
                   {!isGenerating ? (
                     <Button 
                       onClick={() => generateAIPreview(designSettings)} 
                       className="w-full rounded-2xl"
+                      disabled={!hasCredits(1)}
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
                       Generate Preview
+                      {credits !== null && (
+                        <span className="ml-2 text-xs opacity-70">
+                          (1 credit)
+                        </span>
+                      )}
                     </Button>
                   ) : (
                     <Button 
