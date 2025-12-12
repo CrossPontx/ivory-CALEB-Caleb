@@ -4,8 +4,9 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Plus, Home, Sparkles, User } from "lucide-react"
+import { Plus, Home, Sparkles, User, Gift, Share2, X } from "lucide-react"
 import Image from "next/image"
+import { useCredits } from "@/hooks/use-credits"
 
 type NailLook = {
   id: string
@@ -16,7 +17,9 @@ type NailLook = {
 
 export default function HomePage() {
   const router = useRouter()
+  const { credits } = useCredits()
   const [looks, setLooks] = useState<NailLook[]>([])
+  const [showReferralBanner, setShowReferralBanner] = useState(true)
 
   useEffect(() => {
     // Load user's looks from database
@@ -65,6 +68,56 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
+        {/* Referral Promotion Banner */}
+        {showReferralBanner && (
+          <div className="mb-6 sm:mb-8 relative">
+            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+              
+              {/* Close button */}
+              <button
+                onClick={() => setShowReferralBanner(false)}
+                className="absolute top-3 right-3 text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="relative z-10">
+                <div className="flex items-start gap-3 sm:gap-4 mb-3">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-2.5 sm:p-3 flex-shrink-0">
+                    <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-white font-bold text-lg sm:text-xl mb-1">
+                      Earn Free Credits! 🎉
+                    </h3>
+                    <p className="text-white/90 text-sm sm:text-base">
+                      Share with 3 friends and get <span className="font-bold">1 free credit</span> to create more designs
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => router.push('/settings/credits')}
+                  className="w-full sm:w-auto bg-white text-purple-600 hover:bg-white/90 font-semibold shadow-lg"
+                  size="lg"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Get Your Referral Link
+                </Button>
+
+                {credits !== null && (
+                  <p className="text-white/80 text-xs sm:text-sm mt-3">
+                    You currently have <span className="font-bold text-white">{credits} credit{credits !== 1 ? 's' : ''}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="mb-6 sm:mb-8">
           <h2 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal mb-1 sm:mb-2">Your Looks</h2>
           <p className="text-sm sm:text-base text-muted-foreground">Your personal nail design collection</p>
