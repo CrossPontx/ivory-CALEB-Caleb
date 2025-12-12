@@ -42,3 +42,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const { userId, ...updates } = body;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    }
+
+    const updatedUser = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, parseInt(userId)))
+      .returning();
+
+    if (updatedUser.length === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedUser[0]);
+  } catch (error: any) {
+    console.error('Error updating user:', error);
+    return NextResponse.json(
+      { error: error?.message || 'Failed to update user' },
+      { status: 500 }
+    );
+  }
+}

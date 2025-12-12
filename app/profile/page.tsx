@@ -1,24 +1,111 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ArrowLeft, LogOut, Settings, Home, Plus, User } from "lucide-react"
+import { ArrowLeft, LogOut, Settings, Home, Plus, User, Camera, Upload, Loader2 } from "lucide-react"
+import Image from "next/image"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function ProfilePage() {
   const router = useRouter()
+  const { toast } = useToast()
   const [username, setUsername] = useState("")
   const [userType, setUserType] = useState<"client" | "tech">("client")
+  const [userId, setUserId] = useState<number | null>(null)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [portfolioImages, setPortfolioImages] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploadingProfile, setUploadingProfile] = useState(false)
+  const profileImageInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const user = localStorage.getItem("ivoryUser")
-    if (user) {
-      const userData = JSON.parse(user)
-      setUsername(userData.username)
-      setUserType(userData.userType || 'client')
+    const loadProfile = async () => {
+      const user = localStorage.getItem("ivoryUser")
+      if (user) {
+        const userData = JSON.parse(user)
+        setUsername(userData.username)
+        setUserType(userData.userType || 'client')
+        setUserId(userData.id)
+        setProfileImage(userData.avatar || null)
+
+        // Load portfolio images for tech users
+        if (userData.userType === 'tech') {
+          try {
+            const response = await fetch(`/api/portfolio-images?userId=${userData.id}`)
+            if (response.ok) {
+              const data = await response.json()
+              setPortfolioImages(data.images?.map((img: any) => img.imageUrl) || [])
+            }
+          } catch (error) {
+            console.error('Error loading portfolio:', error)
+          }
+        }
+      }
+      setLoading(false)
     }
+
+    loadProfile()
   }, [])
+
+  const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+
+    setUploadingProfile(true)
+    try {
+      // Upload to storage
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', 'avatar')
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!uploadRes.ok) throw new Error('Upload failed')
+
+      const { url } = await uploadRes.json()
+
+      // Update user profile
+      const updateRes = await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          avatar: url,
+        }),
+      })
+
+      if (updateRes.ok) {
+        setProfileImage(url)
+        
+        // Update localStorage
+        const userStr = localStorage.getItem("ivoryUser")
+        if (userStr) {
+          const userData = JSON.parse(userStr)
+          userData.avatar = url
+          localStorage.setItem("ivoryUser", JSON.stringify(userData))
+        }
+
+        toast({
+          title: "Profile image updated",
+          description: "Your profile picture has been changed successfully",
+        })
+      }
+    } catch (error) {
+      console.error('Error uploading profile image:', error)
+      toast({
+        title: "Upload failed",
+        description: "Failed to update profile image",
+        variant: "destructive",
+      })
+    } finally {
+      setUploadingProfile(false)
+    }
+  }
 
   const handleLogout = async () => {
     try {
@@ -60,12 +147,115 @@ export default function ProfilePage() {
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
         {/* Profile Card */}
         <Card className="p-6 sm:p-8 text-center mb-4 sm:mb-6 bg-white rounded-3xl shadow-lg">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
-            <span className="text-2xl sm:text-3xl font-bold text-white">{username.charAt(0).toUpperCase()}</span>
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 group">
+            {profileImage ? (
+              <div className="relative w-full h-full rounded-full overflow-hidden">
+                <Image
+                  src={profileImage}
+                  alt={username}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
+                <span className="text-2xl sm:text-3xl font-bold text-white">
+                  {username.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            
+            {/* Upload Button Overlay */}
+            <button
+              onClick={() => profileImageInputRef.current?.click()}
+              disabled={uploadingProfile}
+              className="absolute inset-0 bg-black/0 hover:bg-black/40 rounded-full transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 active:scale-95"
+            >
+              {uploadingProfile ? (
+                <Loader2 className="w-6 h-6 text-white animate-spin" />
+              ) : (
+                <Camera className="w-6 h-6 text-white" />
+              )}
+            </button>
+            
+            <input
+              ref={profileImageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleProfileImageUpload}
+              className="hidden"
+            />
           </div>
+          
           <h2 className="font-serif text-xl sm:text-2xl font-bold text-charcoal mb-1">{username}</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground capitalize">{userType === "tech" ? "Nail Tech" : "User"}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground capitalize">
+            {userType === "tech" ? "Nail Tech" : "User"}
+          </p>
         </Card>
+
+        {/* Portfolio Gallery for Tech Users */}
+        {userType === "tech" && (
+          <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-white rounded-3xl shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-serif text-lg sm:text-xl font-bold text-charcoal">Portfolio</h3>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => router.push("/tech/profile-setup")}
+                className="h-9 sm:h-10 active:scale-95 transition-transform"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Manage
+              </Button>
+            </div>
+
+            {portfolioImages.length > 0 ? (
+              <div className="grid grid-cols-3 gap-1 sm:gap-2">
+                {portfolioImages.slice(0, 9).map((url, index) => (
+                  <div
+                    key={url}
+                    className="relative aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => {
+                      // Could open lightbox here
+                      window.open(url, '_blank')
+                    }}
+                  >
+                    <Image
+                      src={url}
+                      alt={`Portfolio ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 33vw, 25vw"
+                    />
+                  </div>
+                ))}
+                
+                {portfolioImages.length > 9 && (
+                  <div
+                    className="relative aspect-square rounded-lg overflow-hidden bg-black/60 flex items-center justify-center cursor-pointer hover:bg-black/70 transition-colors"
+                    onClick={() => router.push("/tech/profile-setup")}
+                  >
+                    <span className="text-white text-xl sm:text-2xl font-bold">
+                      +{portfolioImages.length - 9}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+                <Upload className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-3">No portfolio images yet</p>
+                <Button
+                  size="sm"
+                  onClick={() => router.push("/tech/profile-setup")}
+                  className="active:scale-95 transition-transform"
+                >
+                  Add Photos
+                </Button>
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* Menu Options */}
         <div className="space-y-3 sm:space-y-3 mb-4 sm:mb-6">
