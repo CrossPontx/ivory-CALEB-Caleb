@@ -39,14 +39,35 @@ export default function TechDashboardPage() {
         const requestsRes = await fetch(`/api/design-requests?techId=${user.id}`)
         if (requestsRes.ok) {
           const data = await requestsRes.json()
-          const formattedRequests = data.map((req: any) => ({
-            id: req.id.toString(),
-            clientName: `Client ${req.clientId}`,
-            designImage: req.lookId ? "/placeholder.svg" : "/placeholder.svg",
-            message: req.clientMessage || "",
-            status: req.status,
-            date: req.createdAt,
-          }))
+          
+          // Fetch look images for each request
+          const formattedRequests = await Promise.all(
+            data.map(async (req: any) => {
+              let designImage = "/placeholder.svg"
+              
+              if (req.lookId) {
+                try {
+                  const lookRes = await fetch(`/api/looks/${req.lookId}`)
+                  if (lookRes.ok) {
+                    const look = await lookRes.json()
+                    designImage = look.imageUrl || "/placeholder.svg"
+                  }
+                } catch (error) {
+                  console.error(`Error fetching look ${req.lookId}:`, error)
+                }
+              }
+              
+              return {
+                id: req.id.toString(),
+                clientName: `Client ${req.clientId}`,
+                designImage,
+                message: req.clientMessage || "",
+                status: req.status,
+                date: req.createdAt,
+              }
+            })
+          )
+          
           setRequests(formattedRequests)
         }
 
@@ -133,6 +154,7 @@ export default function TechDashboardPage() {
                           alt="Client design"
                           fill
                           className="object-cover"
+                          unoptimized
                         />
                       </div>
 
@@ -200,6 +222,7 @@ export default function TechDashboardPage() {
                           alt="Approved design"
                           fill
                           className="object-cover"
+                          unoptimized
                         />
                       </div>
                       <div className="flex-1">
