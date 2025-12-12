@@ -306,7 +306,7 @@ export default function ProfilePage() {
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-around h-20 sm:h-24">
             <button
-              onClick={() => router.push("/home")}
+              onClick={() => router.push(userType === "tech" ? "/tech/dashboard" : "/home")}
               className="flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground active:text-foreground transition-colors min-w-[60px] active:scale-95"
             >
               <Home className="w-6 h-6 sm:w-7 sm:h-7" />

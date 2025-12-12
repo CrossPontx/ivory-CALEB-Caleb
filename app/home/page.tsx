@@ -29,6 +29,13 @@ export default function HomePage() {
         }
 
         const user = JSON.parse(userStr)
+        
+        // Redirect tech users to their dashboard
+        if (user.userType === 'tech') {
+          router.push("/tech/dashboard")
+          return
+        }
+
         const response = await fetch(`/api/looks?userId=${user.id}`)
         
         if (response.ok) {
