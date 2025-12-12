@@ -1,30 +1,24 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { designRequests, looks, users } from '@/db/schema';
+import { designRequests } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
-    
-    // Get request with related look and user data
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 });
+    }
+
     const result = await db
-      .select({
-        request: designRequests,
-        look: looks,
-        client: {
-          id: users.id,
-          username: users.username,
-          avatar: users.avatar,
-        },
-      })
+      .select()
       .from(designRequests)
-      .leftJoin(looks, eq(designRequests.lookId, looks.id))
-      .leftJoin(users, eq(designRequests.clientId, users.id))
-      .where(eq(designRequests.id, parseInt(id)));
+      .where(eq(designRequests.id, id))
+      .limit(1);
 
     if (result.length === 0) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 });
@@ -32,6 +26,7 @@ export async function GET(
 
     return NextResponse.json(result[0]);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch request' }, { status: 500 });
+    console.error('Error fetching design request:', error);
+    return NextResponse.json({ error: 'Failed to fetch design request' }, { status: 500 });
   }
 }

@@ -229,7 +229,12 @@ export default function TechDashboardPage() {
                         <h3 className="font-semibold text-charcoal mb-1">{request.clientName}</h3>
                         <Badge className="bg-green-500">Approved</Badge>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => router.push(`/tech/request/${request.id}`)}
+                        className="active:scale-95 transition-transform"
+                      >
                         View Details
                       </Button>
                     </div>
