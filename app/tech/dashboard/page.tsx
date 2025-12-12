@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Check, DollarSign, MessageCircle, User } from "lucide-react"
+import { ArrowLeft, Check, DollarSign, MessageCircle, User, Plus } from "lucide-react"
 import Image from "next/image"
 
 type ClientRequest = {
@@ -21,9 +21,11 @@ type ClientRequest = {
 export default function TechDashboardPage() {
   const router = useRouter()
   const [requests, setRequests] = useState<ClientRequest[]>([])
+  const [portfolioImages, setPortfolioImages] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
 
-  useState(() => {
-    const loadRequests = async () => {
+  useEffect(() => {
+    const loadData = async () => {
       try {
         const userStr = localStorage.getItem("ivoryUser")
         if (!userStr) {
@@ -32,28 +34,37 @@ export default function TechDashboardPage() {
         }
 
         const user = JSON.parse(userStr)
-        const response = await fetch(`/api/design-requests?techId=${user.id}`)
         
-        if (response.ok) {
-          const data = await response.json()
-          // Transform data to match component format
+        // Load design requests
+        const requestsRes = await fetch(`/api/design-requests?techId=${user.id}`)
+        if (requestsRes.ok) {
+          const data = await requestsRes.json()
           const formattedRequests = data.map((req: any) => ({
             id: req.id.toString(),
-            clientName: `Client ${req.clientId}`, // Would need to join with users table
-            designImage: req.lookId ? "/placeholder.svg" : "/placeholder.svg", // Would need to join with looks table
+            clientName: `Client ${req.clientId}`,
+            designImage: req.lookId ? "/placeholder.svg" : "/placeholder.svg",
             message: req.clientMessage || "",
             status: req.status,
             date: req.createdAt,
           }))
           setRequests(formattedRequests)
         }
+
+        // Load portfolio images
+        const imagesRes = await fetch(`/api/portfolio-images?userId=${user.id}`)
+        if (imagesRes.ok) {
+          const data = await imagesRes.json()
+          setPortfolioImages(data.images?.map((img: any) => img.imageUrl) || [])
+        }
       } catch (error) {
-        console.error('Error loading requests:', error)
+        console.error('Error loading data:', error)
+      } finally {
+        setLoading(false)
       }
     }
 
-    loadRequests()
-  })
+    loadData()
+  }, [router])
 
   const handleApprove = async (id: string) => {
     try {
@@ -210,11 +221,57 @@ export default function TechDashboardPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="gallery">
-            <Card className="p-12 text-center">
-              <h3 className="font-serif text-xl font-bold text-charcoal mb-2">Coming Soon</h3>
-              <p className="text-muted-foreground">Your portfolio gallery will be displayed here</p>
-            </Card>
+          <TabsContent value="gallery" className="space-y-4">
+            {portfolioImages.length > 0 ? (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    {portfolioImages.length} {portfolioImages.length === 1 ? 'photo' : 'photos'}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => router.push("/tech/profile-setup")}
+                    className="h-9 sm:h-10 active:scale-95 transition-transform"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add More
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {portfolioImages.map((url, index) => (
+                    <div
+                      key={url}
+                      className="relative aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-muted shadow-sm"
+                    >
+                      <Image
+                        src={url}
+                        alt={`Portfolio image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <Card className="p-8 sm:p-12 text-center">
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-charcoal mb-2">
+                  Build Your Portfolio
+                </h3>
+                <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+                  Upload photos of your best work to attract more clients
+                </p>
+                <Button
+                  onClick={() => router.push("/tech/profile-setup")}
+                  className="active:scale-95 transition-transform"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Photos
+                </Button>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </main>
