@@ -7,7 +7,7 @@ export const requestStatusEnum = pgEnum('request_status', ['pending', 'approved'
 export const authProviderEnum = pgEnum('auth_provider', ['email', 'google', 'apple']);
 
 // Users table - both clients and nail techs
-export const users = pgTable('users', {
+export const users: any = pgTable('users', {
   id: serial('id').primaryKey(),
   username: varchar('username', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
@@ -17,7 +17,7 @@ export const users = pgTable('users', {
   avatar: text('avatar'),
   credits: integer('credits').default(5).notNull(), // Free credits on signup
   referralCode: varchar('referral_code', { length: 50 }).unique(), // User's unique referral code
-  referredBy: integer('referred_by').references(() => users.id), // Who referred this user
+  referredBy: integer('referred_by').references((): any => users.id), // Who referred this user
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

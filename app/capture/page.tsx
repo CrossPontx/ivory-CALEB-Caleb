@@ -679,7 +679,7 @@ export default function CapturePage() {
           <div className="flex items-center gap-3">
             <div className="text-charcoal font-semibold text-lg hidden sm:block">Design Your Nails</div>
             <div className="flex items-center">
-              <CreditsDisplay showLabel={true} />
+              <CreditsDisplay showLabel={true} credits={credits} />
             </div>
           </div>
           <div className="flex items-center gap-2">
