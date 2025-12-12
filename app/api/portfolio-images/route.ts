@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { portfolioImages, techProfiles } from '@/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 // GET - Fetch portfolio images for a tech
 export async function GET(request: NextRequest) {
