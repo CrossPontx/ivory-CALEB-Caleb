@@ -660,7 +660,9 @@ export default function CapturePage() {
           </Button>
           <div className="flex items-center gap-3">
             <div className="text-charcoal font-semibold text-lg hidden sm:block">Design Your Nails</div>
-            <CreditsDisplay showLabel={false} />
+            <div className="flex items-center">
+              <CreditsDisplay showLabel={true} />
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button 
@@ -801,7 +803,20 @@ export default function CapturePage() {
                       </div>
                     </div>
                   ) : finalPreview ? (
-                    <Image src={finalPreview} alt="AI Generated" fill className="object-contain" />
+                    <button
+                      onClick={() => window.open(finalPreview, '_blank')}
+                      className="relative w-full h-full group cursor-pointer"
+                    >
+                      <Image src={finalPreview} alt="AI Generated" fill className="object-contain" />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div className="bg-white/90 rounded-full p-3 shadow-lg">
+                          <svg className="w-6 h-6 text-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
                   ) : (
                     <div className="text-center px-4">
                       <Sparkles className="w-8 h-8 mx-auto mb-2 text-primary" />

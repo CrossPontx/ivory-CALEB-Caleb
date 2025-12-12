@@ -12,7 +12,17 @@ interface CreditsDisplayProps {
 export function CreditsDisplay({ className, showLabel = true }: CreditsDisplayProps) {
   const { credits, loading } = useCredits();
 
-  if (loading || credits === null) {
+  if (loading) {
+    return (
+      <div className={cn('flex items-center gap-2', className)}>
+        <Coins className="h-5 w-5 text-yellow-500 animate-pulse" />
+        <span className="font-semibold">...</span>
+        {showLabel && <span className="text-sm text-muted-foreground">credits</span>}
+      </div>
+    );
+  }
+
+  if (credits === null) {
     return null;
   }
 
