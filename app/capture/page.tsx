@@ -528,7 +528,9 @@ export default function CapturePage() {
 
   const saveDesign = async (redirectToHome = true) => {
     if (!finalPreview) {
-      alert('Please generate a preview first')
+      toast.error('Please generate a preview first', {
+        description: 'You need to generate a design before saving',
+      })
       return false
     }
 
@@ -540,6 +542,9 @@ export default function CapturePage() {
       }
 
       const user = JSON.parse(userStr)
+      
+      // Show loading toast
+      const loadingToast = toast.loading('Saving your design...')
       
       const response = await fetch('/api/looks', {
         method: 'POST',
@@ -555,19 +560,32 @@ export default function CapturePage() {
         }),
       })
 
+      // Dismiss loading toast
+      toast.dismiss(loadingToast)
+
       if (response.ok) {
-        alert('Design saved successfully!')
+        toast.success('Design saved successfully! 🎉', {
+          description: redirectToHome ? 'Redirecting to your collection...' : 'You can now continue editing',
+          duration: 3000,
+        })
         if (redirectToHome) {
-          router.push("/home")
+          // Small delay to show the success message
+          setTimeout(() => {
+            router.push("/home")
+          }, 1000)
         }
         return true
       } else {
-        alert('Failed to save design')
+        toast.error('Failed to save design', {
+          description: 'Please try again or contact support',
+        })
         return false
       }
     } catch (error) {
       console.error('Error saving design:', error)
-      alert('An error occurred while saving')
+      toast.error('An error occurred while saving', {
+        description: 'Please check your connection and try again',
+      })
       return false
     }
   }
