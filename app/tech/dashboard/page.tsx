@@ -18,10 +18,18 @@ type ClientRequest = {
   date: string
 }
 
+type PersonalDesign = {
+  id: string
+  title: string
+  imageUrl: string
+  createdAt: string
+}
+
 export default function TechDashboardPage() {
   const router = useRouter()
   const [requests, setRequests] = useState<ClientRequest[]>([])
   const [portfolioImages, setPortfolioImages] = useState<string[]>([])
+  const [personalDesigns, setPersonalDesigns] = useState<PersonalDesign[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -77,6 +85,20 @@ export default function TechDashboardPage() {
           const data = await imagesRes.json()
           setPortfolioImages(data.images?.map((img: any) => img.imageUrl) || [])
         }
+
+        // Load personal designs (looks)
+        const looksRes = await fetch(`/api/looks?userId=${user.id}`)
+        if (looksRes.ok) {
+          const looksData = await looksRes.json()
+          setPersonalDesigns(
+            looksData.map((look: any) => ({
+              id: look.id.toString(),
+              title: look.title,
+              imageUrl: look.imageUrl,
+              createdAt: look.createdAt,
+            }))
+          )
+        }
       } catch (error) {
         console.error('Error loading data:', error)
       } finally {
@@ -128,12 +150,15 @@ export default function TechDashboardPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
         <Tabs defaultValue="requests" className="w-full">
-          <TabsList className="w-full mb-4 sm:mb-6 grid grid-cols-3 h-11 sm:h-12">
+          <TabsList className="w-full mb-4 sm:mb-6 grid grid-cols-4 h-11 sm:h-12">
             <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap">
               Requests
             </TabsTrigger>
             <TabsTrigger value="approved" className="text-xs sm:text-sm whitespace-nowrap">
               Approved
+            </TabsTrigger>
+            <TabsTrigger value="designs" className="text-xs sm:text-sm whitespace-nowrap">
+              My Designs
             </TabsTrigger>
             <TabsTrigger value="gallery" className="text-xs sm:text-sm whitespace-nowrap">
               Gallery
@@ -245,6 +270,76 @@ export default function TechDashboardPage() {
             {requests.filter((req) => req.status === "approved").length === 0 && (
               <Card className="p-12 text-center">
                 <p className="text-muted-foreground">No approved designs yet</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="designs" className="space-y-4">
+            {personalDesigns.length > 0 ? (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    {personalDesigns.length} {personalDesigns.length === 1 ? 'design' : 'designs'}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => router.push("/capture")}
+                    className="h-9 sm:h-10 active:scale-95 transition-transform"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {personalDesigns.map((design) => (
+                    <Card 
+                      key={design.id} 
+                      className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                      onClick={() => router.push(`/shared/${design.id}`)}
+                    >
+                      <CardContent className="p-0">
+                        <div className="relative aspect-square">
+                          <Image
+                            src={design.imageUrl}
+                            alt={design.title}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-serif font-bold text-charcoal mb-1 truncate">
+                            {design.title}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(design.createdAt).toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <Card className="p-8 sm:p-12 text-center">
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-charcoal mb-2">
+                  No Designs Yet
+                </h3>
+                <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+                  Create your first AI-generated nail design
+                </p>
+                <Button
+                  onClick={() => router.push("/capture")}
+                  className="active:scale-95 transition-transform"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Design
+                </Button>
               </Card>
             )}
           </TabsContent>
