@@ -16,7 +16,6 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState<number | null>(null)
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [portfolioImages, setPortfolioImages] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
   const [uploadingProfile, setUploadingProfile] = useState(false)
   const profileImageInputRef = useRef<HTMLInputElement>(null)
 
@@ -43,7 +42,6 @@ export default function ProfilePage() {
           }
         }
       }
-      setLoading(false)
     }
 
     loadProfile()
@@ -169,7 +167,8 @@ export default function ProfilePage() {
             <button
               onClick={() => profileImageInputRef.current?.click()}
               disabled={uploadingProfile}
-              className="absolute inset-0 bg-black/0 hover:bg-black/40 rounded-full transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 active:scale-95"
+              className="absolute inset-0 bg-black/0 hover:bg-black/40 active:bg-black/40 rounded-full transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 active:scale-95"
+              aria-label="Change profile picture"
             >
               {uploadingProfile ? (
                 <Loader2 className="w-6 h-6 text-white animate-spin" />
@@ -177,6 +176,11 @@ export default function ProfilePage() {
                 <Camera className="w-6 h-6 text-white" />
               )}
             </button>
+            
+            {/* Mobile hint badge */}
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-br from-terracotta to-rose rounded-full flex items-center justify-center shadow-lg sm:hidden">
+              <Camera className="w-4 h-4 text-white" />
+            </div>
             
             <input
               ref={profileImageInputRef}
