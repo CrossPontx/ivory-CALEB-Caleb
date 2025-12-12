@@ -379,23 +379,9 @@ export default function EditorPage() {
         <div className="max-w-2xl mx-auto">
           <div className="h-1 w-12 bg-border rounded-full mx-auto my-2 sm:my-3"></div>
 
-          <Tabs defaultValue="design" className="w-full">
-            <TabsList className="w-full justify-start px-4 sm:px-6 bg-transparent border-b rounded-none h-12 sm:h-14 overflow-x-auto">
-              <TabsTrigger value="design" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
-                <Palette className="w-4 h-4 sm:w-5 sm:h-5" />
-                Design
-              </TabsTrigger>
-              <TabsTrigger value="ai" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-                AI Designs
-              </TabsTrigger>
-              <TabsTrigger value="upload" className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap">
-                <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
-                Upload
-              </TabsTrigger>
-            </TabsList>
+          <div className="w-full">
 
-            <TabsContent value="design" className="p-4 sm:p-6 space-y-4 max-h-80 overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-4 max-h-80 overflow-y-auto">
               {/* Influence Weights Section */}
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 space-y-4 border border-purple-200">
                 <h4 className="text-sm font-bold text-charcoal">Design Influence Controls</h4>
@@ -561,83 +547,8 @@ export default function EditorPage() {
                 {isGeneratingDalle ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
                 Generate Preview
               </Button>
-            </TabsContent>
-
-            <TabsContent value="ai" className="p-4 sm:p-6 max-h-80 overflow-y-auto space-y-4">
-              <div>
-                <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal mb-1.5 sm:mb-2">Describe your style</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-                  AI will analyze your prompt and generate design options
-                </p>
-
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    placeholder="e.g. minimalist floral with pink tones..."
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    className="flex-1 h-11 sm:h-12 text-sm sm:text-base"
-                    onKeyDown={(e) => e.key === "Enter" && generateAIDesigns()}
-                  />
-                  <Button onClick={generateAIDesigns} disabled={isGenerating || !aiPrompt.trim()} className="h-11 sm:h-12 px-3 sm:px-4">
-                    {isGenerating ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />}
-                  </Button>
-                </div>
-
-                {isGenerating && (
-                  <div className="text-center py-8">
-                    <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Analyzing and generating designs...</p>
-                  </div>
-                )}
-
-                {generatedDesigns.length > 0 && (
-                  <div className="space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      Select a Design
-                    </p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {generatedDesigns.map((design, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleDesignSelect(design)}
-                          className={`aspect-square relative rounded-lg overflow-hidden border-2 transition-all ${
-                            selectedDesignImage === design ? 'border-primary' : 'border-border'
-                          }`}
-                        >
-                          <Image
-                            src={design}
-                            alt={`Design ${index + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="upload" className="p-4 max-h-80 overflow-y-auto">
-              <div className="text-center py-8">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
-                  <Upload className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="font-serif text-xl font-bold text-charcoal mb-2">Upload Custom Design</h3>
-                <p className="text-sm text-muted-foreground mb-4">AI will analyze and apply it to your nails</p>
-                <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-                  Choose File
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         </div>
       </div>
     </div>
