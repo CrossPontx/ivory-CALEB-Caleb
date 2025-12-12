@@ -117,13 +117,31 @@ export default function LoginPage() {
   }
 
   const handleSocialAuth = async (provider: string) => {
-    // TODO: Implement proper OAuth flow
-    // This requires:
-    // 1. OAuth provider configuration (Google/Apple credentials)
-    // 2. OAuth callback endpoint
-    // 3. Token exchange and verification
-    // 4. Secure user creation/login
-    alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} authentication is not yet configured. Please use email/password login or contact support.`)
+    const baseUrl = window.location.origin;
+    const redirectUri = `${baseUrl}/api/auth/callback/${provider}`;
+    
+    if (provider === 'google') {
+      // Redirect to Google OAuth
+      const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+      googleAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
+      googleAuthUrl.searchParams.set('redirect_uri', redirectUri);
+      googleAuthUrl.searchParams.set('response_type', 'code');
+      googleAuthUrl.searchParams.set('scope', 'profile email');
+      googleAuthUrl.searchParams.set('access_type', 'offline');
+      googleAuthUrl.searchParams.set('prompt', 'consent');
+      
+      window.location.href = googleAuthUrl.toString();
+    } else if (provider === 'apple') {
+      // Redirect to Apple OAuth
+      const appleAuthUrl = new URL('https://appleid.apple.com/auth/authorize');
+      appleAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '');
+      appleAuthUrl.searchParams.set('redirect_uri', redirectUri);
+      appleAuthUrl.searchParams.set('response_type', 'code id_token');
+      appleAuthUrl.searchParams.set('response_mode', 'form_post');
+      appleAuthUrl.searchParams.set('scope', 'name email');
+      
+      window.location.href = appleAuthUrl.toString();
+    }
   }
 
   // Show loading state while checking session
@@ -202,19 +220,16 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* OAuth buttons hidden until properly configured - see OAUTH_SECURITY_FIX.md */}
-          {false && (
-            <>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border"></div>
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
-                </div>
-              </div>
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
 
-              <div className="space-y-2 sm:space-y-3">
+          <div className="space-y-2 sm:space-y-3">
                 <Button
                   type="button"
                   variant="outline"
@@ -254,8 +269,6 @@ export default function LoginPage() {
                   Sign {isSignUp ? "up" : "in"} with Apple
                 </Button>
               </div>
-            </>
-          )}
 
           <div className="mt-6 text-center">
             <button 

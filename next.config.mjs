@@ -38,6 +38,9 @@ const nextConfig = {
     // Email
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     FROM_EMAIL: process.env.FROM_EMAIL,
+    // OAuth - Public client IDs (safe to expose)
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    NEXT_PUBLIC_APPLE_CLIENT_ID: process.env.APPLE_CLIENT_ID,
   },
 }
 

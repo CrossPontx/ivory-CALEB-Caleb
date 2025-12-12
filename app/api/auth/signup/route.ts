@@ -24,14 +24,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password is required for email authentication' }, { status: 400 });
     }
 
-    // OAuth providers (google, apple) should not use this endpoint
-    // They should use a proper OAuth callback endpoint
-    if (authProvider !== 'email') {
-      return NextResponse.json({ 
-        error: 'OAuth authentication must use the proper OAuth flow. This endpoint is for email/password only.' 
-      }, { status: 400 });
-    }
-
     // Check if user already exists
     const existingUser = await db
       .select()
