@@ -87,7 +87,7 @@ export default function HomePage() {
         {/* Referral Promotion Banner */}
         {showReferralBanner && (
           <div className="mb-6 sm:mb-8 relative">
-            <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
               {/* Decorative elements */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
@@ -117,7 +117,7 @@ export default function HomePage() {
 
                 <Button
                   onClick={() => router.push('/settings/credits')}
-                  className="w-full sm:w-auto bg-white text-purple-600 hover:bg-white/90 font-semibold shadow-lg"
+                  className="w-full sm:w-auto bg-white text-blue-600 hover:bg-white/90 font-semibold shadow-lg"
                   size="lg"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
