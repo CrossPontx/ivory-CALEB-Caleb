@@ -533,11 +533,11 @@ export default function CapturePage() {
   }
 
   const saveDesign = async (redirectToHome = true) => {
-    console.log('saveDesign called with finalPreview:', finalPreview)
+    console.log('saveDesign called with finalPreviews:', finalPreviews)
     console.log('saveDesign called with capturedImage:', capturedImage)
     
-    if (!finalPreview) {
-      console.error('No finalPreview available')
+    if (!finalPreview || finalPreviews.length === 0) {
+      console.error('No designs available to save')
       toast.error('Please generate a preview first', {
         description: 'You need to generate a design before saving',
       })
@@ -553,39 +553,45 @@ export default function CapturePage() {
       }
 
       const user = JSON.parse(userStr)
-      console.log('Saving design for user:', user.id)
+      console.log(`Saving ${finalPreviews.length} design(s) for user:`, user.id)
       
       // Show loading toast
-      const loadingToast = toast.loading('Saving your design...')
+      const loadingToast = toast.loading(`Saving ${finalPreviews.length} design${finalPreviews.length > 1 ? 's' : ''}...`)
       
-      const payload = {
-        userId: user.id,
-        title: `Design ${new Date().toLocaleDateString()}`,
-        imageUrl: finalPreview,
-        originalImageUrl: capturedImage,
-        designSettings,
-        aiPrompt: aiPrompt || null,
-        isPublic: false,
-      }
-      
-      console.log('Sending save request with payload:', payload)
-      
-      const response = await fetch('/api/looks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      // Save all designs
+      const savePromises = finalPreviews.map((imageUrl, index) => {
+        const payload = {
+          userId: user.id,
+          title: `Design ${new Date().toLocaleDateString()}${finalPreviews.length > 1 ? ` (${index + 1})` : ''}`,
+          imageUrl: imageUrl,
+          originalImageUrl: capturedImage,
+          designSettings,
+          aiPrompt: aiPrompt || null,
+          isPublic: false,
+        }
+        
+        console.log(`Sending save request for design ${index + 1}:`, payload)
+        
+        return fetch('/api/looks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
       })
+
+      const responses = await Promise.all(savePromises)
 
       // Dismiss loading toast
       toast.dismiss(loadingToast)
 
-      console.log('Save response status:', response.status)
+      // Check if all saves were successful
+      const allSuccessful = responses.every(response => response.ok)
+      const successCount = responses.filter(response => response.ok).length
 
-      if (response.ok) {
-        const savedLook = await response.json()
-        console.log('Design saved successfully:', savedLook)
-        
-        toast.success('Design saved successfully! 🎉', {
+      console.log(`Save results: ${successCount}/${finalPreviews.length} successful`)
+
+      if (allSuccessful) {
+        toast.success(`${finalPreviews.length} design${finalPreviews.length > 1 ? 's' : ''} saved successfully! 🎉`, {
           description: redirectToHome ? 'Redirecting to your collection...' : 'You can now continue editing',
           duration: 3000,
         })
@@ -597,16 +603,27 @@ export default function CapturePage() {
           }, 1000)
         }
         return true
+      } else if (successCount > 0) {
+        toast.success(`${successCount} of ${finalPreviews.length} designs saved`, {
+          description: 'Some designs could not be saved',
+        })
+        if (redirectToHome) {
+          setTimeout(() => {
+            router.push("/home")
+            router.refresh()
+          }, 1000)
+        }
+        return true
       } else {
-        const error = await response.json()
-        console.error('Failed to save design:', error)
-        toast.error('Failed to save design', {
+        const error = await responses[0].json()
+        console.error('Failed to save designs:', error)
+        toast.error('Failed to save designs', {
           description: error.error || 'Please try again or contact support',
         })
         return false
       }
     } catch (error) {
-      console.error('Error saving design:', error)
+      console.error('Error saving designs:', error)
       toast.error('An error occurred while saving', {
         description: 'Please check your connection and try again',
       })
