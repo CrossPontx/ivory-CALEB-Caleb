@@ -185,17 +185,9 @@ export default function HomePage() {
                 <Sparkles className="w-12 h-12 sm:w-14 sm:h-14 text-white drop-shadow-lg" />
               </div>
               <h3 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal mb-3">No designs yet</h3>
-              <p className="text-base sm:text-lg text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
                 Start creating your first stunning nail design with AI
               </p>
-              <Button
-                size="lg"
-                className="h-14 px-8 text-lg font-semibold bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 shadow-xl hover:shadow-2xl active:scale-95 transition-all rounded-2xl"
-                onClick={startNewDesign}
-              >
-                <Plus className="w-6 h-6 mr-2" />
-                Create First Design
-              </Button>
             </div>
           </Card>
         )}
