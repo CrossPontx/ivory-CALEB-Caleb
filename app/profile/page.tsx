@@ -24,7 +24,41 @@ export default function ProfilePage() {
       const user = localStorage.getItem("ivoryUser")
       if (user) {
         const userData = JSON.parse(user)
-        setUsername(userData.username)
+        
+        // If username is missing, fetch fresh data from session
+        if (!userData.username) {
+          try {
+            const sessionRes = await fetch('/api/auth/session')
+            if (sessionRes.ok) {
+              const sessionData = await sessionRes.json()
+              if (sessionData.user) {
+                localStorage.setItem("ivoryUser", JSON.stringify(sessionData.user))
+                setUsername(sessionData.user.username || sessionData.user.email?.split('@')[0] || 'User')
+                setUserType(sessionData.user.userType || 'client')
+                setUserId(sessionData.user.id)
+                setProfileImage(sessionData.user.avatar || null)
+                
+                // Load portfolio images for tech users
+                if (sessionData.user.userType === 'tech') {
+                  try {
+                    const response = await fetch(`/api/portfolio-images?userId=${sessionData.user.id}`)
+                    if (response.ok) {
+                      const data = await response.json()
+                      setPortfolioImages(data.images?.map((img: any) => img.imageUrl) || [])
+                    }
+                  } catch (error) {
+                    console.error('Error loading portfolio:', error)
+                  }
+                }
+                return
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching session:', error)
+          }
+        }
+        
+        setUsername(userData.username || userData.email?.split('@')[0] || 'User')
         setUserType(userData.userType || 'client')
         setUserId(userData.id)
         setProfileImage(userData.avatar || null)
@@ -150,7 +184,7 @@ export default function ProfilePage() {
               <div className="relative w-full h-full rounded-full overflow-hidden">
                 <Image
                   src={profileImage}
-                  alt={username}
+                  alt={username || 'User'}
                   fill
                   className="object-cover"
                 />
@@ -158,7 +192,7 @@ export default function ProfilePage() {
             ) : (
               <div className="w-full h-full rounded-full bg-gradient-to-br from-terracotta to-rose flex items-center justify-center">
                 <span className="text-2xl sm:text-3xl font-bold text-white">
-                  {username.charAt(0).toUpperCase()}
+                  {username ? username.charAt(0).toUpperCase() : 'U'}
                 </span>
               </div>
             )}
@@ -191,7 +225,7 @@ export default function ProfilePage() {
             />
           </div>
           
-          <h2 className="font-serif text-xl sm:text-2xl font-bold text-charcoal mb-1">{username}</h2>
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-charcoal mb-1">{username || 'User'}</h2>
           <p className="text-xs sm:text-sm text-muted-foreground capitalize">
             {userType === "tech" ? "Nail Tech" : "User"}
           </p>
