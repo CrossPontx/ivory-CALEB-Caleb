@@ -48,6 +48,7 @@ export default function CapturePage() {
   const [finalPreviews, setFinalPreviews] = useState<string[]>([])
   const [colorLightness, setColorLightness] = useState(65) // 0-100 for lightness (matches initial color)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null)
   
   const [designSettings, setDesignSettings] = useState<DesignSettings>({
     nailLength: 'medium',
@@ -706,112 +707,10 @@ export default function CapturePage() {
           </div>
         </div>
 
-        {/* Image Preview - Generated images prominent, original smaller */}
+        {/* Image Preview - Original on left, generated thumbnails on right */}
         <div className="pt-20 pb-4 px-4 overflow-y-auto" style={{ height: 'calc(65vh - 80px)', minHeight: '400px' }}>
           <div className="max-w-2xl mx-auto h-full">
-            {finalPreviews.length > 0 ? (
-              /* Layout when images are generated: Small original + Large generated images */
-              <div className="flex flex-col gap-3 h-full">
-                {/* Small Original Image with Share Button */}
-                <div className="flex-shrink-0">
-                  <div className="relative overflow-hidden rounded-xl border border-border group">
-                    <div className="relative bg-white aspect-[4/1] sm:aspect-[5/1]">
-                      <Image src={capturedImage} alt="Original" fill className="object-cover" />
-                      {/* Share Original Button */}
-                      <button
-                        onClick={async () => {
-                          try {
-                            if (navigator.share) {
-                              // Try sharing URL directly first (works on most platforms)
-                              await navigator.share({
-                                url: capturedImage,
-                                title: 'Original Hand Photo',
-                                text: 'Check out my hand photo'
-                              }).catch(err => {
-                                // User canceled or share failed, silently ignore
-                                if (err.name !== 'AbortError') {
-                                  console.log('Share failed, opening in new tab')
-                                  window.open(capturedImage, '_blank')
-                                }
-                              })
-                            } else {
-                              window.open(capturedImage, '_blank')
-                            }
-                          } catch (error) {
-                            console.error('Share error:', error)
-                            window.open(capturedImage, '_blank')
-                          }
-                        }}
-                        className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white transition-all active:scale-95"
-                      >
-                        <Share2 className="w-4 h-4 text-charcoal" />
-                      </button>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-1.5 px-3 flex items-center justify-between">
-                      <span className="font-semibold">Original</span>
-                      <button
-                        onClick={changePhoto}
-                        className="text-white/80 hover:text-white text-xs underline"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Large Generated Images Grid */}
-                <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
-                  {finalPreviews.map((imageUrl, index) => (
-                    <div key={index} className="relative overflow-hidden rounded-2xl border-2 border-border">
-                      <button
-                        onClick={async () => {
-                          setFinalPreview(imageUrl)
-                          try {
-                            if (navigator.share) {
-                              // Try sharing URL directly first (works on most platforms)
-                              await navigator.share({
-                                url: imageUrl,
-                                title: `Nail Design ${index + 1}`,
-                                text: 'Check out my nail design!'
-                              }).catch(err => {
-                                // User canceled or share failed, silently ignore
-                                if (err.name !== 'AbortError') {
-                                  console.log('Share failed, opening in new tab')
-                                  window.open(imageUrl, '_blank')
-                                }
-                              })
-                            } else {
-                              window.open(imageUrl, '_blank')
-                            }
-                          } catch (error) {
-                            console.error('Share error:', error)
-                            window.open(imageUrl, '_blank')
-                          }
-                        }}
-                        className={`relative w-full h-full group cursor-pointer ${
-                          finalPreview === imageUrl ? 'ring-2 ring-primary ring-offset-2' : ''
-                        }`}
-                      >
-                        <div className="relative bg-white h-full">
-                          <Image src={imageUrl} alt={`AI Generated ${index + 1}`} fill className="object-contain" />
-                          {/* Share Icon Overlay */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <div className="bg-white/90 rounded-full p-3 shadow-lg">
-                              <Share2 className="w-6 h-6 text-charcoal" />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-2 text-center font-semibold">
-                          Design {index + 1}
-                        </div>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              /* Layout before generation: Side by side */
-              <div className="grid grid-cols-2 gap-3 h-full">
+            <div className="grid grid-cols-2 gap-3 h-full">
                 {/* Original Image */}
                 <div className="relative overflow-hidden rounded-2xl border-2 border-border group h-full">
                   <div className="relative bg-white h-full">
@@ -828,11 +727,37 @@ export default function CapturePage() {
                   </div>
                 </div>
 
-                {/* Preview Placeholder */}
+                {/* Preview Placeholder or Generated Thumbnails */}
                 <div className="relative overflow-hidden rounded-2xl border-2 border-border h-full">
-                  <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center h-full">
-                    {isGenerating ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                  {finalPreviews.length > 0 ? (
+                    /* Show generated images as thumbnails */
+                    <div className="relative bg-white h-full p-3 flex flex-col gap-3">
+                      <div className="text-xs font-semibold text-charcoal mb-1">Generated Designs</div>
+                      <div className="flex-1 flex flex-col gap-2 overflow-y-auto">
+                        {finalPreviews.map((imageUrl, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSelectedImageModal(imageUrl)}
+                            className="relative overflow-hidden rounded-lg border-2 border-border hover:border-primary transition-all active:scale-95 aspect-[3/2] group"
+                          >
+                            <Image src={imageUrl} alt={`Design ${index + 1}`} fill className="object-cover" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
+                              <div className="bg-white/90 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Sparkles className="w-4 h-4 text-primary" />
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-xs py-1 text-center font-semibold">
+                              Design {index + 1}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="text-xs text-muted-foreground text-center">Tap to view & share</div>
+                    </div>
+                  ) : (
+                    <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center h-full">
+                      {isGenerating ? (
+                        <div className="absolute inset-0 flex items-center justify-center">
                       {/* Dimmed GIF Background */}
                       <div className="absolute inset-0 opacity-30">
                         <Image 
@@ -913,20 +838,92 @@ export default function CapturePage() {
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="text-center px-4">
-                      <Sparkles className="w-8 h-8 mx-auto mb-2 text-primary" />
-                      <p className="text-xs text-muted-foreground">
-                        {designMode === 'design' ? 'Configure design below' : 'Generate or upload design'}
-                      </p>
+                      ) : (
+                        <div className="text-center px-4">
+                          <Sparkles className="w-8 h-8 mx-auto mb-2 text-primary" />
+                          <p className="text-xs text-muted-foreground">
+                            Configure design below
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
-                  </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+
+        {/* Image Modal */}
+        {selectedImageModal && (
+          <div 
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setSelectedImageModal(null)}
+          >
+            <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col">
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedImageModal(null)}
+                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+              >
+                <X className="w-8 h-8" />
+              </button>
+
+              {/* Image */}
+              <div className="relative flex-1 rounded-2xl overflow-hidden bg-white">
+                <Image 
+                  src={selectedImageModal} 
+                  alt="Design Preview" 
+                  fill 
+                  className="object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3 mt-4" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  onClick={async () => {
+                    try {
+                      if (navigator.share) {
+                        await navigator.share({
+                          url: selectedImageModal,
+                          title: 'My Nail Design',
+                          text: 'Check out my nail design!'
+                        }).catch(err => {
+                          if (err.name !== 'AbortError') {
+                            window.open(selectedImageModal, '_blank')
+                          }
+                        })
+                      } else {
+                        window.open(selectedImageModal, '_blank')
+                      }
+                    } catch (error) {
+                      console.error('Share error:', error)
+                      window.open(selectedImageModal, '_blank')
+                    }
+                  }}
+                  className="flex-1"
+                  size="lg"
+                >
+                  <Share2 className="w-5 h-5 mr-2" />
+                  Share
+                </Button>
+                <Button
+                  onClick={() => {
+                    setFinalPreview(selectedImageModal)
+                    setSelectedImageModal(null)
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                  size="lg"
+                >
+                  <Save className="w-5 h-5 mr-2" />
+                  Select for Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bottom Drawer */}
         <div className="fixed left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border rounded-t-3xl shadow-2xl z-20 touch-action-pan-y" style={{ bottom: '80px', height: 'calc(35vh - 80px)', minHeight: '240px', maxHeight: '370px' }}>
