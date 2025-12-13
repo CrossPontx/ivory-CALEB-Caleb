@@ -39,7 +39,8 @@ export default function CreditsPage() {
   };
 
   return (
-    <div className="container max-w-4xl py-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush">
+      <div className="container max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Credits & Referrals</h1>
         <p className="text-muted-foreground">
@@ -115,6 +116,7 @@ export default function CreditsPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
