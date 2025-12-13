@@ -533,7 +533,11 @@ export default function CapturePage() {
   }
 
   const saveDesign = async (redirectToHome = true) => {
+    console.log('saveDesign called with finalPreview:', finalPreview)
+    console.log('saveDesign called with capturedImage:', capturedImage)
+    
     if (!finalPreview) {
+      console.error('No finalPreview available')
       toast.error('Please generate a preview first', {
         description: 'You need to generate a design before saving',
       })
@@ -543,31 +547,39 @@ export default function CapturePage() {
     try {
       const userStr = localStorage.getItem("ivoryUser")
       if (!userStr) {
+        console.error('No user found in localStorage')
         router.push("/")
         return false
       }
 
       const user = JSON.parse(userStr)
+      console.log('Saving design for user:', user.id)
       
       // Show loading toast
       const loadingToast = toast.loading('Saving your design...')
       
+      const payload = {
+        userId: user.id,
+        title: `Design ${new Date().toLocaleDateString()}`,
+        imageUrl: finalPreview,
+        originalImageUrl: capturedImage,
+        designSettings,
+        aiPrompt: aiPrompt || null,
+        isPublic: false,
+      }
+      
+      console.log('Sending save request with payload:', payload)
+      
       const response = await fetch('/api/looks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          title: `Design ${new Date().toLocaleDateString()}`,
-          imageUrl: finalPreview,
-          originalImageUrl: capturedImage,
-          designSettings,
-          aiPrompt: aiPrompt || null,
-          isPublic: false,
-        }),
+        body: JSON.stringify(payload),
       })
 
       // Dismiss loading toast
       toast.dismiss(loadingToast)
+
+      console.log('Save response status:', response.status)
 
       if (response.ok) {
         const savedLook = await response.json()
@@ -699,7 +711,16 @@ export default function CapturePage() {
           </div>
           <div className="flex items-center gap-2">
             <Button 
-              onClick={() => saveDesign(true)} 
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log('Save button clicked, finalPreview:', finalPreview)
+                saveDesign(true)
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
               size="sm" 
               className="h-10 px-3 sm:px-4 bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 shadow-md rounded-xl active:scale-95 transition-all"
               disabled={!finalPreview}
