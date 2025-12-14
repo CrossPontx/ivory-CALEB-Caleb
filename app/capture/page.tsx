@@ -154,6 +154,13 @@ export default function CapturePage() {
       if (zoomIndicatorTimeoutRef.current) {
         clearTimeout(zoomIndicatorTimeoutRef.current)
       }
+      // Clear session state when component unmounts (user navigates away)
+      localStorage.removeItem("captureSession_finalPreviews")
+      localStorage.removeItem("captureSession_finalPreview")
+      localStorage.removeItem("captureSession_designSettings")
+      localStorage.removeItem("captureSession_aiPrompt")
+      localStorage.removeItem("captureSession_selectedDesignImage")
+      console.log('Cleared capture session state on unmount')
     }
   }, [])
 
