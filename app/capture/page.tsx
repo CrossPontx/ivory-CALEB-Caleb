@@ -96,58 +96,86 @@ export default function CapturePage() {
   const zoomIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  // Check for existing image on mount, skip camera if found
+  // Check for user session and existing image on mount
   useEffect(() => {
-    const existingImage = localStorage.getItem("currentEditingImage")
-    if (existingImage) {
-      // User already has an image, go straight to design page
-      setCapturedImage(existingImage)
-      
-      // Restore session state
-      const savedPreviews = localStorage.getItem("captureSession_finalPreviews")
-      const savedPreview = localStorage.getItem("captureSession_finalPreview")
-      const savedSettings = localStorage.getItem("captureSession_designSettings")
-      const savedPrompt = localStorage.getItem("captureSession_aiPrompt")
-      const savedDesignImage = localStorage.getItem("captureSession_selectedDesignImage")
-      
-      if (savedPreviews) {
+    const initializePage = async () => {
+      // Ensure user data is in localStorage
+      const userStr = localStorage.getItem("ivoryUser")
+      if (!userStr) {
         try {
-          const previews = JSON.parse(savedPreviews)
-          setFinalPreviews(previews)
-          console.log('Restored finalPreviews from session:', previews)
-        } catch (e) {
-          console.error('Error parsing saved previews:', e)
+          const sessionRes = await fetch('/api/auth/session')
+          if (sessionRes.ok) {
+            const sessionData = await sessionRes.json()
+            if (sessionData.user) {
+              localStorage.setItem("ivoryUser", JSON.stringify(sessionData.user))
+              console.log('User session restored from API')
+            } else {
+              console.error('No user session found')
+              router.push("/")
+              return
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch user session:', error)
+          router.push("/")
+          return
         }
       }
-      
-      if (savedPreview) {
-        setFinalPreview(savedPreview)
-        console.log('Restored finalPreview from session')
-      }
-      
-      if (savedSettings) {
-        try {
-          const settings = JSON.parse(savedSettings)
-          setDesignSettings(settings)
-          console.log('Restored design settings from session')
-        } catch (e) {
-          console.error('Error parsing saved settings:', e)
+
+      // Check for existing image
+      const existingImage = localStorage.getItem("currentEditingImage")
+      if (existingImage) {
+        // User already has an image, go straight to design page
+        setCapturedImage(existingImage)
+        
+        // Restore session state
+        const savedPreviews = localStorage.getItem("captureSession_finalPreviews")
+        const savedPreview = localStorage.getItem("captureSession_finalPreview")
+        const savedSettings = localStorage.getItem("captureSession_designSettings")
+        const savedPrompt = localStorage.getItem("captureSession_aiPrompt")
+        const savedDesignImage = localStorage.getItem("captureSession_selectedDesignImage")
+        
+        if (savedPreviews) {
+          try {
+            const previews = JSON.parse(savedPreviews)
+            setFinalPreviews(previews)
+            console.log('Restored finalPreviews from session:', previews)
+          } catch (e) {
+            console.error('Error parsing saved previews:', e)
+          }
         }
+        
+        if (savedPreview) {
+          setFinalPreview(savedPreview)
+          console.log('Restored finalPreview from session')
+        }
+        
+        if (savedSettings) {
+          try {
+            const settings = JSON.parse(savedSettings)
+            setDesignSettings(settings)
+            console.log('Restored design settings from session')
+          } catch (e) {
+            console.error('Error parsing saved settings:', e)
+          }
+        }
+        
+        if (savedPrompt) {
+          setAiPrompt(savedPrompt)
+          console.log('Restored AI prompt from session')
+        }
+        
+        if (savedDesignImage) {
+          setSelectedDesignImage(savedDesignImage)
+          console.log('Restored selected design image from session')
+        }
+      } else {
+        // No existing image, start camera
+        startCamera()
       }
-      
-      if (savedPrompt) {
-        setAiPrompt(savedPrompt)
-        console.log('Restored AI prompt from session')
-      }
-      
-      if (savedDesignImage) {
-        setSelectedDesignImage(savedDesignImage)
-        console.log('Restored selected design image from session')
-      }
-    } else {
-      // No existing image, start camera
-      startCamera()
     }
+
+    initializePage()
     
     return () => {
       stopCamera()
@@ -626,9 +654,31 @@ export default function CapturePage() {
     }
 
     try {
-      const userStr = localStorage.getItem("ivoryUser")
+      let userStr = localStorage.getItem("ivoryUser")
+      
+      // If user data is missing, try to fetch it from session
+      if (!userStr) {
+        console.log('User data missing, fetching from session...')
+        try {
+          const sessionRes = await fetch('/api/auth/session')
+          if (sessionRes.ok) {
+            const sessionData = await sessionRes.json()
+            if (sessionData.user) {
+              localStorage.setItem("ivoryUser", JSON.stringify(sessionData.user))
+              userStr = JSON.stringify(sessionData.user)
+              console.log('User session restored')
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch user session:', error)
+        }
+      }
+      
       if (!userStr) {
         console.error('No user found in localStorage')
+        toast.error('Session expired', {
+          description: 'Please log in again to save your designs',
+        })
         router.push("/")
         return false
       }
