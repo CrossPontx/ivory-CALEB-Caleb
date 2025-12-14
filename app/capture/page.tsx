@@ -728,7 +728,12 @@ export default function CapturePage() {
         })
         // Small delay to show the success message, then redirect
         setTimeout(() => {
-          router.push("/home")
+          // Redirect based on user type
+          if (user.userType === 'tech') {
+            router.push("/tech/dashboard?tab=designs")
+          } else {
+            router.push("/home")
+          }
           router.refresh()
         }, 1500)
         return true
@@ -737,7 +742,12 @@ export default function CapturePage() {
           description: 'Redirecting to your collection...',
         })
         setTimeout(() => {
-          router.push("/home")
+          // Redirect based on user type
+          if (user.userType === 'tech') {
+            router.push("/tech/dashboard?tab=designs")
+          } else {
+            router.push("/home")
+          }
           router.refresh()
         }, 1500)
         return true

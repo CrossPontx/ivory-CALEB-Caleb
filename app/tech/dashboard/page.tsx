@@ -32,8 +32,16 @@ export default function TechDashboardPage() {
   const [portfolioImages, setPortfolioImages] = useState<string[]>([])
   const [personalDesigns, setPersonalDesigns] = useState<PersonalDesign[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("requests")
 
   useEffect(() => {
+    // Check for tab parameter in URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const tabParam = urlParams.get('tab')
+    if (tabParam && ['requests', 'approved', 'designs', 'gallery'].includes(tabParam)) {
+      setActiveTab(tabParam)
+    }
+
     const loadData = async () => {
       try {
         const userStr = localStorage.getItem("ivoryUser")
@@ -151,7 +159,7 @@ export default function TechDashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
-        <Tabs defaultValue="requests" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-6 sm:mb-8 grid grid-cols-4 h-12 sm:h-14 bg-white/60 backdrop-blur-sm p-1.5 rounded-2xl shadow-sm">
             <TabsTrigger 
               value="requests" 
