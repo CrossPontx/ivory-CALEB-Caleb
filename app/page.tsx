@@ -227,6 +227,18 @@ export default function LoginPage() {
             </Button>
           </form>
 
+          {!isSignUp && (
+            <div className="mt-3 text-center">
+              <button 
+                type="button" 
+                onClick={() => router.push('/forgot-password')} 
+                className="text-sm text-primary hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
+
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border"></div>

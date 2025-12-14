@@ -18,6 +18,8 @@ export const users: any = pgTable('users', {
   credits: integer('credits').default(5).notNull(), // Free credits on signup
   referralCode: varchar('referral_code', { length: 50 }).unique(), // User's unique referral code
   referredBy: integer('referred_by').references((): any => users.id), // Who referred this user
+  resetPasswordToken: varchar('reset_password_token', { length: 255 }),
+  resetPasswordExpires: timestamp('reset_password_expires'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
