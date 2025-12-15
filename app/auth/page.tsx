@@ -310,7 +310,7 @@ function AuthPageContent() {
             <button 
               type="button" 
               onClick={() => setIsSignUp(!isSignUp)} 
-              className="text-xs tracking-wider text-[#6B6B6B] hover:text-[#8B7355] transition-colors duration-300 font-light"
+              className="text-sm tracking-wide text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300 font-normal underline decoration-[#E8E8E8] hover:decoration-[#8B7355] underline-offset-4"
             >
               {isSignUp ? "Already have an account? Sign in" : "New to Ivory's Choice? Create account"}
             </button>
