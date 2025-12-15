@@ -26,15 +26,14 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
           <button
             onClick={() => router.push('/home')}
             className={cn(
-              'flex flex-col items-center justify-center gap-1 transition-all duration-300',
+              'flex items-center justify-center w-12 h-12 transition-all duration-300',
               'active:scale-95',
               isActive('/home') 
                 ? 'text-[#1A1A1A]' 
                 : 'text-[#6B6B6B] hover:text-[#8B7355]'
             )}
           >
-            <Home className="w-5 h-5" strokeWidth={1} />
-            <span className="text-[10px] tracking-wider uppercase font-light">Home</span>
+            <Home className="w-6 h-6" strokeWidth={1} />
           </button>
 
           {/* Center Action Button */}
@@ -49,15 +48,14 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
           <button
             onClick={() => router.push('/profile')}
             className={cn(
-              'flex flex-col items-center justify-center gap-1 transition-all duration-300',
+              'flex items-center justify-center w-12 h-12 transition-all duration-300',
               'active:scale-95',
               isActive('/profile') 
                 ? 'text-[#1A1A1A]' 
                 : 'text-[#6B6B6B] hover:text-[#8B7355]'
             )}
           >
-            <User className="w-5 h-5" strokeWidth={1} />
-            <span className="text-[10px] tracking-wider uppercase font-light">Profile</span>
+            <User className="w-6 h-6" strokeWidth={1} />
           </button>
         </div>
       </div>
