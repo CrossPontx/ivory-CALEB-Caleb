@@ -14,6 +14,8 @@ import { CreditsDisplay } from "@/components/credits-display"
 import { useCredits } from "@/hooks/use-credits"
 import { toast } from "sonner"
 import { BottomNav } from "@/components/bottom-nav"
+import { DrawingCanvas } from "@/components/drawing-canvas"
+import { Pencil } from "lucide-react"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -50,6 +52,8 @@ export default function CapturePage() {
   const [colorLightness, setColorLightness] = useState(65) // 0-100 for lightness (matches initial color)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null)
+  const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
+  const [drawingImageUrl, setDrawingImageUrl] = useState<string | null>(null)
   
   const [designSettings, setDesignSettings] = useState<DesignSettings>({
     nailLength: 'medium',
@@ -793,7 +797,17 @@ export default function CapturePage() {
     setSelectedDesignImage(null)
     setGeneratedDesigns([])
     setDesignMode(null)
+    setDrawingImageUrl(null)
     startCamera()
+  }
+
+  const handleDrawingComplete = (dataUrl: string) => {
+    setDrawingImageUrl(dataUrl)
+    setCapturedImage(dataUrl)
+    setShowDrawingCanvas(false)
+    toast.success('Drawing saved!', {
+      description: 'Your annotations have been applied to the image',
+    })
   }
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -886,6 +900,13 @@ export default function CapturePage() {
                     <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
                       <span className="text-xs font-semibold text-charcoal">Original</span>
                     </div>
+                    {/* Draw Button */}
+                    <button
+                      onClick={() => setShowDrawingCanvas(true)}
+                      className="absolute bottom-3 right-3 bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 text-white rounded-full p-3 shadow-lg active:scale-95 transition-all"
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
 
@@ -1463,6 +1484,15 @@ export default function CapturePage() {
 
         {/* Bottom Navigation */}
         <BottomNav onCenterAction={changePhoto} centerActionLabel="Capture" />
+
+        {/* Drawing Canvas Modal */}
+        {showDrawingCanvas && capturedImage && (
+          <DrawingCanvas
+            imageUrl={capturedImage}
+            onSave={handleDrawingComplete}
+            onClose={() => setShowDrawingCanvas(false)}
+          />
+        )}
       </div>
     )
   }
