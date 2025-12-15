@@ -51,7 +51,11 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
   useEffect(() => {
     const img = new window.Image()
     img.crossOrigin = 'anonymous'
-    img.src = imageUrl
+    // Use proxy for R2 images to avoid CORS issues
+    const proxiedUrl = imageUrl.includes('r2.dev') || imageUrl.includes('r2.cloudflarestorage.com')
+      ? `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
+      : imageUrl
+    img.src = proxiedUrl
     
     img.onload = () => {
       imageRef.current = img
