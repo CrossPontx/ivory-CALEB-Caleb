@@ -3,9 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { ArrowLeft, LogOut, Settings, Home, Plus, User, Camera, Upload, Loader2 } from "lucide-react"
+import { ArrowLeft, LogOut, Settings, Plus, Camera, Upload, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useToast } from "@/components/ui/use-toast"
 import { BottomNav } from "@/components/bottom-nav"
@@ -232,20 +230,20 @@ export default function ProfilePage() {
   const needsUsername = !username || username.includes('@') || username.includes('_176') || username.includes('google_') || username.includes('apple_')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush pb-24">
+    <div className="min-h-screen bg-white pb-24">
       {/* Header */}
-      <header className="bg-white/95 backdrop-blur-xl border-b border-border/50 sticky top-0 z-10 safe-top shadow-sm">
+      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
         <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => router.back()} 
-              className="hover:bg-muted/50 active:scale-95 transition-all rounded-xl"
+              className="hover:bg-[#F8F7F5] active:scale-95 transition-all rounded-none"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5" strokeWidth={1} />
             </Button>
-            <h1 className="font-serif text-xl sm:text-2xl font-bold bg-gradient-to-r from-terracotta to-rose bg-clip-text text-transparent">
+            <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
               Profile
             </h1>
           </div>
@@ -255,10 +253,10 @@ export default function ProfilePage() {
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
         {/* Profile Card */}
-        <Card className="p-8 sm:p-10 text-center mb-5 sm:mb-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border-0">
+        <div className="border border-[#E8E8E8] p-8 sm:p-10 text-center mb-5 sm:mb-6 bg-white">
           <div className="relative w-28 h-28 sm:w-32 sm:h-32 mx-auto mb-5 sm:mb-6 group">
             {profileImage ? (
-              <div className="relative w-full h-full rounded-full overflow-hidden ring-4 ring-white shadow-2xl">
+              <div className="relative w-full h-full overflow-hidden border-2 border-[#E8E8E8]">
                 <Image
                   src={profileImage}
                   alt={username || 'User'}
@@ -267,8 +265,8 @@ export default function ProfilePage() {
                 />
               </div>
             ) : (
-              <div className="w-full h-full rounded-full bg-gradient-to-br from-terracotta via-rose to-rose-600 flex items-center justify-center ring-4 ring-white shadow-2xl">
-                <span className="text-4xl sm:text-5xl font-bold text-white">
+              <div className="w-full h-full bg-[#F8F7F5] flex items-center justify-center border-2 border-[#E8E8E8]">
+                <span className="text-4xl sm:text-5xl font-light text-[#1A1A1A]">
                   {username ? username.charAt(0).toUpperCase() : 'U'}
                 </span>
               </div>
@@ -278,22 +276,22 @@ export default function ProfilePage() {
             <button
               onClick={() => profileImageInputRef.current?.click()}
               disabled={uploadingProfile}
-              className="absolute inset-0 bg-black/0 hover:bg-black/50 active:bg-black/50 rounded-full transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 active:scale-95"
+              className="absolute inset-0 bg-black/0 hover:bg-black/50 active:bg-black/50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 active:scale-95"
               aria-label="Change profile picture"
             >
               {uploadingProfile ? (
                 <Loader2 className="w-7 h-7 text-white animate-spin" />
               ) : (
                 <div className="flex flex-col items-center gap-1">
-                  <Camera className="w-7 h-7 text-white drop-shadow-lg" />
-                  <span className="text-xs text-white font-medium hidden sm:block">Change</span>
+                  <Camera className="w-7 h-7 text-white drop-shadow-lg" strokeWidth={1} />
+                  <span className="text-xs text-white font-light hidden sm:block tracking-wider uppercase">Change</span>
                 </div>
               )}
             </button>
             
             {/* Mobile hint badge */}
-            <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-gradient-to-br from-terracotta to-rose rounded-full flex items-center justify-center shadow-xl sm:hidden ring-4 ring-white">
-              <Camera className="w-5 h-5 text-white" />
+            <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-[#1A1A1A] flex items-center justify-center sm:hidden border-2 border-white">
+              <Camera className="w-5 h-5 text-white" strokeWidth={1} />
             </div>
             
             <input
@@ -312,85 +310,82 @@ export default function ProfilePage() {
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
                 placeholder="Enter username"
-                className="w-full px-4 py-3 border-2 border-border rounded-xl text-center font-serif text-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                className="w-full px-4 py-3 border border-[#E8E8E8] text-center font-light text-base tracking-wide focus:outline-none focus:border-[#8B7355] transition-all duration-300"
                 autoFocus
               />
               {usernameError && (
-                <p className="text-sm text-destructive font-medium">{usernameError}</p>
+                <p className="text-xs text-red-600 font-light tracking-wide">{usernameError}</p>
               )}
               <div className="flex gap-3">
-                <Button
-                  size="lg"
-                  variant="outline"
+                <button
                   onClick={handleUsernameCancel}
                   disabled={savingUsername}
-                  className="flex-1 h-11 border-2 hover:bg-muted/50 rounded-xl"
+                  className="flex-1 h-11 border border-[#E8E8E8] text-[#1A1A1A] font-light text-sm tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300"
                 >
                   Cancel
-                </Button>
-                <Button
-                  size="lg"
+                </button>
+                <button
                   onClick={handleUsernameSave}
                   disabled={savingUsername}
-                  className="flex-1 h-11 bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 shadow-md rounded-xl"
+                  className="flex-1 h-11 bg-[#1A1A1A] text-white font-light text-sm tracking-wider uppercase hover:bg-[#1A1A1A]/90 active:scale-95 transition-all duration-300"
                 >
                   {savingUsername ? "Saving..." : "Save"}
-                </Button>
+                </button>
               </div>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-center gap-2.5 mb-2">
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal">
+                <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
                   {needsUsername ? 'Add Username' : username}
                 </h2>
                 <button
                   onClick={handleUsernameEdit}
-                  className="p-2 text-primary hover:text-primary/80 hover:bg-primary/10 rounded-lg transition-all active:scale-95"
+                  className="p-2 text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5] transition-all active:scale-95"
                   aria-label="Edit username"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                   </svg>
                 </button>
               </div>
               {needsUsername && (
-                <p className="text-sm text-muted-foreground mb-3 px-4">Click the edit icon to set your username</p>
+                <p className="text-xs text-[#6B6B6B] mb-3 px-4 font-light tracking-wider uppercase">Click the edit icon to set your username</p>
               )}
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-terracotta/10 to-rose/10 rounded-full">
+              <div className="inline-flex items-center gap-2 px-4 py-2 border border-[#E8E8E8] bg-[#F8F7F5]">
                 {userType === "tech" && (
-                  <svg className="w-4 h-4 text-terracotta" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-[#8B7355]" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 )}
-                <span className="text-sm font-semibold text-charcoal capitalize">
-                  {userType === "tech" ? "Verified Nail Tech" : "Member"}
+                <span className="text-xs tracking-wider uppercase text-[#1A1A1A] font-light">
+                  {userType === "tech" ? "Verified Professional" : "Member"}
                 </span>
               </div>
             </>
           )}
-        </Card>
+        </div>
 
         {/* Portfolio Gallery for Tech Users */}
         {userType === "tech" && (
-          <Card className="p-5 sm:p-6 mb-5 sm:mb-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border-0">
-            <div className="flex items-center justify-between mb-5">
+          <div className="border border-[#E8E8E8] p-6 sm:p-8 mb-5 sm:mb-6 bg-white">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-charcoal mb-1">Portfolio</h3>
-                <p className="text-sm text-muted-foreground">
-                  {portfolioImages.length} {portfolioImages.length === 1 ? 'photo' : 'photos'}
+                <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-1">
+                  Portfolio
+                </h3>
+                <p className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">
+                  {portfolioImages.length} {portfolioImages.length === 1 ? 'Photo' : 'Photos'}
                 </p>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
+              <button
                 onClick={() => router.push("/tech/profile-setup")}
-                className="h-10 sm:h-11 px-4 border-2 hover:bg-muted/50 active:scale-95 transition-all rounded-xl"
+                className="h-10 px-4 border border-[#E8E8E8] text-[#1A1A1A] font-light text-xs tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 flex items-center gap-2"
               >
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="w-4 h-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Manage</span>
                 <span className="sm:hidden">Edit</span>
-              </Button>
+              </button>
             </div>
 
             {portfolioImages.length > 0 ? (
@@ -398,7 +393,7 @@ export default function ProfilePage() {
                 {portfolioImages.slice(0, 9).map((url, index) => (
                   <div
                     key={url}
-                    className="group relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-muted/30 to-muted/10 cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
+                    className="group relative aspect-square overflow-hidden border border-[#E8E8E8] cursor-pointer hover:border-[#8B7355] transition-all duration-300"
                     onClick={() => {
                       window.open(url, '_blank')
                     }}
@@ -407,94 +402,104 @@ export default function ProfilePage() {
                       src={url}
                       alt={`Portfolio ${index + 1}`}
                       fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                       sizes="(max-width: 640px) 33vw, 25vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
                   </div>
                 ))}
                 
                 {portfolioImages.length > 9 && (
                   <div
-                    className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-terracotta/80 to-rose/80 flex items-center justify-center cursor-pointer hover:from-terracotta hover:to-rose transition-all duration-300 shadow-md"
+                    className="relative aspect-square overflow-hidden bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center cursor-pointer hover:bg-[#8B7355] hover:border-[#8B7355] transition-all duration-300 group"
                     onClick={() => router.push("/tech/profile-setup")}
                   >
-                    <span className="text-white text-2xl sm:text-3xl font-bold drop-shadow-lg">
+                    <span className="text-[#1A1A1A] group-hover:text-white text-2xl sm:text-3xl font-light transition-colors duration-300">
                       +{portfolioImages.length - 9}
                     </span>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center py-10 sm:py-12 border-2 border-dashed border-border/50 rounded-2xl bg-gradient-to-br from-muted/20 to-muted/10">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-muted/40 to-muted/20 flex items-center justify-center">
-                  <Upload className="w-8 h-8 text-muted-foreground/60" />
+              <div className="text-center py-12 sm:py-16 border border-[#E8E8E8] bg-[#F8F7F5]">
+                <div className="w-16 h-16 mx-auto mb-5 border border-[#E8E8E8] bg-white flex items-center justify-center">
+                  <Upload className="w-7 h-7 text-[#6B6B6B]" strokeWidth={1} />
                 </div>
-                <h4 className="font-serif text-lg font-bold text-charcoal mb-2">No Portfolio Yet</h4>
-                <p className="text-sm text-muted-foreground mb-4 px-4">Showcase your best work to attract clients</p>
-                <Button
-                  size="sm"
+                <h4 className="font-serif text-lg font-light text-[#1A1A1A] tracking-tight mb-2">
+                  No Portfolio Yet
+                </h4>
+                <p className="text-xs text-[#6B6B6B] mb-6 px-4 font-light tracking-wider uppercase">
+                  Showcase your best work
+                </p>
+                <button
                   onClick={() => router.push("/tech/profile-setup")}
-                  className="h-10 px-6 bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 shadow-md active:scale-95 transition-all rounded-xl"
+                  className="h-11 px-6 bg-[#1A1A1A] text-white font-light text-xs tracking-wider uppercase hover:bg-[#1A1A1A]/90 active:scale-95 transition-all duration-300 inline-flex items-center gap-2"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4" strokeWidth={1} />
                   Add Photos
-                </Button>
+                </button>
               </div>
             )}
-          </Card>
+          </div>
         )}
 
         {/* Menu Options */}
         <div className="space-y-3 mb-5 sm:mb-6">
           {userType === "tech" && (
-            <Card
-              className="p-5 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl cursor-pointer active:scale-[0.98] transition-all duration-200 rounded-2xl"
+            <div
+              className="border border-[#E8E8E8] p-5 sm:p-6 bg-white cursor-pointer hover:border-[#8B7355] active:scale-[0.98] transition-all duration-300"
               onClick={() => router.push("/tech/profile-setup")}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-terracotta/20 to-rose/20 flex items-center justify-center flex-shrink-0">
-                  <Settings className="w-6 h-6 text-terracotta" />
+                <div className="w-12 h-12 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center flex-shrink-0">
+                  <Settings className="w-6 h-6 text-[#1A1A1A]" strokeWidth={1} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-serif font-bold text-base sm:text-lg text-charcoal mb-0.5">Tech Profile Setup</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">Services, prices, and gallery</div>
+                  <div className="font-serif font-light text-base sm:text-lg text-[#1A1A1A] tracking-tight mb-1">
+                    Tech Profile Setup
+                  </div>
+                  <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">
+                    Services, Prices & Gallery
+                  </div>
                 </div>
-                <svg className="w-5 h-5 text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg className="w-5 h-5 text-[#6B6B6B] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
-            </Card>
+            </div>
           )}
 
-          <Card
-            className="p-5 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl cursor-pointer active:scale-[0.98] transition-all duration-200 rounded-2xl"
+          <div
+            className="border border-[#E8E8E8] p-5 sm:p-6 bg-white cursor-pointer hover:border-[#8B7355] active:scale-[0.98] transition-all duration-300"
             onClick={() => router.push("/settings")}
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-muted/40 to-muted/20 flex items-center justify-center flex-shrink-0">
-                <Settings className="w-6 h-6 text-charcoal/70" />
+              <div className="w-12 h-12 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center flex-shrink-0">
+                <Settings className="w-6 h-6 text-[#1A1A1A]" strokeWidth={1} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-serif font-bold text-base sm:text-lg text-charcoal mb-0.5">Settings</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Preferences and notifications</div>
+                <div className="font-serif font-light text-base sm:text-lg text-[#1A1A1A] tracking-tight mb-1">
+                  Settings
+                </div>
+                <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">
+                  Preferences & Notifications
+                </div>
               </div>
-              <svg className="w-5 h-5 text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg className="w-5 h-5 text-[#6B6B6B] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Logout */}
-        <Button
-          variant="outline"
-          className="w-full h-14 text-base font-semibold text-destructive hover:text-destructive hover:bg-destructive/5 border-2 border-destructive/20 hover:border-destructive/30 active:scale-[0.98] transition-all rounded-2xl"
+        <button
+          className="w-full h-12 sm:h-14 border border-[#E8E8E8] text-[#1A1A1A] font-light text-sm tracking-wider uppercase hover:bg-[#F8F7F5] hover:border-[#1A1A1A] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
           onClick={handleLogout}
         >
-          <LogOut className="w-5 h-5 mr-2.5" />
+          <LogOut className="w-5 h-5" strokeWidth={1} />
           Log Out
-        </Button>
+        </button>
       </main>
 
       {/* Bottom Navigation */}
