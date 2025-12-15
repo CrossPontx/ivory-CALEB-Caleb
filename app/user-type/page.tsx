@@ -84,10 +84,10 @@ export default function UserTypePage() {
                 <Scissors className="w-10 h-10 sm:w-12 sm:h-12 text-[#1A1A1A] group-hover:text-[#8B7355] transition-colors duration-500" strokeWidth={1} />
               </div>
               <h2 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-4 font-light">
-                For Artisans
+                For Nail Techs
               </h2>
               <p className="text-sm sm:text-base text-[#6B6B6B] mb-8 font-light leading-relaxed">
-                Receive client designs, curate your portfolio, and showcase your exceptional craftsmanship
+                Receive client designs, curate your portfolio, and showcase your exceptional work
               </p>
               <Button className="w-full h-12 sm:h-14 border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light">
                 Begin Journey
