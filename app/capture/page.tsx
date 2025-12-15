@@ -46,7 +46,7 @@ export default function CapturePage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationProgress, setGenerationProgress] = useState(0)
   const [generatedDesigns, setGeneratedDesigns] = useState<string[]>([])
-  const [selectedDesignImage, setSelectedDesignImage] = useState<string | null>(null)
+  const [selectedDesignImages, setSelectedDesignImages] = useState<string[]>([])
   const [finalPreview, setFinalPreview] = useState<string | null>(null)
   const [finalPreviews, setFinalPreviews] = useState<string[]>([])
   const [colorLightness, setColorLightness] = useState(65) // 0-100 for lightness (matches initial color)
@@ -137,7 +137,8 @@ export default function CapturePage() {
         const savedPreview = localStorage.getItem("captureSession_finalPreview")
         const savedSettings = localStorage.getItem("captureSession_designSettings")
         const savedPrompt = localStorage.getItem("captureSession_aiPrompt")
-        const savedDesignImage = localStorage.getItem("captureSession_selectedDesignImage")
+        const savedDesignImages = localStorage.getItem("captureSession_selectedDesignImages")
+        const savedDrawingImage = localStorage.getItem("captureSession_drawingImageUrl")
         
         if (savedPreviews) {
           try {
@@ -169,9 +170,19 @@ export default function CapturePage() {
           console.log('Restored AI prompt from session')
         }
         
-        if (savedDesignImage) {
-          setSelectedDesignImage(savedDesignImage)
-          console.log('Restored selected design image from session')
+        if (savedDesignImages) {
+          try {
+            const images = JSON.parse(savedDesignImages)
+            setSelectedDesignImages(images)
+            console.log('Restored selected design images from session')
+          } catch (e) {
+            console.error('Error parsing saved design images:', e)
+          }
+        }
+        
+        if (savedDrawingImage) {
+          setDrawingImageUrl(savedDrawingImage)
+          console.log('Restored drawing image from session')
         }
       } else {
         // No existing image, start camera
@@ -191,7 +202,8 @@ export default function CapturePage() {
       localStorage.removeItem("captureSession_finalPreview")
       localStorage.removeItem("captureSession_designSettings")
       localStorage.removeItem("captureSession_aiPrompt")
-      localStorage.removeItem("captureSession_selectedDesignImage")
+      localStorage.removeItem("captureSession_selectedDesignImages")
+      localStorage.removeItem("captureSession_drawingImageUrl")
       console.log('Cleared capture session state on unmount')
     }
   }, [])
@@ -226,12 +238,19 @@ export default function CapturePage() {
     }
   }, [aiPrompt, capturedImage])
 
-  // Save selected design image whenever it changes
+  // Save selected design images whenever they change
   useEffect(() => {
-    if (selectedDesignImage && capturedImage) {
-      localStorage.setItem("captureSession_selectedDesignImage", selectedDesignImage)
+    if (selectedDesignImages.length > 0 && capturedImage) {
+      localStorage.setItem("captureSession_selectedDesignImages", JSON.stringify(selectedDesignImages))
     }
-  }, [selectedDesignImage, capturedImage])
+  }, [selectedDesignImages, capturedImage])
+
+  // Save drawing image whenever it changes
+  useEffect(() => {
+    if (drawingImageUrl && capturedImage) {
+      localStorage.setItem("captureSession_drawingImageUrl", drawingImageUrl)
+    }
+  }, [drawingImageUrl, capturedImage])
 
   const startCamera = async () => {
     try {
@@ -382,7 +401,7 @@ export default function CapturePage() {
     return `Ultra-detailed, high-resolution nail art design applied ONLY inside a fingernail area. Nail length: ${settings.nailLength}, Nail shape: ${settings.nailShape}. Base color: ${settings.baseColor}. Finish: ${settings.finish}. Texture: ${settings.texture}. Design style: ${settings.patternType} pattern, ${settings.styleVibe} aesthetic. Accent color: ${settings.accentColor}. Highly realistic nail polish appearance: smooth polish, crisp clean edges, even color distribution, professional salon quality with maximum detail, subtle natural reflections. Design must: stay strictly within the nail surface, follow realistic nail curvature, respect nail boundaries, appear physically painted onto the nail with expert precision. Ultra-high resolution rendering, realistic lighting, natural skin reflection preserved, sharp details, vibrant colors with accurate saturation.`
   }
 
-  const generateAIPreview = async (settings: DesignSettings, selectedImage?: string) => {
+  const generateAIPreview = async (settings: DesignSettings) => {
     if (!capturedImage) return
     
     // Check credits before generating
@@ -435,7 +454,8 @@ export default function CapturePage() {
         body: JSON.stringify({ 
           prompt, 
           originalImage: capturedImage,
-          selectedDesignImage: selectedImage || selectedDesignImage,
+          selectedDesignImages: selectedDesignImages,
+          drawingImageUrl: drawingImageUrl,
           influenceWeights: weights
         }),
         signal: abortControllerRef.current.signal
@@ -611,36 +631,60 @@ export default function CapturePage() {
   }
 
   const handleDesignSelect = (designUrl: string) => {
-    setSelectedDesignImage(designUrl)
+    setSelectedDesignImages([...selectedDesignImages, designUrl])
     handleNailEditorDesignImageInfluence(100)
   }
 
   const handleDesignUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+
+    // Check if adding these files would exceed max (5 images)
+    if (selectedDesignImages.length + files.length > 5) {
+      toast.error('Maximum 5 design images', {
+        description: 'You can upload up to 5 reference images',
+      })
+      return
+    }
 
     setIsGenerating(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData()
+        formData.append('file', file)
 
-      const response = await fetch('/api/analyze-design-image', {
-        method: 'POST',
-        body: formData,
+        const response = await fetch('/api/analyze-design-image', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          return data.imageUrl
+        }
+        return null
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        const { imageUrl } = data
-        
-        setSelectedDesignImage(imageUrl)
+      const uploadedUrls = (await Promise.all(uploadPromises)).filter(url => url !== null) as string[]
+      
+      if (uploadedUrls.length > 0) {
+        setSelectedDesignImages([...selectedDesignImages, ...uploadedUrls])
         handleNailEditorDesignImageInfluence(100)
-        // Don't auto-generate - user must click "Generate Preview"
+        toast.success(`${uploadedUrls.length} design image${uploadedUrls.length > 1 ? 's' : ''} uploaded!`)
       }
     } catch (error) {
       console.error('Error uploading design:', error)
+      toast.error('Failed to upload images')
     } finally {
       setIsGenerating(false)
+    }
+  }
+
+  const removeDesignImage = (imageUrl: string) => {
+    setSelectedDesignImages(selectedDesignImages.filter(url => url !== imageUrl))
+    if (selectedDesignImages.length === 1) {
+      // Last image being removed, reset influence
+      handleNailEditorDesignImageInfluence(0)
     }
   }
 
@@ -782,8 +826,8 @@ export default function CapturePage() {
         localStorage.setItem("designSettings", JSON.stringify(designSettings))
       } else {
         localStorage.setItem("aiPrompt", aiPrompt)
-        if (selectedDesignImage) {
-          localStorage.setItem("selectedDesignImage", selectedDesignImage)
+        if (selectedDesignImages.length > 0) {
+          localStorage.setItem("selectedDesignImages", JSON.stringify(selectedDesignImages))
         }
       }
       router.push("/editor")
@@ -794,7 +838,7 @@ export default function CapturePage() {
     setCapturedImage(null)
     setFinalPreview(null)
     setFinalPreviews([])
-    setSelectedDesignImage(null)
+    setSelectedDesignImages([])
     setGeneratedDesigns([])
     setDesignMode(null)
     setDrawingImageUrl(null)
@@ -803,10 +847,9 @@ export default function CapturePage() {
 
   const handleDrawingComplete = (dataUrl: string) => {
     setDrawingImageUrl(dataUrl)
-    setCapturedImage(dataUrl)
     setShowDrawingCanvas(false)
     toast.success('Drawing saved!', {
-      description: 'Your annotations have been applied to the image',
+      description: 'Your drawing will guide the AI design generation',
     })
   }
 
@@ -903,7 +946,12 @@ export default function CapturePage() {
                     {/* Draw Button */}
                     <button
                       onClick={() => setShowDrawingCanvas(true)}
-                      className="absolute bottom-3 right-3 bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 text-white rounded-full p-3 shadow-lg active:scale-95 transition-all"
+                      className={`absolute bottom-3 right-3 text-white rounded-full p-3 shadow-lg active:scale-95 transition-all ${
+                        drawingImageUrl 
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700' 
+                          : 'bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90'
+                      }`}
+                      title={drawingImageUrl ? 'Drawing added - click to edit' : 'Draw on image'}
                     >
                       <Pencil className="w-5 h-5" />
                     </button>
@@ -1151,40 +1199,88 @@ export default function CapturePage() {
                     </Button>
                   )}
 
+                  {/* Drawing Status */}
+                  {drawingImageUrl && (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200/50 rounded-2xl p-4 text-sm shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <Pencil className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-green-900 font-bold mb-1">Drawing added</p>
+                          <p className="text-green-800 text-xs leading-relaxed">
+                            Your drawing will guide the AI to create designs following your outline
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setDrawingImageUrl(null)}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Upload Design Image */}
                   <Button 
                     variant="outline" 
                     onClick={() => designUploadRef.current?.click()}
                     className="w-full h-11 rounded-2xl border-2 hover:bg-muted/50 active:scale-95 transition-all font-medium"
-                    disabled={isGenerating}
+                    disabled={isGenerating || selectedDesignImages.length >= 5}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload Design Image
+                    Upload Design Images ({selectedDesignImages.length}/5)
                   </Button>
 
-                  {/* Uploaded Design Preview with Influence Control */}
-                  {selectedDesignImage && (
+                  {/* Uploaded Design Previews with Influence Control */}
+                  {selectedDesignImages.length > 0 && (
                     <div className="mb-3">
                       <button
-                        onClick={() => setExpandedSection(expandedSection === 'design-image' ? null : 'design-image')}
+                        onClick={() => setExpandedSection(expandedSection === 'design-images' ? null : 'design-images')}
                         className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-border bg-white/80 backdrop-blur-sm hover:border-primary/50 hover:shadow-md active:scale-[0.98] transition-all"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-14 h-14 rounded-xl overflow-hidden border-2 border-primary shadow-sm flex-shrink-0">
-                            <Image src={selectedDesignImage} alt="Uploaded Design" fill className="object-cover" />
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="flex -space-x-2">
+                            {selectedDesignImages.slice(0, 3).map((img, idx) => (
+                              <div key={idx} className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
+                                <Image src={img} alt={`Design ${idx + 1}`} fill className="object-cover" />
+                              </div>
+                            ))}
+                            {selectedDesignImages.length > 3 && (
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-terracotta to-rose flex items-center justify-center border-2 border-white shadow-sm">
+                                <span className="text-white text-xs font-bold">+{selectedDesignImages.length - 3}</span>
+                              </div>
+                            )}
                           </div>
                           <div className="flex-1 min-w-0 text-left">
-                            <p className="text-sm font-bold text-charcoal mb-0.5">Uploaded Design</p>
+                            <p className="text-sm font-bold text-charcoal mb-0.5">{selectedDesignImages.length} Design{selectedDesignImages.length > 1 ? 's' : ''}</p>
                             <p className="text-xs text-muted-foreground">Tap to adjust influence</p>
                           </div>
                           <span className="text-sm font-bold text-white bg-gradient-to-r from-terracotta to-rose px-3 py-1.5 rounded-full shadow-sm">{influenceWeights.nailEditor_designImage}%</span>
                         </div>
-                        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ml-2 ${expandedSection === 'design-image' ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ml-2 ${expandedSection === 'design-images' ? 'rotate-180' : ''}`} />
                       </button>
-                      {expandedSection === 'design-image' && (
-                        <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-2">
+                      {expandedSection === 'design-images' && (
+                        <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-3">
+                          {/* Design Images Grid */}
+                          <div className="grid grid-cols-3 gap-2">
+                            {selectedDesignImages.map((img, idx) => (
+                              <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group">
+                                <Image src={img} alt={`Design ${idx + 1}`} fill className="object-cover" />
+                                <button
+                                  onClick={() => removeDesignImage(img)}
+                                  className="absolute top-1 right-1 w-6 h-6 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Influence Slider */}
                           <div className="flex justify-between items-center mb-2">
-                            <label className="text-xs font-medium text-muted-foreground">Design Image</label>
+                            <label className="text-xs font-medium text-muted-foreground">Design Images</label>
                             <span className="text-xs font-bold text-primary">{influenceWeights.nailEditor_designImage}%</span>
                           </div>
                           <div className="relative">
@@ -1206,10 +1302,10 @@ export default function CapturePage() {
                             Base Color: {influenceWeights.nailEditor_baseColor}%
                           </p>
                           <button
-                            onClick={() => setSelectedDesignImage(null)}
+                            onClick={() => setSelectedDesignImages([])}
                             className="w-full mt-2 text-xs text-red-600 hover:text-red-700 font-medium"
                           >
-                            Remove Design Image
+                            Remove All Design Images
                           </button>
                         </div>
                       )}
@@ -1378,7 +1474,7 @@ export default function CapturePage() {
                               />
                             </div>
                             <p className="text-[10px] text-muted-foreground mt-1">
-                              {selectedDesignImage && `Design Image: ${influenceWeights.nailEditor_designImage}%`}
+                              {selectedDesignImages.length > 0 && `Design Images: ${influenceWeights.nailEditor_designImage}%`}
                             </p>
                           </div>
                         </div>
@@ -1476,6 +1572,7 @@ export default function CapturePage() {
               ref={designUploadRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handleDesignUpload}
               className="hidden"
             />

@@ -15,9 +15,13 @@ type DrawingLine = {
   points: { x: number; y: number }[]
   color: string
   width: number
+  texture: BrushTexture
 }
 
+type BrushTexture = 'solid' | 'soft' | 'spray' | 'marker' | 'pencil'
+
 const COLORS = [
+  '#808080', // Gray (default)
   '#000000', // Black
   '#FFFFFF', // White
   '#FF0000', // Red
@@ -30,19 +34,29 @@ const COLORS = [
   '#FFA500', // Orange
 ]
 
-const BRUSH_SIZES = [2, 4, 6, 8, 12, 16]
+const BRUSH_SIZES = [2, 4, 6, 8, 12, 16, 20, 24]
+
+const BRUSH_TEXTURES: { value: BrushTexture; label: string; icon: string }[] = [
+  { value: 'solid', label: 'Solid', icon: '●' },
+  { value: 'soft', label: 'Soft', icon: '◉' },
+  { value: 'spray', label: 'Spray', icon: '⊙' },
+  { value: 'marker', label: 'Marker', icon: '▬' },
+  { value: 'pencil', label: 'Pencil', icon: '✎' },
+]
 
 export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
-  const [currentColor, setCurrentColor] = useState('#FF0000')
-  const [brushSize, setBrushSize] = useState(4)
+  const [currentColor, setCurrentColor] = useState('#808080') // Gray default
+  const [brushSize, setBrushSize] = useState(8) // 8px default
+  const [brushTexture, setBrushTexture] = useState<BrushTexture>('solid')
   const [lines, setLines] = useState<DrawingLine[]>([])
   const [currentLine, setCurrentLine] = useState<DrawingLine | null>(null)
   const [undoneLines, setUndoneLines] = useState<DrawingLine[]>([])
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showBrushPicker, setShowBrushPicker] = useState(false)
+  const [showTexturePicker, setShowTexturePicker] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 })
   const imageRef = useRef<HTMLImageElement | null>(null)
@@ -114,21 +128,119 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
     linesToDraw.forEach(line => {
       if (line.points.length < 2) return
       
-      ctx.strokeStyle = line.color
-      ctx.lineWidth = line.width
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      
-      ctx.beginPath()
-      ctx.moveTo(line.points[0].x, line.points[0].y)
-      
-      for (let i = 1; i < line.points.length; i++) {
-        ctx.lineTo(line.points[i].x, line.points[i].y)
-      }
-      
-      ctx.stroke()
+      drawLineWithTexture(ctx, line)
     })
   }, [canvasDimensions])
+
+  // Draw line with texture
+  const drawLineWithTexture = (ctx: CanvasRenderingContext2D, line: DrawingLine) => {
+    const texture = line.texture || 'solid'
+    
+    switch (texture) {
+      case 'solid':
+        // Standard solid line
+        ctx.strokeStyle = line.color
+        ctx.lineWidth = line.width
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.globalAlpha = 1
+        
+        ctx.beginPath()
+        ctx.moveTo(line.points[0].x, line.points[0].y)
+        for (let i = 1; i < line.points.length; i++) {
+          ctx.lineTo(line.points[i].x, line.points[i].y)
+        }
+        ctx.stroke()
+        break
+        
+      case 'soft':
+        // Soft brush with gradient edges
+        ctx.globalAlpha = 0.6
+        ctx.strokeStyle = line.color
+        ctx.lineWidth = line.width
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.filter = 'blur(1px)'
+        
+        ctx.beginPath()
+        ctx.moveTo(line.points[0].x, line.points[0].y)
+        for (let i = 1; i < line.points.length; i++) {
+          ctx.lineTo(line.points[i].x, line.points[i].y)
+        }
+        ctx.stroke()
+        ctx.filter = 'none'
+        ctx.globalAlpha = 1
+        break
+        
+      case 'spray':
+        // Spray paint effect
+        ctx.fillStyle = line.color
+        ctx.globalAlpha = 0.1
+        
+        for (let i = 0; i < line.points.length; i++) {
+          const point = line.points[i]
+          const density = 15
+          
+          for (let j = 0; j < density; j++) {
+            const angle = Math.random() * Math.PI * 2
+            const radius = Math.random() * line.width
+            const x = point.x + Math.cos(angle) * radius
+            const y = point.y + Math.sin(angle) * radius
+            
+            ctx.beginPath()
+            ctx.arc(x, y, 1, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        }
+        ctx.globalAlpha = 1
+        break
+        
+      case 'marker':
+        // Marker with slight transparency and flat edges
+        ctx.strokeStyle = line.color
+        ctx.lineWidth = line.width
+        ctx.lineCap = 'square'
+        ctx.lineJoin = 'miter'
+        ctx.globalAlpha = 0.7
+        
+        ctx.beginPath()
+        ctx.moveTo(line.points[0].x, line.points[0].y)
+        for (let i = 1; i < line.points.length; i++) {
+          ctx.lineTo(line.points[i].x, line.points[i].y)
+        }
+        ctx.stroke()
+        ctx.globalAlpha = 1
+        break
+        
+      case 'pencil':
+        // Pencil with texture
+        ctx.strokeStyle = line.color
+        ctx.lineWidth = line.width * 0.8
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.globalAlpha = 0.8
+        
+        // Draw main line
+        ctx.beginPath()
+        ctx.moveTo(line.points[0].x, line.points[0].y)
+        for (let i = 1; i < line.points.length; i++) {
+          ctx.lineTo(line.points[i].x, line.points[i].y)
+        }
+        ctx.stroke()
+        
+        // Add texture with random dots
+        ctx.globalAlpha = 0.3
+        for (let i = 0; i < line.points.length; i += 2) {
+          const point = line.points[i]
+          if (Math.random() > 0.5) {
+            ctx.fillStyle = line.color
+            ctx.fillRect(point.x, point.y, 1, 1)
+          }
+        }
+        ctx.globalAlpha = 1
+        break
+    }
+  }
 
   // Redraw when lines change
   useEffect(() => {
@@ -169,7 +281,8 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
     setCurrentLine({
       points: [coords],
       color: currentColor,
-      width: brushSize
+      width: brushSize,
+      texture: brushTexture
     })
     setUndoneLines([]) // Clear redo stack when starting new drawing
   }
@@ -310,6 +423,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
             onClick={() => {
               setShowColorPicker(!showColorPicker)
               setShowBrushPicker(false)
+              setShowTexturePicker(false)
             }}
             className="w-full flex items-center justify-between p-3 rounded-xl bg-white/20 hover:bg-white/30 transition-all"
           >
@@ -342,19 +456,60 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
           )}
         </div>
 
+        {/* Brush Texture Picker */}
+        <div className="space-y-2">
+          <button
+            onClick={() => {
+              setShowTexturePicker(!showTexturePicker)
+              setShowColorPicker(false)
+              setShowBrushPicker(false)
+            }}
+            className="w-full flex items-center justify-between p-3 rounded-xl bg-white/20 hover:bg-white/30 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-white text-xl">
+                {BRUSH_TEXTURES.find(t => t.value === brushTexture)?.icon}
+              </span>
+              <span className="text-white font-medium">Texture</span>
+            </div>
+            <span className="text-white text-sm capitalize">{brushTexture}</span>
+          </button>
+          
+          {showTexturePicker && (
+            <div className="grid grid-cols-5 gap-2 p-3 bg-white/10 rounded-xl">
+              {BRUSH_TEXTURES.map(texture => (
+                <button
+                  key={texture.value}
+                  onClick={() => {
+                    setBrushTexture(texture.value)
+                    setShowTexturePicker(false)
+                  }}
+                  className={`flex flex-col items-center p-2 rounded-lg transition-all active:scale-95 ${
+                    brushTexture === texture.value ? 'bg-white/30 scale-110' : 'bg-white/10'
+                  }`}
+                >
+                  <span className="text-white text-2xl mb-1">{texture.icon}</span>
+                  <span className="text-white text-[9px]">{texture.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Brush Size Picker */}
         <div className="space-y-2">
           <button
             onClick={() => {
               setShowBrushPicker(!showBrushPicker)
               setShowColorPicker(false)
+              setShowTexturePicker(false)
             }}
             className="w-full flex items-center justify-between p-3 rounded-xl bg-white/20 hover:bg-white/30 transition-all"
           >
             <div className="flex items-center gap-3">
               <div 
                 className="rounded-full bg-white"
-                style={{ width: brushSize + 8, height: brushSize + 8 }}
+                style={{ width: Math.min(brushSize + 8, 24), height: Math.min(brushSize + 8, 24) }}
               />
               <span className="text-white font-medium">Brush Size</span>
             </div>
@@ -362,7 +517,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
           </button>
           
           {showBrushPicker && (
-            <div className="grid grid-cols-6 gap-2 p-3 bg-white/10 rounded-xl">
+            <div className="grid grid-cols-4 gap-2 p-3 bg-white/10 rounded-xl">
               {BRUSH_SIZES.map(size => (
                 <button
                   key={size}
@@ -376,7 +531,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
                 >
                   <div 
                     className="rounded-full bg-white"
-                    style={{ width: size, height: size }}
+                    style={{ width: Math.min(size, 20), height: Math.min(size, 20) }}
                   />
                 </button>
               ))}

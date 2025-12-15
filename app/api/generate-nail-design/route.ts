@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     const openai = getOpenAIClient()
-    const { prompt, originalImage, selectedDesignImage, influenceWeights } = await request.json()
+    const { prompt, originalImage, selectedDesignImages, drawingImageUrl, influenceWeights } = await request.json()
 
     console.log('🔍 Received request for nail design generation')
     console.log('💳 Credits deducted. New balance:', creditResult.newBalance)
@@ -72,6 +72,10 @@ export async function POST(request: NextRequest) {
     if (!prompt || !originalImage) {
       return NextResponse.json({ error: 'Prompt and original image are required' }, { status: 400 })
     }
+    
+    // Log what reference images we have
+    console.log('📸 Design images count:', selectedDesignImages?.length || 0)
+    console.log('✏️ Drawing image:', drawingImageUrl ? 'Yes' : 'No')
 
     // Extract nail length and shape from the prompt
     const nailLengthMatch = prompt.match(/Nail length: (\w+(?:-\w+)?)/i)
@@ -81,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     // Default influence weights if not provided
     const weights = influenceWeights || {
-      designImage: selectedDesignImage ? 100 : 0,
+      designImage: (selectedDesignImages?.length > 0 || drawingImageUrl) ? 100 : 0,
       stylePrompt: 100,
       nailLength: 100,
       nailShape: 100,
@@ -115,14 +119,30 @@ export async function POST(request: NextRequest) {
       designParamsSection += `- Texture: ${textureValue} (Weight: ${weights.texture}%)\n`
     }
     
+    // Build image inputs description
+    let imageInputsSection = ''
+    let imageCount = 1 // Start with hand image
+    
+    if (drawingImageUrl) {
+      imageCount++
+      imageInputsSection += `- Image 1: The hand photo to edit (preserve everything except nails)\n`
+      imageInputsSection += `- Image 2: User's drawing/outline showing EXACTLY where and how to apply the design (CRITICAL GUIDE)\n`
+    } else {
+      imageInputsSection += `- Image 1: The hand photo to edit (preserve everything except nails)\n`
+    }
+    
+    if (selectedDesignImages && selectedDesignImages.length > 0) {
+      selectedDesignImages.forEach((_: string, idx: number) => {
+        imageInputsSection += `- Image ${imageCount + idx + 1}: Reference design ${idx + 1} to replicate onto the nails\n`
+      })
+    }
+    
     const enhancedPrompt = `CRITICAL INSTRUCTIONS - READ CAREFULLY:
 
 You are editing a photo of a hand to apply nail art designs. Your ONLY task is to modify the fingernails while preserving everything else EXACTLY as it appears.
 
-${selectedDesignImage ? `IMAGE INPUTS:
-- Image 1: The hand photo to edit (preserve everything except nails)
-- Image 2: The reference nail design to replicate EXACTLY onto the nails in Image 1
-
+${imageInputsSection ? `IMAGE INPUTS:
+${imageInputsSection}
 ` : ''}STRICT RULES:
 1. Use the EXACT hand shown in the image - same number of fingers, same pose, same angle
 2. MAINTAIN THE EXACT ORIENTATION AND ROTATION of the original hand image - DO NOT rotate the image by any degree
@@ -133,24 +153,36 @@ ${selectedDesignImage ? `IMAGE INPUTS:
 7. DO NOT add extra hands, arms, bodies, or props
 8. ONLY modify the fingernail surfaces
 
+${drawingImageUrl ? `
+DRAWING/OUTLINE GUIDE (HIGHEST PRIORITY):
+- The user has drawn directly on the hand image to show EXACTLY where and how to apply the design
+- This drawing is your PRIMARY GUIDE - it shows the exact placement, shape, and outline of the design
+- Follow the drawn lines and shapes PRECISELY - they indicate the user's exact intent
+- The drawing acts as a stencil or template for where the design should appear
+- Respect the boundaries and shapes indicated by the drawing
+- If the drawing shows specific patterns or outlines, replicate them exactly in the final design
+- The drawing has MAXIMUM INFLUENCE - it overrides other parameters where there's conflict
+` : ''}
 NAIL DESIGN APPLICATION:
-${selectedDesignImage ? `
-DESIGN IMAGE PROVIDED (Influence: ${weights.designImage}%):
-${weights.designImage === 0 ? '- IGNORE the design image completely.' : 
-  weights.designImage === 100 ? `- CRITICAL: You MUST replicate the design from the reference image with MAXIMUM ACCURACY
-- Copy EVERY detail from the reference design: exact colors, patterns, shapes, lines, and decorative elements
-- The reference design shows the EXACT nail art that must appear on the fingernails
-- DO NOT interpret, simplify, or modify the design - COPY IT PRECISELY
-- Match color values EXACTLY as they appear in the reference
+${selectedDesignImages && selectedDesignImages.length > 0 ? `
+DESIGN IMAGES PROVIDED (${selectedDesignImages.length} reference${selectedDesignImages.length > 1 ? 's' : ''}, Influence: ${weights.designImage}%):
+${weights.designImage === 0 ? '- IGNORE the design images completely.' : 
+  weights.designImage === 100 ? `- CRITICAL: You MUST replicate the designs from the reference images with MAXIMUM ACCURACY
+- Copy EVERY detail from the reference designs: exact colors, patterns, shapes, lines, and decorative elements
+- The reference designs show the EXACT nail art that must appear on the fingernails
+- If multiple reference images are provided, blend their elements harmoniously or apply different designs to different nails
+- DO NOT interpret, simplify, or modify the designs - COPY THEM PRECISELY
+- Match color values EXACTLY as they appear in the references
 - Replicate all patterns, gradients, textures, and details with PERFECT FIDELITY
-- If the reference shows specific nail art elements (flowers, lines, dots, etc.), reproduce them IDENTICALLY
-- The design should look like a professional nail technician perfectly recreated the reference design
-- Adapt the design to fit each nail's shape while maintaining ALL design details
-- DO NOT add any base color, background color, or additional elements not in the reference
-- USE ONLY what you see in the reference design image - nothing more, nothing less
+- If the references show specific nail art elements (flowers, lines, dots, etc.), reproduce them IDENTICALLY
+- The design should look like a professional nail technician perfectly recreated the reference designs
+- Adapt the designs to fit each nail's shape while maintaining ALL design details
+${drawingImageUrl ? '- COMBINE the reference designs WITH the user\'s drawing guide - use the drawing for placement and the references for style/colors' : ''}
+- DO NOT add any base color, background color, or additional elements not in the references
+- USE ONLY what you see in the reference design images - nothing more, nothing less
 - This is a DIRECT COPY operation, not an interpretation or inspiration` : 
-  `- Use the design image as ${weights.designImage}% inspiration, blending with other parameters`}
-` : '- No design image provided'}
+  `- Use the design images as ${weights.designImage}% inspiration, blending with other parameters`}
+` : '- No design images provided'}
 
 ${designParamsSection}
 QUALITY REQUIREMENTS:
@@ -161,10 +193,11 @@ QUALITY REQUIREMENTS:
 - Consistent application across all visible nails
 - Natural lighting and shadows preserved
 - CRITICAL: Output image orientation MUST match input image orientation exactly (no rotation)
-${weights.designImage === 100 ? `- ACCURACY IS PARAMOUNT: The result must be a faithful reproduction of the reference design
-- Every color, pattern, and detail from the reference must be present in the output` : ''}
+${drawingImageUrl ? `- FOLLOW THE DRAWING GUIDE: The user's drawing shows exactly where and how to apply the design` : ''}
+${weights.designImage === 100 ? `- ACCURACY IS PARAMOUNT: The result must be a faithful reproduction of the reference design(s)
+- Every color, pattern, and detail from the reference(s) must be present in the output` : ''}
 
-OUTPUT: Return ONE image with the same hand, same number of fingers, same orientation and rotation, with nail art applied ONLY to the fingernail surfaces.${weights.designImage === 100 ? ' The nail design must be an EXACT REPLICA of the reference design provided.' : ''}`
+OUTPUT: Return ONE image with the same hand, same number of fingers, same orientation and rotation, with nail art applied ONLY to the fingernail surfaces.${drawingImageUrl ? ' Follow the user\'s drawing as your primary guide for placement and shape.' : ''}${weights.designImage === 100 ? ' The nail design must be an EXACT REPLICA of the reference design(s) provided.' : ''}`
 
     console.log('🤖 Generating nail design preview with gpt-image-1...')
     console.log('📥 Fetching original hand image:', originalImage)
@@ -186,22 +219,50 @@ OUTPUT: Return ONE image with the same hand, same number of fingers, same orient
     // Prepare images array
     const images: any[] = [imageFile]
     
-    // If reference design image is provided, fetch and add it
-    if (selectedDesignImage) {
-      console.log('📥 Fetching reference design image:', selectedDesignImage)
+    // If drawing image is provided, add it first (highest priority)
+    if (drawingImageUrl) {
+      console.log('✏️ Fetching drawing image:', drawingImageUrl)
       
-      const designImageResponse = await fetch(selectedDesignImage, {
+      const drawingResponse = await fetch(drawingImageUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Ivory/1.0)' },
       })
       
-      if (designImageResponse.ok) {
-        const designBlob = await designImageResponse.blob()
-        const designFile = await toFile(designBlob, 'design.png', { type: designBlob.type })
+      if (drawingResponse.ok) {
+        const drawingBlob = await drawingResponse.blob()
+        const drawingFile = await toFile(drawingBlob, 'drawing.png', { type: drawingBlob.type })
         
-        console.log('📥 Reference design converted to file object')
-        images.push(designFile)
+        console.log('✏️ Drawing image converted to file object')
+        images.push(drawingFile)
       } else {
-        console.warn('⚠️ Failed to fetch reference design, continuing without it')
+        console.warn('⚠️ Failed to fetch drawing image, continuing without it')
+      }
+    }
+    
+    // If reference design images are provided, fetch and add them
+    if (selectedDesignImages && selectedDesignImages.length > 0) {
+      console.log(`📥 Fetching ${selectedDesignImages.length} reference design image(s)`)
+      
+      for (let i = 0; i < selectedDesignImages.length; i++) {
+        const designImageUrl = selectedDesignImages[i]
+        console.log(`📥 Fetching design image ${i + 1}:`, designImageUrl)
+        
+        try {
+          const designImageResponse = await fetch(designImageUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Ivory/1.0)' },
+          })
+          
+          if (designImageResponse.ok) {
+            const designBlob = await designImageResponse.blob()
+            const designFile = await toFile(designBlob, `design-${i + 1}.png`, { type: designBlob.type })
+            
+            console.log(`📥 Design image ${i + 1} converted to file object`)
+            images.push(designFile)
+          } else {
+            console.warn(`⚠️ Failed to fetch design image ${i + 1}, skipping`)
+          }
+        } catch (error) {
+          console.warn(`⚠️ Error fetching design image ${i + 1}:`, error)
+        }
       }
     }
     
