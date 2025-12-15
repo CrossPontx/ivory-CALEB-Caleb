@@ -139,19 +139,16 @@ export default function TechDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white/95 backdrop-blur-xl border-b border-border/50 sticky top-0 z-10 safe-top shadow-sm">
+      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
         <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5">
           <div className="flex items-center justify-between">
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold bg-gradient-to-r from-terracotta to-rose bg-clip-text text-transparent">
-              Ivory
+            <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
+              IVORY'S CHOICE
             </h1>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="text-xs font-medium">Tech Dashboard</span>
-              </Badge>
+              <span className="hidden sm:block text-xs tracking-wider uppercase text-[#6B6B6B] font-light">Professional</span>
             </div>
           </div>
         </div>
@@ -160,37 +157,37 @@ export default function TechDashboardPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full mb-6 sm:mb-8 grid grid-cols-4 h-12 sm:h-14 bg-white/60 backdrop-blur-sm p-1.5 rounded-2xl shadow-sm">
+          <TabsList className="w-full mb-6 sm:mb-8 grid grid-cols-4 h-auto bg-white border-b border-[#E8E8E8] p-0 rounded-none">
             <TabsTrigger 
               value="requests" 
-              className="text-xs sm:text-sm font-medium rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200"
+              className="text-xs sm:text-sm font-light tracking-wider uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-300"
             >
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              <Clock className="w-4 h-4 mr-2" strokeWidth={1} />
               <span className="hidden xs:inline">Requests</span>
               <span className="xs:hidden">New</span>
             </TabsTrigger>
             <TabsTrigger 
               value="approved" 
-              className="text-xs sm:text-sm font-medium rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200"
+              className="text-xs sm:text-sm font-light tracking-wider uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-300"
             >
-              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              <CheckCircle2 className="w-4 h-4 mr-2" strokeWidth={1} />
               <span className="hidden xs:inline">Approved</span>
               <span className="xs:hidden">Done</span>
             </TabsTrigger>
             <TabsTrigger 
               value="designs" 
-              className="text-xs sm:text-sm font-medium rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200"
+              className="text-xs sm:text-sm font-light tracking-wider uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-300"
             >
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              <Sparkles className="w-4 h-4 mr-2" strokeWidth={1} />
               <span className="hidden xs:inline">Designs</span>
               <span className="xs:hidden">AI</span>
             </TabsTrigger>
             <TabsTrigger 
               value="gallery" 
-              className="text-xs sm:text-sm font-medium rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200"
+              className="text-xs sm:text-sm font-light tracking-wider uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-300"
             >
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span className="hidden xs:inline">Gallery</span>
               <span className="xs:hidden">Work</span>
@@ -283,15 +280,15 @@ export default function TechDashboardPage() {
               ))}
 
             {requests.filter((req) => req.status === "pending").length === 0 && (
-              <Card className="p-12 sm:p-16 text-center border-0 shadow-lg bg-white/60 backdrop-blur-sm">
+              <div className="p-12 sm:p-16 text-center border border-[#E8E8E8]">
                 <div className="max-w-sm mx-auto">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-muted/40 to-muted/20 flex items-center justify-center">
-                    <Clock className="w-8 h-8 text-muted-foreground/60" />
+                  <div className="w-16 h-16 mx-auto mb-6 border border-[#E8E8E8] flex items-center justify-center">
+                    <Clock className="w-8 h-8 text-[#8B7355]" strokeWidth={1} />
                   </div>
-                  <h3 className="font-serif text-xl font-bold text-charcoal mb-2">All Caught Up!</h3>
-                  <p className="text-muted-foreground">No pending requests at the moment</p>
+                  <h3 className="font-serif text-xl font-light text-[#1A1A1A] mb-2 tracking-tight">All Caught Up</h3>
+                  <p className="text-sm text-[#6B6B6B] font-light">No pending requests at the moment</p>
                 </div>
-              </Card>
+              </div>
             )}
           </TabsContent>
 
@@ -337,15 +334,15 @@ export default function TechDashboardPage() {
               ))}
 
             {requests.filter((req) => req.status === "approved").length === 0 && (
-              <Card className="p-12 sm:p-16 text-center border-0 shadow-lg bg-white/60 backdrop-blur-sm">
+              <div className="p-12 sm:p-16 text-center border border-[#E8E8E8]">
                 <div className="max-w-sm mx-auto">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
-                    <CheckCircle2 className="w-8 h-8 text-green-600/60" />
+                  <div className="w-16 h-16 mx-auto mb-6 border border-[#E8E8E8] flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-[#8B7355]" strokeWidth={1} />
                   </div>
-                  <h3 className="font-serif text-xl font-bold text-charcoal mb-2">No Approved Designs</h3>
-                  <p className="text-muted-foreground">Approved requests will appear here</p>
+                  <h3 className="font-serif text-xl font-light text-[#1A1A1A] mb-2 tracking-tight">No Approved Designs</h3>
+                  <p className="text-sm text-[#6B6B6B] font-light">Approved requests will appear here</p>
                 </div>
-              </Card>
+              </div>
             )}
           </TabsContent>
 
@@ -410,27 +407,26 @@ export default function TechDashboardPage() {
                 </div>
               </>
             ) : (
-              <Card className="p-10 sm:p-16 text-center border-0 shadow-lg bg-white/60 backdrop-blur-sm">
+              <div className="p-10 sm:p-16 text-center border border-[#E8E8E8]">
                 <div className="max-w-md mx-auto">
-                  <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-terracotta/20 to-rose/20 flex items-center justify-center">
-                    <Sparkles className="w-10 h-10 text-terracotta/60" />
+                  <div className="w-20 h-20 mx-auto mb-6 border border-[#E8E8E8] flex items-center justify-center">
+                    <Sparkles className="w-10 h-10 text-[#8B7355]" strokeWidth={1} />
                   </div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-3">
+                  <h3 className="font-serif text-2xl font-light text-[#1A1A1A] mb-3 tracking-tight">
                     Create Your First Design
                   </h3>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                  <p className="text-sm text-[#6B6B6B] mb-6 leading-relaxed font-light">
                     Use AI to generate stunning nail art designs and showcase your creativity
                   </p>
                   <Button
                     onClick={() => router.push("/capture")}
-                    size="lg"
-                    className="h-12 px-8 bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 shadow-lg active:scale-95 transition-all"
+                    className="h-12 px-8 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95"
                   >
-                    <Plus className="w-5 h-5 mr-2" />
+                    <Plus className="w-5 h-5 mr-2" strokeWidth={1.5} />
                     Create Design
                   </Button>
                 </div>
-              </Card>
+              </div>
             )}
           </TabsContent>
 
@@ -476,29 +472,28 @@ export default function TechDashboardPage() {
                 </div>
               </>
             ) : (
-              <Card className="p-10 sm:p-16 text-center border-0 shadow-lg bg-white/60 backdrop-blur-sm">
+              <div className="p-10 sm:p-16 text-center border border-[#E8E8E8]">
                 <div className="max-w-md mx-auto">
-                  <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-muted/40 to-muted/20 flex items-center justify-center">
-                    <svg className="w-10 h-10 text-muted-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <div className="w-20 h-20 mx-auto mb-6 border border-[#E8E8E8] flex items-center justify-center">
+                    <svg className="w-10 h-10 text-[#8B7355]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-3">
+                  <h3 className="font-serif text-2xl font-light text-[#1A1A1A] mb-3 tracking-tight">
                     Build Your Portfolio
                   </h3>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                  <p className="text-sm text-[#6B6B6B] mb-6 leading-relaxed font-light">
                     Showcase your best nail art work to attract more clients and grow your business
                   </p>
                   <Button
                     onClick={() => router.push("/tech/profile-setup")}
-                    size="lg"
-                    className="h-12 px-8 bg-gradient-to-r from-terracotta to-rose hover:from-terracotta/90 hover:to-rose/90 shadow-lg active:scale-95 transition-all"
+                    className="h-12 px-8 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95"
                   >
-                    <Plus className="w-5 h-5 mr-2" />
+                    <Plus className="w-5 h-5 mr-2" strokeWidth={1.5} />
                     Add Photos
                   </Button>
                 </div>
-              </Card>
+              </div>
             )}
           </TabsContent>
         </Tabs>
