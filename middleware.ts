@@ -8,7 +8,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-ch
 const protectedRoutes = ['/home', '/capture', '/editor', '/look', '/profile', '/send-to-tech', '/share', '/tech'];
 
 // Routes that should redirect to home if already authenticated
-const authRoutes = ['/'];
+const authRoutes = ['/', '/auth'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
