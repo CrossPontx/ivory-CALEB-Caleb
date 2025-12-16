@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReferralCard } from '@/components/referral-card';
@@ -19,7 +19,7 @@ interface CreditTransaction {
   createdAt: string;
 }
 
-export default function CreditsPage() {
+function CreditsContent() {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -138,5 +138,21 @@ export default function CreditsPage() {
       </Card>
       </div>
     </div>
+  );
+}
+
+export default function CreditsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush">
+        <div className="container max-w-4xl mx-auto px-4 sm:px-6 py-8">
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <CreditsContent />
+    </Suspense>
   );
 }
