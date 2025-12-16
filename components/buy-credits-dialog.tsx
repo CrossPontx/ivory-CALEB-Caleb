@@ -40,7 +40,17 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to create checkout session' }));
+        
+        if (response.status === 403) {
+          toast.error('Please subscribe to a plan first to purchase additional credits.');
+          setTimeout(() => {
+            window.location.href = '/billing';
+          }, 2000);
+          return;
+        }
+        
+        throw new Error(errorData.message || errorData.error || 'Failed to create checkout session');
       }
 
       const { url } = await response.json();
@@ -51,11 +61,9 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
       } else {
         throw new Error('No checkout URL returned');
       }
-
-
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Failed to start checkout. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to start checkout. Please try again.');
       setLoading(null);
     }
   };

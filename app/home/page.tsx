@@ -21,6 +21,8 @@ export default function HomePage() {
   const { credits } = useCredits()
   const [looks, setLooks] = useState<NailLook[]>([])
   const [showReferralBanner, setShowReferralBanner] = useState(true)
+  const [subscriptionTier, setSubscriptionTier] = useState('free')
+  const [subscriptionStatus, setSubscriptionStatus] = useState('inactive')
 
   useEffect(() => {
     // Load user's looks from database
@@ -33,6 +35,10 @@ export default function HomePage() {
         }
 
         const user = JSON.parse(userStr)
+        
+        // Set subscription info
+        setSubscriptionTier(user.subscriptionTier || 'free')
+        setSubscriptionStatus(user.subscriptionStatus || 'inactive')
         
         // Redirect tech users to their dashboard
         if (user.userType === 'tech') {
@@ -87,7 +93,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
-        {/* Referral Promotion Banner */}
+        {/* Credits/Subscription Banner */}
         {showReferralBanner && (
           <div className="mb-6 sm:mb-8 relative">
             <div className="border border-[#E8E8E8] p-6 sm:p-8 relative bg-[#F8F7F5]">
@@ -100,27 +106,57 @@ export default function HomePage() {
               </button>
 
               <div className="max-w-2xl">
-                <div className="flex items-start gap-4 sm:gap-6 mb-6">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white">
-                    <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355]" strokeWidth={1} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
-                      Referral Program
-                    </h3>
-                    <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
-                      Refer 3 friends and receive <span className="text-[#1A1A1A] font-normal">1 complimentary credit</span> to create more designs
-                    </p>
-                  </div>
-                </div>
+                {subscriptionTier !== 'free' && subscriptionStatus === 'active' ? (
+                  // Paid users - show referral program
+                  <>
+                    <div className="flex items-start gap-4 sm:gap-6 mb-6">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white">
+                        <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355]" strokeWidth={1} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                          Referral Program
+                        </h3>
+                        <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
+                          Refer 3 friends and receive <span className="text-[#1A1A1A] font-normal">1 complimentary credit</span> to create more designs
+                        </p>
+                      </div>
+                    </div>
 
-                <Button
-                  onClick={() => router.push('/settings/credits')}
-                  className="h-11 sm:h-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-6 sm:px-8 text-xs tracking-widest uppercase rounded-none font-light"
-                >
-                  <Share2 className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                  Get Referral Link
-                </Button>
+                    <Button
+                      onClick={() => router.push('/settings/credits')}
+                      className="h-11 sm:h-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-6 sm:px-8 text-xs tracking-widest uppercase rounded-none font-light"
+                    >
+                      <Share2 className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                      Get Referral Link
+                    </Button>
+                  </>
+                ) : (
+                  // Free users - show upgrade prompt
+                  <>
+                    <div className="flex items-start gap-4 sm:gap-6 mb-6">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white">
+                        <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355]" strokeWidth={1} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                          Upgrade Your Plan
+                        </h3>
+                        <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
+                          Subscribe to get <span className="text-[#1A1A1A] font-normal">monthly credits</span> and unlock the ability to purchase additional credits anytime
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => router.push('/billing')}
+                      className="h-11 sm:h-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-6 sm:px-8 text-xs tracking-widest uppercase rounded-none font-light"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                      View Plans
+                    </Button>
+                  </>
+                )}
 
                 {credits !== null && (
                   <p className="text-xs tracking-wider text-[#6B6B6B] mt-4 font-light uppercase">
