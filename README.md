@@ -15,6 +15,7 @@ AI-powered nail design platform connecting clients with professional nail techni
 - 👩‍🎨 **Find Nail Techs** - Connect with professional nail technicians
 - 📤 **Share Designs** - Share your creations with friends
 - 💬 **Request Service** - Send designs directly to nail techs
+- ⌚ **Apple Watch Support** - Optimized UI for Apple Watch displays
 
 ### For Nail Technicians
 - 📬 **Receive Requests** - Get design requests from clients
@@ -38,6 +39,8 @@ AI-powered nail design platform connecting clients with professional nail techni
   - `gpt-4o-mini` - Text analysis
 - **Email**: Resend
 - **Deployment**: Vercel
+- **Mobile**: Capacitor (iOS/Android)
+- **Apple Watch**: Responsive design optimizations
 
 ### AI Architecture
 
@@ -284,6 +287,18 @@ For security issues, please email security@ivory.app
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details
+
+## Apple Watch Support
+
+The app is fully optimized for Apple Watch displays with:
+- Automatic viewport detection (≤272px)
+- Simplified, touch-optimized UI
+- Compact navigation and layouts
+- Essential features only
+- Reusable watch-optimized components
+
+**Quick Start**: See [APPLE_WATCH_QUICK_START.md](APPLE_WATCH_QUICK_START.md)  
+**Full Guide**: See [APPLE_WATCH_SETUP.md](APPLE_WATCH_SETUP.md)
 
 ## Support
 

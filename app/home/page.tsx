@@ -8,6 +8,7 @@ import Image from "next/image"
 import { useCredits } from "@/hooks/use-credits"
 import { BottomNav } from "@/components/bottom-nav"
 import ContentModerationMenu from "@/components/content-moderation-menu"
+import { useIsAppleWatch, HideOnWatch, WatchButton, WatchGrid } from "@/components/watch-optimized-layout"
 
 type NailLook = {
   id: string
@@ -26,6 +27,7 @@ export default function HomePage() {
   const [subscriptionTier, setSubscriptionTier] = useState('free')
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive')
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+  const isWatch = useIsAppleWatch()
 
   useEffect(() => {
     // Load user's looks from database
@@ -87,18 +89,18 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
-        <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5">
-          <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
-            IVORY'S CHOICE
+      <header className={`bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top ${isWatch ? 'watch-compact' : ''}`}>
+        <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-2' : 'px-5 sm:px-6 py-4 sm:py-5'}`}>
+          <h1 className={`font-serif font-light text-[#1A1A1A] tracking-tight ${isWatch ? 'text-sm' : 'text-xl sm:text-2xl'}`}>
+            {isWatch ? "IVORY'S" : "IVORY'S CHOICE"}
           </h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
-        {/* Credits/Subscription Banner */}
-        {showReferralBanner && (
+      <main className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-3 pb-20' : 'px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32'}`}>
+        {/* Credits/Subscription Banner - Hidden on Watch */}
+        {showReferralBanner && !isWatch && (
           <div className="mb-6 sm:mb-8 relative">
             <div className="border border-[#E8E8E8] p-6 sm:p-8 relative bg-[#F8F7F5]">
               {/* Close button */}
@@ -172,21 +174,36 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="mb-6 sm:mb-8">
-          <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 font-light">Collection</p>
-          <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">Your Designs</h2>
+        {/* Credits display for watch */}
+        {isWatch && credits !== null && (
+          <div className="mb-3 text-center">
+            <p className="text-[10px] tracking-wider text-[#6B6B6B] font-light uppercase">
+              {credits} Credit{credits !== 1 ? 's' : ''}
+            </p>
+          </div>
+        )}
+
+        <div className={isWatch ? 'mb-3' : 'mb-6 sm:mb-8'}>
+          <HideOnWatch>
+            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 font-light">Collection</p>
+          </HideOnWatch>
+          <h2 className={`font-serif font-light text-[#1A1A1A] tracking-tight ${isWatch ? 'text-sm text-center' : 'text-2xl sm:text-3xl'}`}>
+            Your Designs
+          </h2>
         </div>
 
         {/* Gallery Grid */}
         {looks.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
+          <WatchGrid className={isWatch ? 'mb-3' : 'mb-6 sm:mb-8'} cols={2}>
             {looks.map((look) => (
               <div
                 key={look.id}
-                className="group active:scale-95 transition-all duration-300 border border-[#E8E8E8] hover:border-[#8B7355] bg-white overflow-visible"
+                className={`group active:scale-95 transition-all duration-300 bg-white overflow-visible ${
+                  isWatch ? 'watch-card' : 'border border-[#E8E8E8] hover:border-[#8B7355]'
+                }`}
               >
                 <div 
-                  className="aspect-square relative overflow-hidden bg-[#F8F7F5] cursor-pointer"
+                  className={`aspect-square relative overflow-hidden bg-[#F8F7F5] cursor-pointer ${isWatch ? 'watch-image' : ''}`}
                   onClick={() => router.push(`/look/${look.id}`)}
                 >
                   <Image 
@@ -196,15 +213,17 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500" 
                   />
                 </div>
-                <div className="p-3 sm:p-4 relative">
+                <div className={isWatch ? 'p-2' : 'p-3 sm:p-4 relative'}>
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <h3 
-                      className="font-serif text-sm sm:text-base text-[#1A1A1A] line-clamp-1 font-light cursor-pointer flex-1"
+                      className={`font-serif text-[#1A1A1A] line-clamp-1 font-light cursor-pointer flex-1 ${
+                        isWatch ? 'text-[10px]' : 'text-sm sm:text-base'
+                      }`}
                       onClick={() => router.push(`/look/${look.id}`)}
                     >
                       {look.title}
                     </h3>
-                    {currentUserId && look.userId && look.userId !== currentUserId && (
+                    {!isWatch && currentUserId && look.userId && look.userId !== currentUserId && (
                       <ContentModerationMenu
                         currentUserId={currentUserId}
                         contentType="look"
@@ -215,28 +234,38 @@ export default function HomePage() {
                       />
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-[#6B6B6B] font-light">
-                    <Sparkles className="w-3 h-3" strokeWidth={1} />
-                    <span>
-                      {new Date(look.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
+                  <HideOnWatch>
+                    <div className="flex items-center gap-1.5 text-xs text-[#6B6B6B] font-light">
+                      <Sparkles className="w-3 h-3" strokeWidth={1} />
+                      <span>
+                        {new Date(look.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </HideOnWatch>
                 </div>
               </div>
             ))}
-          </div>
+          </WatchGrid>
         ) : (
-          <div className="text-center py-16 sm:py-20 px-4 border border-[#E8E8E8] mb-6">
+          <div className={`text-center px-4 mb-6 ${isWatch ? 'py-8 watch-card' : 'py-16 sm:py-20 border border-[#E8E8E8]'}`}>
             <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 mx-auto mb-6 border border-[#E8E8E8] flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-[#8B7355]" strokeWidth={1} />
+              <div className={`mx-auto mb-4 flex items-center justify-center ${
+                isWatch ? 'w-10 h-10' : 'w-16 h-16 border border-[#E8E8E8]'
+              }`}>
+                <Sparkles className={`text-[#8B7355] ${isWatch ? 'w-5 h-5' : 'w-8 h-8'}`} strokeWidth={1} />
               </div>
-              <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-3 tracking-tight">No Designs Yet</h3>
-              <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
-                Begin your journey by creating your first design
+              <h3 className={`font-serif font-light text-[#1A1A1A] mb-2 tracking-tight ${
+                isWatch ? 'text-sm' : 'text-2xl sm:text-3xl mb-3'
+              }`}>
+                No Designs Yet
+              </h3>
+              <p className={`text-[#6B6B6B] leading-relaxed font-light ${
+                isWatch ? 'text-[10px]' : 'text-sm sm:text-base'
+              }`}>
+                {isWatch ? 'Create your first design' : 'Begin your journey by creating your first design'}
               </p>
             </div>
           </div>
@@ -245,13 +274,20 @@ export default function HomePage() {
         {/* Create Button - Large */}
         {looks.length > 0 && (
           <div className="flex justify-center px-4">
-            <Button
-              className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 w-full sm:w-auto text-xs tracking-widest uppercase rounded-none font-light active:scale-95"
-              onClick={startNewDesign}
-            >
-              <Plus className="w-5 h-5 mr-2" strokeWidth={1.5} />
-              Create Design
-            </Button>
+            {isWatch ? (
+              <WatchButton onClick={startNewDesign} className="rounded-full">
+                <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+                Create
+              </WatchButton>
+            ) : (
+              <Button
+                className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 w-full sm:w-auto text-xs tracking-widest uppercase rounded-none font-light active:scale-95"
+                onClick={startNewDesign}
+              >
+                <Plus className="w-5 h-5 mr-2" strokeWidth={1.5} />
+                Create Design
+              </Button>
+            )}
           </div>
         )}
       </main>

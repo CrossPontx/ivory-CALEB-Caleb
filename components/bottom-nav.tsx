@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { Home, Plus, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useIsAppleWatch } from './watch-optimized-layout'
 
 interface BottomNavProps {
   onCenterAction?: () => void
@@ -12,50 +13,67 @@ interface BottomNavProps {
 export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: BottomNavProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const isWatch = useIsAppleWatch()
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path)
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 safe-bottom">
+    <nav className={cn(
+      "fixed bottom-0 left-0 right-0 z-30 safe-bottom",
+      isWatch && "watch-nav"
+    )}>
       {/* Elegant backdrop */}
       <div className="absolute inset-0 bg-white/98 backdrop-blur-sm border-t border-[#E8E8E8]" />
       
-      <div className="relative max-w-screen-xl mx-auto px-6 sm:px-8">
-        <div className="flex items-center justify-around h-16 sm:h-18">
+      <div className={cn(
+        "relative max-w-screen-xl mx-auto",
+        isWatch ? "px-2" : "px-6 sm:px-8"
+      )}>
+        <div className={cn(
+          "flex items-center justify-around",
+          isWatch ? "h-12" : "h-16 sm:h-18"
+        )}>
           {/* Home Button */}
           <button
             onClick={() => router.push('/home')}
             className={cn(
-              'flex items-center justify-center w-12 h-12 transition-all duration-300',
+              'flex flex-col items-center justify-center transition-all duration-300',
               'active:scale-95',
+              isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
               isActive('/home') 
                 ? 'text-[#1A1A1A]' 
                 : 'text-[#6B6B6B] hover:text-[#8B7355]'
             )}
           >
-            <Home className="w-6 h-6" strokeWidth={1} />
+            <Home className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+            {isWatch && <span className="text-[8px] mt-0.5">Home</span>}
           </button>
 
           {/* Center Action Button */}
           <button
             onClick={onCenterAction}
-            className="relative flex items-center justify-center w-12 h-12 -mt-2 bg-[#1A1A1A] hover:bg-[#8B7355] active:scale-95 transition-all duration-300"
+            className={cn(
+              "relative flex items-center justify-center bg-[#1A1A1A] hover:bg-[#8B7355] active:scale-95 transition-all duration-300",
+              isWatch ? "w-10 h-10 rounded-full" : "w-12 h-12 -mt-2"
+            )}
           >
-            <Plus className="w-6 h-6 text-white" strokeWidth={1.5} />
+            <Plus className={isWatch ? "w-5 h-5 text-white" : "w-6 h-6 text-white"} strokeWidth={1.5} />
           </button>
 
           {/* Profile Button */}
           <button
             onClick={() => router.push('/profile')}
             className={cn(
-              'flex items-center justify-center w-12 h-12 transition-all duration-300',
+              'flex flex-col items-center justify-center transition-all duration-300',
               'active:scale-95',
+              isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
               isActive('/profile') 
                 ? 'text-[#1A1A1A]' 
                 : 'text-[#6B6B6B] hover:text-[#8B7355]'
             )}
           >
-            <User className="w-6 h-6" strokeWidth={1} />
+            <User className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+            {isWatch && <span className="text-[8px] mt-0.5">Profile</span>}
           </button>
         </div>
       </div>
