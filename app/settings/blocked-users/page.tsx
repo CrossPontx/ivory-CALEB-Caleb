@@ -19,10 +19,16 @@ export default function BlockedUsersPage() {
 
   useEffect(() => {
     // Get current user ID from session/auth
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      setCurrentUserId(parseInt(userId));
-      fetchBlockedUsers(parseInt(userId));
+    const userStr = localStorage.getItem('ivoryUser');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUserId(user.id);
+        fetchBlockedUsers(user.id);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        router.push('/auth');
+      }
     } else {
       router.push('/auth');
     }
