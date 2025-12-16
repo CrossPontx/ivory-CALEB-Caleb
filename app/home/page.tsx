@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Plus, Home, Sparkles, User, Gift, Share2, X, MoreVertical } from "lucide-react"
+import { Plus, Sparkles, Gift, Share2, X } from "lucide-react"
 import Image from "next/image"
 import { useCredits } from "@/hooks/use-credits"
 import { BottomNav } from "@/components/bottom-nav"
@@ -184,7 +183,7 @@ export default function HomePage() {
             {looks.map((look) => (
               <div
                 key={look.id}
-                className="group active:scale-95 transition-all duration-300 border border-[#E8E8E8] hover:border-[#8B7355] bg-white"
+                className="group active:scale-95 transition-all duration-300 border border-[#E8E8E8] hover:border-[#8B7355] bg-white overflow-visible"
               >
                 <div 
                   className="aspect-square relative overflow-hidden bg-[#F8F7F5] cursor-pointer"
@@ -197,7 +196,7 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500" 
                   />
                 </div>
-                <div className="p-3 sm:p-4">
+                <div className="p-3 sm:p-4 relative">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <h3 
                       className="font-serif text-sm sm:text-base text-[#1A1A1A] line-clamp-1 font-light cursor-pointer flex-1"

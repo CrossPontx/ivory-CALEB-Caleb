@@ -33,10 +33,13 @@ export default function ContentModerationMenu({
 
   return (
     <>
-      <div className="relative">
+      <div className="relative z-50">
         <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="p-2 hover:bg-gray-100 rounded-full"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowMenu(!showMenu);
+          }}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           aria-label="More options"
         >
           <MoreVertical size={20} className="text-gray-600" />
@@ -45,16 +48,17 @@ export default function ContentModerationMenu({
         {showMenu && (
           <>
             <div
-              className="fixed inset-0 z-10"
+              className="fixed inset-0 z-40"
               onClick={() => setShowMenu(false)}
             />
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setShowFlagDialog(true);
                   setShowMenu(false);
                 }}
-                className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-gray-700"
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-gray-700 transition-colors"
               >
                 <Flag size={18} />
                 <span>Report Content</span>
@@ -62,11 +66,12 @@ export default function ContentModerationMenu({
               
               {showBlockOption && (
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setShowBlockDialog(true);
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-red-600 border-t border-gray-200"
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-red-600 border-t border-gray-200 transition-colors"
                 >
                   <UserX size={18} />
                   <span>Block User</span>
