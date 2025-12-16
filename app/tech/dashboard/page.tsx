@@ -35,6 +35,8 @@ export default function TechDashboardPage() {
   const [personalDesigns, setPersonalDesigns] = useState<PersonalDesign[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("requests")
+  const [subscriptionTier, setSubscriptionTier] = useState('free')
+  const [subscriptionStatus, setSubscriptionStatus] = useState('inactive')
 
   useEffect(() => {
     // Check for tab parameter in URL
@@ -53,6 +55,10 @@ export default function TechDashboardPage() {
         }
 
         const user = JSON.parse(userStr)
+        
+        // Set subscription info
+        setSubscriptionTier(user.subscriptionTier || 'free')
+        setSubscriptionStatus(user.subscriptionStatus || 'inactive')
         
         // Load design requests
         const requestsRes = await fetch(`/api/design-requests?techId=${user.id}`)
@@ -154,16 +160,28 @@ export default function TechDashboardPage() {
                 <Coins className="w-4 h-4 text-[#8B7355]" />
                 <CreditsDisplay showLabel={false} className="text-sm font-semibold" />
               </div>
-              <BuyCreditsDialog>
+              {subscriptionTier !== 'free' && subscriptionStatus === 'active' ? (
+                <BuyCreditsDialog>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="hidden sm:flex gap-1.5 h-9 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all"
+                  >
+                    <Coins className="w-4 h-4" />
+                    <span className="text-xs tracking-wider uppercase font-light">Buy</span>
+                  </Button>
+                </BuyCreditsDialog>
+              ) : (
                 <Button 
                   size="sm" 
                   variant="outline"
+                  onClick={() => router.push('/billing')}
                   className="hidden sm:flex gap-1.5 h-9 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all"
                 >
-                  <Coins className="w-4 h-4" />
-                  <span className="text-xs tracking-wider uppercase font-light">Buy</span>
+                  <Sparkles className="w-4 h-4" />
+                  <span className="text-xs tracking-wider uppercase font-light">Upgrade</span>
                 </Button>
-              </BuyCreditsDialog>
+              )}
               <span className="hidden md:block text-xs tracking-wider uppercase text-[#6B6B6B] font-light">Professional</span>
             </div>
           </div>
@@ -363,34 +381,66 @@ export default function TechDashboardPage() {
           </TabsContent>
 
           <TabsContent value="designs" className="space-y-5">
-            {/* Credits Info Card */}
-            <Card className="border-2 border-[#8B7355]/20 bg-gradient-to-br from-[#8B7355]/5 to-[#8B7355]/10">
-              <CardContent className="p-5 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white border border-[#E8E8E8] flex items-center justify-center">
-                      <Coins className="w-6 h-6 text-[#8B7355]" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-light tracking-wider uppercase text-[#6B6B6B]">Your Credits</span>
-                        <CreditsDisplay showLabel={false} className="text-2xl font-semibold text-[#1A1A1A]" />
+            {/* Credits/Subscription Info Card */}
+            {subscriptionTier !== 'free' && subscriptionStatus === 'active' ? (
+              // Paid users - show credits with buy option
+              <Card className="border-2 border-[#8B7355]/20 bg-gradient-to-br from-[#8B7355]/5 to-[#8B7355]/10">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-white border border-[#E8E8E8] flex items-center justify-center">
+                        <Coins className="w-6 h-6 text-[#8B7355]" />
                       </div>
-                      <p className="text-xs text-[#6B6B6B] font-light">1 credit per AI design generation</p>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-light tracking-wider uppercase text-[#6B6B6B]">Your Credits</span>
+                          <CreditsDisplay showLabel={false} className="text-2xl font-semibold text-[#1A1A1A]" />
+                        </div>
+                        <p className="text-xs text-[#6B6B6B] font-light">1 credit per AI design generation</p>
+                      </div>
                     </div>
+                    <BuyCreditsDialog>
+                      <Button 
+                        size="sm"
+                        className="h-10 px-5 bg-[#8B7355] text-white hover:bg-[#8B7355]/90 transition-all"
+                      >
+                        <Coins className="w-4 h-4 mr-2" />
+                        <span className="text-xs tracking-wider uppercase font-light">Buy Credits</span>
+                      </Button>
+                    </BuyCreditsDialog>
                   </div>
-                  <BuyCreditsDialog>
+                </CardContent>
+              </Card>
+            ) : (
+              // Free users - show upgrade prompt
+              <Card className="border-2 border-[#8B7355]/20 bg-gradient-to-br from-[#8B7355]/5 to-[#8B7355]/10">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 bg-white border border-[#E8E8E8] flex items-center justify-center flex-shrink-0">
+                        <Sparkles className="w-6 h-6 text-[#8B7355]" />
+                      </div>
+                      <div>
+                        <h3 className="font-serif text-lg font-light text-[#1A1A1A] mb-1 tracking-tight">
+                          Upgrade Your Plan
+                        </h3>
+                        <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
+                          Subscribe to get monthly credits and unlock the ability to purchase additional credits anytime
+                        </p>
+                      </div>
+                    </div>
                     <Button 
+                      onClick={() => router.push('/billing')}
                       size="sm"
-                      className="h-10 px-5 bg-[#8B7355] text-white hover:bg-[#8B7355]/90 transition-all"
+                      className="h-10 px-5 bg-[#8B7355] text-white hover:bg-[#8B7355]/90 transition-all whitespace-nowrap"
                     >
-                      <Coins className="w-4 h-4 mr-2" />
-                      <span className="text-xs tracking-wider uppercase font-light">Buy Credits</span>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      <span className="text-xs tracking-wider uppercase font-light">View Plans</span>
                     </Button>
-                  </BuyCreditsDialog>
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {personalDesigns.length > 0 ? (
               <>
