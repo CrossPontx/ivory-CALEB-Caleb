@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReferralCard } from '@/components/referral-card';
 import { CreditsDisplay } from '@/components/credits-display';
-import { BuyCreditsDialog } from '@/components/buy-credits-dialog';
 import { Coins, History } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -79,7 +78,17 @@ function CreditsContent() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <BuyCreditsDialog />
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Subscribe to a plan to get monthly credits and unlock the ability to purchase additional credits anytime.
+            </p>
+            <button
+              onClick={() => window.location.href = '/billing'}
+              className="w-full px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-md font-medium"
+            >
+              View Subscription Plans
+            </button>
+          </div>
         </CardContent>
       </Card>
 
