@@ -11,6 +11,7 @@ import { SubscriptionPlans } from '@/components/subscription-plans';
 import { ArrowLeft, Coins, CreditCard, History, Sparkles, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { CREDIT_PACKAGES } from '@/lib/stripe-config';
+import { toast } from 'sonner';
 
 interface CreditTransaction {
   id: number;
@@ -29,6 +30,23 @@ export default function BillingPage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive');
 
   useEffect(() => {
+    // Check for Stripe redirect parameters
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const success = urlParams.get('success');
+      const canceled = urlParams.get('canceled');
+      
+      if (success === 'true') {
+        toast.success('Payment successful! Your credits will be added shortly.');
+        // Clean up URL
+        window.history.replaceState({}, '', '/billing');
+      } else if (canceled === 'true') {
+        toast.error('Payment canceled. You can try again anytime.');
+        // Clean up URL
+        window.history.replaceState({}, '', '/billing');
+      }
+    }
+    
     fetchData();
   }, []);
 
