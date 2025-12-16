@@ -28,6 +28,7 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [subscriptionTier, setSubscriptionTier] = useState('free');
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive');
+  const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
     // Check for Stripe redirect parameters
@@ -58,6 +59,14 @@ export default function BillingPage() {
         const user = JSON.parse(userStr);
         setSubscriptionTier(user.subscriptionTier || 'free');
         setSubscriptionStatus(user.subscriptionStatus || 'inactive');
+        setCredits(user.credits || 0);
+      }
+
+      // Fetch current credits balance
+      const balanceResponse = await fetch('/api/credits/balance');
+      if (balanceResponse.ok) {
+        const balanceData = await balanceResponse.json();
+        setCredits(balanceData.credits);
       }
 
       // Fetch transactions
@@ -125,8 +134,14 @@ export default function BillingPage() {
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <CreditsDisplay showLabel={false} className="text-4xl sm:text-5xl font-bold" />
-                <span className="text-sm sm:text-base text-muted-foreground">credits</span>
+                {credits !== null ? (
+                  <>
+                    <span className="text-4xl sm:text-5xl font-bold">{credits}</span>
+                    <span className="text-sm sm:text-base text-muted-foreground">credits</span>
+                  </>
+                ) : (
+                  <span className="text-4xl sm:text-5xl font-bold animate-pulse">...</span>
+                )}
               </div>
             </div>
           </CardHeader>
