@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Check, DollarSign, MessageCircle, Plus, Sparkles, Clock, CheckCircle2 } from "lucide-react"
+import { Check, DollarSign, MessageCircle, Plus, Sparkles, Clock, CheckCircle2, Coins } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
+import { CreditsDisplay } from "@/components/credits-display"
+import { BuyCreditsDialog } from "@/components/buy-credits-dialog"
 
 type ClientRequest = {
   id: string
@@ -147,8 +149,22 @@ export default function TechDashboardPage() {
             <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
               IVORY'S CHOICE
             </h1>
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:block text-xs tracking-wider uppercase text-[#6B6B6B] font-light">Professional</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F8F7F5] border border-[#E8E8E8] rounded-full">
+                <Coins className="w-4 h-4 text-[#8B7355]" />
+                <CreditsDisplay showLabel={false} className="text-sm font-semibold" />
+              </div>
+              <BuyCreditsDialog>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="hidden sm:flex gap-1.5 h-9 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all"
+                >
+                  <Coins className="w-4 h-4" />
+                  <span className="text-xs tracking-wider uppercase font-light">Buy</span>
+                </Button>
+              </BuyCreditsDialog>
+              <span className="hidden md:block text-xs tracking-wider uppercase text-[#6B6B6B] font-light">Professional</span>
             </div>
           </div>
         </div>
@@ -347,6 +363,35 @@ export default function TechDashboardPage() {
           </TabsContent>
 
           <TabsContent value="designs" className="space-y-5">
+            {/* Credits Info Card */}
+            <Card className="border-2 border-[#8B7355]/20 bg-gradient-to-br from-[#8B7355]/5 to-[#8B7355]/10">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white border border-[#E8E8E8] flex items-center justify-center">
+                      <Coins className="w-6 h-6 text-[#8B7355]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-light tracking-wider uppercase text-[#6B6B6B]">Your Credits</span>
+                        <CreditsDisplay showLabel={false} className="text-2xl font-semibold text-[#1A1A1A]" />
+                      </div>
+                      <p className="text-xs text-[#6B6B6B] font-light">1 credit per AI design generation</p>
+                    </div>
+                  </div>
+                  <BuyCreditsDialog>
+                    <Button 
+                      size="sm"
+                      className="h-10 px-5 bg-[#8B7355] text-white hover:bg-[#8B7355]/90 transition-all"
+                    >
+                      <Coins className="w-4 h-4 mr-2" />
+                      <span className="text-xs tracking-wider uppercase font-light">Buy Credits</span>
+                    </Button>
+                  </BuyCreditsDialog>
+                </div>
+              </CardContent>
+            </Card>
+
             {personalDesigns.length > 0 ? (
               <>
                 <div className="flex justify-between items-center">
