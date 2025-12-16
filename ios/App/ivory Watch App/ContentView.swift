@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WatchConnectivity
+import Combine
 
 struct ContentView: View {
     @StateObject private var connectivity = WatchConnectivityManager()

@@ -9,18 +9,16 @@ import SwiftUI
 
 @main
 struct ivory_Watch_AppApp: App {
+    
+    init() {
+        // Configure app appearance
+        configureAppearance()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-    }
-}
-
-// MARK: - App Configuration
-extension ivory_Watch_AppApp {
-    init() {
-        // Configure app appearance
-        configureAppearance()
     }
     
     private func configureAppearance() {
