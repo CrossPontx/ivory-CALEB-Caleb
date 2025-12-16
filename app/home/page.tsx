@@ -4,16 +4,19 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Plus, Home, Sparkles, User, Gift, Share2, X } from "lucide-react"
+import { Plus, Home, Sparkles, User, Gift, Share2, X, MoreVertical } from "lucide-react"
 import Image from "next/image"
 import { useCredits } from "@/hooks/use-credits"
 import { BottomNav } from "@/components/bottom-nav"
+import ContentModerationMenu from "@/components/content-moderation-menu"
 
 type NailLook = {
   id: string
   imageUrl: string
   title: string
   createdAt: string
+  userId?: number
+  username?: string
 }
 
 export default function HomePage() {
@@ -23,6 +26,7 @@ export default function HomePage() {
   const [showReferralBanner, setShowReferralBanner] = useState(true)
   const [subscriptionTier, setSubscriptionTier] = useState('free')
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive')
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
 
   useEffect(() => {
     // Load user's looks from database
@@ -35,6 +39,7 @@ export default function HomePage() {
         }
 
         const user = JSON.parse(userStr)
+        setCurrentUserId(user.id)
         
         // Set subscription info
         setSubscriptionTier(user.subscriptionTier || 'free')
@@ -46,7 +51,7 @@ export default function HomePage() {
           return
         }
 
-        const response = await fetch(`/api/looks?userId=${user.id}`, {
+        const response = await fetch(`/api/looks?userId=${user.id}&currentUserId=${user.id}`, {
           cache: 'no-store' // Prevent caching to always get fresh data
         })
         
@@ -179,10 +184,12 @@ export default function HomePage() {
             {looks.map((look) => (
               <div
                 key={look.id}
-                className="group cursor-pointer active:scale-95 transition-all duration-300 border border-[#E8E8E8] hover:border-[#8B7355] bg-white"
-                onClick={() => router.push(`/look/${look.id}`)}
+                className="group active:scale-95 transition-all duration-300 border border-[#E8E8E8] hover:border-[#8B7355] bg-white"
               >
-                <div className="aspect-square relative overflow-hidden bg-[#F8F7F5]">
+                <div 
+                  className="aspect-square relative overflow-hidden bg-[#F8F7F5] cursor-pointer"
+                  onClick={() => router.push(`/look/${look.id}`)}
+                >
                   <Image 
                     src={look.imageUrl || "/placeholder.svg"} 
                     alt={look.title} 
@@ -191,9 +198,24 @@ export default function HomePage() {
                   />
                 </div>
                 <div className="p-3 sm:p-4">
-                  <h3 className="font-serif text-sm sm:text-base text-[#1A1A1A] mb-1 line-clamp-1 font-light">
-                    {look.title}
-                  </h3>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h3 
+                      className="font-serif text-sm sm:text-base text-[#1A1A1A] line-clamp-1 font-light cursor-pointer flex-1"
+                      onClick={() => router.push(`/look/${look.id}`)}
+                    >
+                      {look.title}
+                    </h3>
+                    {currentUserId && look.userId && look.userId !== currentUserId && (
+                      <ContentModerationMenu
+                        currentUserId={currentUserId}
+                        contentType="look"
+                        contentId={parseInt(look.id)}
+                        contentOwnerId={look.userId}
+                        contentOwnerUsername={look.username || `User ${look.userId}`}
+                        showBlockOption={true}
+                      />
+                    )}
+                  </div>
                   <div className="flex items-center gap-1.5 text-xs text-[#6B6B6B] font-light">
                     <Sparkles className="w-3 h-3" strokeWidth={1} />
                     <span>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { looks } from '@/db/schema';
+import { looks, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET(
@@ -11,8 +11,23 @@ export async function GET(
     const { id } = await params;
     
     const look = await db
-      .select()
+      .select({
+        id: looks.id,
+        userId: looks.userId,
+        title: looks.title,
+        imageUrl: looks.imageUrl,
+        originalImageUrl: looks.originalImageUrl,
+        aiPrompt: looks.aiPrompt,
+        nailPositions: looks.nailPositions,
+        isPublic: looks.isPublic,
+        viewCount: looks.viewCount,
+        createdAt: looks.createdAt,
+        user: {
+          username: users.username,
+        },
+      })
       .from(looks)
+      .leftJoin(users, eq(looks.userId, users.id))
       .where(eq(looks.id, parseInt(id)));
 
     if (look.length === 0) {

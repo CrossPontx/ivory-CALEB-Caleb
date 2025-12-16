@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Edit2, Heart, Loader2 } from "lucide-react"
 import Image from "next/image"
+import ContentModerationMenu from "@/components/content-moderation-menu"
 
 type Look = {
   id: number
@@ -26,8 +27,16 @@ export default function SharedDesignPage() {
   const [look, setLook] = useState<Look | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
 
   useEffect(() => {
+    // Get current user ID
+    const userStr = localStorage.getItem("ivoryUser")
+    if (userStr) {
+      const user = JSON.parse(userStr)
+      setCurrentUserId(user.id)
+    }
+
     const fetchLook = async () => {
       try {
         const response = await fetch(`/api/looks/${params.id}`)
@@ -105,7 +114,7 @@ export default function SharedDesignPage() {
           </div>
           <div className="p-4">
             <div className="flex items-start justify-between mb-2">
-              <div>
+              <div className="flex-1">
                 <h2 className="font-serif text-2xl font-bold text-charcoal mb-1">{look.title}</h2>
                 <p className="text-sm text-muted-foreground">
                   {look.user?.username ? `Shared by @${look.user.username}` : 'Shared design'}
@@ -118,14 +127,26 @@ export default function SharedDesignPage() {
                   })}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={liked ? "text-red-500" : "text-muted-foreground"}
-                onClick={() => setLiked(!liked)}
-              >
-                <Heart className={`w-6 h-6 ${liked ? "fill-current" : ""}`} />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={liked ? "text-red-500" : "text-muted-foreground"}
+                  onClick={() => setLiked(!liked)}
+                >
+                  <Heart className={`w-6 h-6 ${liked ? "fill-current" : ""}`} />
+                </Button>
+                {currentUserId && look.userId !== currentUserId && (
+                  <ContentModerationMenu
+                    currentUserId={currentUserId}
+                    contentType="look"
+                    contentId={look.id}
+                    contentOwnerId={look.userId}
+                    contentOwnerUsername={look.user?.username || `User ${look.userId}`}
+                    showBlockOption={true}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </Card>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { looks, blockedUsers } from '@/db/schema';
+import { looks, blockedUsers, users } from '@/db/schema';
 import { eq, desc, notInArray } from 'drizzle-orm';
 
 export async function GET(request: Request) {
@@ -21,8 +21,21 @@ export async function GET(request: Request) {
 
     if (userId) {
       const userLooks = await db
-        .select()
+        .select({
+          id: looks.id,
+          userId: looks.userId,
+          title: looks.title,
+          imageUrl: looks.imageUrl,
+          originalImageUrl: looks.originalImageUrl,
+          aiPrompt: looks.aiPrompt,
+          nailPositions: looks.nailPositions,
+          isPublic: looks.isPublic,
+          viewCount: looks.viewCount,
+          createdAt: looks.createdAt,
+          username: users.username,
+        })
         .from(looks)
+        .leftJoin(users, eq(looks.userId, users.id))
         .where(eq(looks.userId, parseInt(userId)))
         .orderBy(desc(looks.createdAt));
       
@@ -33,14 +46,40 @@ export async function GET(request: Request) {
     let allLooks;
     if (blockedUserIds.length > 0) {
       allLooks = await db
-        .select()
+        .select({
+          id: looks.id,
+          userId: looks.userId,
+          title: looks.title,
+          imageUrl: looks.imageUrl,
+          originalImageUrl: looks.originalImageUrl,
+          aiPrompt: looks.aiPrompt,
+          nailPositions: looks.nailPositions,
+          isPublic: looks.isPublic,
+          viewCount: looks.viewCount,
+          createdAt: looks.createdAt,
+          username: users.username,
+        })
         .from(looks)
+        .leftJoin(users, eq(looks.userId, users.id))
         .where(notInArray(looks.userId, blockedUserIds))
         .orderBy(desc(looks.createdAt));
     } else {
       allLooks = await db
-        .select()
+        .select({
+          id: looks.id,
+          userId: looks.userId,
+          title: looks.title,
+          imageUrl: looks.imageUrl,
+          originalImageUrl: looks.originalImageUrl,
+          aiPrompt: looks.aiPrompt,
+          nailPositions: looks.nailPositions,
+          isPublic: looks.isPublic,
+          viewCount: looks.viewCount,
+          createdAt: looks.createdAt,
+          username: users.username,
+        })
         .from(looks)
+        .leftJoin(users, eq(looks.userId, users.id))
         .orderBy(desc(looks.createdAt));
     }
     
