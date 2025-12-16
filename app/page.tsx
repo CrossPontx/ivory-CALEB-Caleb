@@ -30,16 +30,11 @@ export default function HomePage() {
           } else {
             router.push('/user-type')
           }
-        } else if (isNative) {
-          // If native app and no session, go directly to auth
-          router.push('/auth')
         }
+        // Removed forced redirect to /auth for native apps
+        // Users can now browse the landing page without authentication
       } catch (error) {
         console.error('Session check error:', error)
-        if (isNative) {
-          // If native app and error checking session, go to auth
-          router.push('/auth')
-        }
       } finally {
         setIsChecking(false)
       }
@@ -57,11 +52,6 @@ export default function HomePage() {
     )
   }
 
-  // If native app, don't show landing page (will redirect to /auth)
-  if (isNativeApp) {
-    return null
-  }
-
-  // Show landing page for web users
+  // Show landing page for all users (web and native)
   return <LandingPage />
 }

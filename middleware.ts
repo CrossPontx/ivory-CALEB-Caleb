@@ -8,7 +8,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-ch
 const protectedRoutes = ['/home', '/capture', '/editor', '/look', '/profile', '/send-to-tech', '/tech'];
 
 // Public routes that don't require authentication
-const publicRoutes = ['/shared'];
+const publicRoutes = ['/shared', '/explore'];
 
 // Routes that should redirect to home if already authenticated
 const authRoutes = ['/', '/auth'];

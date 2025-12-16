@@ -630,6 +630,11 @@
     tslib "2.6.2"
     yargs "17.7.2"
 
+"@capacitor/browser@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@capacitor/browser/-/browser-8.0.0.tgz#2c8689b95d47d22bab394289a3bec171d6bfcec5"
+  integrity sha512-xey7maszGABKuStvXDV4vXN+EzIyz0o7zlyzw4JKG6o/1GzqeqHqVuE+8Ux+Hks3DZji4LoriWZVgVF6mR6RGg==
+
 "@capacitor/camera@^8.0.0":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@capacitor/camera/-/camera-8.0.0.tgz#baa83e73ad6a45be5911cbd56c12eca3b549a215"

@@ -35,6 +35,7 @@ export default function LandingPage() {
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-10">
+              <button onClick={() => router.push('/explore')} className="text-xs tracking-widest uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300">Explore</button>
               <a href="#experience" className="text-xs tracking-widest uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300">Experience</a>
               <a href="#craft" className="text-xs tracking-widest uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300">The Craft</a>
               <a href="#collection" className="text-xs tracking-widest uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300">Collection</a>
@@ -81,17 +82,17 @@ export default function LandingPage() {
               
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
                 <Button 
-                  onClick={() => router.push('/auth?signup=true')}
+                  onClick={() => router.push('/explore')}
                   className="bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-8 sm:px-12 h-12 sm:h-14 text-xs tracking-widest uppercase rounded-none font-light"
                 >
-                  Explore Collection
+                  Browse Designs
                 </Button>
                 <Button 
                   variant="outline"
-                  onClick={() => router.push('/auth')}
+                  onClick={() => router.push('/auth?signup=true')}
                   className="border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 px-8 sm:px-12 h-12 sm:h-14 text-xs tracking-widest uppercase rounded-none font-light"
                 >
-                  Discover More
+                  Get Started
                 </Button>
               </div>
             </div>

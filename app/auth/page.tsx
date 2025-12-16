@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
+import { Capacitor } from "@capacitor/core"
+import { Browser } from "@capacitor/browser"
 
 function AuthPageContent() {
   const router = useRouter()
@@ -64,6 +66,38 @@ function AuthPageContent() {
     }
     
     checkSession()
+
+    // Listen for OAuth completion from in-app browser
+    const isNative = Capacitor.isNativePlatform();
+    if (isNative) {
+      // Poll for session after OAuth flow
+      const pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch('/api/auth/session')
+          const data = await response.json()
+          
+          if (data.user) {
+            clearInterval(pollInterval)
+            localStorage.setItem("ivoryUser", JSON.stringify(data.user))
+            
+            if (data.user.userType === 'tech') {
+              router.push('/tech/dashboard')
+            } else if (data.user.userType === 'client') {
+              router.push('/home')
+            } else {
+              router.push('/user-type')
+            }
+          }
+        } catch (error) {
+          // Continue polling
+        }
+      }, 1000)
+
+      // Clean up polling after 2 minutes
+      setTimeout(() => clearInterval(pollInterval), 120000)
+
+      return () => clearInterval(pollInterval)
+    }
   }, [router])
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -153,9 +187,10 @@ function AuthPageContent() {
     
     const baseUrl = window.location.origin;
     const redirectUri = `${baseUrl}/api/auth/callback/${provider}`;
+    const isNative = Capacitor.isNativePlatform();
     
     if (provider === 'google') {
-      // Redirect to Google OAuth
+      // Build Google OAuth URL
       const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       googleAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
       googleAuthUrl.searchParams.set('redirect_uri', redirectUri);
@@ -164,9 +199,18 @@ function AuthPageContent() {
       googleAuthUrl.searchParams.set('access_type', 'offline');
       googleAuthUrl.searchParams.set('prompt', 'consent');
       
-      window.location.href = googleAuthUrl.toString();
+      if (isNative) {
+        // Use in-app browser (Safari View Controller on iOS)
+        await Browser.open({ 
+          url: googleAuthUrl.toString(),
+          presentationStyle: 'popover' // Uses Safari View Controller on iOS
+        });
+      } else {
+        // Web: redirect in same window
+        window.location.href = googleAuthUrl.toString();
+      }
     } else if (provider === 'apple') {
-      // Redirect to Apple OAuth
+      // Build Apple OAuth URL
       const appleAuthUrl = new URL('https://appleid.apple.com/auth/authorize');
       appleAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '');
       appleAuthUrl.searchParams.set('redirect_uri', redirectUri);
@@ -174,7 +218,16 @@ function AuthPageContent() {
       appleAuthUrl.searchParams.set('response_mode', 'form_post');
       appleAuthUrl.searchParams.set('scope', 'name email');
       
-      window.location.href = appleAuthUrl.toString();
+      if (isNative) {
+        // Use in-app browser (Safari View Controller on iOS)
+        await Browser.open({ 
+          url: appleAuthUrl.toString(),
+          presentationStyle: 'popover' // Uses Safari View Controller on iOS
+        });
+      } else {
+        // Web: redirect in same window
+        window.location.href = appleAuthUrl.toString();
+      }
     }
   }
 
