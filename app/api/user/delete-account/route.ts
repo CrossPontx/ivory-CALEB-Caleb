@@ -12,7 +12,12 @@ import {
   aiGenerations,
   techProfiles,
   services,
-  portfolioImages
+  portfolioImages,
+  referrals,
+  creditTransactions,
+  contentFlags,
+  blockedUsers,
+  colorPalettes
 } from "@/db/schema"
 import { eq } from "drizzle-orm"
 
@@ -49,17 +54,36 @@ export async function DELETE() {
     // 3. Delete AI generations
     await db.delete(aiGenerations).where(eq(aiGenerations.userId, userId))
 
-    // 4. Delete reviews (both given and received)
+    // 4. Delete credit transactions
+    await db.delete(creditTransactions).where(eq(creditTransactions.userId, userId))
+
+    // 5. Delete referrals (both as referrer and referred user)
+    await db.delete(referrals).where(eq(referrals.referrerId, userId))
+    await db.delete(referrals).where(eq(referrals.referredUserId, userId))
+
+    // 6. Delete content flags (as reporter, content owner, or reviewer)
+    await db.delete(contentFlags).where(eq(contentFlags.reporterId, userId))
+    await db.delete(contentFlags).where(eq(contentFlags.contentOwnerId, userId))
+    await db.delete(contentFlags).where(eq(contentFlags.reviewedBy, userId))
+
+    // 7. Delete blocked users (as blocker or blocked)
+    await db.delete(blockedUsers).where(eq(blockedUsers.blockerId, userId))
+    await db.delete(blockedUsers).where(eq(blockedUsers.blockedId, userId))
+
+    // 8. Delete custom color palettes created by user
+    await db.delete(colorPalettes).where(eq(colorPalettes.createdBy, userId))
+
+    // 9. Delete reviews (both given and received)
     await db.delete(reviews).where(eq(reviews.clientId, userId))
     
-    // 5. Delete design requests (both sent and received)
+    // 10. Delete design requests (both sent and received)
     await db.delete(designRequests).where(eq(designRequests.clientId, userId))
     await db.delete(designRequests).where(eq(designRequests.techId, userId))
 
-    // 6. Delete looks
+    // 11. Delete looks
     await db.delete(looks).where(eq(looks.userId, userId))
 
-    // 7. If user is a tech, delete tech-specific data
+    // 12. If user is a tech, delete tech-specific data
     const [techProfile] = await db
       .select()
       .from(techProfiles)
@@ -80,10 +104,10 @@ export async function DELETE() {
       await db.delete(techProfiles).where(eq(techProfiles.id, techProfile.id))
     }
 
-    // 8. Delete all sessions
+    // 13. Delete all sessions
     await db.delete(sessions).where(eq(sessions.userId, userId))
 
-    // 9. Finally, delete the user account
+    // 14. Finally, delete the user account
     await db.delete(users).where(eq(users.id, userId))
 
     // Clear the session cookie
