@@ -22,15 +22,10 @@ export async function GET(
             avatar: true,
           },
         },
-        services: {
-          where: (services, { eq }) => eq(services.isActive, true),
-        },
-        portfolioImages: {
-          orderBy: (portfolioImages, { desc }) => [desc(portfolioImages.orderIndex)],
-        },
+        services: true,
+        portfolioImages: true,
         reviews: {
           limit: 10,
-          orderBy: (reviews, { desc }) => [desc(reviews.createdAt)],
           with: {
             client: {
               columns: {
