@@ -76,6 +76,28 @@ export async function POST(request: NextRequest) {
       })
       .where(eq(bookings.id, bookingId));
 
+    // Check if tech has Stripe Connect account
+    const techProfile = booking.techProfile as any;
+    const hasStripeConnect = techProfile.stripeConnectAccountId && techProfile.payoutsEnabled;
+
+    // Create payment intent data with transfer if tech has Connect account
+    const paymentIntentData: any = {
+      metadata: {
+        bookingId: bookingId.toString(),
+        userId: session.userId.toString(),
+        techProfileId: techProfile.id.toString(),
+        type: 'booking_payment',
+      },
+    };
+
+    // If tech has Stripe Connect, use destination charges to split payment
+    if (hasStripeConnect) {
+      paymentIntentData.application_fee_amount = Math.round(serviceFee * 100); // Platform fee in cents
+      paymentIntentData.transfer_data = {
+        destination: techProfile.stripeConnectAccountId, // Tech receives service price
+      };
+    }
+
     // Create Stripe Checkout Session
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -85,21 +107,10 @@ export async function POST(request: NextRequest) {
             currency: 'usd',
             product_data: {
               name: (booking.service as any).name,
-              description: `Appointment with ${(booking.techProfile as any).businessName || (booking.techProfile as any).user.username}`,
+              description: `Appointment with ${techProfile.businessName || techProfile.user.username}`,
               images: (booking.look as any)?.imageUrl ? [(booking.look as any).imageUrl] : undefined,
             },
-            unit_amount: Math.round(servicePrice * 100), // Convert to cents
-          },
-          quantity: 1,
-        },
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'Service Fee',
-              description: 'Platform service fee (12.5%)',
-            },
-            unit_amount: Math.round(serviceFee * 100), // Convert to cents
+            unit_amount: Math.round(totalPrice * 100), // Total amount in cents
           },
           quantity: 1,
         },
@@ -111,15 +122,10 @@ export async function POST(request: NextRequest) {
       metadata: {
         bookingId: bookingId.toString(),
         userId: session.userId.toString(),
+        techProfileId: techProfile.id.toString(),
         type: 'booking_payment',
       },
-      payment_intent_data: {
-        metadata: {
-          bookingId: bookingId.toString(),
-          userId: session.userId.toString(),
-          type: 'booking_payment',
-        },
-      },
+      payment_intent_data: paymentIntentData,
     });
 
     // Save checkout session ID

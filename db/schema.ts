@@ -45,6 +45,11 @@ export const techProfiles = pgTable('tech_profiles', {
   website: varchar('website', { length: 255 }),
   instagramHandle: varchar('instagram_handle', { length: 100 }),
   isVerified: boolean('is_verified').default(false),
+  // Stripe Connect for payouts
+  stripeConnectAccountId: varchar('stripe_connect_account_id', { length: 255 }),
+  stripeAccountStatus: varchar('stripe_account_status', { length: 50 }).default('not_setup'), // not_setup, pending, active, restricted
+  payoutsEnabled: boolean('payouts_enabled').default(false),
+  chargesEnabled: boolean('charges_enabled').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
