@@ -58,193 +58,163 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
   return (
     <div className="space-y-6">
       {/* Basic Tier */}
-      <Card className={`border-0 shadow-md bg-white ${isBasicPlan ? 'ring-2 ring-primary/20' : ''}`}>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl font-serif">
+      <div className={`border ${isBasicPlan ? 'border-[#8B7355]' : 'border-[#E8E8E8]'} p-6 sm:p-8 bg-white`}>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
                 Basic
-                {isBasicPlan && (
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border-0">
-                    Current Plan
-                  </Badge>
-                )}
-              </CardTitle>
-              <CardDescription className="text-sm sm:text-base mt-1">
-                Perfect for trying out the platform
-              </CardDescription>
+              </h3>
+              {isBasicPlan && (
+                <span className="px-3 py-1 bg-[#8B7355] text-white text-xs tracking-wider uppercase font-light">
+                  Current
+                </span>
+              )}
             </div>
-            <div className="text-left sm:text-right">
-              <div className="text-3xl sm:text-4xl font-bold">$0</div>
-              <div className="text-sm text-muted-foreground">forever</div>
-            </div>
+            <p className="text-sm text-[#6B6B6B] font-light">
+              Perfect for trying out the platform
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-3 mb-4">
-            <li className="flex items-center gap-3 text-sm sm:text-base">
-              <div className="p-1 bg-primary/10 rounded">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <span>5 credits on signup</span>
-            </li>
-            <li className="flex items-center gap-3 text-sm sm:text-base">
-              <div className="p-1 bg-primary/10 rounded">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <span>Basic design tools</span>
-            </li>
-            <li className="flex items-center gap-3 text-sm sm:text-base">
-              <div className="p-1 bg-primary/10 rounded">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <span>Community support</span>
-            </li>
-            <li className="flex items-center gap-3 text-sm sm:text-base text-muted-foreground">
-              <div className="p-1 bg-muted rounded">
-                <Check className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <span>Upgrade to buy more credits</span>
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
+          <div className="text-left sm:text-right">
+            <div className="font-serif text-4xl sm:text-5xl font-light text-[#1A1A1A]">$0</div>
+            <div className="text-xs tracking-wider uppercase text-[#6B6B6B] font-light mt-1">Forever</div>
+          </div>
+        </div>
+        
+        <ul className="space-y-4">
+          <li className="flex items-start gap-3 text-sm sm:text-base font-light text-[#1A1A1A]">
+            <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <span>5 credits on signup</span>
+          </li>
+          <li className="flex items-start gap-3 text-sm sm:text-base font-light text-[#1A1A1A]">
+            <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <span>Basic design tools</span>
+          </li>
+          <li className="flex items-start gap-3 text-sm sm:text-base font-light text-[#1A1A1A]">
+            <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <span>Community support</span>
+          </li>
+          <li className="flex items-start gap-3 text-sm sm:text-base font-light text-[#6B6B6B]">
+            <Check className="h-5 w-5 text-[#6B6B6B] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <span>Upgrade to buy more credits</span>
+          </li>
+        </ul>
+      </div>
 
       {/* Subscription Plans */}
-      <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         {SUBSCRIPTION_PLANS.map((plan) => (
-          <Card
+          <div
             key={plan.id}
-            className={`relative border-0 shadow-lg bg-white overflow-hidden ${
-              plan.popular ? 'ring-2 ring-primary' : ''
-            } ${isCurrentPlan(plan.id) ? 'ring-2 ring-green-500' : ''}`}
+            className={`relative border-2 ${
+              plan.popular ? 'border-[#8B7355]' : 'border-[#E8E8E8]'
+            } ${isCurrentPlan(plan.id) ? 'border-green-600' : ''} p-6 sm:p-8 bg-white`}
           >
             {plan.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full shadow-md z-10">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#8B7355] text-white text-xs tracking-wider uppercase px-4 py-1.5 font-light z-10">
                 Most Popular
               </div>
             )}
             {isCurrentPlan(plan.id) && (
-              <div className="absolute -top-3 right-4 bg-green-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-md z-10">
+              <div className="absolute -top-3 right-4 bg-green-600 text-white text-xs tracking-wider uppercase px-4 py-1.5 font-light z-10">
                 Active
               </div>
             )}
 
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-2xl" />
-
-            <CardHeader className="relative">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1">
-                  <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl font-serif mb-2">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      {plan.id === 'pro' ? (
-                        <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                      ) : (
-                        <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                      )}
-                    </div>
-                    {plan.name}
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
-                    {plan.credits} credits per month
-                  </CardDescription>
-                </div>
-                <div className="text-left sm:text-right">
-                  <div className="text-3xl sm:text-4xl font-bold">${plan.price / 100}</div>
-                  <div className="text-sm text-muted-foreground">/month</div>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-6 relative">
-              <ul className="space-y-3">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3 text-sm sm:text-base">
-                    <div className="p-1 bg-primary/10 rounded mt-0.5">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    </div>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                className="w-full shadow-md hover:shadow-lg transition-all"
-                size="lg"
-                onClick={() => handleSubscribe(plan.id)}
-                disabled={loading !== null || isCurrentPlan(plan.id)}
-              >
-                {loading === plan.id ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Processing...
-                  </>
-                ) : isCurrentPlan(plan.id) ? (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    Current Plan
-                  </>
-                ) : (
-                  `Subscribe to ${plan.name}`
-                )}
-              </Button>
-
-              {!isCurrentPlan(plan.id) && (
-                <p className="text-xs text-center text-muted-foreground">
-                  Buy additional credits anytime after subscribing
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
+              <div className="flex-1">
+                <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight mb-2">
+                  {plan.name}
+                </h3>
+                <p className="text-sm text-[#6B6B6B] font-light">
+                  {plan.credits} credits per month
                 </p>
+              </div>
+              <div className="text-left sm:text-right">
+                <div className="font-serif text-4xl sm:text-5xl font-light text-[#1A1A1A]">
+                  ${plan.price / 100}
+                </div>
+                <div className="text-xs tracking-wider uppercase text-[#6B6B6B] font-light mt-1">/month</div>
+              </div>
+            </div>
+
+            <ul className="space-y-4 mb-8">
+              {plan.features.map((feature, index) => (
+                <li key={index} className="flex items-start gap-3 text-sm sm:text-base font-light text-[#1A1A1A]">
+                  <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => handleSubscribe(plan.id)}
+              disabled={loading !== null || isCurrentPlan(plan.id)}
+              className={`w-full h-12 font-light text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 ${
+                isCurrentPlan(plan.id)
+                  ? 'bg-green-600 text-white cursor-default'
+                  : 'bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 active:scale-95'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {loading === plan.id ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1} />
+                  Processing...
+                </>
+              ) : isCurrentPlan(plan.id) ? (
+                <>
+                  <Check className="h-4 w-4" strokeWidth={1} />
+                  Current Plan
+                </>
+              ) : (
+                `Subscribe to ${plan.name}`
               )}
-            </CardContent>
-          </Card>
+            </button>
+
+            {!isCurrentPlan(plan.id) && (
+              <p className="text-xs text-center text-[#6B6B6B] font-light mt-4">
+                Buy additional credits anytime after subscribing
+              </p>
+            )}
+          </div>
         ))}
       </div>
 
-      <Card className="border-0 shadow-md bg-gradient-to-br from-sand/10 via-white to-ivory/20">
-        <CardContent className="p-6 sm:p-8">
-          <h3 className="font-serif text-lg sm:text-xl font-bold mb-4 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            About Subscriptions
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg mt-0.5">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm sm:text-base">Monthly Credits</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Refresh on your billing date</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg mt-0.5">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm sm:text-base">Credits Roll Over</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Unused credits never expire</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg mt-0.5">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm sm:text-base">Buy More Anytime</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Starting from 5 credits</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg mt-0.5">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm sm:text-base">Cancel Anytime</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">No long-term commitment</p>
-              </div>
+      <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-[#F8F7F5]">
+        <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-6">
+          About Subscriptions
+        </h3>
+        <div className="grid sm:grid-cols-2 gap-6">
+          <div className="flex items-start gap-4">
+            <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <div>
+              <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Monthly Credits</p>
+              <p className="text-xs text-[#6B6B6B] font-light">Refresh on your billing date</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-start gap-4">
+            <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <div>
+              <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Credits Roll Over</p>
+              <p className="text-xs text-[#6B6B6B] font-light">Unused credits never expire</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <div>
+              <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Buy More Anytime</p>
+              <p className="text-xs text-[#6B6B6B] font-light">Starting from 5 credits</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
+            <div>
+              <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Cancel Anytime</p>
+              <p className="text-xs text-[#6B6B6B] font-light">No long-term commitment</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
