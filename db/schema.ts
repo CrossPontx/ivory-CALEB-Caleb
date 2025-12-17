@@ -5,6 +5,8 @@ import { relations } from 'drizzle-orm';
 export const userTypeEnum = pgEnum('user_type', ['client', 'tech']);
 export const requestStatusEnum = pgEnum('request_status', ['pending', 'approved', 'modified', 'rejected', 'completed']);
 export const authProviderEnum = pgEnum('auth_provider', ['email', 'google', 'apple']);
+export const bookingStatusEnum = pgEnum('booking_status', ['pending', 'confirmed', 'cancelled', 'completed', 'no_show']);
+export const dayOfWeekEnum = pgEnum('day_of_week', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
 
 // Users table - both clients and nail techs
 export const users: any = pgTable('users', {
@@ -58,6 +60,71 @@ export const services = pgTable('services', {
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Tech availability schedule
+export const techAvailability = pgTable('tech_availability', {
+  id: serial('id').primaryKey(),
+  techProfileId: integer('tech_profile_id').references(() => techProfiles.id).notNull(),
+  dayOfWeek: dayOfWeekEnum('day_of_week').notNull(),
+  startTime: varchar('start_time', { length: 5 }).notNull(), // HH:MM format
+  endTime: varchar('end_time', { length: 5 }).notNull(), // HH:MM format
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Tech time off / blocked dates
+export const techTimeOff = pgTable('tech_time_off', {
+  id: serial('id').primaryKey(),
+  techProfileId: integer('tech_profile_id').references(() => techProfiles.id).notNull(),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date').notNull(),
+  reason: text('reason'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Bookings/Appointments
+export const bookings = pgTable('bookings', {
+  id: serial('id').primaryKey(),
+  clientId: integer('client_id').references(() => users.id).notNull(),
+  techProfileId: integer('tech_profile_id').references(() => techProfiles.id).notNull(),
+  serviceId: integer('service_id').references(() => services.id).notNull(),
+  lookId: integer('look_id').references(() => looks.id), // Design they want
+  appointmentDate: timestamp('appointment_date').notNull(),
+  duration: integer('duration').notNull(), // in minutes
+  status: bookingStatusEnum('status').default('pending').notNull(),
+  clientNotes: text('client_notes'),
+  techNotes: text('tech_notes'),
+  servicePrice: decimal('service_price', { precision: 10, scale: 2 }).notNull(), // Original service price
+  serviceFee: decimal('service_fee', { precision: 10, scale: 2 }).notNull(), // 12.5% platform fee
+  totalPrice: decimal('total_price', { precision: 10, scale: 2 }).notNull(), // servicePrice + serviceFee
+  paymentStatus: varchar('payment_status', { length: 50 }).default('pending'), // pending, paid, refunded
+  stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
+  stripeCheckoutSessionId: varchar('stripe_checkout_session_id', { length: 255 }),
+  paidAt: timestamp('paid_at'),
+  cancellationReason: text('cancellation_reason'),
+  cancelledBy: integer('cancelled_by').references(() => users.id),
+  cancelledAt: timestamp('cancelled_at'),
+  refundedAt: timestamp('refunded_at'),
+  refundAmount: decimal('refund_amount', { precision: 10, scale: 2 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// AI-generated design breakdowns for nail techs
+export const designBreakdowns = pgTable('design_breakdowns', {
+  id: serial('id').primaryKey(),
+  lookId: integer('look_id').references(() => looks.id).notNull(),
+  bookingId: integer('booking_id').references(() => bookings.id),
+  generatedFor: integer('generated_for').references(() => users.id).notNull(), // Tech who requested it
+  breakdown: jsonb('breakdown').notNull(), // Structured breakdown with steps, products, techniques
+  rawText: text('raw_text').notNull(), // Full AI-generated text
+  difficulty: varchar('difficulty', { length: 50 }), // beginner, intermediate, advanced
+  estimatedTime: integer('estimated_time'), // in minutes
+  productsNeeded: jsonb('products_needed'), // Array of products/tools
+  techniques: jsonb('techniques'), // Array of techniques used
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // Nail design looks created by users
@@ -242,6 +309,55 @@ export const techProfilesRelations = relations(techProfiles, ({ one, many }) => 
   services: many(services),
   portfolioImages: many(portfolioImages),
   reviews: many(reviews),
+  availability: many(techAvailability),
+  timeOff: many(techTimeOff),
+  bookings: many(bookings),
+}));
+
+export const servicesRelations = relations(services, ({ one, many }) => ({
+  techProfile: one(techProfiles, {
+    fields: [services.techProfileId],
+    references: [techProfiles.id],
+  }),
+  bookings: many(bookings),
+}));
+
+export const bookingsRelations = relations(bookings, ({ one }) => ({
+  client: one(users, {
+    fields: [bookings.clientId],
+    references: [users.id],
+  }),
+  techProfile: one(techProfiles, {
+    fields: [bookings.techProfileId],
+    references: [techProfiles.id],
+  }),
+  service: one(services, {
+    fields: [bookings.serviceId],
+    references: [services.id],
+  }),
+  look: one(looks, {
+    fields: [bookings.lookId],
+    references: [looks.id],
+  }),
+  designBreakdown: one(designBreakdowns, {
+    fields: [bookings.id],
+    references: [designBreakdowns.bookingId],
+  }),
+}));
+
+export const designBreakdownsRelations = relations(designBreakdowns, ({ one }) => ({
+  look: one(looks, {
+    fields: [designBreakdowns.lookId],
+    references: [looks.id],
+  }),
+  booking: one(bookings, {
+    fields: [designBreakdowns.bookingId],
+    references: [bookings.id],
+  }),
+  generatedForUser: one(users, {
+    fields: [designBreakdowns.generatedFor],
+    references: [users.id],
+  }),
 }));
 
 export const looksRelations = relations(looks, ({ one, many }) => ({

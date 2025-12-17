@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/db';
-import { users, creditTransactions } from '@/db/schema';
+import { users, creditTransactions, bookings, notifications } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import Stripe from 'stripe';
 
@@ -74,47 +74,94 @@ export async function POST(request: NextRequest) {
 
           console.log(`Subscription activated for user ${userId}: ${planId}`);
         } else {
-          // Handle one-time credit purchase
-          const userId = parseInt(session.metadata?.userId || '0');
-          const credits = parseInt(session.metadata?.credits || '0');
-          const packageId = session.metadata?.packageId;
+          const paymentType = session.metadata?.type;
 
-          if (!userId || !credits) {
-            console.error('Invalid metadata in session:', session.metadata);
-            break;
+          if (paymentType === 'booking_payment') {
+            // Handle booking payment
+            const bookingId = parseInt(session.metadata?.bookingId || '0');
+            const userId = parseInt(session.metadata?.userId || '0');
+
+            if (!bookingId || !userId) {
+              console.error('Invalid booking payment metadata:', session.metadata);
+              break;
+            }
+
+            const paymentIntentId = session.payment_intent as string;
+
+            // Update booking payment status
+            await db
+              .update(bookings)
+              .set({
+                paymentStatus: 'paid',
+                stripePaymentIntentId: paymentIntentId,
+                paidAt: new Date(),
+                updatedAt: new Date(),
+              })
+              .where(eq(bookings.id, bookingId));
+
+            // Create notification for tech
+            const booking = await db.query.bookings.findFirst({
+              where: eq(bookings.id, bookingId),
+              with: {
+                techProfile: true,
+                service: true,
+              },
+            });
+
+            if (booking) {
+              await db.insert(notifications).values({
+                userId: (booking.techProfile as any).userId,
+                type: 'booking_paid',
+                title: 'Booking Payment Received',
+                message: `Payment received for ${(booking.service as any).name}. You can now confirm the appointment.`,
+                relatedId: bookingId,
+              });
+            }
+
+            console.log(`Booking payment completed for booking ${bookingId}`);
+          } else {
+            // Handle one-time credit purchase
+            const userId = parseInt(session.metadata?.userId || '0');
+            const credits = parseInt(session.metadata?.credits || '0');
+            const packageId = session.metadata?.packageId;
+
+            if (!userId || !credits) {
+              console.error('Invalid metadata in session:', session.metadata);
+              break;
+            }
+
+            const [user] = await db
+              .select()
+              .from(users)
+              .where(eq(users.id, userId))
+              .limit(1);
+
+            if (!user) {
+              console.error('User not found:', userId);
+              break;
+            }
+
+            const newBalance = user.credits + credits;
+
+            await db
+              .update(users)
+              .set({ 
+                credits: newBalance,
+                updatedAt: new Date(),
+              })
+              .where(eq(users.id, userId));
+
+            await db.insert(creditTransactions).values({
+              userId,
+              amount: credits,
+              type: 'purchase',
+              description: `Purchased ${credits} credits (${packageId})`,
+              relatedId: null,
+              balanceAfter: newBalance,
+            });
+
+            console.log(`Successfully added ${credits} credits to user ${userId}`);
           }
-
-          const [user] = await db
-            .select()
-            .from(users)
-            .where(eq(users.id, userId))
-            .limit(1);
-
-          if (!user) {
-            console.error('User not found:', userId);
-            break;
-          }
-
-          const newBalance = user.credits + credits;
-
-          await db
-            .update(users)
-            .set({ 
-              credits: newBalance,
-              updatedAt: new Date(),
-            })
-            .where(eq(users.id, userId));
-
-          await db.insert(creditTransactions).values({
-            userId,
-            amount: credits,
-            type: 'purchase',
-            description: `Purchased ${credits} credits (${packageId})`,
-            relatedId: null,
-            balanceAfter: newBalance,
-          });
-
-          console.log(`Successfully added ${credits} credits to user ${userId}`);
         }
         break;
       }

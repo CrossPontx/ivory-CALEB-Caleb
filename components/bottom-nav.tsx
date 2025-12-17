@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Plus, User } from 'lucide-react'
+import { Home, Plus, User, Calendar, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsAppleWatch } from './watch-optimized-layout'
 
@@ -31,7 +31,8 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
       )}>
         <div className={cn(
           "flex items-center justify-around",
-          isWatch ? "h-12" : "h-16 sm:h-18"
+          isWatch ? "h-12" : "h-16 sm:h-18",
+          "max-w-md mx-auto"
         )}>
           {/* Home Button */}
           <button
@@ -47,6 +48,22 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
           >
             <Home className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
             {isWatch && <span className="text-[8px] mt-0.5">Home</span>}
+          </button>
+
+          {/* Bookings Button */}
+          <button
+            onClick={() => router.push('/bookings')}
+            className={cn(
+              'flex flex-col items-center justify-center transition-all duration-300',
+              'active:scale-95',
+              isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
+              isActive('/bookings') || isActive('/book') || isActive('/tech/bookings')
+                ? 'text-[#1A1A1A]' 
+                : 'text-[#6B6B6B] hover:text-[#8B7355]'
+            )}
+          >
+            <Calendar className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+            {isWatch && <span className="text-[8px] mt-0.5">Book</span>}
           </button>
 
           {/* Center Action Button */}
@@ -74,6 +91,22 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
           >
             <User className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
             {isWatch && <span className="text-[8px] mt-0.5">Profile</span>}
+          </button>
+
+          {/* Settings Button */}
+          <button
+            onClick={() => router.push('/settings')}
+            className={cn(
+              'flex flex-col items-center justify-center transition-all duration-300',
+              'active:scale-95',
+              isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
+              isActive('/settings') || isActive('/billing')
+                ? 'text-[#1A1A1A]' 
+                : 'text-[#6B6B6B] hover:text-[#8B7355]'
+            )}
+          >
+            <Settings className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+            {isWatch && <span className="text-[8px] mt-0.5">Settings</span>}
           </button>
         </div>
       </div>

@@ -191,6 +191,17 @@ export default function TechDashboardPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {/* Quick Actions */}
+          <div className="mb-6">
+            <Button 
+              onClick={() => router.push('/tech/bookings')}
+              className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              View Bookings & Appointments
+            </Button>
+          </div>
+
           <TabsList className="w-full mb-6 sm:mb-8 grid grid-cols-4 h-auto bg-white border-b border-[#E8E8E8] p-0 rounded-none">
             <TabsTrigger 
               value="requests" 
