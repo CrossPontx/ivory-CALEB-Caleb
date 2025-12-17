@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
               with: {
                 techProfile: true,
                 service: true,
+                look: true,
               },
             });
 
@@ -116,6 +117,35 @@ export async function POST(request: NextRequest) {
                 message: `Payment received for ${(booking.service as any).name}. You can now confirm the appointment.`,
                 relatedId: bookingId,
               });
+
+              // Auto-generate design breakdown if design is attached
+              if (booking.lookId) {
+                try {
+                  const breakdownResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/bookings/generate-breakdown`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ bookingId }),
+                  });
+
+                  if (breakdownResponse.ok) {
+                    console.log(`Design breakdown generated for booking ${bookingId}`);
+                    
+                    // Send additional notification about breakdown
+                    await db.insert(notifications).values({
+                      userId: (booking.techProfile as any).userId,
+                      type: 'design_breakdown_ready',
+                      title: 'Design Breakdown Ready',
+                      message: `AI-generated technical breakdown is ready for your upcoming appointment.`,
+                      relatedId: bookingId,
+                    });
+                  }
+                } catch (error) {
+                  console.error('Failed to generate design breakdown:', error);
+                  // Don't fail the webhook if breakdown generation fails
+                }
+              }
             }
 
             console.log(`Booking payment completed for booking ${bookingId}`);
