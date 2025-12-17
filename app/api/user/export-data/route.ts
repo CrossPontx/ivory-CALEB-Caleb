@@ -1,24 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { db } from '@/db';
-import { users, looks, portfolioImages, creditTransactions, referrals, bookings, techProfiles } from '@/db/schema';
+import { users, looks, portfolioImages, creditTransactions, referrals, bookings, techProfiles, sessions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get user from session
-    const sessionCookie = request.cookies.get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get('session')?.value;
+
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Parse session to get user ID
-    let userId: number;
-    try {
-      const sessionData = JSON.parse(sessionCookie.value);
-      userId = sessionData.userId;
-    } catch (error) {
+    // Get user from session
+    const [session] = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.token, sessionToken))
+      .limit(1);
+
+    if (!session) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
+
+    const userId = session.userId;
 
     // Fetch all user data
     const [userData] = await db.select().from(users).where(eq(users.id, userId));
