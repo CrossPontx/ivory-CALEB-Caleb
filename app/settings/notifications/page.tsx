@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { BottomNav } from "@/components/bottom-nav"
 import { ArrowLeft } from "lucide-react"
 
 export default function NotificationsPage() {
@@ -15,36 +15,43 @@ export default function NotificationsPage() {
   const [marketing, setMarketing] = useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush pb-24">
+    <div className="min-h-screen bg-white pb-24">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10 safe-top">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="active:scale-95 transition-transform">
-            <ArrowLeft className="w-5 h-5" />
+      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
+        <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5 flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => router.back()} 
+            className="hover:bg-[#F8F7F5] active:scale-95 transition-all rounded-none"
+          >
+            <ArrowLeft className="w-5 h-5" strokeWidth={1} />
           </Button>
-          <h1 className="font-serif text-lg sm:text-xl font-bold text-charcoal">Notifications</h1>
+          <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
+            Notifications
+          </h1>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
-        <Card className="p-6 bg-white rounded-2xl shadow-sm mb-4">
-          <h2 className="font-semibold text-base mb-4 text-charcoal">Notification Channels</h2>
+        <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-white mb-6">
+          <h2 className="font-serif text-xl font-light text-[#1A1A1A] tracking-tight mb-6">Notification Channels</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium text-sm">Email Notifications</div>
-                <div className="text-xs text-muted-foreground">Receive updates via email</div>
+                <div className="font-serif text-base font-light text-[#1A1A1A]">Email Notifications</div>
+                <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">Receive updates via email</div>
               </div>
               <button
                 onClick={() => setEmailNotifications(!emailNotifications)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  emailNotifications ? "bg-primary" : "bg-gray-300"
+                className={`relative inline-flex h-6 w-11 items-center transition-colors ${
+                  emailNotifications ? "bg-[#8B7355]" : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform bg-white transition-transform ${
                     emailNotifications ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
@@ -53,42 +60,42 @@ export default function NotificationsPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium text-sm">Push Notifications</div>
-                <div className="text-xs text-muted-foreground">Receive alerts on your device</div>
+                <div className="font-serif text-base font-light text-[#1A1A1A]">Push Notifications</div>
+                <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">Receive alerts on your device</div>
               </div>
               <button
                 onClick={() => setPushNotifications(!pushNotifications)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  pushNotifications ? "bg-primary" : "bg-gray-300"
+                className={`relative inline-flex h-6 w-11 items-center transition-colors ${
+                  pushNotifications ? "bg-[#8B7355]" : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform bg-white transition-transform ${
                     pushNotifications ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
               </button>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-6 bg-white rounded-2xl shadow-sm">
-          <h2 className="font-semibold text-base mb-4 text-charcoal">Notification Types</h2>
+        <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-white">
+          <h2 className="font-serif text-xl font-light text-[#1A1A1A] tracking-tight mb-6">Notification Types</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium text-sm">Design Requests</div>
-                <div className="text-xs text-muted-foreground">New requests and responses</div>
+                <div className="font-serif text-base font-light text-[#1A1A1A]">Design Requests</div>
+                <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">New requests and responses</div>
               </div>
               <button
                 onClick={() => setDesignRequests(!designRequests)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  designRequests ? "bg-primary" : "bg-gray-300"
+                className={`relative inline-flex h-6 w-11 items-center transition-colors ${
+                  designRequests ? "bg-[#8B7355]" : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform bg-white transition-transform ${
                     designRequests ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
@@ -97,17 +104,17 @@ export default function NotificationsPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium text-sm">Messages</div>
-                <div className="text-xs text-muted-foreground">Direct messages from techs</div>
+                <div className="font-serif text-base font-light text-[#1A1A1A]">Messages</div>
+                <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">Direct messages from techs</div>
               </div>
               <button
                 onClick={() => setMessages(!messages)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  messages ? "bg-primary" : "bg-gray-300"
+                className={`relative inline-flex h-6 w-11 items-center transition-colors ${
+                  messages ? "bg-[#8B7355]" : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform bg-white transition-transform ${
                     messages ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
@@ -116,25 +123,28 @@ export default function NotificationsPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium text-sm">Marketing & Updates</div>
-                <div className="text-xs text-muted-foreground">News and promotions</div>
+                <div className="font-serif text-base font-light text-[#1A1A1A]">Marketing & Updates</div>
+                <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">News and promotions</div>
               </div>
               <button
                 onClick={() => setMarketing(!marketing)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  marketing ? "bg-primary" : "bg-gray-300"
+                className={`relative inline-flex h-6 w-11 items-center transition-colors ${
+                  marketing ? "bg-[#8B7355]" : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform bg-white transition-transform ${
                     marketing ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
               </button>
             </div>
           </div>
-        </Card>
+        </div>
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav onCenterAction={() => router.push('/capture')} />
     </div>
   )
 }

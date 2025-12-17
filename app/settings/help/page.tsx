@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { BottomNav } from "@/components/bottom-nav"
 import { ArrowLeft, Send } from "lucide-react"
 
 export default function HelpPage() {
@@ -68,52 +67,61 @@ export default function HelpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-sand to-blush pb-24">
+    <div className="min-h-screen bg-white pb-24">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10 safe-top">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="active:scale-95 transition-transform">
-            <ArrowLeft className="w-5 h-5" />
+      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
+        <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5 flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => router.back()} 
+            className="hover:bg-[#F8F7F5] active:scale-95 transition-all rounded-none"
+          >
+            <ArrowLeft className="w-5 h-5" strokeWidth={1} />
           </Button>
-          <h1 className="font-serif text-lg sm:text-xl font-bold text-charcoal">Help & Support</h1>
+          <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
+            Help & Support
+          </h1>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
-        <Card className="p-6 bg-white rounded-2xl shadow-sm mb-4">
-          <h2 className="font-serif text-xl font-bold text-charcoal mb-2">How can we help?</h2>
-          <p className="text-sm text-muted-foreground mb-6">
+        <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-white mb-6">
+          <h2 className="font-serif text-2xl font-light text-[#1A1A1A] tracking-tight mb-2">How can we help?</h2>
+          <p className="text-sm text-[#6B6B6B] font-light mb-8">
             Send us a message and we'll get back to you as soon as possible.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="text-sm font-medium mb-2 block">Your Email</label>
-              <Input
+              <label className="text-xs tracking-wider uppercase text-[#6B6B6B] mb-2 block font-light">Your Email</label>
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
                 disabled={isSending}
+                className="w-full px-4 py-3 border border-[#E8E8E8] font-light text-base focus:outline-none focus:border-[#8B7355] transition-all duration-300"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Subject</label>
-              <Input
+              <label className="text-xs tracking-wider uppercase text-[#6B6B6B] mb-2 block font-light">Subject</label>
+              <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="What do you need help with?"
                 required
                 disabled={isSending}
+                className="w-full px-4 py-3 border border-[#E8E8E8] font-light text-base focus:outline-none focus:border-[#8B7355] transition-all duration-300"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Message</label>
+              <label className="text-xs tracking-wider uppercase text-[#6B6B6B] mb-2 block font-light">Message</label>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -121,48 +129,51 @@ export default function HelpPage() {
                 required
                 disabled={isSending}
                 rows={6}
-                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                className="w-full px-4 py-3 border border-[#E8E8E8] font-light text-base focus:outline-none focus:border-[#8B7355] transition-all duration-300 resize-none"
               />
             </div>
 
             {statusMessage && (
-              <p className={`text-sm ${statusMessage.includes("success") ? "text-green-600" : "text-destructive"}`}>
+              <p className={`text-sm font-light ${statusMessage.includes("success") ? "text-green-600" : "text-red-600"}`}>
                 {statusMessage}
               </p>
             )}
 
-            <Button
+            <button
               type="submit"
-              className="w-full h-12"
               disabled={isSending}
+              className="w-full h-12 bg-[#1A1A1A] text-white font-light text-sm tracking-wider uppercase hover:bg-[#1A1A1A]/90 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
             >
               {isSending ? (
                 "Sending..."
               ) : (
                 <>
-                  <Send className="w-4 h-4 mr-2" />
+                  <Send className="w-4 h-4" strokeWidth={1} />
                   Send Help Request
                 </>
               )}
-            </Button>
+            </button>
           </form>
-        </Card>
+        </div>
 
-        <Card className="p-6 bg-white rounded-2xl shadow-sm">
-          <h3 className="font-semibold text-base mb-3 text-charcoal">Other Ways to Reach Us</h3>
-          <div className="space-y-3 text-sm text-muted-foreground">
+        <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-white">
+          <h3 className="font-serif text-xl font-light text-[#1A1A1A] tracking-tight mb-4">Other Ways to Reach Us</h3>
+          <div className="space-y-3 text-sm font-light text-[#6B6B6B]">
             <div>
-              <strong className="text-charcoal">Email:</strong>{" "}
-              <a href="mailto:mirrosocial@gmail.com" className="text-primary hover:underline">
+              <span className="text-[#1A1A1A]">Email:</span>{" "}
+              <a href="mailto:mirrosocial@gmail.com" className="text-[#8B7355] hover:underline">
                 mirrosocial@gmail.com
               </a>
             </div>
             <div>
-              <strong className="text-charcoal">Response Time:</strong> We typically respond within 24-48 hours
+              <span className="text-[#1A1A1A]">Response Time:</span> We typically respond within 24-48 hours
             </div>
           </div>
-        </Card>
+        </div>
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav onCenterAction={() => router.push('/capture')} />
     </div>
   )
 }
