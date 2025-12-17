@@ -20,22 +20,18 @@ export default function PrivacyPage() {
         throw new Error('Failed to download data')
       }
 
-      // Get the blob from response
-      const blob = await response.blob()
+      // Get the HTML from response
+      const html = await response.text()
       
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `ivory-data-export-${Date.now()}.json`
-      document.body.appendChild(a)
-      a.click()
-      
-      // Cleanup
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      
-      toast.success('Your data has been downloaded successfully')
+      // Open in new window for printing as PDF
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(html)
+        printWindow.document.close()
+        toast.success('Opening print dialog to save as PDF')
+      } else {
+        toast.error('Please allow popups to download your data')
+      }
     } catch (error) {
       console.error('Error downloading data:', error)
       toast.error('Failed to download data. Please try again.')
