@@ -322,7 +322,7 @@ export const servicesRelations = relations(services, ({ one, many }) => ({
   bookings: many(bookings),
 }));
 
-export const bookingsRelations = relations(bookings, ({ one }) => ({
+export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   client: one(users, {
     fields: [bookings.clientId],
     references: [users.id],
@@ -339,10 +339,7 @@ export const bookingsRelations = relations(bookings, ({ one }) => ({
     fields: [bookings.lookId],
     references: [looks.id],
   }),
-  designBreakdown: one(designBreakdowns, {
-    fields: [bookings.id],
-    references: [designBreakdowns.bookingId],
-  }),
+  designBreakdowns: many(designBreakdowns),
 }));
 
 export const designBreakdownsRelations = relations(designBreakdowns, ({ one }) => ({
