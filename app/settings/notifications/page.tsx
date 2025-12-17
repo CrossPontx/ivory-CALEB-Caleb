@@ -46,15 +46,15 @@ export default function NotificationsPage() {
               </div>
               <button
                 onClick={() => setEmailNotifications(!emailNotifications)}
-                className={`relative inline-flex h-8 w-12 items-center rounded-full transition-all duration-300 ${
+                className={`relative w-14 h-8 rounded transition-colors duration-300 ${
                   emailNotifications 
                     ? "bg-[#8B7355]" 
                     : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                    emailNotifications ? "translate-x-5" : "translate-x-1"
+                  className={`absolute top-1 left-1 w-6 h-6 bg-white rounded transition-transform duration-300 ${
+                    emailNotifications ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
               </button>
@@ -67,15 +67,15 @@ export default function NotificationsPage() {
               </div>
               <button
                 onClick={() => setPushNotifications(!pushNotifications)}
-                className={`relative inline-flex h-8 w-12 items-center rounded-full transition-all duration-300 ${
+                className={`relative w-14 h-8 rounded transition-colors duration-300 ${
                   pushNotifications 
                     ? "bg-[#8B7355]" 
                     : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                    pushNotifications ? "translate-x-5" : "translate-x-1"
+                  className={`absolute top-1 left-1 w-6 h-6 bg-white rounded transition-transform duration-300 ${
+                    pushNotifications ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
               </button>
@@ -94,15 +94,15 @@ export default function NotificationsPage() {
               </div>
               <button
                 onClick={() => setDesignRequests(!designRequests)}
-                className={`relative inline-flex h-8 w-12 items-center rounded-full transition-all duration-300 ${
+                className={`relative w-14 h-8 rounded transition-colors duration-300 ${
                   designRequests 
                     ? "bg-[#8B7355]" 
                     : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                    designRequests ? "translate-x-5" : "translate-x-1"
+                  className={`absolute top-1 left-1 w-6 h-6 bg-white rounded transition-transform duration-300 ${
+                    designRequests ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
               </button>
@@ -115,15 +115,15 @@ export default function NotificationsPage() {
               </div>
               <button
                 onClick={() => setMessages(!messages)}
-                className={`relative inline-flex h-8 w-12 items-center rounded-full transition-all duration-300 ${
+                className={`relative w-14 h-8 rounded transition-colors duration-300 ${
                   messages 
                     ? "bg-[#8B7355]" 
                     : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                    messages ? "translate-x-5" : "translate-x-1"
+                  className={`absolute top-1 left-1 w-6 h-6 bg-white rounded transition-transform duration-300 ${
+                    messages ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
               </button>
@@ -136,15 +136,15 @@ export default function NotificationsPage() {
               </div>
               <button
                 onClick={() => setMarketing(!marketing)}
-                className={`relative inline-flex h-8 w-12 items-center rounded-full transition-all duration-300 ${
+                className={`relative w-14 h-8 rounded transition-colors duration-300 ${
                   marketing 
                     ? "bg-[#8B7355]" 
                     : "bg-[#E8E8E8]"
                 }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-sm transition-all duration-300 ${
-                    marketing ? "translate-x-5" : "translate-x-1"
+                  className={`absolute top-1 left-1 w-6 h-6 bg-white rounded transition-transform duration-300 ${
+                    marketing ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
               </button>
