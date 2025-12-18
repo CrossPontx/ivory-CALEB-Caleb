@@ -1036,7 +1036,13 @@ export default function CapturePage() {
         </div>
 
         {/* Image Preview - Original on left, generated thumbnails on right */}
-        <div className="pt-32 pb-4 px-4 overflow-y-auto" style={{ height: 'calc(65vh - 80px)', minHeight: '400px' }}>
+        <div 
+          className="pt-32 pb-4 px-4 overflow-y-auto transition-all duration-300" 
+          style={{ 
+            height: expandedSection ? 'calc(35vh - 80px)' : 'calc(65vh - 80px)', 
+            minHeight: expandedSection ? '200px' : '400px' 
+          }}
+        >
           <div className="max-w-2xl mx-auto h-full">
             <div className="grid grid-cols-2 gap-3 sm:gap-4 h-full">
                 {/* Original Image */}
@@ -1229,7 +1235,15 @@ export default function CapturePage() {
         )}
 
         {/* Bottom Drawer */}
-        <div className="fixed left-0 right-0 bg-white border-t border-[#E8E8E8] z-20 touch-action-pan-y" style={{ bottom: '80px', height: 'calc(35vh - 80px)', minHeight: '240px', maxHeight: '370px' }}>
+        <div 
+          className="fixed left-0 right-0 bg-white border-t border-[#E8E8E8] z-20 touch-action-pan-y transition-all duration-300" 
+          style={{ 
+            bottom: '80px', 
+            height: expandedSection ? 'calc(65vh - 80px)' : 'calc(35vh - 80px)', 
+            minHeight: expandedSection ? '400px' : '240px', 
+            maxHeight: expandedSection ? '600px' : '370px' 
+          }}
+        >
           <div className="max-w-2xl mx-auto h-full flex flex-col">
             <div className="h-1 w-16 bg-[#E8E8E8] mx-auto my-3 flex-shrink-0"></div>
 
