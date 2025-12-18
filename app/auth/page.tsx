@@ -298,36 +298,49 @@ function AuthPageContent() {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6">
-      {/* Back to Home Link */}
+      {/* Back to Home Link - Mobile Optimized */}
       <button 
         onClick={() => router.push('/')}
-        className="fixed top-6 left-6 text-xs tracking-widest uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300 font-light z-50"
+        className="fixed top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300 z-50 touch-manipulation"
       >
-        ← Home
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 sm:w-4 sm:h-4">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        <span className="text-xs tracking-wider uppercase font-light hidden sm:inline">Home</span>
       </button>
 
       <div className="w-full max-w-md">
-        <div className="border border-[#E8E8E8] bg-white p-8 sm:p-12">
-          <div className="text-center mb-8 sm:mb-12">
-            <h1 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-3 tracking-tight">
+        <div className="border border-[#E8E8E8] bg-white p-6 sm:p-8 md:p-12">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-2 tracking-tight">
               IVORY'S CHOICE
             </h1>
-            <p className="text-xs tracking-wider uppercase text-[#6B6B6B] font-light">
+            <p className="text-xs sm:text-sm tracking-wider uppercase text-[#6B6B6B] font-light mb-3">
               {referralCode ? "Exclusive Invitation" : isSignUp ? "Begin Your Journey" : "Welcome Back"}
             </p>
+            
+            {/* Account Toggle - More Prominent */}
+            <button 
+              type="button" 
+              onClick={() => setIsSignUp(!isSignUp)} 
+              className="text-sm sm:text-base text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300 font-normal underline decoration-[#8B7355] decoration-2 underline-offset-4 touch-manipulation"
+            >
+              {isSignUp ? "Already have an account? Sign in" : "New to Ivory's Choice? Create account"}
+            </button>
+            
             {referralCode && (
-              <p className="text-xs text-[#8B7355] mt-2 font-light">5 complimentary credits included</p>
+              <p className="text-xs text-[#8B7355] mt-3 font-light">5 complimentary credits included</p>
             )}
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleAuth} className="space-y-4 sm:space-y-5 mt-6">
             <div>
               <label className="block text-xs tracking-wider uppercase text-[#6B6B6B] mb-2 font-light">Username</label>
               <Input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="h-12 sm:h-14 text-sm border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light"
+                className="h-14 text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light touch-manipulation"
                 required
               />
             </div>
@@ -338,7 +351,7 @@ function AuthPageContent() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 sm:h-14 text-sm border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light"
+                  className="h-14 text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light touch-manipulation"
                   required
                 />
               </div>
@@ -349,13 +362,13 @@ function AuthPageContent() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-12 sm:h-14 text-sm border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 pr-12 font-light"
+                className="h-14 text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 pr-14 font-light touch-manipulation"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 bottom-4 text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors"
+                className="absolute right-3 top-[38px] p-2 text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors touch-manipulation"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -373,25 +386,25 @@ function AuthPageContent() {
 
             <Button 
               type="submit" 
-              className="w-full h-12 sm:h-14 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light mt-6"
+              className="w-full h-14 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light mt-6 touch-manipulation"
             >
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
 
           {!isSignUp && (
-            <div className="mt-4 text-center">
+            <div className="mt-5 text-center">
               <button 
                 type="button" 
                 onClick={() => router.push('/forgot-password')} 
-                className="text-xs tracking-wider text-[#6B6B6B] hover:text-[#8B7355] transition-colors duration-300 font-light"
+                className="text-sm text-[#6B6B6B] hover:text-[#8B7355] transition-colors duration-300 font-light touch-manipulation"
               >
                 Forgot password?
               </button>
             </div>
           )}
 
-          <div className="relative my-8 sm:my-10">
+          <div className="relative my-6 sm:my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-[#E8E8E8]"></div>
             </div>
@@ -404,10 +417,10 @@ function AuthPageContent() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 sm:h-14 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-transparent text-[#1A1A1A] rounded-none text-xs font-light transition-all duration-300"
+              className="w-full h-14 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-transparent text-[#1A1A1A] rounded-none text-xs font-light transition-all duration-300 touch-manipulation"
               onClick={() => handleSocialAuth("google")}
             >
-              <svg className="mr-3 h-4 w-4" viewBox="0 0 24 24">
+              <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -431,31 +444,21 @@ function AuthPageContent() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 sm:h-14 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-transparent text-[#1A1A1A] rounded-none text-xs font-light transition-all duration-300"
+              className="w-full h-14 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-transparent text-[#1A1A1A] rounded-none text-xs font-light transition-all duration-300 touch-manipulation"
               onClick={() => handleSocialAuth("apple")}
             >
-              <svg className="mr-3 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="mr-3 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
               </svg>
               <span className="tracking-wider uppercase">Continue with Apple</span>
             </Button>
           </div>
 
-          <div className="mt-8 text-center">
-            <button 
-              type="button" 
-              onClick={() => setIsSignUp(!isSignUp)} 
-              className="text-sm tracking-wide text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300 font-normal underline decoration-[#E8E8E8] hover:decoration-[#8B7355] underline-offset-4"
-            >
-              {isSignUp ? "Already have an account? Sign in" : "New to Ivory's Choice? Create account"}
-            </button>
-          </div>
-
-          <div className="mt-6 text-center text-[10px] tracking-wider text-[#6B6B6B] space-x-3 font-light">
+          <div className="mt-6 text-center text-xs tracking-wider text-[#6B6B6B] space-x-3 font-light">
             <button 
               type="button"
               onClick={() => router.push('/privacy-policy')}
-              className="hover:text-[#8B7355] transition-colors duration-300"
+              className="hover:text-[#8B7355] transition-colors duration-300 touch-manipulation"
             >
               Privacy
             </button>
@@ -463,7 +466,7 @@ function AuthPageContent() {
             <button 
               type="button"
               onClick={() => router.push('/terms')}
-              className="hover:text-[#8B7355] transition-colors duration-300"
+              className="hover:text-[#8B7355] transition-colors duration-300 touch-manipulation"
             >
               Terms
             </button>
