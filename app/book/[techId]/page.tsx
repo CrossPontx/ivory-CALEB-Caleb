@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, Clock, DollarSign, Calendar as CalendarIcon, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Clock, DollarSign, Calendar as CalendarIcon, Image as ImageIcon, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function BookAppointmentPage() {
   const router = useRouter();
@@ -19,6 +19,8 @@ export default function BookAppointmentPage() {
   const [myDesigns, setMyDesigns] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<string>('');
   const [selectedDesign, setSelectedDesign] = useState<string>('');
+  const [uploadedImage, setUploadedImage] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
@@ -76,9 +78,82 @@ export default function BookAppointmentPage() {
     setAvailableTimes(times);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const uploadData = await uploadResponse.json();
+      
+      // Create a look for this uploaded image
+      const lookResponse = await fetch('/api/looks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: `Uploaded Design - ${new Date().toLocaleDateString()}`,
+          imageUrl: uploadData.url,
+          isPublic: false,
+        }),
+      });
+
+      if (!lookResponse.ok) {
+        throw new Error('Failed to save design');
+      }
+
+      const lookData = await lookResponse.json();
+      setUploadedImage(uploadData.url);
+      setSelectedDesign(lookData.look.id.toString());
+      
+      // Clear any previously selected design from gallery
+      setMyDesigns([lookData.look, ...myDesigns]);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleBooking = async () => {
     if (!selectedService || !selectedDate || !selectedTime) {
       alert('Please select service, date, and time');
+      return;
+    }
+
+    if (!selectedDesign && !uploadedImage) {
+      alert('Please select or upload a design for your appointment');
       return;
     }
 
@@ -98,7 +173,7 @@ export default function BookAppointmentPage() {
         body: JSON.stringify({
           techProfileId: parseInt(techId),
           serviceId: parseInt(selectedService),
-          lookId: selectedDesign ? parseInt(selectedDesign) : null,
+          lookId: parseInt(selectedDesign),
           appointmentDate: appointmentDateTime.toISOString(),
           clientNotes,
         }),
@@ -233,29 +308,55 @@ export default function BookAppointmentPage() {
                 <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 font-light">Step 2</p>
                 <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
                   Select Design
+                  <span className="text-red-500 ml-2">*</span>
                 </h2>
                 <p className="text-sm text-[#6B6B6B] mt-2 font-light">
-                  Choose a design you want the tech to recreate (optional)
+                  Choose a design you want the tech to recreate (required)
                 </p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <button
-                  onClick={() => setSelectedDesign('')}
-                  className={`border-2 p-4 transition-all duration-500 group ${
-                    !selectedDesign
-                      ? 'border-[#8B7355] bg-[#FAFAF8]'
-                      : 'border-[#E8E8E8] hover:border-[#8B7355]'
-                  }`}
-                >
-                  <div className="aspect-square bg-gradient-to-br from-[#F8F7F5] to-[#E8E8E8] flex items-center justify-center mb-3">
-                    <ImageIcon className="h-8 w-8 text-[#6B6B6B]" />
+
+              {/* Upload Option */}
+              <div className="mb-6 p-6 border-2 border-dashed border-[#8B7355]/30 bg-[#FAFAF8] hover:border-[#8B7355] transition-all duration-500">
+                <label htmlFor="design-upload" className="cursor-pointer block">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-white border border-[#E8E8E8] flex items-center justify-center">
+                      {uploadingImage ? (
+                        <Loader2 className="h-8 w-8 text-[#8B7355] animate-spin" />
+                      ) : (
+                        <svg className="h-8 w-8 text-[#8B7355]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-light text-[#1A1A1A] mb-1">
+                        {uploadingImage ? 'Uploading...' : 'Upload Your Design'}
+                      </p>
+                      <p className="text-xs text-[#6B6B6B] font-light">
+                        PNG, JPG up to 5MB
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs tracking-wider uppercase text-[#6B6B6B] font-light">No Design</p>
-                </button>
+                  <input
+                    id="design-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Design Gallery */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {myDesigns.map((design) => (
                   <button
                     key={design.id}
-                    onClick={() => setSelectedDesign(design.id.toString())}
+                    onClick={() => {
+                      setSelectedDesign(design.id.toString());
+                      setUploadedImage('');
+                    }}
                     className={`border-2 p-4 transition-all duration-500 group ${
                       selectedDesign === design.id.toString()
                         ? 'border-[#8B7355] bg-[#FAFAF8]'
@@ -268,11 +369,24 @@ export default function BookAppointmentPage() {
                         alt={design.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
+                      {selectedDesign === design.id.toString() && (
+                        <div className="absolute inset-0 bg-[#8B7355]/20 flex items-center justify-center">
+                          <CheckCircle2 className="w-8 h-8 text-[#8B7355]" />
+                        </div>
+                      )}
                     </div>
                     <p className="text-xs text-[#1A1A1A] font-light truncate">{design.title}</p>
                   </button>
                 ))}
               </div>
+
+              {myDesigns.length === 0 && !uploadedImage && (
+                <div className="text-center py-8 border border-[#E8E8E8] mt-4">
+                  <p className="text-sm text-[#6B6B6B] font-light">
+                    No saved designs yet. Upload an image or create one in the app.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Date & Time Selection */}
@@ -402,15 +516,31 @@ export default function BookAppointmentPage() {
                       </div>
                     </div>
                   )}
+
+                  {selectedDesign && (
+                    <div className="pb-4 border-b border-[#E8E8E8]">
+                      <p className="text-xs tracking-wider uppercase text-[#6B6B6B] mb-2 font-light">Selected Design</p>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <p className="text-sm font-light text-[#1A1A1A]">Design attached</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Button
                   onClick={handleBooking}
-                  disabled={loading || !selectedService || !selectedDate || !selectedTime}
+                  disabled={loading || !selectedService || !selectedDate || !selectedTime || !selectedDesign}
                   className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-500 h-12 text-xs tracking-widest uppercase rounded-none font-light disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Processing...' : 'Continue to Payment'}
                 </Button>
+                
+                {!selectedDesign && (
+                  <p className="text-xs text-center text-red-500 mt-2 font-light">
+                    Please select or upload a design to continue
+                  </p>
+                )}
                 
                 <p className="text-xs text-center text-[#6B6B6B] mt-4 font-light leading-relaxed">
                   Secure payment via Stripe. Your booking will be confirmed after payment.

@@ -103,8 +103,8 @@ export async function POST(request: NextRequest) {
     const { techProfileId, serviceId, lookId, appointmentDate, clientNotes } = body;
 
     // Validate required fields
-    if (!techProfileId || !serviceId || !appointmentDate) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!techProfileId || !serviceId || !appointmentDate || !lookId) {
+      return NextResponse.json({ error: 'Missing required fields. A design must be selected.' }, { status: 400 });
     }
 
     // Get service details for duration and price
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       clientId: session.userId,
       techProfileId,
       serviceId,
-      lookId: lookId || null,
+      lookId: lookId,
       appointmentDate: appointmentStart,
       duration: service.duration || 60,
       servicePrice: servicePrice.toFixed(2),
