@@ -296,18 +296,22 @@ function AuthPageContent() {
     )
   }
 
+  const isNative = Capacitor.isNativePlatform();
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6">
-      {/* Back to Home Link - Mobile Optimized */}
-      <button 
-        onClick={() => router.push('/')}
-        className="fixed top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300 z-50 touch-manipulation"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 sm:w-4 sm:h-4">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        <span className="text-xs tracking-wider uppercase font-light hidden sm:inline">Home</span>
-      </button>
+      {/* Back to Home Link - Only show on web, not in native iOS app */}
+      {!isNative && (
+        <button 
+          onClick={() => router.push('/')}
+          className="fixed top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-300 z-50 touch-manipulation"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 sm:w-4 sm:h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          <span className="text-xs tracking-wider uppercase font-light hidden sm:inline">Home</span>
+        </button>
+      )}
 
       <div className="w-full max-w-md">
         <div className="border border-[#E8E8E8] bg-white p-6 sm:p-8 md:p-12">

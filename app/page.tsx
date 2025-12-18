@@ -30,9 +30,10 @@ export default function HomePage() {
           } else {
             router.push('/user-type')
           }
+        } else if (isNative) {
+          // Native iOS app users skip landing page and go directly to auth
+          router.push('/auth')
         }
-        // Removed forced redirect to /auth for native apps
-        // Users can now browse the landing page without authentication
       } catch (error) {
         console.error('Session check error:', error)
       } finally {
@@ -52,6 +53,6 @@ export default function HomePage() {
     )
   }
 
-  // Show landing page for all users (web and native)
+  // Show landing page for web users only
   return <LandingPage />
 }
