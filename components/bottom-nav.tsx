@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Home, Plus, User, Calendar, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsAppleWatch } from './watch-optimized-layout'
+import { haptics } from '@/lib/haptics'
 
 interface BottomNavProps {
   onCenterAction?: () => void
@@ -36,7 +37,10 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
         )}>
           {/* Home Button */}
           <button
-            onClick={() => router.push('/home')}
+            onClick={async () => {
+              await haptics.light();
+              router.push('/home');
+            }}
             className={cn(
               'flex flex-col items-center justify-center transition-all duration-300',
               'active:scale-95',
@@ -52,7 +56,10 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
 
           {/* Bookings Button */}
           <button
-            onClick={() => router.push('/bookings')}
+            onClick={async () => {
+              await haptics.light();
+              router.push('/bookings');
+            }}
             className={cn(
               'flex flex-col items-center justify-center transition-all duration-300',
               'active:scale-95',
@@ -68,7 +75,10 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
 
           {/* Center Action Button */}
           <button
-            onClick={onCenterAction}
+            onClick={async () => {
+              await haptics.medium();
+              onCenterAction?.();
+            }}
             className={cn(
               "relative flex items-center justify-center bg-[#1A1A1A] hover:bg-[#8B7355] active:scale-95 transition-all duration-300",
               isWatch ? "w-10 h-10 rounded-full" : "w-12 h-12 -mt-2"
@@ -79,7 +89,10 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
 
           {/* Profile Button */}
           <button
-            onClick={() => router.push('/profile')}
+            onClick={async () => {
+              await haptics.light();
+              router.push('/profile');
+            }}
             className={cn(
               'flex flex-col items-center justify-center transition-all duration-300',
               'active:scale-95',
@@ -95,7 +108,10 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
 
           {/* Settings Button */}
           <button
-            onClick={() => router.push('/settings')}
+            onClick={async () => {
+              await haptics.light();
+              router.push('/settings');
+            }}
             className={cn(
               'flex flex-col items-center justify-center transition-all duration-300',
               'active:scale-95',

@@ -6,9 +6,10 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 import { Capacitor } from "@capacitor/core"
 import { Browser } from "@capacitor/browser"
+import { Haptics, ImpactStyle } from "@capacitor/haptics"
+import { signInWithAppleNative } from "@/lib/native-apple-auth"
 
 function AuthPageContent() {
   const router = useRouter()
@@ -180,6 +181,15 @@ function AuthPageContent() {
   }
 
   const handleSocialAuth = async (provider: string) => {
+    // Haptic feedback on button press
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Haptics.impact({ style: ImpactStyle.Light });
+      } catch (e) {
+        // Haptics not available, continue
+      }
+    }
+
     // Store referral code in cookie before OAuth redirect
     if (referralCode) {
       document.cookie = `pendingReferralCode=${referralCode}; path=/; max-age=600; SameSite=Lax`
@@ -188,6 +198,7 @@ function AuthPageContent() {
     const baseUrl = window.location.origin;
     const redirectUri = `${baseUrl}/api/auth/callback/${provider}`;
     const isNative = Capacitor.isNativePlatform();
+    const isIOS = Capacitor.getPlatform() === 'ios';
     
     if (provider === 'google') {
       // Build Google OAuth URL
@@ -210,22 +221,67 @@ function AuthPageContent() {
         window.location.href = googleAuthUrl.toString();
       }
     } else if (provider === 'apple') {
-      // Build Apple OAuth URL
-      const appleAuthUrl = new URL('https://appleid.apple.com/auth/authorize');
-      appleAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '');
-      appleAuthUrl.searchParams.set('redirect_uri', redirectUri);
-      appleAuthUrl.searchParams.set('response_type', 'code id_token');
-      appleAuthUrl.searchParams.set('response_mode', 'form_post');
-      appleAuthUrl.searchParams.set('scope', 'name email');
-      
-      if (isNative) {
-        // Use in-app browser (Safari View Controller on iOS)
-        await Browser.open({ 
-          url: appleAuthUrl.toString(),
-          presentationStyle: 'popover' // Uses Safari View Controller on iOS
-        });
+      // Use native Sign in with Apple on iOS
+      if (isIOS) {
+        try {
+          const result = await signInWithAppleNative();
+          
+          if (result.success && result.user) {
+            // Send to native endpoint
+            const response = await fetch('/api/auth/apple-native', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                identityToken: result.user.identityToken,
+                authorizationCode: result.user.authorizationCode,
+                email: result.user.email,
+                givenName: result.user.givenName,
+                familyName: result.user.familyName,
+                referralCode: referralCode || undefined,
+              }),
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              alert(error.error || 'Failed to sign in with Apple');
+              return;
+            }
+
+            const data = await response.json();
+            localStorage.setItem("ivoryUser", JSON.stringify(data.user));
+
+            // Check if there's a return URL stored
+            const returnUrl = localStorage.getItem('returnUrl');
+            if (returnUrl) {
+              localStorage.removeItem('returnUrl');
+              router.push(returnUrl);
+              return;
+            }
+
+            // Navigate based on user type
+            if (data.user.userType === 'tech') {
+              router.push('/tech/dashboard');
+            } else if (data.user.userType === 'client') {
+              router.push('/home');
+            } else {
+              router.push('/user-type');
+            }
+          } else {
+            alert(result.error || 'Failed to sign in with Apple');
+          }
+        } catch (error) {
+          console.error('Native Apple Sign In error:', error);
+          alert('Failed to sign in with Apple');
+        }
       } else {
-        // Web: redirect in same window
+        // Web: Use web OAuth flow
+        const appleAuthUrl = new URL('https://appleid.apple.com/auth/authorize');
+        appleAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '');
+        appleAuthUrl.searchParams.set('redirect_uri', redirectUri);
+        appleAuthUrl.searchParams.set('response_type', 'code id_token');
+        appleAuthUrl.searchParams.set('response_mode', 'form_post');
+        appleAuthUrl.searchParams.set('scope', 'name email');
+        
         window.location.href = appleAuthUrl.toString();
       }
     }
