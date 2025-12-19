@@ -215,6 +215,7 @@ export default function CapturePage() {
     }
   }
   const abortControllerRef = useRef<AbortController | null>(null)
+  const hasLoadedDesignRef = useRef(false) // Track if we've loaded a design to prevent double-loading
 
   // Check for user session and existing tabs on mount
   useEffect(() => {
@@ -252,9 +253,12 @@ export default function CapturePage() {
       console.log('- loadedMetadata:', loadedMetadata ? 'EXISTS' : 'NULL')
       console.log('- loadedEditingImage:', loadedEditingImage ? 'EXISTS' : 'NULL')
       console.log('- loadedPreview:', loadedPreview ? 'EXISTS' : 'NULL')
+      console.log('- hasLoadedDesignRef:', hasLoadedDesignRef.current)
       
-      if (loadedMetadata && loadedEditingImage) {
+      if (loadedMetadata && loadedEditingImage && !hasLoadedDesignRef.current) {
         try {
+          hasLoadedDesignRef.current = true // Mark as loaded to prevent double-loading
+          
           const metadata = JSON.parse(loadedMetadata)
           console.log('✅ Loading design metadata for editing:', metadata)
           
@@ -292,15 +296,19 @@ export default function CapturePage() {
             setColorLightness(metadata.colorLightness)
           }
           
-          // Clear the loaded metadata
-          localStorage.removeItem("loadedDesignMetadata")
-          localStorage.removeItem("currentEditingImage")
-          localStorage.removeItem("generatedPreview")
+          // Clear the loaded metadata after a delay to ensure state is set
+          setTimeout(() => {
+            localStorage.removeItem("loadedDesignMetadata")
+            localStorage.removeItem("currentEditingImage")
+            localStorage.removeItem("generatedPreview")
+            console.log('✅ Cleared localStorage after loading')
+          }, 100)
           
           toast.success('Design loaded for editing!')
           return
         } catch (e) {
           console.error('Error loading design metadata:', e)
+          hasLoadedDesignRef.current = false // Reset on error
         }
       }
       
