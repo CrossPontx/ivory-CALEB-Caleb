@@ -70,13 +70,12 @@ export default function LandingPage() {
             <div className="space-y-6 sm:space-y-10 text-center lg:text-left order-2 lg:order-1">
               <div className="space-y-4 sm:space-y-6">
                 <h1 className="font-serif text-4xl sm:text-5xl lg:text-7xl font-light text-[#1A1A1A] leading-[1.1] tracking-tight">
-                  The Art of
+                  See It Before
                   <br />
-                  <span className="italic">Perfection</span>
+                  <span className="italic">You Book</span>
                 </h1>
                 <p className="text-sm sm:text-base lg:text-lg text-[#6B6B6B] leading-relaxed max-w-xl mx-auto lg:mx-0 font-light">
-                  Where artificial intelligence meets artisanal craftsmanship. 
-                  Discover bespoke nail designs, curated for the discerning individual.
+                  Design it once. Get it right. Connect with nail techs who bring your vision to life.
                 </p>
               </div>
               
@@ -98,18 +97,16 @@ export default function LandingPage() {
             </div>
             
             {/* Image */}
-            <div className="relative order-1 lg:order-2">
-              <div className="aspect-[3/4] sm:aspect-[4/5] overflow-hidden relative group">
+            <div className="relative order-1 lg:order-2 flex items-center justify-center">
+              <div className="relative w-full max-w-[280px] sm:max-w-[400px] lg:max-w-[500px] aspect-[16/9] mx-auto">
                 <Image 
-                  src="/elegant-french-manicure-nails.jpg" 
-                  alt="Elegant nail design showcasing artisanal craftsmanship"
+                  src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&h=450&fit=crop&q=80" 
+                  alt="Elegant line art of hands with nail polish"
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-contain"
                   priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
+                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 400px, 500px"
                 />
-                {/* Subtle overlay for sophistication */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
               </div>
             </div>
           </div>
@@ -125,9 +122,9 @@ export default function LandingPage() {
       <section id="experience" className="py-16 sm:py-24 lg:py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-12 sm:mb-20">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">The Experience</p>
+            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">Features</p>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight">
-              Unparalleled Excellence
+              What You Get
             </h2>
           </div>
 
@@ -139,9 +136,9 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="space-y-2 sm:space-y-3">
-                <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] font-light">Intelligent Design</h3>
+                <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] font-light">Design It Once</h3>
                 <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light max-w-xs mx-auto">
-                  Precision-crafted designs powered by advanced artificial intelligence
+                  Show us a photo or describe your vision. Get custom designs instantly.
                 </p>
               </div>
             </div>
@@ -153,9 +150,9 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="space-y-2 sm:space-y-3">
-                <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] font-light">Master Artisans</h3>
+                <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] font-light">Find Your Tech</h3>
                 <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light max-w-xs mx-auto">
-                  Curated network of exceptional nail technicians
+                  Browse local techs. See their work, ratings, and open slots.
                 </p>
               </div>
             </div>
@@ -167,12 +164,57 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="space-y-2 sm:space-y-3">
-                <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] font-light">Effortless Service</h3>
+                <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] font-light">Less Explaining. Better Nails.</h3>
                 <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light max-w-xs mx-auto">
-                  Seamless booking and personalized attention
+                  Book directly. Pay securely. Show up knowing exactly what you're getting.
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section className="py-16 sm:py-24 lg:py-32 bg-white">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="text-center mb-12 sm:mb-20">
+            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">Inspiration</p>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight">
+              Real Designs. Real Results.
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {[
+              "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&h=500&fit=crop",
+              "https://images.unsplash.com/photo-1610992015732-2449b76344bc?w=400&h=500&fit=crop",
+              "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=400&h=500&fit=crop",
+              "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=400&h=500&fit=crop",
+              "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&h=500&fit=crop",
+              "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&h=500&fit=crop",
+              "https://images.unsplash.com/photo-1604654894609-b5c0a2c39a9e?w=400&h=500&fit=crop",
+              "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=400&h=500&fit=crop"
+            ].map((src, idx) => (
+              <div key={idx} className="relative aspect-[4/5] overflow-hidden group cursor-pointer">
+                <Image
+                  src={src}
+                  alt={`Nail design inspiration ${idx + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12 sm:mt-16">
+            <Button 
+              onClick={() => router.push('/explore')}
+              className="bg-transparent border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 px-8 sm:px-12 h-12 sm:h-14 text-xs tracking-widest uppercase rounded-none font-light"
+            >
+              View More Designs
+            </Button>
           </div>
         </div>
       </section>
@@ -181,21 +223,21 @@ export default function LandingPage() {
       <section id="craft" className="py-16 sm:py-24 lg:py-32 bg-[#F8F7F5]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-12 sm:mb-20">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">The Process</p>
+            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">How It Works</p>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight mb-4 sm:mb-6">
-              A Journey of Refinement
+              Four Simple Steps
             </h2>
             <p className="text-sm sm:text-base text-[#6B6B6B] max-w-2xl mx-auto font-light leading-relaxed">
-              Four meticulously crafted steps to perfection
+              From idea to appointment in minutes
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
             {[
-              { step: "I", title: "Envision", desc: "Capture your inspiration through imagery" },
-              { step: "II", title: "Create", desc: "AI interprets and refines your vision" },
-              { step: "III", title: "Connect", desc: "Matched with master artisans" },
-              { step: "IV", title: "Experience", desc: "Bespoke service, flawless execution" }
+              { step: "1", title: "Show Us", desc: "Upload a photo or describe your idea" },
+              { step: "2", title: "See Options", desc: "Get custom designs in seconds" },
+              { step: "3", title: "Pick Your Tech", desc: "Find someone near you who gets it" },
+              { step: "4", title: "Book It", desc: "Schedule and pay. Done." }
             ].map((item, idx) => (
               <div key={idx} className="relative group">
                 <div className="text-5xl sm:text-6xl font-serif font-light text-[#8B7355]/20 mb-4 sm:mb-6 group-hover:text-[#8B7355]/40 transition-colors duration-500">{item.step}</div>
@@ -214,9 +256,9 @@ export default function LandingPage() {
       <section id="collection" className="py-16 sm:py-24 lg:py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-12 sm:mb-20">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">Membership</p>
+            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">Pricing</p>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight">
-              Select Your Experience
+              Choose Your Plan
             </h2>
           </div>
 
@@ -225,7 +267,7 @@ export default function LandingPage() {
             <div className="border border-[#E8E8E8] p-6 sm:p-10 hover:border-[#8B7355] transition-all duration-500 group">
               <div className="space-y-6 sm:space-y-8">
                 <div>
-                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Essential</h3>
+                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Basic</h3>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$9</span>
                     <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Monthly</span>
@@ -234,30 +276,34 @@ export default function LandingPage() {
                 <div className="space-y-3 sm:space-y-4 text-sm font-light">
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">10 curated designs monthly</span>
+                    <span className="text-[#6B6B6B]">10 custom designs per month</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Standard service</span>
+                    <span className="text-[#6B6B6B]">Browse all designs</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
+                    <span className="text-[#6B6B6B]">Book appointments</span>
                   </div>
                 </div>
                 <Button 
                   onClick={() => router.push('/auth?signup=true')}
                   className="w-full bg-transparent border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 h-12 text-xs tracking-widest uppercase rounded-none font-light"
                 >
-                  Begin
+                  Get Started
                 </Button>
               </div>
             </div>
 
-            {/* Signature */}
+            {/* Pro */}
             <div className="border-2 border-[#8B7355] p-6 sm:p-10 relative group bg-[#FAFAF8]">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#8B7355] text-white px-4 py-1 text-[10px] tracking-widest uppercase font-light">
-                Recommended
+                Popular
               </div>
               <div className="space-y-6 sm:space-y-8">
                 <div>
-                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Signature</h3>
+                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Pro</h3>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$29</span>
                     <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Monthly</span>
@@ -266,50 +312,59 @@ export default function LandingPage() {
                 <div className="space-y-3 sm:space-y-4 text-sm font-light">
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Unlimited designs</span>
+                    <span className="text-[#6B6B6B]">Unlimited custom designs</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Priority artisan matching</span>
+                    <span className="text-[#6B6B6B]">Priority booking</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Advanced personalization</span>
+                    <span className="text-[#6B6B6B]">Save favorite designs</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
+                    <span className="text-[#6B6B6B]">Advanced filters</span>
                   </div>
                 </div>
                 <Button 
                   onClick={() => router.push('/auth?signup=true')}
                   className="w-full bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-500 h-12 text-xs tracking-widest uppercase rounded-none font-light"
                 >
-                  Begin
+                  Get Started
                 </Button>
               </div>
             </div>
 
-            {/* Atelier */}
+            {/* Pay As You Go */}
             <div className="border border-[#E8E8E8] p-6 sm:p-10 hover:border-[#8B7355] transition-all duration-500 group sm:col-span-2 lg:col-span-1">
               <div className="space-y-6 sm:space-y-8">
                 <div>
-                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Atelier</h3>
+                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Credits</h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">Bespoke</span>
+                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$1</span>
+                    <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Per Design</span>
                   </div>
                 </div>
                 <div className="space-y-3 sm:space-y-4 text-sm font-light">
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Signature benefits included</span>
+                    <span className="text-[#6B6B6B]">No subscription required</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Dedicated concierge</span>
+                    <span className="text-[#6B6B6B]">Buy credits as needed</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
+                    <span className="text-[#6B6B6B]">Credits never expire</span>
                   </div>
                 </div>
                 <Button 
-                  onClick={() => router.push('/auth')}
+                  onClick={() => router.push('/auth?signup=true')}
                   className="w-full bg-transparent border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 h-12 text-xs tracking-widest uppercase rounded-none font-light"
                 >
-                  Inquire
+                  Get Started
                 </Button>
               </div>
             </div>
@@ -320,18 +375,18 @@ export default function LandingPage() {
       {/* Final CTA Section */}
       <section className="py-16 sm:py-24 lg:py-32 bg-[#1A1A1A] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-6 sm:mb-8 font-light">Begin Your Journey</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-6 sm:mb-8 font-light">Ready to Start?</p>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6 sm:mb-8 tracking-tight">
-            Discover Perfection
+            Stop Explaining. Start Showing.
           </h2>
           <p className="text-sm sm:text-base text-white/70 mb-8 sm:mb-12 max-w-2xl mx-auto font-light leading-relaxed">
-            Join a distinguished community of individuals who appreciate the finest in nail artistry
+            Sign up free and create your first design in seconds
           </p>
           <Button 
             onClick={() => router.push('/auth?signup=true')}
             className="bg-white text-[#1A1A1A] hover:bg-[#8B7355] hover:text-white transition-all duration-500 px-8 sm:px-16 h-12 sm:h-14 text-xs tracking-widest uppercase rounded-none font-light"
           >
-            Explore Now
+            Get Started Free
           </Button>
         </div>
       </section>
