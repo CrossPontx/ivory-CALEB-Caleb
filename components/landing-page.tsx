@@ -192,7 +192,7 @@ export default function LandingPage() {
               "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=400&h=500&fit=crop&q=80",
               "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&h=500&fit=crop&q=80",
               "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1599948128020-9a44d19e148b?w=400&h=500&fit=crop&q=80",
+              "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&h=500&fit=crop&q=80",
               "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=400&h=500&fit=crop&q=80"
             ].map((src, idx) => (
               <div key={idx} className="relative aspect-[4/5] overflow-hidden group cursor-pointer" onClick={() => router.push('/explore')}>
