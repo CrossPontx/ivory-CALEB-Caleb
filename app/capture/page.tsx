@@ -318,13 +318,14 @@ export default function CapturePage() {
           // Set initializing to false immediately so UI updates
           setIsInitializing(false)
           
-          // Clear the loaded metadata after a delay to ensure state is set
+          // Don't clear localStorage immediately - React Strict Mode will remount
+          // Clear it after a longer delay to allow for remounts
           setTimeout(() => {
             localStorage.removeItem("loadedDesignMetadata")
             localStorage.removeItem("currentEditingImage")
             localStorage.removeItem("generatedPreview")
             console.log('✅ Cleared localStorage after loading')
-          }, 100)
+          }, 2000) // Increased delay to 2 seconds
           
           toast.success('Design loaded for editing!')
           console.log('✅ Design has content, camera will NOT start')
