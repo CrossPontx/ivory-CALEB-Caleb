@@ -24,17 +24,25 @@ Apple rejected the app because it uses Stripe for digital content purchases. Thi
 
 ## Setup Checklist
 
-### 1. App Store Connect Configuration
+### 1. Code Implementation ✅ COMPLETE
+- [x] Swift IAP plugin created (`IAPPlugin.swift`)
+- [x] TypeScript bridge implemented (`lib/iap.ts`)
+- [x] Receipt validation API created
+- [x] UI updated for platform detection
+- [x] Plugin registered in `capacitor.config.ts`
+- [x] TypeScript errors resolved
+
+### 2. App Store Connect Configuration (YOU NEED TO DO)
 - [ ] Create subscription products (Pro, Business)
 - [ ] Create consumable products (credit packages)
 - [ ] Get IAP Shared Secret
 - [ ] Add to `.env`: `APPLE_IAP_SHARED_SECRET=your_secret`
 
-### 2. Xcode Setup
-- [ ] Add `IAPPlugin.swift` to project
+### 3. Xcode Setup (YOU NEED TO DO)
+- [ ] Add `IAPPlugin.swift` to Xcode project
 - [ ] Add StoreKit framework
-- [ ] Register plugin in `capacitor.config.ts`
 - [ ] Build and test
+- [ ] Resolve "Missing package product 'CapApp-SPM'" error
 
 ### 3. Testing
 - [ ] Create sandbox test account

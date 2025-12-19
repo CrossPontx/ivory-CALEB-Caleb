@@ -33,6 +33,9 @@ const config: CapacitorConfig = {
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
+    },
+    IAPPlugin: {
+      // Apple In-App Purchase plugin for subscriptions and credits
     }
   }
 };

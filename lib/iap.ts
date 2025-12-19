@@ -9,9 +9,17 @@ export interface IAPPlugin {
   restorePurchases(): Promise<void>;
   finishTransaction(options: { transactionId: string }): Promise<void>;
   addListener(
-    eventName: 'purchaseCompleted' | 'purchaseFailed' | 'purchaseRestored',
-    listenerFunc: (data: any) => void
-  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+    eventName: 'purchaseCompleted',
+    listenerFunc: (result: PurchaseResult) => void
+  ): Promise<PluginListenerHandle>;
+  addListener(
+    eventName: 'purchaseFailed',
+    listenerFunc: (error: { productId: string; errorCode: number; errorMessage: string }) => void
+  ): Promise<PluginListenerHandle>;
+  addListener(
+    eventName: 'purchaseRestored',
+    listenerFunc: (result: PurchaseResult) => void
+  ): Promise<PluginListenerHandle>;
 }
 
 export interface IAPProduct {
