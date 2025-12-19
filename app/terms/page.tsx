@@ -65,7 +65,9 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-12">
-            <h2 className="font-serif text-2xl font-light text-[#1A1A1A] mb-6 tracking-tight">3. User Content</h2>
+            <h2 className="font-serif text-2xl font-light text-[#1A1A1A] mb-6 tracking-tight">3. User Content and Community Standards</h2>
+            
+            <h3 className="text-lg font-normal text-[#1A1A1A] mb-4">3.1 Content Ownership</h3>
             <p className="text-[#6B6B6B] mb-4 font-light leading-relaxed">
               You retain ownership of your content, including photos and design notes.
             </p>
@@ -76,9 +78,44 @@ export default function TermsPage() {
               <li>Provide it to nail technicians you explicitly select</li>
               <li>Use anonymized, aggregated forms for improving the Service</li>
             </ul>
-            <p className="text-muted-foreground">
-              You agree not to upload harmful, illegal, or infringing content.
+
+            <h3 className="text-lg font-normal text-[#1A1A1A] mb-4">3.2 Zero Tolerance for Objectionable Content</h3>
+            <p className="text-[#6B6B6B] mb-4 font-light leading-relaxed">
+              <strong>We maintain a strict zero-tolerance policy for objectionable content and abusive behavior.</strong> This includes but is not limited to:
             </p>
+            <ul className="list-disc list-inside space-y-3 text-[#6B6B6B] mb-6 font-light leading-relaxed">
+              <li>Harassment, bullying, or threats toward other users</li>
+              <li>Hate speech, discrimination, or content promoting violence</li>
+              <li>Sexually explicit, pornographic, or inappropriate content</li>
+              <li>Spam, scams, or fraudulent activity</li>
+              <li>Content that infringes on intellectual property rights</li>
+              <li>Illegal content or content promoting illegal activities</li>
+              <li>Impersonation or misrepresentation</li>
+            </ul>
+
+            <h3 className="text-lg font-normal text-[#1A1A1A] mb-4">3.3 Content Moderation and Enforcement</h3>
+            <p className="text-[#6B6B6B] mb-4 font-light leading-relaxed">
+              We actively moderate user-generated content and take swift action against violations:
+            </p>
+            <ul className="list-disc list-inside space-y-3 text-[#6B6B6B] mb-6 font-light leading-relaxed">
+              <li><strong>Reporting:</strong> Users can flag objectionable content through our in-app reporting system</li>
+              <li><strong>Blocking:</strong> Users can block abusive users, immediately removing their content from your feed</li>
+              <li><strong>24-Hour Response:</strong> We review all reported content within 24 hours</li>
+              <li><strong>Immediate Action:</strong> Objectionable content is removed and violating users are banned from the platform</li>
+              <li><strong>No Appeals for Serious Violations:</strong> Users who post illegal, harmful, or abusive content will be permanently banned</li>
+            </ul>
+
+            <h3 className="text-lg font-normal text-[#1A1A1A] mb-4">3.4 Your Responsibilities</h3>
+            <p className="text-[#6B6B6B] mb-4 font-light leading-relaxed">
+              By using our Service, you agree to:
+            </p>
+            <ul className="list-disc list-inside space-y-3 text-[#6B6B6B] font-light leading-relaxed">
+              <li>Only upload content you have the right to share</li>
+              <li>Treat other users with respect and professionalism</li>
+              <li>Report any objectionable content you encounter</li>
+              <li>Not attempt to circumvent our moderation systems</li>
+              <li>Accept that violations will result in immediate account termination</li>
+            </ul>
           </section>
 
           <section className="mb-12">
@@ -122,13 +159,18 @@ export default function TermsPage() {
 
           <section className="mb-12">
             <h2 className="font-serif text-2xl font-light text-[#1A1A1A] mb-6 tracking-tight">6. Prohibited Activities</h2>
-            <p className="text-[#6B6B6B] mb-4 font-light leading-relaxed">You may not:</p>
+            <p className="text-[#6B6B6B] mb-4 font-light leading-relaxed">
+              The following activities are strictly prohibited and will result in immediate account termination:
+            </p>
             <ul className="list-disc list-inside space-y-3 text-[#6B6B6B] font-light leading-relaxed">
-              <li>Attempt to reverse engineer or misuse the platform</li>
-              <li>Circumvent payment systems or booking flows</li>
-              <li>Harass users or nail techs</li>
-              <li>Use the Service for fraudulent purposes</li>
-              <li>Upload inappropriate or harmful content</li>
+              <li>Posting objectionable, offensive, or inappropriate content (see Section 3.2)</li>
+              <li>Harassing, threatening, or abusing other users or nail technicians</li>
+              <li>Attempting to reverse engineer or misuse the platform</li>
+              <li>Circumventing payment systems or booking flows</li>
+              <li>Using the Service for fraudulent or illegal purposes</li>
+              <li>Impersonating others or creating fake accounts</li>
+              <li>Spamming or sending unsolicited commercial messages</li>
+              <li>Attempting to bypass content moderation or filtering systems</li>
             </ul>
           </section>
 

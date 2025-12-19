@@ -21,6 +21,7 @@ function AuthPageContent() {
   const [isChecking, setIsChecking] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   // Check for existing session and referral code on mount
   useEffect(() => {
@@ -109,6 +110,11 @@ function AuthPageContent() {
         // Sign up - create new user
         if (!email) {
           alert('Email is required for sign up')
+          return
+        }
+        
+        if (!acceptedTerms) {
+          alert('You must accept the Terms of Service and Privacy Policy to create an account')
           return
         }
         
@@ -399,6 +405,44 @@ function AuthPageContent() {
                 )}
               </button>
             </div>
+
+            {isSignUp && (
+              <div className="flex items-start gap-3 p-4 bg-[#FAFAF8] border border-[#E8E8E8]">
+                <input
+                  type="checkbox"
+                  id="terms-checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-[#E8E8E8] text-[#8B7355] focus:ring-[#8B7355] focus:ring-offset-0 cursor-pointer touch-manipulation"
+                  required
+                />
+                <label htmlFor="terms-checkbox" className="text-xs text-[#6B6B6B] font-light leading-relaxed cursor-pointer">
+                  I agree to the{" "}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      router.push('/terms')
+                    }}
+                    className="text-[#8B7355] hover:text-[#1A1A1A] underline decoration-1 underline-offset-2 transition-colors touch-manipulation"
+                  >
+                    Terms of Service
+                  </button>
+                  {" "}and{" "}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      router.push('/privacy-policy')
+                    }}
+                    className="text-[#8B7355] hover:text-[#1A1A1A] underline decoration-1 underline-offset-2 transition-colors touch-manipulation"
+                  >
+                    Privacy Policy
+                  </button>
+                  , including our zero-tolerance policy for objectionable content and abusive behavior.
+                </label>
+              </div>
+            )}
 
             <Button 
               type="submit" 

@@ -167,8 +167,6 @@ psql -d your_database < db/migrations/add_content_moderation.sql
 
 Or use your ORM migration tool:
 ```bash
-npm run db:push
-# or
 yarn db:push
 ```
 
