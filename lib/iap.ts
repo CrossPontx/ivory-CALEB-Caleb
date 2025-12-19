@@ -43,17 +43,17 @@ const IAP = registerPlugin<IAPPlugin>('IAPPlugin');
 // Product IDs - these must match what you configure in App Store Connect
 export const IAP_PRODUCT_IDS = {
   // Client Subscriptions
-  PRO_MONTHLY: 'com.ivory.client.pro.monthly', // $20/month for clients
+  PRO_MONTHLY: 'com.yourcompany.ivory.pro', // $20/month for clients
   
   // Tech Subscriptions
-  BUSINESS_MONTHLY: 'com.ivory.tech.business.monthly', // $60/month for techs
+  BUSINESS_MONTHLY: 'com.yourcompany.ivory.business', // $60/month for techs
   
   // Credit Packages (for clients only)
-  CREDITS_5: 'com.ivory.credits.5',
-  CREDITS_10: 'com.ivory.credits.10',
-  CREDITS_25: 'com.ivory.credits.25',
-  CREDITS_50: 'com.ivory.credits.50',
-  CREDITS_100: 'com.ivory.credits.100',
+  CREDITS_5: 'com.yourcompany.ivory.credits.5',
+  CREDITS_10: 'com.yourcompany.ivory.credits.10',
+  CREDITS_25: 'com.yourcompany.ivory.credits.25',
+  CREDITS_50: 'com.yourcompany.ivory.credits.50',
+  CREDITS_100: 'com.yourcompany.ivory.credits.100',
 };
 
 // Map product IDs to credit amounts (for clients)
