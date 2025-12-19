@@ -1183,7 +1183,7 @@ export default function CapturePage() {
           </div>
         </div>
 
-        {/* Elegant Image Preview Section */}
+        {/* Elegant Image Preview Section - Side by Side */}
         <div 
           className="pt-36 sm:pt-40 lg:pt-44 pb-4 sm:pb-6 px-4 sm:px-8 lg:px-12 overflow-y-auto transition-all duration-700" 
           style={{ 
@@ -1192,42 +1192,42 @@ export default function CapturePage() {
           }}
         >
           <div className="max-w-6xl mx-auto h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 h-full">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-full">
                 {/* Original Image Card */}
                 <div className="relative overflow-hidden border border-[#E8E8E8]/50 group h-full bg-white shadow-sm hover:shadow-lg transition-all duration-700 rounded-sm animate-fade-in">
                   <div className="relative bg-gradient-to-br from-[#F8F7F5] to-white h-full">
-                    <Image src={capturedImage} alt="Original" fill className="object-contain p-4 sm:p-6 transition-transform duration-700 group-hover:scale-[1.02]" />
+                    <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02]" />
                     {/* Elegant Change Photo Overlay */}
                     <button
                       onClick={changePhoto}
                       className="absolute inset-0 bg-black/0 hover:bg-black/60 transition-all duration-700 flex items-center justify-center opacity-0 group-hover:opacity-100 active:scale-[0.98]"
                     >
-                      <div className="bg-white p-5 sm:p-6 shadow-2xl transform group-hover:scale-105 transition-transform duration-500 rounded-sm">
-                        <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-[#1A1A1A]" strokeWidth={0.8} />
+                      <div className="bg-white p-3 sm:p-5 md:p-6 shadow-2xl transform group-hover:scale-105 transition-transform duration-500 rounded-sm">
+                        <Upload className="w-5 h-5 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#1A1A1A]" strokeWidth={0.8} />
                       </div>
                     </button>
                     {/* Elegant Draw Button */}
                     <button
                       onClick={() => setShowDrawingCanvas(true)}
-                      className="absolute bottom-4 sm:bottom-5 right-4 sm:right-5 bg-[#2D7A4F] hover:bg-[#2D7A4F]/90 text-white p-3 sm:p-4 active:scale-[0.95] transition-all duration-500 shadow-lg hover:shadow-xl rounded-sm"
+                      className="absolute bottom-2 sm:bottom-4 md:bottom-5 right-2 sm:right-4 md:right-5 bg-[#2D7A4F] hover:bg-[#2D7A4F]/90 text-white p-2 sm:p-3 md:p-4 active:scale-[0.95] transition-all duration-500 shadow-lg hover:shadow-xl rounded-sm"
                       title={drawingImageUrl ? 'Drawing added - click to edit' : 'Draw on image'}
                     >
-                      <Pencil className="w-5 h-5" strokeWidth={1} />
+                      <Pencil className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1} />
                     </button>
                   </div>
                 </div>
 
-                {/* AI Designs Card */}
+                {/* AI Designs Card - Side by Side */}
                 <div className="relative overflow-hidden border border-[#E8E8E8]/50 h-full bg-white shadow-sm hover:shadow-lg transition-all duration-700 rounded-sm animate-fade-in-delayed">
                   {finalPreviews.length > 0 ? (
                     /* Generated Designs Gallery */
-                    <div className="relative bg-gradient-to-br from-[#F8F7F5] to-white h-full p-4 sm:p-6 flex flex-col gap-4">
+                    <div className="relative bg-gradient-to-br from-[#F8F7F5] to-white h-full p-2 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4">
                       <div className="flex items-center justify-end">
-                        <div className="bg-[#1A1A1A] text-white px-3 sm:px-4 py-1.5 sm:py-2 shadow-sm rounded-sm">
-                          <span className="text-xs sm:text-sm font-light tracking-wider">{finalPreviews.length}</span>
+                        <div className="bg-[#1A1A1A] text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 shadow-sm rounded-sm">
+                          <span className="text-[10px] sm:text-xs md:text-sm font-light tracking-wider">{finalPreviews.length}</span>
                         </div>
                       </div>
-                      <div className="flex-1 flex flex-col gap-3 sm:gap-4 overflow-y-auto scrollbar-hide">
+                      <div className="flex-1 flex flex-col gap-2 sm:gap-3 md:gap-4 overflow-y-auto scrollbar-hide">
                         {finalPreviews.map((imageUrl, index) => (
                           <button
                             key={index}
@@ -1237,8 +1237,8 @@ export default function CapturePage() {
                           >
                             <Image src={imageUrl} alt={`Design ${index + 1}`} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                              <div className="bg-white p-3 sm:p-4 border border-[#E8E8E8]/50 shadow-lg transform group-hover:scale-110 transition-transform duration-500 rounded-sm">
-                                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355]" strokeWidth={1} />
+                              <div className="bg-white p-2 sm:p-3 md:p-4 border border-[#E8E8E8]/50 shadow-lg transform group-hover:scale-110 transition-transform duration-500 rounded-sm">
+                                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#8B7355]" strokeWidth={1} />
                               </div>
                             </div>
                           </button>
