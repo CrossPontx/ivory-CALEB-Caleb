@@ -25,6 +25,7 @@ export default function SharedDesignPage() {
   const router = useRouter()
   const params = useParams()
   const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
   const [look, setLook] = useState<Look | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,8 +34,10 @@ export default function SharedDesignPage() {
   useEffect(() => {
     // Get current user ID
     const userStr = localStorage.getItem("ivoryUser")
+    let userId: number | null = null
     if (userStr) {
       const user = JSON.parse(userStr)
+      userId = user.id
       setCurrentUserId(user.id)
     }
 
@@ -44,6 +47,23 @@ export default function SharedDesignPage() {
         if (response.ok) {
           const data = await response.json()
           setLook(data)
+          
+          // Check if user has liked this design
+          if (userId) {
+            const likeResponse = await fetch(`/api/looks/${params.id}/like?userId=${userId}`)
+            if (likeResponse.ok) {
+              const likeData = await likeResponse.json()
+              setLiked(likeData.liked)
+              setLikeCount(likeData.likeCount)
+            }
+          } else {
+            // Just get the like count for non-logged-in users
+            const likeResponse = await fetch(`/api/looks/${params.id}/like`)
+            if (likeResponse.ok) {
+              const likeData = await likeResponse.json()
+              setLikeCount(likeData.likeCount)
+            }
+          }
         } else {
           setError('Design not found')
         }
@@ -125,6 +145,45 @@ export default function SharedDesignPage() {
     } else {
       navigator.clipboard.writeText(window.location.href)
       toast.success('Link copied to clipboard!')
+    }
+  }
+
+  const handleLike = async () => {
+    if (!currentUserId) {
+      localStorage.setItem('returnUrl', window.location.pathname)
+      toast.info('Sign in to like this design')
+      router.push("/auth")
+      return
+    }
+
+    try {
+      if (liked) {
+        // Unlike
+        const response = await fetch(`/api/looks/${params.id}/like?userId=${currentUserId}`, {
+          method: 'DELETE',
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setLiked(false)
+          setLikeCount(data.likeCount)
+        }
+      } else {
+        // Like
+        const response = await fetch(`/api/looks/${params.id}/like`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId }),
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setLiked(true)
+          setLikeCount(data.likeCount)
+          toast.success('Liked!')
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error)
+      toast.error('Failed to update like')
     }
   }
 
@@ -212,12 +271,15 @@ export default function SharedDesignPage() {
           <div className="mb-8 sm:mb-10 text-center max-w-md mx-auto">
             <div className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
               <button
-                onClick={() => setLiked(!liked)}
-                className={`transition-all duration-300 active:scale-95 ${
+                onClick={handleLike}
+                className={`flex items-center gap-2 transition-all duration-300 active:scale-95 ${
                   liked ? "text-red-500" : "text-[#6B6B6B] hover:text-red-500"
                 }`}
               >
                 <Heart className={`w-6 h-6 sm:w-7 sm:h-7 ${liked ? "fill-current" : ""}`} strokeWidth={1.5} />
+                {likeCount > 0 && (
+                  <span className="text-sm sm:text-base font-light">{likeCount}</span>
+                )}
               </button>
               {currentUserId && look.userId !== currentUserId && (
                 <ContentModerationMenu

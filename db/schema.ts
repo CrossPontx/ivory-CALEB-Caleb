@@ -145,8 +145,17 @@ export const looks = pgTable('looks', {
   shareToken: varchar('share_token', { length: 100 }).unique(),
   allowCollaborativeEdit: boolean('allow_collaborative_edit').default(false),
   viewCount: integer('view_count').default(0),
+  likeCount: integer('like_count').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Likes for designs
+export const likes = pgTable('likes', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  lookId: integer('look_id').references(() => looks.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // Design requests sent from clients to techs
@@ -392,6 +401,18 @@ export const looksRelations = relations(looks, ({ one, many }) => ({
   }),
   designRequests: many(designRequests),
   favorites: many(favorites),
+  likes: many(likes),
+}));
+
+export const likesRelations = relations(likes, ({ one }) => ({
+  user: one(users, {
+    fields: [likes.userId],
+    references: [users.id],
+  }),
+  look: one(looks, {
+    fields: [likes.lookId],
+    references: [looks.id],
+  }),
 }));
 
 export const designRequestsRelations = relations(designRequests, ({ one }) => ({
