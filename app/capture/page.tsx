@@ -61,11 +61,6 @@ export default function CapturePage() {
   }
   
   const [capturedImage, setCapturedImage] = useState<string | null>(getInitialCapturedImage())
-  
-  // Debug: Log capturedImage whenever it changes
-  useEffect(() => {
-    console.log('📸 capturedImage changed:', capturedImage ? `${capturedImage.substring(0, 50)}... (length: ${capturedImage.length})` : 'NULL')
-  }, [capturedImage])
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
   const [isFlipping, setIsFlipping] = useState(false)
   const [zoom, setZoom] = useState(1)
@@ -77,6 +72,16 @@ export default function CapturePage() {
   const [generationProgress, setGenerationProgress] = useState(0)
   const [generatedDesigns, setGeneratedDesigns] = useState<string[]>([])
   const [selectedDesignImages, setSelectedDesignImages] = useState<string[]>([])
+  
+  // Debug: Log capturedImage whenever it changes
+  useEffect(() => {
+    console.log('📸 capturedImage changed:', capturedImage ? `${capturedImage.substring(0, 50)}... (length: ${capturedImage.length})` : 'NULL')
+  }, [capturedImage])
+  
+  // Debug: Log selectedDesignImages whenever it changes
+  useEffect(() => {
+    console.log('🎨 selectedDesignImages changed:', selectedDesignImages.length, selectedDesignImages)
+  }, [selectedDesignImages])
   const [finalPreview, setFinalPreview] = useState<string | null>(null)
   const [finalPreviews, setFinalPreviews] = useState<string[]>([])
   const [colorLightness, setColorLightness] = useState(65) // 0-100 for lightness (matches initial color)
@@ -284,6 +289,7 @@ export default function CapturePage() {
           
           const metadata = JSON.parse(loadedMetadata)
           console.log('✅ Loading design metadata for editing:', metadata)
+          console.log('✅ selectedDesignImages from metadata:', metadata.selectedDesignImages)
           
           // Create a new tab with the loaded design
           const newTab: DesignTab = {
@@ -308,6 +314,7 @@ export default function CapturePage() {
           console.log('✅ Set capturedImage to:', loadedEditingImage?.substring(0, 50) + '...')
           setDesignSettings(metadata.designSettings || designSettings)
           setSelectedDesignImages(metadata.selectedDesignImages || [])
+          console.log('✅ Set selectedDesignImages to:', metadata.selectedDesignImages || [])
           setDrawingImageUrl(metadata.drawingImageUrl || null)
           setAiPrompt(metadata.aiPrompt || '')
           setFinalPreviews(loadedPreview ? [loadedPreview] : [])

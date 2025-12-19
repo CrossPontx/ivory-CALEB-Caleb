@@ -99,13 +99,22 @@ export default function SharedDesignPage() {
       console.log('Original image:', look.originalImageUrl)
       console.log('Generated image:', look.imageUrl)
       console.log('Design metadata:', look.designMetadata)
+      console.log('Design metadata type:', typeof look.designMetadata)
+      console.log('Design metadata keys:', look.designMetadata ? Object.keys(look.designMetadata) : 'NULL')
+      console.log('selectedDesignImages from metadata:', look.designMetadata?.selectedDesignImages)
       
       localStorage.setItem("currentEditingImage", look.originalImageUrl || look.imageUrl)
       localStorage.setItem("generatedPreview", look.imageUrl)
       
       // Store all design metadata if available, otherwise create basic metadata
       // Also handle case where designMetadata exists but is null
-      const metadata = (look.designMetadata && Object.keys(look.designMetadata).length > 0) ? look.designMetadata : {
+      const metadata = (look.designMetadata && Object.keys(look.designMetadata).length > 0) ? {
+        ...look.designMetadata,
+        // Preserve the original selectedDesignImages if they exist, otherwise use the generated image
+        selectedDesignImages: look.designMetadata.selectedDesignImages && look.designMetadata.selectedDesignImages.length > 0 
+          ? look.designMetadata.selectedDesignImages 
+          : [look.imageUrl]
+      } : {
         designSettings: {
           nailLength: 'medium',
           nailShape: 'oval',
@@ -131,6 +140,8 @@ export default function SharedDesignPage() {
       }
       
       console.log('Storing metadata:', metadata)
+      console.log('Metadata selectedDesignImages:', metadata.selectedDesignImages)
+      console.log('Metadata selectedDesignImages length:', metadata.selectedDesignImages?.length)
       localStorage.setItem("loadedDesignMetadata", JSON.stringify(metadata))
       
       console.log('LocalStorage after setting:')
