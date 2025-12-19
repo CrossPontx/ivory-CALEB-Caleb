@@ -1,40 +1,54 @@
 // Client-safe Stripe configuration
 // This file can be imported in both client and server code
 
-// Subscription plans
-export const SUBSCRIPTION_PLANS = [
+// Subscription plans for CLIENTS (regular users)
+export const CLIENT_SUBSCRIPTION_PLANS = [
   {
     id: 'pro',
     name: 'Pro',
     price: 2000, // $20/month in cents
     credits: 20,
     interval: 'month' as const,
+    userType: 'client' as const,
     features: [
       '20 AI designs per month',
+      'Buy additional credits anytime',
       'Priority support',
       'Advanced design tools',
-      'Portfolio showcase',
-      'Client booking system',
+      'Save favorite designs',
+      'Share with nail techs',
     ],
     popular: true,
   },
+] as const;
+
+// Subscription plans for NAIL TECHS
+export const TECH_SUBSCRIPTION_PLANS = [
   {
     id: 'business',
     name: 'Business',
     price: 6000, // $60/month in cents
-    credits: 60,
+    credits: 0, // Techs don't use credits
     interval: 'month' as const,
+    userType: 'tech' as const,
     features: [
-      '60 AI designs per month',
-      'Everything in Pro',
-      'Team collaboration tools',
+      'Unlimited bookings',
+      'Portfolio showcase',
+      'Client management',
       'Advanced analytics',
-      'Priority design queue',
+      'Priority listing',
       'Custom branding',
-      'API access',
+      'Stripe Connect payouts',
     ],
-    popular: false,
+    popular: true,
+    freeBookings: 5, // 5 free bookings before subscription required
   },
+] as const;
+
+// Combined for backwards compatibility
+export const SUBSCRIPTION_PLANS = [
+  ...CLIENT_SUBSCRIPTION_PLANS,
+  ...TECH_SUBSCRIPTION_PLANS,
 ] as const;
 
 // One-time credit packages (for additional credits - only for paid subscribers)
@@ -81,11 +95,21 @@ export const CREDIT_PACKAGES = [
   },
 ] as const;
 
+export type ClientSubscriptionPlan = typeof CLIENT_SUBSCRIPTION_PLANS[number];
+export type TechSubscriptionPlan = typeof TECH_SUBSCRIPTION_PLANS[number];
 export type SubscriptionPlan = typeof SUBSCRIPTION_PLANS[number];
 export type CreditPackage = typeof CREDIT_PACKAGES[number];
 
 export function getSubscriptionPlan(planId: string): SubscriptionPlan | undefined {
   return SUBSCRIPTION_PLANS.find(plan => plan.id === planId);
+}
+
+export function getClientPlans(): ClientSubscriptionPlan[] {
+  return [...CLIENT_SUBSCRIPTION_PLANS];
+}
+
+export function getTechPlans(): TechSubscriptionPlan[] {
+  return [...TECH_SUBSCRIPTION_PLANS];
 }
 
 export function getCreditPackage(packageId: string): CreditPackage | undefined {

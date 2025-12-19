@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Loader2, Sparkles, Zap } from 'lucide-react';
 import { toast } from 'sonner';
-import { SUBSCRIPTION_PLANS } from '@/lib/stripe-config';
+import { CLIENT_SUBSCRIPTION_PLANS, TECH_SUBSCRIPTION_PLANS, getClientPlans, getTechPlans } from '@/lib/stripe-config';
 import { iapManager, IAP_PRODUCT_IDS } from '@/lib/iap';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -16,11 +16,15 @@ interface SubscriptionPlansProps {
   currentTier?: string;
   currentStatus?: string;
   isNative?: boolean;
+  userType?: 'client' | 'tech';
 }
 
-export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inactive', isNative = false }: SubscriptionPlansProps) {
+export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inactive', isNative = false, userType = 'client' }: SubscriptionPlansProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [iapProducts, setIapProducts] = useState<any[]>([]);
+  
+  // Get plans based on user type
+  const plans = userType === 'tech' ? getTechPlans() : getClientPlans();
 
   useEffect(() => {
     if (isNative) {
@@ -184,8 +188,8 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
       </div>
 
       {/* Subscription Plans */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {SUBSCRIPTION_PLANS.map((plan) => (
+      <div className={`grid ${plans.length > 1 ? 'md:grid-cols-2' : ''} gap-6`}>
+        {plans.map((plan) => (
           <div
             key={plan.id}
             className={`relative border-2 ${
@@ -209,7 +213,9 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
                   {plan.name}
                 </h3>
                 <p className="text-sm text-[#6B6B6B] font-light">
-                  {plan.credits} credits per month
+                  {userType === 'tech' 
+                    ? 'Unlimited bookings' 
+                    : `${plan.credits} credits per month`}
                 </p>
               </div>
               <div className="text-left sm:text-right">
@@ -253,9 +259,14 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
               )}
             </button>
 
-            {!isCurrentPlan(plan.id) && (
+            {!isCurrentPlan(plan.id) && userType === 'client' && (
               <p className="text-xs text-center text-[#6B6B6B] font-light mt-4">
                 Buy additional credits anytime after subscribing
+              </p>
+            )}
+            {!isCurrentPlan(plan.id) && userType === 'tech' && 'freeBookings' in plan && (
+              <p className="text-xs text-center text-[#6B6B6B] font-light mt-4">
+                First {plan.freeBookings} bookings free, then subscription required
               </p>
             )}
           </div>

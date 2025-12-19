@@ -52,11 +52,14 @@ Apple rejected the app because it uses Stripe for digital content purchases. Thi
 
 Configure these exact IDs in App Store Connect:
 
-**Subscriptions (Auto-Renewable):**
-- `com.ivory.pro.monthly` - $9.99/month (20 credits)
-- `com.ivory.business.monthly` - $29.99/month (50 credits)
+**Client Subscriptions (Auto-Renewable):**
+- `com.ivory.client.pro.monthly` - $20/month (20 credits + buy more)
 
-**Credits (Consumable):**
+**Tech Subscriptions (Auto-Renewable):**
+- `com.ivory.tech.business.monthly` - $60/month (unlimited bookings)
+  - First 5 bookings free, then subscription required
+
+**Credits (Consumable - Clients Only):**
 - `com.ivory.credits.5` - $4.99 (5 credits)
 - `com.ivory.credits.10` - $8.99 (10 credits)
 - `com.ivory.credits.25` - $19.99 (25 credits)

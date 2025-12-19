@@ -29,6 +29,7 @@ export default function BillingPage() {
   const [subscriptionTier, setSubscriptionTier] = useState('free');
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive');
   const [credits, setCredits] = useState<number | null>(null);
+  const [userType, setUserType] = useState<'client' | 'tech'>('client');
   const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function BillingPage() {
         setSubscriptionTier(user.subscriptionTier || 'free');
         setSubscriptionStatus(user.subscriptionStatus || 'inactive');
         setCredits(user.credits || 0);
+        setUserType(user.userType || 'client');
       }
 
       // Fetch current credits balance
@@ -194,10 +196,11 @@ export default function BillingPage() {
             currentTier={subscriptionTier}
             currentStatus={subscriptionStatus}
             isNative={isNative}
+            userType={userType}
           />
           
           {/* Message for Basic users */}
-          {isBasicPlan && (
+          {isBasicPlan && userType === 'client' && (
             <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-[#F8F7F5] mt-6">
               <div className="flex items-start gap-4 mb-6">
                 <div className="w-12 h-12 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white">
@@ -208,7 +211,7 @@ export default function BillingPage() {
                     Unlock Premium Features
                   </h3>
                   <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
-                    Upgrade to Pro or Business to get monthly credits and the ability to purchase additional credits anytime.
+                    Upgrade to Pro to get 20 monthly credits and the ability to purchase additional credits anytime.
                   </p>
                 </div>
               </div>
@@ -224,6 +227,39 @@ export default function BillingPage() {
                 <div className="border border-[#E8E8E8] p-4 bg-white">
                   <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Credits Roll Over</p>
                   <p className="text-xs text-[#6B6B6B] font-light">Never lose credits</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Message for Tech users */}
+          {isBasicPlan && userType === 'tech' && (
+            <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-[#F8F7F5] mt-6">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-12 h-12 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white">
+                  <Crown className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
+                </div>
+                <div>
+                  <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                    Grow Your Business
+                  </h3>
+                  <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
+                    Get 5 free bookings to start. After that, upgrade to Business for unlimited bookings and premium features.
+                  </p>
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div className="border border-[#E8E8E8] p-4 bg-white">
+                  <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Unlimited Bookings</p>
+                  <p className="text-xs text-[#6B6B6B] font-light">No limits on clients</p>
+                </div>
+                <div className="border border-[#E8E8E8] p-4 bg-white">
+                  <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Priority Listing</p>
+                  <p className="text-xs text-[#6B6B6B] font-light">Get discovered first</p>
+                </div>
+                <div className="border border-[#E8E8E8] p-4 bg-white">
+                  <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Advanced Analytics</p>
+                  <p className="text-xs text-[#6B6B6B] font-light">Track your growth</p>
                 </div>
               </div>
             </div>

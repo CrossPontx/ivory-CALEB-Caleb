@@ -30,11 +30,13 @@ const IAP = registerPlugin<IAPPlugin>('IAPPlugin');
 
 // Product IDs - these must match what you configure in App Store Connect
 export const IAP_PRODUCT_IDS = {
-  // Subscriptions
-  PRO_MONTHLY: 'com.ivory.pro.monthly',
-  BUSINESS_MONTHLY: 'com.ivory.business.monthly',
+  // Client Subscriptions
+  PRO_MONTHLY: 'com.ivory.client.pro.monthly', // $20/month for clients
   
-  // Credit Packages
+  // Tech Subscriptions
+  BUSINESS_MONTHLY: 'com.ivory.tech.business.monthly', // $60/month for techs
+  
+  // Credit Packages (for clients only)
   CREDITS_5: 'com.ivory.credits.5',
   CREDITS_10: 'com.ivory.credits.10',
   CREDITS_25: 'com.ivory.credits.25',
@@ -42,7 +44,7 @@ export const IAP_PRODUCT_IDS = {
   CREDITS_100: 'com.ivory.credits.100',
 };
 
-// Map product IDs to credit amounts
+// Map product IDs to credit amounts (for clients)
 export const PRODUCT_CREDITS: Record<string, number> = {
   [IAP_PRODUCT_IDS.CREDITS_5]: 5,
   [IAP_PRODUCT_IDS.CREDITS_10]: 10,
@@ -51,10 +53,10 @@ export const PRODUCT_CREDITS: Record<string, number> = {
   [IAP_PRODUCT_IDS.CREDITS_100]: 100,
 };
 
-// Map product IDs to subscription tiers
-export const PRODUCT_TIERS: Record<string, string> = {
-  [IAP_PRODUCT_IDS.PRO_MONTHLY]: 'pro',
-  [IAP_PRODUCT_IDS.BUSINESS_MONTHLY]: 'business',
+// Map product IDs to subscription tiers and user types
+export const PRODUCT_TIERS: Record<string, { tier: string; userType: string; credits?: number }> = {
+  [IAP_PRODUCT_IDS.PRO_MONTHLY]: { tier: 'pro', userType: 'client', credits: 20 },
+  [IAP_PRODUCT_IDS.BUSINESS_MONTHLY]: { tier: 'business', userType: 'tech', credits: 0 },
 };
 
 class IAPManager {
