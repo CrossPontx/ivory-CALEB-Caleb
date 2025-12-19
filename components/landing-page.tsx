@@ -263,20 +263,20 @@ export default function LandingPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {/* Essential */}
+            {/* Free */}
             <div className="border border-[#E8E8E8] p-6 sm:p-10 hover:border-[#8B7355] transition-all duration-500 group">
               <div className="space-y-6 sm:space-y-8">
                 <div>
-                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Basic</h3>
+                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Free</h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$9</span>
-                    <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Monthly</span>
+                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$0</span>
+                    <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Forever</span>
                   </div>
                 </div>
                 <div className="space-y-3 sm:space-y-4 text-sm font-light">
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">10 custom designs per month</span>
+                    <span className="text-[#6B6B6B]">5 credits on signup</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
@@ -285,6 +285,10 @@ export default function LandingPage() {
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
                     <span className="text-[#6B6B6B]">Book appointments</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
+                    <span className="text-[#6B6B6B]">Buy credits as needed</span>
                   </div>
                 </div>
                 <Button 
@@ -305,26 +309,26 @@ export default function LandingPage() {
                 <div>
                   <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Pro</h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$29</span>
+                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$20</span>
                     <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Monthly</span>
                   </div>
                 </div>
                 <div className="space-y-3 sm:space-y-4 text-sm font-light">
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Unlimited custom designs</span>
+                    <span className="text-[#6B6B6B]">20 designs per month</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Priority booking</span>
+                    <span className="text-[#6B6B6B]">Buy more credits anytime</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Save favorite designs</span>
+                    <span className="text-[#6B6B6B]">Credits never expire</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#8B7355] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Advanced filters</span>
+                    <span className="text-[#6B6B6B]">Priority support</span>
                   </div>
                 </div>
                 <Button 
@@ -336,28 +340,32 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Pay As You Go */}
+            {/* Business */}
             <div className="border border-[#E8E8E8] p-6 sm:p-10 hover:border-[#8B7355] transition-all duration-500 group sm:col-span-2 lg:col-span-1">
               <div className="space-y-6 sm:space-y-8">
                 <div>
-                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Credits</h3>
+                  <h3 className="text-xs tracking-[0.2em] uppercase text-[#1A1A1A] mb-3 sm:mb-4 font-light">Business</h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$1</span>
-                    <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Per Design</span>
+                    <span className="text-3xl sm:text-4xl font-light text-[#1A1A1A]">$60</span>
+                    <span className="text-xs tracking-wider text-[#6B6B6B] uppercase font-light">Monthly</span>
                   </div>
                 </div>
                 <div className="space-y-3 sm:space-y-4 text-sm font-light">
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">No subscription required</span>
+                    <span className="text-[#6B6B6B]">60 designs per month</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Buy credits as needed</span>
+                    <span className="text-[#6B6B6B]">Everything in Pro</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
-                    <span className="text-[#6B6B6B]">Credits never expire</span>
+                    <span className="text-[#6B6B6B]">Advanced analytics</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-1 bg-[#1A1A1A] mt-2 flex-shrink-0" />
+                    <span className="text-[#6B6B6B]">Team collaboration</span>
                   </div>
                 </div>
                 <Button 
