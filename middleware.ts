@@ -5,7 +5,7 @@ import { jwtVerify } from 'jose';
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-in-production');
 
 // Routes that require authentication
-const protectedRoutes = ['/home', '/capture', '/editor', '/look', '/profile', '/send-to-tech', '/tech', '/billing', '/settings'];
+const protectedRoutes = ['/home', '/capture', '/look', '/profile', '/send-to-tech', '/tech', '/billing', '/settings'];
 
 // Public routes that don't require authentication (browsable without account per Apple Guideline 5.1.1)
 const publicRoutes = ['/shared', '/explore', '/privacy-policy', '/terms'];

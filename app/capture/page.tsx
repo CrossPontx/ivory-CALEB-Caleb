@@ -871,23 +871,7 @@ export default function CapturePage() {
     }
   }
 
-  const proceedToEditor = () => {
-    if (capturedImage) {
-      localStorage.setItem("currentEditingImage", capturedImage)
-      if (finalPreview) {
-        localStorage.setItem("generatedPreview", finalPreview)
-      }
-      if (designMode === 'design') {
-        localStorage.setItem("designSettings", JSON.stringify(designSettings))
-      } else {
-        localStorage.setItem("aiPrompt", aiPrompt)
-        if (selectedDesignImages.length > 0) {
-          localStorage.setItem("selectedDesignImages", JSON.stringify(selectedDesignImages))
-        }
-      }
-      router.push("/editor")
-    }
-  }
+
 
   const changePhoto = () => {
     // Clear the current tab's data

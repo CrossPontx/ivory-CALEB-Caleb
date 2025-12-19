@@ -68,7 +68,6 @@ export const APP_ROUTES = {
   USER_TYPE: '/user-type',
   PERMISSIONS: '/permissions',
   CAPTURE: '/capture',
-  EDITOR: '/editor',
   PROFILE: '/profile',
   LOOK: (id: string | number) => `/look/${id}`,
   SHARE: (id: string | number) => `/share/${id}`,
