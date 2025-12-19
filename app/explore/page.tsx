@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { GoogleMapsSearch } from "@/components/google-maps-search"
@@ -11,45 +12,66 @@ import { Search } from "lucide-react"
 const sampleDesigns = [
   {
     id: "sample-1",
-    imageUrl: "/sample-designs/elegant-french.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&h=800&fit=crop&q=80",
     title: "Classic French Elegance",
     description: "Timeless sophistication with a modern twist",
     style: "French Manicure"
   },
   {
     id: "sample-2",
-    imageUrl: "/sample-designs/floral-spring.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1610992015732-2449b76344bc?w=600&h=800&fit=crop&q=80",
     title: "Spring Blossom",
     description: "Delicate floral patterns for the season",
     style: "Floral Art"
   },
   {
     id: "sample-3",
-    imageUrl: "/sample-designs/geometric-modern.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&h=800&fit=crop&q=80",
     title: "Geometric Precision",
     description: "Bold lines and contemporary design",
     style: "Geometric"
   },
   {
     id: "sample-4",
-    imageUrl: "/sample-designs/minimalist-nude.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=600&h=800&fit=crop&q=80",
     title: "Minimalist Nude",
     description: "Understated elegance in neutral tones",
     style: "Minimalist"
   },
   {
     id: "sample-5",
-    imageUrl: "/sample-designs/glitter-glam.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=600&h=800&fit=crop&q=80",
     title: "Evening Glamour",
     description: "Sparkle and shine for special occasions",
     style: "Glitter"
   },
   {
     id: "sample-6",
-    imageUrl: "/sample-designs/ombre-sunset.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&h=800&fit=crop&q=80",
     title: "Sunset Ombre",
     description: "Gradient perfection in warm hues",
     style: "Ombre"
+  },
+  {
+    id: "sample-7",
+    imageUrl: "https://images.unsplash.com/photo-1599948128020-9a44d19e148b?w=600&h=800&fit=crop&q=80",
+    title: "Modern Minimalist",
+    description: "Clean lines and subtle elegance",
+    style: "Minimalist"
+  },
+  {
+    id: "sample-8",
+    imageUrl: "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=600&h=800&fit=crop&q=80",
+    title: "Bold Statement",
+    description: "Make an impression with dramatic design",
+    style: "Geometric"
+  },
+  {
+    id: "sample-9",
+    imageUrl: "https://images.unsplash.com/photo-1604654894609-b5c0a2c39a9e?w=600&h=800&fit=crop&q=80",
+    title: "Soft Romance",
+    description: "Delicate and feminine touches",
+    style: "Floral Art"
   }
 ]
 
@@ -226,20 +248,15 @@ export default function ExplorePage() {
                 }
               }}>
                 <div className="aspect-[3/4] overflow-hidden relative mb-4 bg-[#F8F7F5]">
-                  {/* Placeholder for sample images */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <div className="w-16 h-16 mx-auto mb-4 border border-[#E8E8E8] flex items-center justify-center">
-                        <svg className="w-8 h-8 text-[#8B7355]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={0.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <p className="text-xs tracking-wider uppercase text-[#6B6B6B] font-light">
-                        {design.style}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Image
+                    src={design.imageUrl}
+                    alt={design.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-sm tracking-wider uppercase text-[#1A1A1A] font-light">
