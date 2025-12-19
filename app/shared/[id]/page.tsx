@@ -96,10 +96,32 @@ export default function SharedDesignPage() {
       localStorage.setItem("currentEditingImage", look.originalImageUrl || look.imageUrl)
       localStorage.setItem("generatedPreview", look.imageUrl)
       
-      // Store all design metadata if available
-      if (look.designMetadata) {
-        localStorage.setItem("loadedDesignMetadata", JSON.stringify(look.designMetadata))
+      // Store all design metadata if available, otherwise create basic metadata
+      const metadata = look.designMetadata || {
+        designSettings: {
+          nailLength: 'medium',
+          nailShape: 'oval',
+          baseColor: '#FF6B9D',
+          finish: 'glossy',
+          texture: 'smooth',
+          patternType: 'solid',
+          styleVibe: 'elegant',
+          accentColor: '#FFFFFF'
+        },
+        selectedDesignImages: [],
+        drawingImageUrl: null,
+        aiPrompt: look.aiPrompt || null,
+        influenceWeights: {
+          nailEditor_designImage: 0,
+          nailEditor_baseColor: 100,
+          nailEditor_finish: 100,
+          nailEditor_texture: 100
+        },
+        handReference: 3,
+        designMode: null,
+        colorLightness: 65
       }
+      localStorage.setItem("loadedDesignMetadata", JSON.stringify(metadata))
       
       toast.success('Loading design for editing!')
     }
@@ -123,10 +145,32 @@ export default function SharedDesignPage() {
       localStorage.setItem("generatedPreview", look.imageUrl)
       localStorage.setItem("isRemix", "true") // Flag to indicate this is a remix
       
-      // Store all design metadata if available
-      if (look.designMetadata) {
-        localStorage.setItem("loadedDesignMetadata", JSON.stringify(look.designMetadata))
+      // Store all design metadata if available, otherwise create basic metadata
+      const metadata = look.designMetadata || {
+        designSettings: {
+          nailLength: 'medium',
+          nailShape: 'oval',
+          baseColor: '#FF6B9D',
+          finish: 'glossy',
+          texture: 'smooth',
+          patternType: 'solid',
+          styleVibe: 'elegant',
+          accentColor: '#FFFFFF'
+        },
+        selectedDesignImages: [],
+        drawingImageUrl: null,
+        aiPrompt: look.aiPrompt || null,
+        influenceWeights: {
+          nailEditor_designImage: 0,
+          nailEditor_baseColor: 100,
+          nailEditor_finish: 100,
+          nailEditor_texture: 100
+        },
+        handReference: 3,
+        designMode: null,
+        colorLightness: 65
       }
+      localStorage.setItem("loadedDesignMetadata", JSON.stringify(metadata))
       
       toast.success('Loading design for remix!')
     }
