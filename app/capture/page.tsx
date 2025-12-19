@@ -151,7 +151,6 @@ export default function CapturePage() {
       if (activeTab.originalImage || activeTab.finalPreviews.length > 0) {
         stopCamera()
       }
-      // Don't auto-start camera - let user tap to take photo
     }
   }, [activeTabId])
   
@@ -274,6 +273,11 @@ export default function CapturePage() {
             originalImage: loadedEditingImage
           }
           
+          // Save to session storage IMMEDIATELY so tab restoration logic sees it
+          localStorage.setItem("captureSession_designTabs", JSON.stringify([newTab]))
+          localStorage.setItem("captureSession_activeTabId", '1')
+          console.log('✅ Saved loaded design to session storage')
+          
           setDesignTabs([newTab])
           setActiveTabId('1')
           setCapturedImage(loadedEditingImage)
@@ -305,6 +309,7 @@ export default function CapturePage() {
           }, 100)
           
           toast.success('Design loaded for editing!')
+          console.log('✅ Design has content, camera will NOT start')
           return
         } catch (e) {
           console.error('Error loading design metadata:', e)
@@ -327,13 +332,16 @@ export default function CapturePage() {
             if (savedActiveTabId) {
               setActiveTabId(savedActiveTabId)
             }
-            console.log('Restored design tabs from session:', tabs)
+            console.log('✅ Restored design tabs from session:', tabs)
             
             // Find the active tab and check if it needs camera
             const activeTabToRestore = tabs.find((t: DesignTab) => t.id === savedActiveTabId) || tabs[0]
             // Only start camera if the active tab has no content (no image AND no designs)
             if (!activeTabToRestore.originalImage && activeTabToRestore.finalPreviews.length === 0) {
+              console.log('⚠️ Active tab has no content, starting camera')
               setTimeout(() => startCamera(), 100)
+            } else {
+              console.log('✅ Active tab has content, NOT starting camera')
             }
             return
           }
@@ -343,6 +351,7 @@ export default function CapturePage() {
       }
       
       // No existing tabs with content - auto-start camera
+      console.log('⚠️ No saved tabs with content, starting camera')
       startCamera()
     }
 
