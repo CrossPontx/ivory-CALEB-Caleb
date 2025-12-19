@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, MapPin, Calendar, Clock, Star } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import { useIsAppleWatch } from '@/components/watch-optimized-layout';
+import { BookingReviewDialog } from '@/components/booking-review-dialog';
 
 export default function BookingsPage() {
   const router = useRouter();
@@ -361,6 +362,22 @@ export default function BookingsPage() {
                       >
                         Complete Payment
                       </Button>
+                    )}
+
+                    {/* Review Button for Completed Bookings */}
+                    {booking.status === 'completed' && !booking.hasReview && (
+                      <BookingReviewDialog
+                        bookingId={booking.id}
+                        techName={booking.techProfile?.businessName || booking.techProfile?.user?.username || 'this tech'}
+                        onReviewSubmitted={() => fetchMyBookings(userId || undefined)}
+                      />
+                    )}
+
+                    {booking.status === 'completed' && booking.hasReview && (
+                      <div className="flex items-center justify-center gap-2 py-2 text-sm text-[#6B6B6B]">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span>Review submitted</span>
+                      </div>
                     )}
                   </CardContent>
                 </Card>

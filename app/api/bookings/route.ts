@@ -48,6 +48,25 @@ export async function GET(request: NextRequest) {
         },
         orderBy: (bookings, { desc }) => [desc(bookings.appointmentDate)],
       });
+
+      // Check if each booking has been reviewed
+      const bookingsWithReviewStatus = await Promise.all(
+        userBookings.map(async (booking) => {
+          const review = await db.query.reviews.findFirst({
+            where: (reviews, { and, eq }) =>
+              and(
+                eq(reviews.techProfileId, booking.techProfileId),
+                eq(reviews.clientId, session.userId)
+              ),
+          });
+          return {
+            ...booking,
+            hasReview: !!review,
+          };
+        })
+      );
+
+      userBookings = bookingsWithReviewStatus;
     } else {
       // Tech view: bookings for their profile
       const techProfile = await db.query.techProfiles.findFirst({
