@@ -53,12 +53,19 @@ export default function CapturePage() {
     const loadedImage = localStorage.getItem("currentEditingImage")
     if (loadedImage) {
       console.log('🎯 Found initial captured image in localStorage')
+      console.log('🎯 Image length:', loadedImage.length)
       return loadedImage
     }
+    console.log('❌ No initial captured image found')
     return null
   }
   
   const [capturedImage, setCapturedImage] = useState<string | null>(getInitialCapturedImage())
+  
+  // Debug: Log capturedImage whenever it changes
+  useEffect(() => {
+    console.log('📸 capturedImage changed:', capturedImage ? `${capturedImage.substring(0, 50)}... (length: ${capturedImage.length})` : 'NULL')
+  }, [capturedImage])
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
   const [isFlipping, setIsFlipping] = useState(false)
   const [zoom, setZoom] = useState(1)
