@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Send, Search, Loader2, UserPlus, Mail } from "lucide-react"
+import { ArrowLeft, Send, Search, Loader2, UserPlus, Copy } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
+import { BottomNav } from "@/components/bottom-nav"
 
 type NailTech = {
   id: string
@@ -123,12 +124,20 @@ export default function SendToTechPage() {
     }
   }
 
-  const handleInviteTech = () => {
-    const subject = encodeURIComponent("Join me on Ivory's Choice!")
-    const body = encodeURIComponent(
-      `Hi!\n\nI'd love for you to join Ivory's Choice - it's a platform where I can design my nails and send them directly to you.\n\nSign up here: ${window.location.origin}/auth?signup=true&type=tech\n\nLooking forward to working with you!\n\nBest,\n${JSON.parse(localStorage.getItem("ivoryUser") || "{}").username || "Your Client"}`
-    )
-    window.location.href = `mailto:?subject=${subject}&body=${body}`
+  const handleInviteTech = async () => {
+    const inviteLink = `${window.location.origin}/auth?signup=true&type=tech`
+    
+    try {
+      await navigator.clipboard.writeText(inviteLink)
+      toast.success('Invite link copied! 📋', {
+        description: 'Share this link with your nail tech',
+      })
+    } catch (error) {
+      console.error('Failed to copy:', error)
+      toast.error('Failed to copy link', {
+        description: 'Please try again',
+      })
+    }
   }
 
   if (sent) {
@@ -163,7 +172,7 @@ export default function SendToTechPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12 pb-8 sm:pb-16">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12 pb-28 sm:pb-32">
         {/* Page Title */}
         <div className="mb-8 sm:mb-12 text-center">
           <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Share Your Design</p>
@@ -213,8 +222,8 @@ export default function SendToTechPage() {
               onClick={handleInviteTech}
               className="bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 h-12 sm:h-14 px-8 sm:px-10 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98]"
             >
-              <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
-              Invite Nail Tech
+              <Copy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
+              Copy Invite Link
             </Button>
           </div>
         ) : (
@@ -310,11 +319,14 @@ export default function SendToTechPage() {
             onClick={handleInviteTech}
             className="w-full sm:w-auto bg-transparent border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 h-12 sm:h-14 px-8 sm:px-10 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98]"
           >
-            <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
-            Invite Nail Tech
+            <Copy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
+            Copy Invite Link
           </Button>
         </div>
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   )
 }
