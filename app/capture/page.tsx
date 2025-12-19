@@ -65,6 +65,7 @@ export default function CapturePage() {
   const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null)
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
   const [drawingImageUrl, setDrawingImageUrl] = useState<string | null>(null)
+  const [isInitializing, setIsInitializing] = useState(true) // Track if we're still initializing
   
   // Tabs for multiple designs
   const [designTabs, setDesignTabs] = useState<DesignTab[]>([
@@ -315,6 +316,7 @@ export default function CapturePage() {
           // Mark initial load as complete after a short delay
           setTimeout(() => {
             isInitialLoadRef.current = false
+            setIsInitializing(false)
           }, 200)
           
           return
@@ -354,6 +356,7 @@ export default function CapturePage() {
             // Mark initial load as complete
             setTimeout(() => {
               isInitialLoadRef.current = false
+              setIsInitializing(false)
             }, 200)
             
             return
@@ -370,6 +373,7 @@ export default function CapturePage() {
       // Mark initial load as complete
       setTimeout(() => {
         isInitialLoadRef.current = false
+        setIsInitializing(false)
       }, 200)
     }
 
@@ -1064,6 +1068,15 @@ export default function CapturePage() {
   }, [])
 
 
+
+  // Show loading state while initializing
+  if (isInitializing) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8B7355]" />
+      </div>
+    )
+  }
 
   if (capturedImage) {
     return (
