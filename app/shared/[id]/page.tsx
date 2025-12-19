@@ -108,12 +108,15 @@ export default function SharedDesignPage() {
       return
     }
 
-    // Store the design as inspiration and redirect to capture page
+    // Store the design for remixing - load it into the editor
     if (look) {
-      localStorage.setItem("inspirationImage", look.imageUrl)
-      toast.success('Design saved as inspiration!')
+      // Store both the original and generated images so they can remix it
+      localStorage.setItem("currentEditingImage", look.originalImageUrl || look.imageUrl)
+      localStorage.setItem("generatedPreview", look.imageUrl)
+      localStorage.setItem("isRemix", "true") // Flag to indicate this is a remix
+      toast.success('Loading design for remix!')
     }
-    router.push("/capture")
+    router.push("/editor")
   }
 
   const handleDownload = async () => {
