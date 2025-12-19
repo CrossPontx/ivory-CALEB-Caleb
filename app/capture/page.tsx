@@ -243,14 +243,20 @@ export default function CapturePage() {
       }
 
       // Check for loaded design metadata (from edit)
+      console.log('=== CAPTURE PAGE INIT DEBUG ===')
       const loadedMetadata = localStorage.getItem("loadedDesignMetadata")
       const loadedEditingImage = localStorage.getItem("currentEditingImage")
       const loadedPreview = localStorage.getItem("generatedPreview")
       
+      console.log('Checking localStorage:')
+      console.log('- loadedMetadata:', loadedMetadata ? 'EXISTS' : 'NULL')
+      console.log('- loadedEditingImage:', loadedEditingImage ? 'EXISTS' : 'NULL')
+      console.log('- loadedPreview:', loadedPreview ? 'EXISTS' : 'NULL')
+      
       if (loadedMetadata && loadedEditingImage) {
         try {
           const metadata = JSON.parse(loadedMetadata)
-          console.log('Loading design metadata for editing:', metadata)
+          console.log('✅ Loading design metadata for editing:', metadata)
           
           // Create a new tab with the loaded design
           const newTab: DesignTab = {

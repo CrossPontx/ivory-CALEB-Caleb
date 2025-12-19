@@ -94,6 +94,12 @@ export default function SharedDesignPage() {
 
     // Store the design in localStorage for editing with all metadata
     if (look) {
+      console.log('=== EDIT DESIGN DEBUG ===')
+      console.log('Look data:', look)
+      console.log('Original image:', look.originalImageUrl)
+      console.log('Generated image:', look.imageUrl)
+      console.log('Design metadata:', look.designMetadata)
+      
       localStorage.setItem("currentEditingImage", look.originalImageUrl || look.imageUrl)
       localStorage.setItem("generatedPreview", look.imageUrl)
       
@@ -122,9 +128,19 @@ export default function SharedDesignPage() {
         designMode: null,
         colorLightness: 65
       }
+      
+      console.log('Storing metadata:', metadata)
       localStorage.setItem("loadedDesignMetadata", JSON.stringify(metadata))
       
+      console.log('LocalStorage after setting:')
+      console.log('- currentEditingImage:', localStorage.getItem("currentEditingImage"))
+      console.log('- generatedPreview:', localStorage.getItem("generatedPreview"))
+      console.log('- loadedDesignMetadata:', localStorage.getItem("loadedDesignMetadata"))
+      console.log('=== END DEBUG ===')
+      
       toast.success('Loading design for editing!')
+    } else {
+      console.error('No look data available!')
     }
     router.push("/capture")
   }
