@@ -1117,17 +1117,19 @@ export default function CapturePage() {
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 pt-14 px-4 sm:px-6 pb-4 z-10 bg-white border-b border-[#E8E8E8]">
           <div className="flex items-center justify-between mb-3">
-            <button
-              onClick={changePhoto}
-              className="h-10 px-3 sm:px-4 border border-[#E8E8E8] text-[#1A1A1A] font-light text-xs tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 flex items-center gap-2"
-            >
-              <Upload className="w-4 h-4" strokeWidth={1} />
-              <span className="hidden sm:inline">Change</span>
-            </button>
-            <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+            <div className="flex items-center gap-2 sm:gap-3">
               <h1 className="font-serif text-base sm:text-xl font-light text-[#1A1A1A] tracking-tight hidden xs:block">
                 Design Your Nails
               </h1>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+              <button
+                onClick={changePhoto}
+                className="h-10 px-3 sm:px-4 border border-[#E8E8E8] text-[#1A1A1A] font-light text-xs tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" strokeWidth={1} />
+                <span className="hidden sm:inline">Change</span>
+              </button>
               <div className="flex items-center">
                 <CreditsDisplay showLabel={true} credits={credits} />
               </div>
