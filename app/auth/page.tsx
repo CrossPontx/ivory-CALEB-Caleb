@@ -407,39 +407,62 @@ function AuthPageContent() {
             </div>
 
             {isSignUp && (
-              <div className="flex items-start gap-3 p-4 bg-[#FAFAF8] border border-[#E8E8E8]">
-                <input
-                  type="checkbox"
-                  id="terms-checkbox"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-[#E8E8E8] text-[#8B7355] focus:ring-[#8B7355] focus:ring-offset-0 cursor-pointer touch-manipulation"
-                  required
-                />
-                <label htmlFor="terms-checkbox" className="text-xs text-[#6B6B6B] font-light leading-relaxed cursor-pointer">
-                  I agree to the{" "}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      router.push('/terms')
-                    }}
-                    className="text-[#8B7355] hover:text-[#1A1A1A] underline decoration-1 underline-offset-2 transition-colors touch-manipulation"
-                  >
-                    Terms of Service
-                  </button>
-                  {" "}and{" "}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      router.push('/privacy-policy')
-                    }}
-                    className="text-[#8B7355] hover:text-[#1A1A1A] underline decoration-1 underline-offset-2 transition-colors touch-manipulation"
-                  >
-                    Privacy Policy
-                  </button>
-                  , including our zero-tolerance policy for objectionable content and abusive behavior.
+              <div className="border border-[#E8E8E8] bg-[#FAFAF8] p-5 sm:p-6">
+                <label 
+                  htmlFor="terms-checkbox" 
+                  className="flex items-start gap-4 cursor-pointer group"
+                >
+                  <div className="relative flex-shrink-0 mt-0.5">
+                    <input
+                      type="checkbox"
+                      id="terms-checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="peer h-5 w-5 cursor-pointer appearance-none border-2 border-[#E8E8E8] bg-white transition-all duration-300 checked:border-[#8B7355] checked:bg-[#8B7355] hover:border-[#8B7355] focus:outline-none focus:ring-2 focus:ring-[#8B7355] focus:ring-offset-2 touch-manipulation"
+                      required
+                    />
+                    <svg 
+                      className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-300" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor" 
+                      strokeWidth={3}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm sm:text-[13px] text-[#1A1A1A] font-light leading-relaxed">
+                      I agree to the{" "}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          router.push('/terms')
+                        }}
+                        className="text-[#8B7355] hover:text-[#1A1A1A] underline decoration-1 underline-offset-2 transition-colors duration-300 touch-manipulation font-normal"
+                      >
+                        Terms of Service
+                      </button>
+                      {" "}and{" "}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          router.push('/privacy-policy')
+                        }}
+                        className="text-[#8B7355] hover:text-[#1A1A1A] underline decoration-1 underline-offset-2 transition-colors duration-300 touch-manipulation font-normal"
+                      >
+                        Privacy Policy
+                      </button>
+                    </p>
+                    <p className="text-xs text-[#6B6B6B] font-light leading-relaxed mt-2 tracking-wide">
+                      Including our zero-tolerance policy for objectionable content and abusive behavior.
+                    </p>
+                  </div>
                 </label>
               </div>
             )}
