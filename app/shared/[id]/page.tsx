@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Edit2, Heart, Loader2, Sparkles, Download, Share2 } from "lucide-react"
+import { Edit2, Heart, Loader2, Download, Share2 } from "lucide-react"
 import Image from "next/image"
 import Head from "next/head"
 import ContentModerationMenu from "@/components/content-moderation-menu"
@@ -318,18 +318,10 @@ export default function SharedDesignPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="space-y-3 sm:space-y-4 max-w-md mx-auto mb-8 sm:mb-10">
-            <Button 
-              onClick={handleRemix}
-              className="w-full bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation"
-            >
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
-              Remix This Design
-            </Button>
-
+          <div className="max-w-md mx-auto mb-8 sm:mb-10">
             <Button 
               onClick={handleEdit}
-              className="w-full bg-transparent border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation"
+              className="w-full bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation"
             >
               <Edit2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
               Edit This Design
