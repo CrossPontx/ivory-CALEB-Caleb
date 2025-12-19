@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Edit2, Heart, Loader2, Download, Share2 } from "lucide-react"
+import { Edit2, Heart, Loader2, Download, Share2, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Head from "next/head"
 import ContentModerationMenu from "@/components/content-moderation-menu"
