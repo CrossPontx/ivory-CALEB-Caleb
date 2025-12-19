@@ -358,7 +358,8 @@ export default function BookingsPage() {
                 {myBookings.map((booking) => (
                   <div
                     key={booking.id}
-                    className="border border-[#E8E8E8] hover:border-[#8B7355] transition-all duration-700 hover:shadow-xl hover:shadow-[#8B7355]/5"
+                    className="border border-[#E8E8E8] hover:border-[#8B7355] transition-all duration-700 hover:shadow-xl hover:shadow-[#8B7355]/5 cursor-pointer"
+                    onClick={() => router.push(`/booking/${booking.id}`)}
                   >
                     <div className="p-6 sm:p-8 lg:p-10 space-y-6">
                       {/* Header */}
