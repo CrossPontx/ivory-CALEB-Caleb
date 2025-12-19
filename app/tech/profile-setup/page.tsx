@@ -15,6 +15,8 @@ type Service = {
   id: string
   name: string
   price: string
+  duration: string
+  description: string
 }
 
 export default function TechProfileSetupPage() {
@@ -28,8 +30,8 @@ export default function TechProfileSetupPage() {
   const [location, setLocation] = useState("")
   const [portfolioImages, setPortfolioImages] = useState<string[]>([])
   const [services, setServices] = useState<Service[]>([
-    { id: "1", name: "Full Set", price: "60" },
-    { id: "2", name: "Gel Manicure", price: "45" },
+    { id: "1", name: "Full Set", price: "60", duration: "90", description: "Complete acrylic or gel nail set" },
+    { id: "2", name: "Gel Manicure", price: "45", duration: "60", description: "Gel polish application with nail care" },
   ])
 
   // Load existing profile data
@@ -73,6 +75,8 @@ export default function TechProfileSetupPage() {
                 id: s.id.toString(),
                 name: s.name,
                 price: s.price.toString(),
+                duration: s.duration?.toString() || "60",
+                description: s.description || "",
               }))
             )
           }
@@ -88,14 +92,14 @@ export default function TechProfileSetupPage() {
   }, [router])
 
   const addService = () => {
-    setServices([...services, { id: Date.now().toString(), name: "", price: "" }])
+    setServices([...services, { id: Date.now().toString(), name: "", price: "", duration: "60", description: "" }])
   }
 
   const removeService = (id: string) => {
     setServices(services.filter((s) => s.id !== id))
   }
 
-  const updateService = (id: string, field: "name" | "price", value: string) => {
+  const updateService = (id: string, field: "name" | "price" | "duration" | "description", value: string) => {
     setServices(services.map((s) => (s.id === id ? { ...s, [field]: value } : s)))
   }
 
@@ -223,6 +227,8 @@ export default function TechProfileSetupPage() {
             .map((s) => ({
               name: s.name,
               price: parseFloat(s.price),
+              duration: parseInt(s.duration) || 60,
+              description: s.description,
             })),
         }),
       })
@@ -389,35 +395,80 @@ export default function TechProfileSetupPage() {
               </Button>
             </div>
 
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-5 sm:space-y-6">
               {services.map((service, index) => (
-                <div key={service.id} className="flex gap-2 sm:gap-3 items-start group">
-                  <Input
-                    placeholder="Service name"
-                    value={service.name}
-                    onChange={(e) => updateService(service.id, "name", e.target.value)}
-                    className="flex-1 h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
-                  />
-                  <div className="relative w-24 sm:w-32 lg:w-36">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] text-sm sm:text-base font-light">
-                      $
-                    </span>
-                    <Input
-                      placeholder="0"
-                      type="number"
-                      value={service.price}
-                      onChange={(e) => updateService(service.id, "price", e.target.value)}
-                      className="pl-6 sm:pl-7 h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
-                    />
+                <div key={service.id} className="border border-[#E8E8E8] p-5 sm:p-6 lg:p-7 group hover:border-[#8B7355]/30 transition-all duration-700">
+                  <div className="flex items-start justify-between mb-4 sm:mb-5">
+                    <p className="text-[10px] tracking-[0.25em] uppercase text-[#8B7355] font-light">Service {index + 1}</p>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => removeService(service.id)}
+                      className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 rounded-none opacity-60 group-hover:opacity-100"
+                    >
+                      <X className="w-4 h-4" strokeWidth={1} />
+                    </Button>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => removeService(service.id)}
-                    className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 flex-shrink-0 hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 rounded-none opacity-60 group-hover:opacity-100"
-                  >
-                    <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1} />
-                  </Button>
+                  
+                  <div className="space-y-4 sm:space-y-5">
+                    <div>
+                      <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
+                        Service Name
+                      </label>
+                      <Input
+                        placeholder="e.g., Full Set, Gel Manicure"
+                        value={service.name}
+                        onChange={(e) => updateService(service.id, "name", e.target.value)}
+                        className="h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
+                        Description
+                      </label>
+                      <Textarea
+                        placeholder="Brief description of what's included..."
+                        value={service.description}
+                        onChange={(e) => updateService(service.id, "description", e.target.value)}
+                        rows={2}
+                        className="text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 resize-none font-light leading-[1.7] tracking-wide transition-all duration-300"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                      <div>
+                        <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
+                          Price
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] text-sm sm:text-base font-light">
+                            $
+                          </span>
+                          <Input
+                            placeholder="0"
+                            type="number"
+                            value={service.price}
+                            onChange={(e) => updateService(service.id, "price", e.target.value)}
+                            className="pl-6 sm:pl-7 h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
+                          Duration (min)
+                        </label>
+                        <Input
+                          placeholder="60"
+                          type="number"
+                          value={service.duration}
+                          onChange={(e) => updateService(service.id, "duration", e.target.value)}
+                          className="h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
