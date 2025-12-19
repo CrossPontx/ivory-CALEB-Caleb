@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { ArrowLeft, Copy, Check, Share2, Download, Link2 } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
+import { BottomNav } from "@/components/bottom-nav"
 
 type NailLook = {
   id: string
@@ -148,7 +149,7 @@ export default function SharePage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12 pb-8 sm:pb-16">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12 pb-28 sm:pb-32">
         {/* Page Title */}
         <div className="mb-8 sm:mb-12 text-center">
           <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Share Your Design</p>
@@ -280,6 +281,9 @@ export default function SharePage() {
           </p>
         </div>
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   )
 }
