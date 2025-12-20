@@ -1112,22 +1112,8 @@ export default function CapturePage() {
   }
 
   if (capturedImage) {
-    // Handle scroll to reveal drawer
-    const handleWheel = (e: React.WheelEvent) => {
-      if (e.deltaY > 0) {
-        // Scrolling down - scroll to drawer
-        const drawer = document.querySelector('[data-drawer="bottom"]');
-        if (drawer) {
-          drawer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    };
-
     return (
-      <div 
-        className="fixed inset-0 z-[100] bg-gradient-to-b from-[#F8F7F5] via-white to-white flex flex-col"
-        onWheel={handleWheel}
-      >
+      <div className="fixed inset-0 z-[100] bg-gradient-to-b from-[#F8F7F5] via-white to-white flex flex-col">
         {/* Elegant Header */}
         <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-8 lg:px-12 pb-5 sm:pb-6 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
           <div className="max-w-7xl mx-auto">
@@ -1203,6 +1189,37 @@ export default function CapturePage() {
           style={{ 
             height: expandedSection ? 'calc(35vh - 80px)' : 'calc(65vh - 80px)', 
             minHeight: expandedSection ? '220px' : '420px' 
+          }}
+          onWheel={(e) => {
+            // Only scroll to drawer if scrolling down
+            if (e.deltaY > 0) {
+              const drawer = document.querySelector('[data-drawer="bottom"]');
+              if (drawer) {
+                drawer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          }}
+          onTouchMove={(e) => {
+            // Handle touch scroll on mobile
+            const touch = e.touches[0];
+            const startY = touch.clientY;
+            
+            const handleTouchEnd = (endEvent: TouchEvent) => {
+              const endTouch = endEvent.changedTouches[0];
+              const deltaY = startY - endTouch.clientY;
+              
+              // If swiping up (scrolling down)
+              if (deltaY > 50) {
+                const drawer = document.querySelector('[data-drawer="bottom"]');
+                if (drawer) {
+                  drawer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }
+              
+              document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            document.addEventListener('touchend', handleTouchEnd, { once: true });
           }}
         >
           <div className="max-w-6xl mx-auto h-full">
@@ -1864,6 +1881,7 @@ S
               multiple
               onChange={handleDesignUpload}
               className="hidden"
+              capture="environment"
             />
           </div>
         </div>
