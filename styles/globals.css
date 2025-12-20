@@ -204,6 +204,63 @@ html {
   }
 }
 
+/* iOS/iPadOS specific touch optimizations */
+@supports (-webkit-touch-callout: none) {
+  /* Prevent double-tap zoom on buttons and interactive elements */
+  button, 
+  a[role="button"],
+  [role="tab"],
+  [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Improve scrolling performance on iOS */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent iOS text size adjustment */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Smooth transitions for active states on iOS */
+  button:active,
+  a[role="button"]:active,
+  [role="tab"]:active {
+    opacity: 0.8;
+    transition: opacity 0.1s ease;
+  }
+}
+
+/* iPad specific optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Ensure tabs are easily tappable on iPad */
+  [role="tab"] {
+    min-height: 48px;
+    min-width: 100px;
+    padding: 12px 16px;
+  }
+
+  /* Improve button touch targets on iPad */
+  button {
+    min-height: 44px;
+  }
+}
+
+/* Desktop/Mac optimizations */
+@media (min-width: 1025px) {
+  /* Restore hover effects for desktop */
+  button:hover,
+  a[role="button"]:hover,
+  [role="tab"]:hover {
+    cursor: pointer;
+  }
+}
+
 /* Vertical Sidebar Layout for Desktop */
 @media (min-width: 1024px) {
   /* Add left margin to main content areas to avoid sidebar overlap */

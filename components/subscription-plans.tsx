@@ -246,7 +246,7 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
             <button
               onClick={() => handleSubscribe(plan.id)}
               disabled={loading !== null || isCurrentPlan(plan.id)}
-              className={`w-full h-12 font-light text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`w-full h-12 font-light text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 touch-manipulation ${
                 isCurrentPlan(plan.id)
                   ? 'bg-green-600 text-white cursor-default'
                   : 'bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 active:scale-95'
