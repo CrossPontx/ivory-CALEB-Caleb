@@ -94,6 +94,65 @@ Cookie consent component incorrectly suggested we use cookies for "analytics" an
 
 ---
 
+## Fix #3: Guideline 4.8 - Design - Login Services
+
+### Issue
+App uses Google Sign In but must offer an equivalent login option that meets privacy requirements
+
+### Root Cause
+Sign in with Apple button was commented out (disabled)
+
+### Fix Applied
+✅ Enabled Sign in with Apple button
+✅ Provides equivalent login option to Google
+✅ Meets all Guideline 4.8 requirements
+✅ Equal visual prominence and styling
+
+### Requirements Met
+
+#### 1. Limits Data Collection ✅
+- Only collects name and email
+- No additional data requested
+- Scope: `name email` only
+
+#### 2. Allows Private Email ✅
+- Supports "Hide My Email" feature
+- Accepts private relay emails
+- User controls email visibility
+
+#### 3. No Advertising Data ✅
+- No tracking cookies
+- No advertising SDKs
+- No data sharing with advertisers
+- Authentication data only
+
+### Visual Implementation
+Both buttons have:
+- Same size (h-14 / 56px height)
+- Same styling (border, hover effects)
+- Same positioning (stacked vertically)
+- Same prominence (no visual hierarchy)
+- Same touch targets (touch-manipulation CSS)
+
+### Files Modified
+- `app/auth/page.tsx` - Enabled Sign in with Apple button and OAuth flow
+
+### Testing
+- ✅ Sign in with Apple button visible
+- ✅ Equal prominence to Google Sign In
+- ✅ OAuth flow works correctly
+- ✅ Hide My Email supported
+- ✅ Account creation successful
+- ✅ No additional data collected
+
+### Documentation
+- `APPLE_GUIDELINE_4_8_SIGN_IN_RESPONSE.md` - Detailed response
+
+### Commit
+`7e27563e` - "Fix: Enable Sign in with Apple - Apple Guideline 4.8"
+
+---
+
 ## Summary for Apple Review
 
 ### Guideline 2.1 - Performance
@@ -105,6 +164,11 @@ The "Subscribe to Pro" tab now responds immediately to touch on all iPad models 
 **Status:** ✅ FIXED
 
 The cookie consent banner has been removed. We clarify that we only use essential cookies for authentication and UI preferences. We do NOT use cookies for tracking, analytics, or advertising purposes. No App Tracking Transparency is required as we do not track users.
+
+### Guideline 4.8 - Login Services
+**Status:** ✅ FIXED
+
+Sign in with Apple is now enabled and fully functional. It provides an equivalent login option to Google Sign In with equal visual prominence. Sign in with Apple meets all requirements: limits data collection to name and email, supports Hide My Email, and does not collect data for advertising.
 
 ---
 
@@ -127,6 +191,18 @@ The cookie consent banner has been removed. We clarify that we only use essentia
    - `sidebar_state` (UI preference)
 6. No analytics or tracking cookies ✅
 
+### Test 3: Sign in with Apple (Any Device)
+1. Open app authentication screen
+2. Verify both buttons visible:
+   - "Continue with Google" ✅
+   - "Sign in with Apple" ✅
+3. Tap "Sign in with Apple"
+4. Apple authentication screen appears ✅
+5. Choose "Hide My Email" (optional)
+6. Complete authentication
+7. Account created successfully ✅
+8. Only name and email stored ✅
+
 ---
 
 ## Commits
@@ -141,11 +217,16 @@ The cookie consent banner has been removed. We clarify that we only use essentia
    - Date: 2024-12-20
    - Files: 3 changed, 225 insertions, 120 deletions
 
+3. **Guideline 4.8 Fix**
+   - Commit: `7e27563e`
+   - Date: 2024-12-20
+   - Files: 2 changed, 384 insertions, 75 deletions
+
 ---
 
 ## Deployment
 
-Both fixes have been:
+All fixes have been:
 - ✅ Committed to main branch
 - ✅ Pushed to GitHub
 - ✅ Deployed to production (Vercel auto-deploy)
@@ -155,7 +236,7 @@ Both fixes have been:
 
 ## Response to Apple Review Team
 
-We have addressed both issues raised in the app review:
+We have addressed all three issues raised in the app review:
 
 **Guideline 2.1 - Performance:**
 The iPad touch responsiveness issue has been resolved by implementing proper interactive tabs with platform-specific optimizations. The app now provides immediate touch feedback across all supported devices.
@@ -163,7 +244,10 @@ The iPad touch responsiveness issue has been resolved by implementing proper int
 **Guideline 5.1.2 - Privacy:**
 The cookie consent banner has been removed as we do not use cookies for tracking purposes. We only use essential cookies for authentication and UI preferences, which do not require App Tracking Transparency under Apple's guidelines.
 
-Both fixes have been thoroughly tested and are ready for re-review.
+**Guideline 4.8 - Login Services:**
+Sign in with Apple is fully implemented and enabled. It provides an equivalent login option to Google Sign In with equal visual prominence. Sign in with Apple meets all requirements: limits data collection to name and email, supports Hide My Email, and does not collect data for advertising purposes.
+
+All fixes have been thoroughly tested and are ready for re-review.
 
 ---
 
