@@ -1881,7 +1881,6 @@ S
               multiple
               onChange={handleDesignUpload}
               className="hidden"
-              capture="environment"
             />
           </div>
         </div>
