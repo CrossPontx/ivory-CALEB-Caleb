@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { CookieConsent } from "@/components/cookie-consent"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -444,8 +443,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Cookie Consent */}
-      <CookieConsent />
     </div>
   )
 }
