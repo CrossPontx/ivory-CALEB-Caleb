@@ -41,6 +41,8 @@ type DesignTab = {
   drawingImageUrl: string | null
   aiPrompt: string
   originalImage: string | null
+  isGenerating: boolean
+  generationProgress: number
 }
 
 export default function CapturePage() {
@@ -111,7 +113,9 @@ export default function CapturePage() {
       selectedDesignImages: [],
       drawingImageUrl: null,
       aiPrompt: '',
-      originalImage: null
+      originalImage: null,
+      isGenerating: false,
+      generationProgress: 0
     }
   ])
   const [activeTabId, setActiveTabId] = useState('1')
@@ -175,6 +179,8 @@ export default function CapturePage() {
       setDrawingImageUrl(activeTab.drawingImageUrl)
       setAiPrompt(activeTab.aiPrompt)
       setCapturedImage(activeTab.originalImage)
+      setIsGenerating(activeTab.isGenerating)
+      setGenerationProgress(activeTab.generationProgress)
       
       // Stop camera when switching to a tab that has content
       if (activeTab.originalImage || activeTab.finalPreviews.length > 0) {
@@ -194,11 +200,13 @@ export default function CapturePage() {
             selectedDesignImages,
             drawingImageUrl,
             aiPrompt,
-            originalImage: capturedImage
+            originalImage: capturedImage,
+            isGenerating,
+            generationProgress
           }
         : tab
     ))
-  }, [finalPreviews, designSettings, selectedDesignImages, drawingImageUrl, aiPrompt, capturedImage, activeTabId])
+  }, [finalPreviews, designSettings, selectedDesignImages, drawingImageUrl, aiPrompt, capturedImage, activeTabId, isGenerating, generationProgress])
   
   // Add new tab
   const addNewTab = () => {
@@ -220,7 +228,9 @@ export default function CapturePage() {
       selectedDesignImages: [],
       drawingImageUrl: null,
       aiPrompt: '',
-      originalImage: null
+      originalImage: null,
+      isGenerating: false,
+      generationProgress: 0
     }
     setDesignTabs([...designTabs, newTab])
     setActiveTabId(newId)
@@ -301,7 +311,9 @@ export default function CapturePage() {
             selectedDesignImages: metadata.selectedDesignImages || [],
             drawingImageUrl: metadata.drawingImageUrl || null,
             aiPrompt: metadata.aiPrompt || '',
-            originalImage: loadedEditingImage
+            originalImage: loadedEditingImage,
+            isGenerating: false,
+            generationProgress: 0
           }
           
           // Save to session storage IMMEDIATELY so tab restoration logic sees it
@@ -1152,7 +1164,10 @@ export default function CapturePage() {
                     }`}
                   >
                     {tab.name}
-                    {tab.finalPreviews.length > 0 && (
+                    {tab.isGenerating && (
+                      <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
+                    )}
+                    {!tab.isGenerating && tab.finalPreviews.length > 0 && (
                       <span className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm ${
                         activeTabId === tab.id ? 'bg-white/20' : 'bg-[#F8F7F5]'
                       }`}>
