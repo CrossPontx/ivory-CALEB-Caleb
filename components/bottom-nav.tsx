@@ -43,14 +43,17 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                   router.push(item.path)
                 }}
                 className={cn(
-                  'flex items-center justify-center transition-all duration-300',
+                  'flex items-center justify-center transition-all duration-300 relative',
                   'active:scale-95 w-12 h-12 rounded-lg',
                   active
                     ? 'text-[#1A1A1A] bg-[#F8F7F5]'
                     : 'text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5]/50'
                 )}
               >
-                <Icon className="w-6 h-6" strokeWidth={1} />
+                <Icon className="w-6 h-6" strokeWidth={active ? 1.5 : 1} />
+                {active && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#1A1A1A] rounded-r-full" />
+                )}
               </button>
             )
           })}
@@ -79,14 +82,17 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                   router.push(item.path)
                 }}
                 className={cn(
-                  'flex items-center justify-center transition-all duration-300',
+                  'flex items-center justify-center transition-all duration-300 relative',
                   'active:scale-95 w-12 h-12 rounded-lg',
                   active
                     ? 'text-[#1A1A1A] bg-[#F8F7F5]'
                     : 'text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5]/50'
                 )}
               >
-                <Icon className="w-6 h-6" strokeWidth={1} />
+                <Icon className="w-6 h-6" strokeWidth={active ? 1.5 : 1} />
+                {active && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#1A1A1A] rounded-r-full" />
+                )}
               </button>
             )
           })}
@@ -117,7 +123,7 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                 router.push('/home');
               }}
               className={cn(
-                'flex flex-col items-center justify-center transition-all duration-300',
+                'flex flex-col items-center justify-center transition-all duration-300 relative',
                 'active:scale-95',
                 isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
                 isActive('/home') 
@@ -125,8 +131,11 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                   : 'text-[#6B6B6B] hover:text-[#8B7355]'
               )}
             >
-              <Home className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+              <Home className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={isActive('/home') ? 1.5 : 1} />
               {isWatch && <span className="text-[8px] mt-0.5">Home</span>}
+              {isActive('/home') && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
+              )}
             </button>
 
             {/* Bookings Button */}
@@ -136,7 +145,7 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                 router.push('/bookings');
               }}
               className={cn(
-                'flex flex-col items-center justify-center transition-all duration-300',
+                'flex flex-col items-center justify-center transition-all duration-300 relative',
                 'active:scale-95',
                 isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
                 isActive('/bookings') || isActive('/book') || isActive('/tech/bookings')
@@ -144,8 +153,11 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                   : 'text-[#6B6B6B] hover:text-[#8B7355]'
               )}
             >
-              <Calendar className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+              <Calendar className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={(isActive('/bookings') || isActive('/book') || isActive('/tech/bookings')) ? 1.5 : 1} />
               {isWatch && <span className="text-[8px] mt-0.5">Book</span>}
+              {(isActive('/bookings') || isActive('/book') || isActive('/tech/bookings')) && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
+              )}
             </button>
 
             {/* Center Action Button */}
@@ -169,7 +181,7 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                 router.push('/profile');
               }}
               className={cn(
-                'flex flex-col items-center justify-center transition-all duration-300',
+                'flex flex-col items-center justify-center transition-all duration-300 relative',
                 'active:scale-95',
                 isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
                 isActive('/profile') 
@@ -177,8 +189,11 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                   : 'text-[#6B6B6B] hover:text-[#8B7355]'
               )}
             >
-              <User className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+              <User className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={isActive('/profile') ? 1.5 : 1} />
               {isWatch && <span className="text-[8px] mt-0.5">Profile</span>}
+              {isActive('/profile') && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
+              )}
             </button>
 
             {/* Settings Button */}
@@ -188,7 +203,7 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                 router.push('/settings');
               }}
               className={cn(
-                'flex flex-col items-center justify-center transition-all duration-300',
+                'flex flex-col items-center justify-center transition-all duration-300 relative',
                 'active:scale-95',
                 isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
                 isActive('/settings') || isActive('/billing')
@@ -196,8 +211,11 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                   : 'text-[#6B6B6B] hover:text-[#8B7355]'
               )}
             >
-              <Settings className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={1} />
+              <Settings className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={(isActive('/settings') || isActive('/billing')) ? 1.5 : 1} />
               {isWatch && <span className="text-[8px] mt-0.5">Settings</span>}
+              {(isActive('/settings') || isActive('/billing')) && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
+              )}
             </button>
           </div>
         </div>
