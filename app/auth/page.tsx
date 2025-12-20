@@ -55,7 +55,7 @@ function AuthPageContent() {
           if (data.user.userType === 'tech') {
             router.push('/tech/dashboard')
           } else if (data.user.userType === 'client') {
-            router.push('/home')
+            router.push('/capture')
           } else {
             router.push('/user-type')
           }
@@ -85,7 +85,7 @@ function AuthPageContent() {
             if (data.user.userType === 'tech') {
               router.push('/tech/dashboard')
             } else if (data.user.userType === 'client') {
-              router.push('/home')
+              router.push('/capture')
             } else {
               router.push('/user-type')
             }
@@ -173,9 +173,9 @@ function AuthPageContent() {
           return
         }
         
-        // If user already has a type, go to home, otherwise select type
+        // If user already has a type, go to capture/dashboard, otherwise select type
         if (user.userType) {
-          router.push(user.userType === 'tech' ? '/tech/dashboard' : '/home')
+          router.push(user.userType === 'tech' ? '/tech/dashboard' : '/capture')
         } else {
           router.push("/user-type")
         }
