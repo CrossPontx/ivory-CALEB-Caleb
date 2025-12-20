@@ -1227,15 +1227,23 @@ export default function CapturePage() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-full">
                 {/* Original Image Card */}
                 <div className="relative overflow-hidden border border-[#E8E8E8]/50 group h-full bg-white shadow-sm hover:shadow-lg transition-all duration-700 rounded-sm animate-fade-in">
-                  <button
+                  <div
                     onClick={() => setShowDrawingCanvas(true)}
                     className="relative bg-gradient-to-br from-[#F8F7F5] to-white h-full w-full cursor-pointer"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setShowDrawingCanvas(true)
+                      }
+                    }}
                     title="Click to draw on image"
                   >
                     <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
                     
                     {/* Draw Indicator Overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-700 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-700 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
                       <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 md:p-8 shadow-2xl transform group-hover:scale-105 transition-transform duration-500 rounded-sm border border-[#E8E8E8]">
                         <Pencil className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-[#2D7A4F]" strokeWidth={1.5} />
                         <p className="text-[10px] sm:text-xs md:text-sm text-[#1A1A1A] font-light tracking-wider uppercase mt-2">
@@ -1262,7 +1270,7 @@ export default function CapturePage() {
                     >
                       <Upload className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
                     </button>
-                  </button>
+                  </div>
                 </div>
 
                 {/* AI Designs Card - Side by Side */}
