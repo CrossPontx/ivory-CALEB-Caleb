@@ -1243,13 +1243,13 @@ export default function CapturePage() {
                     <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
                     
                     {/* Elegant Blinking "Tap to draw" Text Overlay - At Top */}
-                    <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-10 pt-3 sm:pt-4 md:pt-6">
+                    <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-10 pt-3 sm:pt-4 md:pt-6 px-3">
                       <div className="relative">
-                        <div className="bg-gradient-to-r from-[#8B7355]/90 via-[#A0826D]/90 to-[#8B7355]/90 backdrop-blur-md px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-full shadow-2xl animate-blink border border-white/20">
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" strokeWidth={1.5} />
-                            <p className="text-white text-xs sm:text-sm md:text-base font-light tracking-[0.2em] uppercase">
-                              Tap to draw on image
+                        <div className="bg-gradient-to-br from-[#8B7355]/95 via-[#A0826D]/95 to-[#8B7355]/95 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4 rounded-lg shadow-2xl animate-blink border border-white/30">
+                          <div className="flex flex-col items-center gap-1.5 sm:gap-2">
+                            <Pencil className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={1.5} />
+                            <p className="text-white text-[10px] sm:text-xs font-light tracking-[0.25em] uppercase text-center leading-tight">
+                              Tap to Draw
                             </p>
                           </div>
                         </div>
