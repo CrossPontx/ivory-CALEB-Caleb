@@ -69,6 +69,7 @@ export default function CapturePage() {
   const [designMode, setDesignMode] = useState<DesignMode>(null)
   const [aiPrompt, setAiPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isUploadingDesign, setIsUploadingDesign] = useState(false)
   const [generationProgress, setGenerationProgress] = useState(0)
   const [generatedDesigns, setGeneratedDesigns] = useState<string[]>([])
   const [selectedDesignImages, setSelectedDesignImages] = useState<string[]>([])
@@ -828,7 +829,7 @@ export default function CapturePage() {
       return
     }
 
-    setIsGenerating(true)
+    setIsUploadingDesign(true)
     try {
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData()
@@ -857,7 +858,7 @@ export default function CapturePage() {
       console.error('Error uploading design:', error)
       toast.error('Failed to upload images')
     } finally {
-      setIsGenerating(false)
+      setIsUploadingDesign(false)
     }
   }
 
@@ -1531,12 +1532,21 @@ S
                   <button 
                     onClick={() => designUploadRef.current?.click()}
                     className="w-full h-11 sm:h-12 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={isGenerating || selectedDesignImages.length >= 3}
+                    disabled={isUploadingDesign || selectedDesignImages.length >= 3}
                   >
-                    <Upload className="w-4 h-4" strokeWidth={1} />
-                    <span className="hidden sm:inline">Upload Design Images</span>
-                    <span className="sm:hidden">Upload Images</span>
-                    <span className="text-[10px] opacity-70">({selectedDesignImages.length}/3)</span>
+                    {isUploadingDesign ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1} />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" strokeWidth={1} />
+                        <span className="hidden sm:inline">Upload Design Images</span>
+                        <span className="sm:hidden">Upload Images</span>
+                        <span className="text-[10px] opacity-70">({selectedDesignImages.length}/3)</span>
+                      </>
+                    )}
                   </button>
 
                   {/* Uploaded Design Previews with Influence Control */}
