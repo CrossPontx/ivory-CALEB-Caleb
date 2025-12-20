@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useState, useEffect, useCallback } from 'react'
-import { Undo, Redo, Trash2, Palette, X, ZoomIn, ZoomOut, Maximize2, Move, Eye, EyeOff } from 'lucide-react'
+import { Undo, Redo, Trash2, Palette, X, ZoomIn, ZoomOut, Maximize2, Move, Eye, EyeOff, Pencil, Eraser } from 'lucide-react'
 
 interface DrawingCanvasProps {
   imageUrl: string
@@ -14,9 +14,11 @@ type DrawingLine = {
   color: string
   width: number
   texture: BrushTexture
+  isEraser?: boolean
 }
 
 type BrushTexture = 'solid' | 'soft' | 'spray' | 'marker' | 'pencil'
+type ToolMode = 'draw' | 'pan' | 'eraser'
 
 const COLORS = [
   '#808080', // Gray (default)
@@ -51,8 +53,10 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
-  const [currentColor, setCurrentColor] = useState('#808080') // Gray default
+  const [toolMode, setToolMode] = useState<ToolMode>('draw')
+  const [currentColor, setCurrentColor] = useState('#000000') // Black default
   const [brushSize, setBrushSize] = useState(8) // 8px default
+  const [eraserSize, setEraserSize] = useState(20) // Larger default for eraser
   const [brushTexture, setBrushTexture] = useState<BrushTexture>('solid')
   const [lines, setLines] = useState<DrawingLine[]>([])
   const [currentLine, setCurrentLine] = useState<DrawingLine | null>(null)
@@ -163,6 +167,25 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
 
   // Draw line with texture
   const drawLineWithTexture = (ctx: CanvasRenderingContext2D, line: DrawingLine) => {
+    // Handle eraser mode
+    if (line.isEraser) {
+      ctx.globalCompositeOperation = 'destination-out'
+      ctx.strokeStyle = 'rgba(0,0,0,1)'
+      ctx.lineWidth = line.width
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      
+      ctx.beginPath()
+      ctx.moveTo(line.points[0].x, line.points[0].y)
+      for (let i = 1; i < line.points.length; i++) {
+        ctx.lineTo(line.points[i].x, line.points[i].y)
+      }
+      ctx.stroke()
+      
+      ctx.globalCompositeOperation = 'source-over'
+      return
+    }
+    
     const texture = line.texture || 'solid'
     
     switch (texture) {
@@ -320,12 +343,24 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
     const coords = getCoordinates(e)
     if (!coords) return
     
+    // Handle pan mode
+    if (toolMode === 'pan') {
+      setIsPanning(true)
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      setPanStart({ x: clientX, y: clientY })
+      return
+    }
+    
+    // Handle drawing/eraser mode
     setIsDrawing(true)
+    const currentSize = toolMode === 'eraser' ? eraserSize : brushSize
     setCurrentLine({
       points: [coords],
       color: currentColor,
-      width: brushSize / zoom, // Adjust brush size for zoom
-      texture: brushTexture
+      width: currentSize / zoom, // Adjust size for zoom
+      texture: brushTexture,
+      isEraser: toolMode === 'eraser'
     })
     setUndoneLines([]) // Clear redo stack when starting new drawing
   }
@@ -335,6 +370,18 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
     
     // Check if this is a two-finger gesture (for pinch zoom)
     if ('touches' in e && e.touches.length === 2) {
+      return
+    }
+    
+    // Handle panning
+    if (isPanning && toolMode === 'pan') {
+      const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      const deltaX = currentX - panStart.x
+      const deltaY = currentY - panStart.y
+      
+      setPan(prev => ({ x: prev.x + deltaX, y: prev.y + deltaY }))
+      setPanStart({ x: currentX, y: currentY })
       return
     }
     
@@ -350,6 +397,11 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
   }
 
   const stopDrawing = () => {
+    if (isPanning) {
+      setIsPanning(false)
+      return
+    }
+    
     if (currentLine && currentLine.points.length > 0) {
       setLines([...lines, currentLine])
       setCurrentLine(null)
@@ -502,6 +554,43 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
           </div>
         )}
 
+        {/* Tool Mode Selection - Top Left */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-40">
+          <button
+            onClick={() => setToolMode('draw')}
+            className={`w-12 h-12 border flex items-center justify-center shadow-lg transition-all duration-300 ${
+              toolMode === 'draw' 
+                ? 'bg-[#8B7355] text-white border-[#8B7355]' 
+                : 'bg-white text-[#1A1A1A] border-[#E8E8E8] hover:bg-[#F8F7F5]'
+            }`}
+            title="Draw Mode"
+          >
+            <Pencil className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+          <button
+            onClick={() => setToolMode('eraser')}
+            className={`w-12 h-12 border flex items-center justify-center shadow-lg transition-all duration-300 ${
+              toolMode === 'eraser' 
+                ? 'bg-[#8B7355] text-white border-[#8B7355]' 
+                : 'bg-white text-[#1A1A1A] border-[#E8E8E8] hover:bg-[#F8F7F5]'
+            }`}
+            title="Eraser Mode"
+          >
+            <Eraser className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+          <button
+            onClick={() => setToolMode('pan')}
+            className={`w-12 h-12 border flex items-center justify-center shadow-lg transition-all duration-300 ${
+              toolMode === 'pan' 
+                ? 'bg-[#8B7355] text-white border-[#8B7355]' 
+                : 'bg-white text-[#1A1A1A] border-[#E8E8E8] hover:bg-[#F8F7F5]'
+            }`}
+            title="Pan Mode"
+          >
+            <Move className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+        </div>
+
         {/* Zoom Controls - Floating on Canvas */}
         <div className="absolute top-4 right-4 flex flex-col gap-2 z-40">
           <button
@@ -557,7 +646,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
           style={{
             width: canvasDimensions.width,
             height: canvasDimensions.height,
-            cursor: isDrawing ? 'crosshair' : zoom > 1 ? 'move' : 'crosshair'
+            cursor: toolMode === 'pan' || isPanning ? 'grab' : toolMode === 'eraser' ? 'crosshair' : 'crosshair'
           }}
         />
       </div>
@@ -671,7 +760,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
           )}
         </div>
 
-        {/* Brush Size Picker */}
+        {/* Brush/Eraser Size Picker */}
         <div className="space-y-2">
           <button
             onClick={() => {
@@ -684,32 +773,41 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
             <div className="flex items-center gap-3">
               <div 
                 className="bg-[#1A1A1A] rounded-full"
-                style={{ width: Math.min(brushSize + 8, 24), height: Math.min(brushSize + 8, 24) }}
+                style={{ width: Math.min((toolMode === 'eraser' ? eraserSize : brushSize) + 8, 24), height: Math.min((toolMode === 'eraser' ? eraserSize : brushSize) + 8, 24) }}
               />
-              <span className="text-[#1A1A1A] font-light tracking-wider uppercase text-sm">Brush Size</span>
+              <span className="text-[#1A1A1A] font-light tracking-wider uppercase text-sm">
+                {toolMode === 'eraser' ? 'Eraser Size' : 'Brush Size'}
+              </span>
             </div>
-            <span className="text-[#6B6B6B] font-light">{brushSize}px</span>
+            <span className="text-[#6B6B6B] font-light">{toolMode === 'eraser' ? eraserSize : brushSize}px</span>
           </button>
           
           {showBrushPicker && (
             <div className="grid grid-cols-5 gap-2 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
-              {BRUSH_SIZES.map(size => (
-                <button
-                  key={size}
-                  onClick={() => {
-                    setBrushSize(size)
-                    setShowBrushPicker(false)
-                  }}
-                  className={`w-full aspect-square border flex items-center justify-center transition-all active:scale-95 ${
-                    brushSize === size ? 'border-[#8B7355] bg-white scale-110 shadow-md' : 'border-[#E8E8E8] bg-white'
-                  }`}
-                >
-                  <div 
-                    className="bg-[#1A1A1A] rounded-full"
-                    style={{ width: Math.min(size, 20), height: Math.min(size, 20) }}
-                  />
-                </button>
-              ))}
+              {BRUSH_SIZES.map(size => {
+                const currentSize = toolMode === 'eraser' ? eraserSize : brushSize
+                return (
+                  <button
+                    key={size}
+                    onClick={() => {
+                      if (toolMode === 'eraser') {
+                        setEraserSize(size)
+                      } else {
+                        setBrushSize(size)
+                      }
+                      setShowBrushPicker(false)
+                    }}
+                    className={`w-full aspect-square border flex items-center justify-center transition-all active:scale-95 ${
+                      currentSize === size ? 'border-[#8B7355] bg-white scale-110 shadow-md' : 'border-[#E8E8E8] bg-white'
+                    }`}
+                  >
+                    <div 
+                      className="bg-[#1A1A1A] rounded-full"
+                      style={{ width: Math.min(size, 20), height: Math.min(size, 20) }}
+                    />
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
