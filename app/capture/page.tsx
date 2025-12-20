@@ -2008,7 +2008,7 @@ S
         <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-6 pb-5 z-10 bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => router.push('/home')}
+              onClick={() => router.back()}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-500 shadow-lg active:scale-95"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
