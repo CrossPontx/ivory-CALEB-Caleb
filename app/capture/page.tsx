@@ -86,7 +86,6 @@ export default function CapturePage() {
   const [finalPreviews, setFinalPreviews] = useState<string[]>([])
   const [colorLightness, setColorLightness] = useState(65) // 0-100 for lightness (matches initial color)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
-  const [expandedSubSection, setExpandedSubSection] = useState<string | null>(null) // For nested options
   const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null)
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
   const [drawingImageUrl, setDrawingImageUrl] = useState<string | null>(null)
@@ -1372,63 +1371,37 @@ S
           </div>
         )}
 
-        {/* Floating Generate Button - Always Visible */}
-        <div className="fixed left-0 right-0 z-30 px-4 sm:px-6" style={{ bottom: '100px' }}>
-          <div className="max-w-2xl mx-auto">
-            {!isGenerating ? (
-              <button 
-                onClick={() => generateAIPreview(designSettings)} 
-                className="w-full h-14 sm:h-16 bg-[#1A1A1A] text-white font-light text-sm sm:text-base tracking-[0.15em] uppercase hover:bg-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-3 shadow-2xl hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)] rounded-sm disabled:opacity-50 disabled:cursor-not-allowed animate-fade-in"
-                disabled={!hasCredits(1)}
-              >
-                <Sparkles className="w-6 h-6" strokeWidth={1.5} />
-                <span className="font-serif text-lg sm:text-xl font-light">Generate Design</span>
-                {credits !== null && (
-                  <span className="ml-2 text-xs opacity-70 font-light">
-                    (1 credit)
-                  </span>
-                )}
-              </button>
-            ) : (
-              <button 
-                onClick={cancelGeneration}
-                className="w-full h-14 sm:h-16 border-2 border-[#E8E8E8] bg-white text-[#1A1A1A] font-light text-sm sm:text-base tracking-[0.15em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-3 shadow-2xl rounded-sm"
-              >
-                <X className="w-6 h-6" strokeWidth={1.5} />
-                <span className="font-serif text-lg sm:text-xl font-light">Cancel</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Simplified Bottom Drawer - Optional Settings */}
+        {/* Elegant Bottom Drawer with Mobile Optimization */}
         <div 
           className="fixed left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#E8E8E8]/50 z-20 touch-action-pan-y transition-all duration-500 shadow-2xl" 
           style={{ 
             bottom: '80px', 
-            height: expandedSection ? 'calc(50vh - 80px)' : 'auto',
-            maxHeight: expandedSection ? '500px' : 'auto'
+            height: expandedSection ? 'calc(65vh - 80px)' : 'calc(35vh - 80px)', 
+            minHeight: expandedSection ? '400px' : '240px', 
+            maxHeight: expandedSection ? '600px' : '370px' 
           }}
         >
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto h-full flex flex-col">
             {/* Elegant Drag Handle */}
             <div className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355]"></div>
 
-            <div className="px-4 sm:px-6 pb-6">
+            <div className="w-full flex-1 flex flex-col overflow-hidden">
               {(designMode === 'design' || designMode === null) && (
-                <div className="space-y-4">
-                  {/* Credits Warning - Only if low/no credits */}
+                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide">
+                  {/* Low Credits Warning */}
                   {credits !== null && credits <= 2 && credits > 0 && (
-                    <div className="bg-gradient-to-r from-[#FFF9E6] to-[#FFF9E6]/50 border border-[#E8E8E8]/50 p-4 text-sm rounded-sm shadow-sm animate-fade-in">
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">⚠️</span>
+                    <div className="bg-gradient-to-r from-[#FFF9E6] to-[#FFF9E6]/50 border border-[#E8E8E8]/50 p-4 sm:p-5 text-sm rounded-sm shadow-sm animate-fade-in">
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 border border-[#E8E8E8] bg-white flex items-center justify-center flex-shrink-0 rounded-sm shadow-sm">
+                          <span className="text-lg sm:text-xl">⚠️</span>
+                        </div>
                         <div className="flex-1">
-                          <p className="text-[#1A1A1A] font-medium mb-1">Low on credits!</p>
-                          <p className="text-[#6B6B6B] text-sm">
+                          <p className="text-[#1A1A1A] font-light tracking-[0.15em] uppercase mb-2 text-[10px] sm:text-xs">Low on credits!</p>
+                          <p className="text-[#6B6B6B] text-xs sm:text-sm leading-relaxed font-light">
                             You have {credits} credit{credits !== 1 ? 's' : ''} left. 
                             <button 
                               onClick={() => router.push('/settings/credits')}
-                              className="underline ml-1 hover:text-[#1A1A1A] font-medium"
+                              className="underline ml-1 hover:text-[#1A1A1A] transition-colors duration-300"
                             >
                               Get more
                             </button>
@@ -1438,17 +1411,20 @@ S
                     </div>
                   )}
 
+                  {/* No Credits Warning */}
                   {credits !== null && credits === 0 && (
-                    <div className="bg-gradient-to-r from-[#FFF0F0] to-[#FFF0F0]/50 border border-[#E8E8E8]/50 p-4 text-sm rounded-sm shadow-sm animate-fade-in">
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">❌</span>
+                    <div className="bg-gradient-to-r from-[#FFF0F0] to-[#FFF0F0]/50 border border-[#E8E8E8]/50 p-4 sm:p-5 text-sm rounded-sm shadow-sm animate-fade-in">
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 border border-[#E8E8E8] bg-white flex items-center justify-center flex-shrink-0 rounded-sm shadow-sm">
+                          <span className="text-lg sm:text-xl">❌</span>
+                        </div>
                         <div className="flex-1">
-                          <p className="text-[#1A1A1A] font-medium mb-1">No credits remaining</p>
-                          <p className="text-[#6B6B6B] text-sm">
+                          <p className="text-[#1A1A1A] font-light tracking-[0.15em] uppercase mb-2 text-[10px] sm:text-xs">No credits remaining</p>
+                          <p className="text-[#6B6B6B] text-xs sm:text-sm leading-relaxed font-light">
                             Refer 3 friends to earn 1 free credit!
                             <button 
                               onClick={() => router.push('/settings/credits')}
-                              className="underline ml-1 hover:text-[#1A1A1A] font-medium"
+                              className="underline ml-1 hover:text-[#1A1A1A] transition-colors duration-300"
                             >
                               Learn more
                             </button>
@@ -1458,93 +1434,161 @@ S
                     </div>
                   )}
 
-                  {/* Simple Action Buttons - Always Visible */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Elegant Generate Preview Button */}
+                  {!isGenerating ? (
                     <button 
-                      onClick={() => designUploadRef.current?.click()}
-                      className="h-16 border-2 border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex flex-col items-center justify-center gap-2 rounded-sm disabled:opacity-50"
-                      disabled={isGenerating || selectedDesignImages.length >= 5}
+                      onClick={() => generateAIPreview(designSettings)} 
+                      className="w-full h-12 sm:h-14 bg-[#1A1A1A] text-white font-light text-[11px] sm:text-sm tracking-[0.2em] uppercase hover:bg-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!hasCredits(1)}
                     >
-                      <Upload className="w-6 h-6" strokeWidth={1.5} />
-                      <span className="text-xs font-light tracking-wider">Upload Image</span>
+                      <Sparkles className="w-5 h-5" strokeWidth={1} />
+                      Generate Preview
+                      {credits !== null && (
+                        <span className="ml-2 text-[10px] sm:text-xs opacity-70 font-light">
+                          (1 credit)
+                        </span>
+                      )}
                     </button>
-
+                  ) : (
                     <button 
-                      onClick={() => setExpandedSection(expandedSection ? null : 'options')}
-                      className="h-16 border-2 border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex flex-col items-center justify-center gap-2 rounded-sm"
+                      onClick={cancelGeneration}
+                      className="w-full h-12 sm:h-14 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[11px] sm:text-sm tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 sm:gap-3 rounded-sm"
                     >
-                      <Palette className="w-6 h-6" strokeWidth={1.5} />
-                      <span className="text-xs font-light tracking-wider">
-                        {expandedSection ? 'Hide Options' : 'More Options'}
-                      </span>
+                      <X className="w-5 h-5" strokeWidth={1} />
+                      Cancel Generation
                     </button>
-                  </div>
+                  )}
 
-                  {/* Drawing Status - If active */}
+                  {/* Drawing Status */}
                   {drawingImageUrl && (
-                    <div className="bg-gradient-to-r from-[#F0FFF4] to-[#F0FFF4]/50 border border-[#E8E8E8] p-4 rounded-sm shadow-sm animate-fade-in">
-                      <div className="flex items-start gap-3">
-                        <Pencil className="w-5 h-5 text-[#2D7A4F] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <div className="bg-gradient-to-r from-[#F0FFF4] to-[#F0FFF4]/50 border border-[#E8E8E8]/50 p-4 sm:p-5 text-sm rounded-sm shadow-sm animate-fade-in">
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 border border-[#E8E8E8] bg-white flex items-center justify-center flex-shrink-0 rounded-sm shadow-sm">
+                          <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-[#2D7A4F]" strokeWidth={1} />
+                        </div>
                         <div className="flex-1">
-                          <p className="text-[#1A1A1A] font-medium mb-1">Drawing added</p>
-                          <p className="text-[#6B6B6B] text-xs">Your drawing will guide the AI</p>
+                          <p className="text-[#1A1A1A] font-light tracking-[0.15em] uppercase mb-2 text-[10px] sm:text-xs">Drawing added</p>
+                          <p className="text-[#6B6B6B] text-xs sm:text-sm leading-relaxed font-light">
+                            Your drawing will guide the AI to create designs following your outline
+                          </p>
                         </div>
                         <button
                           onClick={() => setDrawingImageUrl(null)}
-                          className="text-[#6B6B6B] hover:text-[#1A1A1A] p-1"
+                          className="text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors duration-300 p-1"
                         >
-                          <X className="w-5 h-5" strokeWidth={1.5} />
+                          <X className="w-5 h-5" strokeWidth={1} />
                         </button>
                       </div>
                     </div>
                   )}
 
-                  {/* Design Image Influence - Only show if images uploaded */}
+                  {/* Elegant Upload Design Image Button */}
+                  <button 
+                    onClick={() => designUploadRef.current?.click()}
+                    className="w-full h-11 sm:h-12 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isGenerating || selectedDesignImages.length >= 5}
+                  >
+                    <Upload className="w-4 h-4" strokeWidth={1} />
+                    <span className="hidden sm:inline">Upload Design Images</span>
+                    <span className="sm:hidden">Upload Images</span>
+                    <span className="text-[10px] opacity-70">({selectedDesignImages.length}/5)</span>
+                  </button>
+
+                  {/* Uploaded Design Previews with Influence Control */}
                   {selectedDesignImages.length > 0 && (
-                    <div className="bg-white border border-[#E8E8E8] p-4 rounded-sm">
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-xs font-medium text-[#1A1A1A] uppercase tracking-wider">Design Image Influence</label>
-                        <span className="text-xs font-light text-[#1A1A1A]">{influenceWeights.nailEditor_designImage}%</span>
-                      </div>
-                      <div className="relative">
-                        <div className="absolute inset-0 h-2 rounded-full" style={{
-                          background: 'linear-gradient(to right, #e0e0e0 0%, #8B7355 50%, #1A1A1A 100%)',
-                          top: '50%',
-                          transform: 'translateY(-50%)'
-                        }} />
-                        <Slider
-                          value={[influenceWeights.nailEditor_designImage]}
-                          onValueChange={(value) => handleNailEditorDesignImageInfluence(value[0])}
-                          min={0}
-                          max={100}
-                          step={5}
-                          className="w-full relative z-10"
-                        />
-                      </div>
-                      <p className="text-[10px] text-[#6B6B6B] font-light mt-1">
-                        Base Color: {influenceWeights.nailEditor_baseColor}%
-                      </p>
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedSection(expandedSection === 'design-images' ? null : 'design-images')}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-border bg-white/80 backdrop-blur-sm hover:border-primary/50 hover:shadow-md active:scale-[0.98] transition-all"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="flex -space-x-2">
+                            {selectedDesignImages.slice(0, 3).map((img, idx) => (
+                              <div key={idx} className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
+                                <Image src={img} alt={`Design ${idx + 1}`} fill className="object-cover" />
+                              </div>
+                            ))}
+                            {selectedDesignImages.length > 3 && (
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-terracotta to-rose flex items-center justify-center border-2 border-white shadow-sm">
+                                <span className="text-white text-xs font-bold">+{selectedDesignImages.length - 3}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className="text-sm font-bold text-charcoal mb-0.5">{selectedDesignImages.length} Design{selectedDesignImages.length > 1 ? 's' : ''}</p>
+                            <p className="text-xs text-muted-foreground">Tap to adjust influence</p>
+                          </div>
+                          <span className="text-sm font-bold text-white bg-gradient-to-r from-terracotta to-rose px-3 py-1.5 rounded-full shadow-sm">{influenceWeights.nailEditor_designImage}%</span>
+                        </div>
+                        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ml-2 ${expandedSection === 'design-images' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedSection === 'design-images' && (
+                        <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-3">
+                          {/* Design Images Grid */}
+                          <div className="grid grid-cols-3 gap-2">
+                            {selectedDesignImages.map((img, idx) => (
+                              <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group">
+                                <Image src={img} alt={`Design ${idx + 1}`} fill className="object-cover" />
+                                <button
+                                  onClick={() => removeDesignImage(img)}
+                                  className="absolute top-1 right-1 w-6 h-6 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Influence Slider */}
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-xs font-medium text-muted-foreground">Design Images</label>
+                            <span className="text-xs font-bold text-primary">{influenceWeights.nailEditor_designImage}%</span>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute inset-0 h-2 rounded-full" style={{
+                              background: 'linear-gradient(to right, #e0e0e0 0%, #9b59b6 50%, #8e44ad 100%)',
+                              top: '50%',
+                              transform: 'translateY(-50%)'
+                            }} />
+                            <Slider
+                              value={[influenceWeights.nailEditor_designImage]}
+                              onValueChange={(value) => handleNailEditorDesignImageInfluence(value[0])}
+                              min={0}
+                              max={100}
+                              step={5}
+                              className="w-full relative z-10"
+                            />
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">
+                            Base Color: {influenceWeights.nailEditor_baseColor}%
+                          </p>
+                          <button
+                            onClick={() => setSelectedDesignImages([])}
+                            className="w-full mt-2 text-xs text-red-600 hover:text-red-700 font-medium"
+                          >
+                            Remove All Design Images
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* Advanced Options - Collapsible */}
-                  {expandedSection === 'options' && (
-                    <div className="border-t border-[#E8E8E8] pt-4 space-y-3 max-h-[300px] overflow-y-auto scrollbar-hide animate-fade-in">
-                      <p className="text-xs font-medium text-[#1A1A1A] uppercase tracking-wider mb-3">Design Options</p>
+                  <div className="border-t border-[#E8E8E8] pt-4">
+                    <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-widest mb-4">Design Parameters</p>
 
                     {/* Nail Length - Collapsible */}
                     <div className="mb-3">
                       <button
-                        onClick={() => setExpandedSubSection(expandedSubSection === 'length' ? null : 'length')}
+                        onClick={() => setExpandedSection(expandedSection === 'length' ? null : 'length')}
                         className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-[#1A1A1A] tracking-wide">Nail Length</span>
                           <span className="text-xs text-[#6B6B6B] capitalize font-light">{designSettings.nailLength.replace('-', ' ')}</span>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSubSection === 'length' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'length' ? 'rotate-180' : ''}`} strokeWidth={1} />
                       </button>
-                      {expandedSubSection === 'length' && (
+                      {expandedSection === 'length' && (
                         <div className="mt-2 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
                           <div className="grid grid-cols-4 gap-2">
                             {[
@@ -1574,16 +1618,16 @@ S
                     {/* Nail Shape - Collapsible */}
                     <div className="mb-3">
                       <button
-                        onClick={() => setExpandedSubSection(expandedSubSection === 'shape' ? null : 'shape')}
+                        onClick={() => setExpandedSection(expandedSection === 'shape' ? null : 'shape')}
                         className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-[#1A1A1A] tracking-wide">Nail Shape</span>
                           <span className="text-xs text-[#6B6B6B] capitalize font-light">{designSettings.nailShape}</span>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSubSection === 'shape' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'shape' ? 'rotate-180' : ''}`} strokeWidth={1} />
                       </button>
-                      {expandedSubSection === 'shape' && (
+                      {expandedSection === 'shape' && (
                         <div className="mt-2 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
                           <div className="grid grid-cols-3 gap-2">
                             {[
@@ -1617,7 +1661,7 @@ S
                     {/* Base Color - Collapsible */}
                     <div className="mb-3">
                       <button
-                        onClick={() => setExpandedSubSection(expandedSubSection === 'color' ? null : 'color')}
+                        onClick={() => setExpandedSection(expandedSection === 'color' ? null : 'color')}
                         className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3 flex-1">
@@ -1631,9 +1675,9 @@ S
                           </div>
                         </div>
                         <span className="text-xs font-light text-[#1A1A1A] bg-[#F8F7F5] border border-[#E8E8E8] px-2 py-1 mr-2">{influenceWeights.nailEditor_baseColor}%</span>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSubSection === 'color' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'color' ? 'rotate-180' : ''}`} strokeWidth={1} />
                       </button>
-                      {expandedSubSection === 'color' && (
+                      {expandedSection === 'color' && (
                         <div className="mt-2 space-y-3 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
                           <div>
                             <label className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase mb-1.5 block">Hue</label>
@@ -1701,16 +1745,16 @@ S
                     {/* Finish - Collapsible */}
                     <div className="mb-3">
                       <button
-                        onClick={() => setExpandedSubSection(expandedSubSection === 'finish' ? null : 'finish')}
+                        onClick={() => setExpandedSection(expandedSection === 'finish' ? null : 'finish')}
                         className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-[#1A1A1A] tracking-wide">Finish</span>
                           <span className="text-xs text-[#6B6B6B] capitalize font-light">{designSettings.finish}</span>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSubSection === 'finish' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'finish' ? 'rotate-180' : ''}`} strokeWidth={1} />
                       </button>
-                      {expandedSubSection === 'finish' && (
+                      {expandedSection === 'finish' && (
                         <div className="mt-2 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
                           <div className="grid grid-cols-3 gap-2">
                             {[
@@ -1741,16 +1785,16 @@ S
                     {/* Texture - Collapsible */}
                     <div className="mb-3">
                       <button
-                        onClick={() => setExpandedSubSection(expandedSubSection === 'texture' ? null : 'texture')}
+                        onClick={() => setExpandedSection(expandedSection === 'texture' ? null : 'texture')}
                         className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3 flex-1">
                           <span className="text-sm font-light text-[#1A1A1A] tracking-wide">Texture</span>
                           <span className="text-xs text-[#6B6B6B] capitalize font-light">{designSettings.texture}</span>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSubSection === 'texture' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'texture' ? 'rotate-180' : ''}`} strokeWidth={1} />
                       </button>
-                      {expandedSubSection === 'texture' && (
+                      {expandedSection === 'texture' && (
                         <div className="mt-2 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
                           <div className="grid grid-cols-3 gap-2">
                             {[
@@ -1779,23 +1823,22 @@ S
                         </div>
                       )}
                     </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
+
+
             </div>
+            <input
+              ref={designUploadRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleDesignUpload}
+              className="hidden"
+            />
           </div>
         </div>
-
-        {/* Hidden File Input */}
-        <input
-          ref={designUploadRef}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleDesignUpload}
-          className="hidden"
-        />
 
         {/* Bottom Navigation */}
         <BottomNav onCenterAction={changePhoto} centerActionLabel="Capture" />
