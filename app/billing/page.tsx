@@ -89,7 +89,7 @@ export default function BillingPage() {
   const isPaidPlan = subscriptionTier !== 'free' && subscriptionStatus === 'active';
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white lg:pl-20">
       {/* Header */}
       <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
         <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5 flex items-center gap-4">

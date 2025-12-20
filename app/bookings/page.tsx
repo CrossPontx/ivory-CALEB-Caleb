@@ -123,7 +123,7 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white lg:pl-20">
       {/* Elegant Header */}
       <header className={`bg-white border-b border-[#E8E8E8] sticky top-0 z-50 backdrop-blur-md bg-white/98 safe-top ${isWatch ? 'watch-compact' : ''}`}>
         <div className={`max-w-[1400px] mx-auto ${isWatch ? 'px-3 py-3' : 'px-6 sm:px-8 lg:px-16 py-6 sm:py-8'}`}>
