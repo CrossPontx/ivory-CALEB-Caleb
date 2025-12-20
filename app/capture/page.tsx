@@ -1242,6 +1242,20 @@ export default function CapturePage() {
                   >
                     <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
                     
+                    {/* Elegant Blinking "Tap to draw" Text Overlay - At Top */}
+                    <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-10 pt-3 sm:pt-4 md:pt-6">
+                      <div className="relative">
+                        <div className="bg-gradient-to-r from-[#8B7355]/90 via-[#A0826D]/90 to-[#8B7355]/90 backdrop-blur-md px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-full shadow-2xl animate-blink border border-white/20">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/90" strokeWidth={1.5} />
+                            <p className="text-white text-xs sm:text-sm md:text-base font-light tracking-[0.2em] uppercase">
+                              Tap to draw on image
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
                     {/* Draw Indicator Overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-700 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
                       <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 md:p-8 shadow-2xl transform group-hover:scale-105 transition-transform duration-500 rounded-sm border border-[#E8E8E8]">

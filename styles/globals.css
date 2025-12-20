@@ -478,3 +478,26 @@ html {
 .animate-bounce-slow {
   animation: bounce-slow 3s ease-in-out infinite;
 }
+
+/* Elegant slow fade in/out blinking animation */
+@keyframes elegant-blink {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes subtle-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 115, 85, 0.2), 0 0 40px rgba(139, 115, 85, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139, 115, 85, 0.4), 0 0 60px rgba(139, 115, 85, 0.15);
+  }
+}
+
+.animate-blink {
+  animation: elegant-blink 4s ease-in-out infinite, subtle-glow 4s ease-in-out infinite;
+}
