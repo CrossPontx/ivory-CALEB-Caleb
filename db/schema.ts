@@ -147,12 +147,21 @@ export const looks = pgTable('looks', {
   allowCollaborativeEdit: boolean('allow_collaborative_edit').default(false),
   viewCount: integer('view_count').default(0),
   likeCount: integer('like_count').default(0).notNull(),
+  dislikeCount: integer('dislike_count').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Likes for designs
 export const likes = pgTable('likes', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  lookId: integer('look_id').references(() => looks.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Dislikes for designs
+export const dislikes = pgTable('dislikes', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').references(() => users.id).notNull(),
   lookId: integer('look_id').references(() => looks.id).notNull(),
@@ -403,6 +412,7 @@ export const looksRelations = relations(looks, ({ one, many }) => ({
   designRequests: many(designRequests),
   favorites: many(favorites),
   likes: many(likes),
+  dislikes: many(dislikes),
 }));
 
 export const likesRelations = relations(likes, ({ one }) => ({
@@ -412,6 +422,17 @@ export const likesRelations = relations(likes, ({ one }) => ({
   }),
   look: one(looks, {
     fields: [likes.lookId],
+    references: [looks.id],
+  }),
+}));
+
+export const dislikesRelations = relations(dislikes, ({ one }) => ({
+  user: one(users, {
+    fields: [dislikes.userId],
+    references: [users.id],
+  }),
+  look: one(looks, {
+    fields: [dislikes.lookId],
     references: [looks.id],
   }),
 }));

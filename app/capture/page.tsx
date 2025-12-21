@@ -1425,16 +1425,12 @@ export default function CapturePage() {
         {/* Elegant Bottom Drawer with Mobile Optimization */}
         <div 
           data-drawer="bottom"
-          className={`fixed left-0 right-0 bg-white/98 backdrop-blur-md z-40 touch-action-pan-y transition-all duration-500 ${
+          className={`fixed inset-0 bg-white z-40 touch-action-pan-y transition-all duration-500 ${
             isDrawerOpen 
-              ? 'translate-y-0 opacity-100 border-t border-[#E8E8E8]/50 shadow-2xl pointer-events-auto' 
-              : 'translate-y-full opacity-0 border-t-0 shadow-none pointer-events-none'
+              ? 'translate-y-0 opacity-100 pointer-events-auto' 
+              : 'translate-y-full opacity-0 pointer-events-none'
           }`}
           style={{ 
-            bottom: '80px', 
-            height: expandedSection ? 'calc(65vh - 80px)' : 'calc(35vh - 80px)', 
-            minHeight: expandedSection ? '400px' : '240px', 
-            maxHeight: expandedSection ? '600px' : '370px',
             visibility: isDrawerOpen ? 'visible' : 'hidden'
           }}
         >
