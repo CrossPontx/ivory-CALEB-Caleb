@@ -1292,50 +1292,56 @@ export default function CapturePage() {
               >
                 <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
                 
-                {/* Elegant Blinking "Tap to draw" Text Overlay - At Top */}
-                <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-10 pt-3 sm:pt-4 md:pt-6 px-3">
-                  <div className="relative">
-                    <div className="bg-gradient-to-br from-[#8B7355]/95 via-[#A0826D]/95 to-[#8B7355]/95 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4 rounded-lg shadow-2xl animate-blink border border-white/30">
-                      <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-                        <Pencil className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={1.5} />
-                        <p className="text-white text-[10px] sm:text-xs font-light tracking-[0.25em] uppercase text-center leading-tight">
-                          Tap to Draw
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                {/* Snapchat-Style Vertical Icon Bar - Right Side */}
+                <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 sm:gap-5 z-20 pointer-events-auto">
+                  {/* Draw Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowDrawingCanvas(true)
+                    }}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#8B7355] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
+                    title="Draw on image"
+                  >
+                    <Pencil className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355] group-hover:text-[#2D7A4F]" strokeWidth={2} />
+                  </button>
+
+                  {/* Settings/Parameters Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsDrawerOpen(!isDrawerOpen)
+                    }}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full backdrop-blur-md border-2 flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 ${
+                      isDrawerOpen 
+                        ? 'bg-[#8B7355] border-[#8B7355] text-white' 
+                        : 'bg-white/90 border-[#E8E8E8] text-[#1A1A1A]'
+                    }`}
+                    title="Design settings"
+                  >
+                    <Palette className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
+                  </button>
+
+                  {/* Replace Hand Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      replaceHandPhoto()
+                    }}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#E8E8E8] text-[#1A1A1A] flex items-center justify-center shadow-xl hover:scale-110 hover:border-[#8B7355] active:scale-95 transition-all duration-300"
+                    title="Replace hand photo"
+                  >
+                    <Upload className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
+                  </button>
                 </div>
                 
-                {/* Draw Indicator Overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-700 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
-                  <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 md:p-8 shadow-2xl transform group-hover:scale-105 transition-transform duration-500 rounded-sm border border-[#E8E8E8]">
-                    <Pencil className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-[#2D7A4F]" strokeWidth={1.5} />
-                    <p className="text-[10px] sm:text-xs md:text-sm text-[#1A1A1A] font-light tracking-wider uppercase mt-2">
-                      {drawingImageUrl ? 'Edit Drawing' : 'Draw on Image'}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Drawing Status Badge */}
+                {/* Drawing Status Badge - Top Left */}
                 {drawingImageUrl && (
-                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3 md:top-4 md:left-4 bg-[#2D7A4F] text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-light tracking-wide shadow-lg z-10 pointer-events-none">
-                    ✓ Drawing Added
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#2D7A4F] text-white px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-light tracking-wide shadow-lg z-10 pointer-events-none flex items-center gap-1.5">
+                    <Pencil className="w-3 h-3" strokeWidth={2} />
+                    <span>Drawing Added</span>
                   </div>
                 )}
-                
-                {/* Replace Hand Button - Bottom Right */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    replaceHandPhoto()
-                  }}
-                  className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 h-10 sm:h-11 px-3 sm:px-4 border-2 border-[#8B7355] bg-white/95 backdrop-blur-sm text-[#8B7355] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#8B7355] hover:text-white active:scale-[0.98] transition-all duration-500 flex items-center gap-2 rounded-sm shadow-lg z-20 pointer-events-auto"
-                  title="Replace the hand reference photo for all designs"
-                >
-                  <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.5} />
-                  <span className="hidden sm:inline">Replace Hand</span>
-                  <span className="sm:hidden">Replace</span>
-                </button>
               </div>
             </div>
           </div>
@@ -1343,12 +1349,12 @@ export default function CapturePage() {
 
         {/* Fixed Generate Design Button Bar - At Bottom Above Nav */}
         <div className="fixed left-0 right-0 bottom-20 z-30 px-3 pb-3 bg-gradient-to-t from-white via-white to-transparent pt-6 pointer-events-none">
-          <div className="max-w-4xl mx-auto flex items-center gap-2 pointer-events-auto">
+          <div className="max-w-4xl mx-auto pointer-events-auto">
             {!isGenerating ? (
               <button 
                 onClick={() => generateAIPreview(designSettings)} 
                 disabled={!hasCredits(1)}
-                className="flex-1 h-12 sm:h-14 bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white font-light text-xs sm:text-sm tracking-[0.2em] uppercase hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl rounded-sm disabled:opacity-50 disabled:cursor-not-allowed border border-[#E8E8E8]/20 backdrop-blur-sm animate-shimmer"
+                className="w-full h-12 sm:h-14 bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white font-light text-xs sm:text-sm tracking-[0.2em] uppercase hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl rounded-sm disabled:opacity-50 disabled:cursor-not-allowed border border-[#E8E8E8]/20 backdrop-blur-sm animate-shimmer"
                 style={{
                   backgroundSize: '200% 100%',
                   animation: 'shimmer 3s ease-in-out infinite'
@@ -1366,25 +1372,12 @@ export default function CapturePage() {
             ) : (
               <button 
                 onClick={cancelGeneration}
-                className="flex-1 h-12 sm:h-14 border-2 border-[#E8E8E8] text-[#1A1A1A] font-light text-xs sm:text-sm tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 rounded-sm bg-white shadow-lg"
+                className="w-full h-12 sm:h-14 border-2 border-[#E8E8E8] text-[#1A1A1A] font-light text-xs sm:text-sm tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 rounded-sm bg-white shadow-lg"
               >
                 <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
                 <span>Cancel</span>
               </button>
             )}
-
-            {/* Settings Toggle Button */}
-            <button
-              onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-              className={`h-12 sm:h-14 w-12 sm:w-14 flex-shrink-0 border-2 transition-all duration-500 flex items-center justify-center rounded-sm shadow-xl hover:shadow-2xl active:scale-[0.98] ${
-                isDrawerOpen 
-                  ? 'bg-[#8B7355] border-[#8B7355] text-white' 
-                  : 'bg-white border-[#E8E8E8] text-[#1A1A1A] hover:border-[#8B7355]'
-              }`}
-              aria-label="Toggle design settings"
-            >
-              <Palette className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
-            </button>
           </div>
         </div>
 
