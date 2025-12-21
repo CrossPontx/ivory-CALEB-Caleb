@@ -231,20 +231,18 @@ export default function ProfilePage() {
   const needsUsername = !username || username.includes('@') || username.includes('_176') || username.includes('google_') || username.includes('apple_')
 
   return (
-    <div className="min-h-screen bg-white pb-24 lg:pl-20">
+    <div className="min-h-screen bg-[#FAFAF8] pb-24 lg:pl-20">
       {/* Header */}
-      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
-        <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+      <header className="bg-white/98 backdrop-blur-md border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-5 sm:py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
               onClick={() => router.back()} 
-              className="hover:bg-[#F8F7F5] active:scale-95 transition-all rounded-none"
+              className="w-10 h-10 flex items-center justify-center hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300"
             >
-              <ArrowLeft className="w-5 h-5" strokeWidth={1} />
-            </Button>
-            <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
+              <ArrowLeft className="w-5 h-5 text-[#1A1A1A]" strokeWidth={1} />
+            </button>
+            <h1 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
               Profile
             </h1>
           </div>
@@ -252,22 +250,22 @@ export default function ProfilePage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-safe">
+      <main className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-20 pb-safe">
         {/* Profile Card */}
-        <div className="border border-[#E8E8E8] p-8 sm:p-10 text-center mb-5 sm:mb-6 bg-white">
-          <div className="relative w-28 h-28 sm:w-32 sm:h-32 mx-auto mb-5 sm:mb-6 group">
+        <div className="border border-[#E8E8E8] p-10 sm:p-14 lg:p-16 text-center mb-8 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-shadow duration-700">
+          <div className="relative w-36 h-36 sm:w-40 sm:h-40 lg:w-44 lg:h-44 mx-auto mb-8 sm:mb-10 group">
             {profileImage ? (
-              <div className="relative w-full h-full overflow-hidden border-2 border-[#E8E8E8]">
+              <div className="relative w-full h-full overflow-hidden border border-[#E8E8E8]">
                 <Image
                   src={profileImage}
                   alt={username || 'User'}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
             ) : (
-              <div className="w-full h-full bg-[#F8F7F5] flex items-center justify-center border-2 border-[#E8E8E8]">
-                <span className="text-4xl sm:text-5xl font-light text-[#1A1A1A]">
+              <div className="w-full h-full bg-[#F8F7F5] flex items-center justify-center border border-[#E8E8E8]">
+                <span className="text-5xl sm:text-6xl lg:text-7xl font-light text-[#1A1A1A]">
                   {username ? username.charAt(0).toUpperCase() : 'U'}
                 </span>
               </div>
@@ -277,21 +275,21 @@ export default function ProfilePage() {
             <button
               onClick={() => profileImageInputRef.current?.click()}
               disabled={uploadingProfile}
-              className="absolute inset-0 bg-black/0 hover:bg-black/50 active:bg-black/50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 active:scale-95"
+              className="absolute inset-0 bg-black/0 hover:bg-black/60 transition-all duration-700 flex items-center justify-center opacity-0 group-hover:opacity-100"
               aria-label="Change profile picture"
             >
               {uploadingProfile ? (
-                <Loader2 className="w-7 h-7 text-white animate-spin" />
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
               ) : (
-                <div className="flex flex-col items-center gap-1">
-                  <Camera className="w-7 h-7 text-white drop-shadow-lg" strokeWidth={1} />
-                  <span className="text-xs text-white font-light hidden sm:block tracking-wider uppercase">Change</span>
+                <div className="flex flex-col items-center gap-2">
+                  <Camera className="w-8 h-8 text-white drop-shadow-lg" strokeWidth={1} />
+                  <span className="text-[10px] text-white font-light tracking-[0.25em] uppercase">Change Photo</span>
                 </div>
               )}
             </button>
             
             {/* Mobile hint badge */}
-            <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-[#1A1A1A] flex items-center justify-center sm:hidden border-2 border-white">
+            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-[#1A1A1A] flex items-center justify-center sm:hidden border-2 border-white shadow-lg">
               <Camera className="w-5 h-5 text-white" strokeWidth={1} />
             </div>
             
@@ -305,30 +303,30 @@ export default function ProfilePage() {
           </div>
           
           {isEditingUsername ? (
-            <div className="space-y-4 w-full max-w-sm mx-auto">
+            <div className="space-y-6 w-full max-w-md mx-auto">
               <input
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
                 placeholder="Enter username"
-                className="w-full px-4 py-3 border border-[#E8E8E8] text-center font-light text-base tracking-wide focus:outline-none focus:border-[#8B7355] transition-all duration-300"
+                className="w-full px-6 py-4 border border-[#E8E8E8] text-center font-light text-lg tracking-wide focus:outline-none focus:border-[#8B7355] transition-all duration-700 bg-white"
                 autoFocus
               />
               {usernameError && (
-                <p className="text-xs text-red-600 font-light tracking-wide">{usernameError}</p>
+                <p className="text-sm text-red-600 font-light tracking-wide">{usernameError}</p>
               )}
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
                   onClick={handleUsernameCancel}
                   disabled={savingUsername}
-                  className="flex-1 h-11 border border-[#E8E8E8] text-[#1A1A1A] font-light text-sm tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300"
+                  className="flex-1 h-14 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#F8F7F5] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUsernameSave}
                   disabled={savingUsername}
-                  className="flex-1 h-11 bg-[#1A1A1A] text-white font-light text-sm tracking-wider uppercase hover:bg-[#1A1A1A]/90 active:scale-95 transition-all duration-300"
+                  className="flex-1 h-14 bg-[#1A1A1A] text-white font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#8B7355] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700"
                 >
                   {savingUsername ? "Saving..." : "Save"}
                 </button>
@@ -336,13 +334,13 @@ export default function ProfilePage() {
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-center gap-2.5 mb-2">
-                <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight">
                   {needsUsername ? 'Add Username' : username}
                 </h2>
                 <button
                   onClick={handleUsernameEdit}
-                  className="p-2 text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5] transition-all active:scale-95"
+                  className="p-2.5 text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5] transition-all duration-500 hover:scale-110"
                   aria-label="Edit username"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-5 h-5">
@@ -351,15 +349,15 @@ export default function ProfilePage() {
                 </button>
               </div>
               {needsUsername && (
-                <p className="text-xs text-[#6B6B6B] mb-3 px-4 font-light tracking-wider uppercase">Click the edit icon to set your username</p>
+                <p className="text-[10px] text-[#6B6B6B] mb-5 px-4 font-light tracking-[0.25em] uppercase">Click the edit icon to set your username</p>
               )}
-              <div className="inline-flex items-center gap-2 px-4 py-2 border border-[#E8E8E8] bg-[#F8F7F5]">
+              <div className="inline-flex items-center gap-2.5 px-5 py-2.5 border border-[#E8E8E8] bg-[#F8F7F5]">
                 {userType === "tech" && (
                   <svg className="w-4 h-4 text-[#8B7355]" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 )}
-                <span className="text-xs tracking-wider uppercase text-[#1A1A1A] font-light">
+                <span className="text-[10px] tracking-[0.25em] uppercase text-[#1A1A1A] font-light">
                   {userType === "tech" ? "Verified Professional" : "Member"}
                 </span>
               </div>
@@ -372,22 +370,22 @@ export default function ProfilePage() {
         {/* Tech Profile Setup for Tech Users */}
         {userType === "tech" && (
           <div
-            className="border border-[#E8E8E8] p-5 sm:p-6 bg-white cursor-pointer hover:border-[#8B7355] active:scale-[0.98] transition-all duration-300 mb-5 sm:mb-6"
+            className="border border-[#E8E8E8] p-8 sm:p-10 bg-white cursor-pointer hover:border-[#8B7355] hover:shadow-lg hover:scale-[1.01] transition-all duration-700 mb-8 sm:mb-10 group"
             onClick={() => router.push("/tech/profile-setup")}
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center flex-shrink-0">
-                <Settings className="w-6 h-6 text-[#1A1A1A]" strokeWidth={1} />
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center flex-shrink-0 group-hover:border-[#8B7355] group-hover:bg-[#8B7355] transition-all duration-700">
+                <Settings className="w-7 h-7 text-[#1A1A1A] group-hover:text-white transition-colors duration-700" strokeWidth={1} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-serif font-light text-base sm:text-lg text-[#1A1A1A] tracking-tight mb-1">
+                <div className="font-serif font-light text-xl sm:text-2xl text-[#1A1A1A] tracking-tight mb-2">
                   Tech Profile Setup
                 </div>
-                <div className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">
+                <div className="text-[10px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">
                   Services, Prices & Gallery
                 </div>
               </div>
-              <svg className="w-5 h-5 text-[#6B6B6B] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+              <svg className="w-6 h-6 text-[#6B6B6B] flex-shrink-0 group-hover:text-[#8B7355] group-hover:translate-x-1 transition-all duration-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -396,19 +394,19 @@ export default function ProfilePage() {
 
         {/* Portfolio Gallery for Tech Users */}
         {userType === "tech" && (
-          <div className="border border-[#E8E8E8] p-6 sm:p-8 mb-5 sm:mb-6 bg-white">
-            <div className="flex items-center justify-between mb-6">
+          <div className="border border-[#E8E8E8] p-8 sm:p-10 lg:p-12 mb-8 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-shadow duration-700">
+            <div className="flex items-center justify-between mb-10">
               <div>
-                <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-1">
+                <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-2">
                   Portfolio
                 </h3>
-                <p className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase">
+                <p className="text-[10px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">
                   {portfolioImages.length} {portfolioImages.length === 1 ? 'Photo' : 'Photos'}
                 </p>
               </div>
               <button
                 onClick={() => router.push("/tech/profile-setup")}
-                className="h-10 px-4 border border-[#E8E8E8] text-[#1A1A1A] font-light text-xs tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 flex items-center gap-2"
+                className="h-12 px-6 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#1A1A1A] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 flex items-center gap-2"
               >
                 <Upload className="w-4 h-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Manage</span>
@@ -417,11 +415,11 @@ export default function ProfilePage() {
             </div>
 
             {portfolioImages.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
                 {portfolioImages.slice(0, 9).map((url, index) => (
                   <div
                     key={url}
-                    className="group relative aspect-square overflow-hidden border border-[#E8E8E8] cursor-pointer hover:border-[#8B7355] transition-all duration-300"
+                    className="group relative aspect-square overflow-hidden border border-[#E8E8E8] cursor-pointer hover:border-[#8B7355] hover:shadow-lg transition-all duration-700"
                     onClick={() => {
                       window.open(url, '_blank')
                     }}
@@ -430,38 +428,38 @@ export default function ProfilePage() {
                       src={url}
                       alt={`Portfolio ${index + 1}`}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover group-hover:scale-110 transition-transform duration-1000"
                       sizes="(max-width: 640px) 33vw, 25vw"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-700" />
                   </div>
                 ))}
                 
                 {portfolioImages.length > 9 && (
                   <div
-                    className="relative aspect-square overflow-hidden bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center cursor-pointer hover:bg-[#8B7355] hover:border-[#8B7355] transition-all duration-300 group"
+                    className="relative aspect-square overflow-hidden bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center cursor-pointer hover:bg-[#8B7355] hover:border-[#8B7355] hover:shadow-lg transition-all duration-700 group"
                     onClick={() => router.push("/tech/profile-setup")}
                   >
-                    <span className="text-[#1A1A1A] group-hover:text-white text-2xl sm:text-3xl font-light transition-colors duration-300">
+                    <span className="text-[#1A1A1A] group-hover:text-white text-3xl sm:text-4xl font-light transition-colors duration-700">
                       +{portfolioImages.length - 9}
                     </span>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center py-12 sm:py-16 border border-[#E8E8E8] bg-[#F8F7F5]">
-                <div className="w-16 h-16 mx-auto mb-5 border border-[#E8E8E8] bg-white flex items-center justify-center">
-                  <Upload className="w-7 h-7 text-[#6B6B6B]" strokeWidth={1} />
+              <div className="text-center py-16 sm:py-20 lg:py-24 border border-[#E8E8E8] bg-[#F8F7F5]">
+                <div className="w-20 h-20 mx-auto mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-[#6B6B6B]" strokeWidth={1} />
                 </div>
-                <h4 className="font-serif text-lg font-light text-[#1A1A1A] tracking-tight mb-2">
+                <h4 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-3">
                   No Portfolio Yet
                 </h4>
-                <p className="text-xs text-[#6B6B6B] mb-6 px-4 font-light tracking-wider uppercase">
+                <p className="text-[10px] text-[#6B6B6B] mb-8 px-4 font-light tracking-[0.25em] uppercase">
                   Showcase your best work
                 </p>
                 <button
                   onClick={() => router.push("/tech/profile-setup")}
-                  className="h-11 px-6 bg-[#1A1A1A] text-white font-light text-xs tracking-wider uppercase hover:bg-[#1A1A1A]/90 active:scale-95 transition-all duration-300 inline-flex items-center gap-2"
+                  className="h-14 px-8 bg-[#1A1A1A] text-white font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#8B7355] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 inline-flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" strokeWidth={1} />
                   Add Photos
@@ -475,7 +473,7 @@ export default function ProfilePage() {
 
         {/* Logout */}
         <button
-          className="w-full h-12 sm:h-14 border border-[#E8E8E8] text-[#1A1A1A] font-light text-sm tracking-wider uppercase hover:bg-[#F8F7F5] hover:border-[#1A1A1A] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
+          className="w-full h-14 sm:h-16 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#1A1A1A] hover:text-white hover:border-[#1A1A1A] hover:scale-[1.01] active:scale-[0.98] transition-all duration-700 flex items-center justify-center gap-3"
           onClick={handleLogout}
         >
           <LogOut className="w-5 h-5" strokeWidth={1} />
