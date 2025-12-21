@@ -38,8 +38,19 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
             return (
               <button
                 key={item.path}
-                onClick={() => {
+                onClick={async () => {
                   haptics.light()
+                  // Special handling for bookings button
+                  if (item.path === '/bookings') {
+                    const userStr = localStorage.getItem("ivoryUser");
+                    if (userStr) {
+                      const user = JSON.parse(userStr);
+                      if (user.userType === 'tech') {
+                        router.push('/tech/bookings');
+                        return;
+                      }
+                    }
+                  }
                   router.push(item.path)
                 }}
                 className={cn(
@@ -140,9 +151,20 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
 
             {/* Bookings Button */}
             <button
-              onClick={() => {
+              onClick={async () => {
                 haptics.light();
-                router.push('/bookings');
+                // Check user type and route accordingly
+                const userStr = localStorage.getItem("ivoryUser");
+                if (userStr) {
+                  const user = JSON.parse(userStr);
+                  if (user.userType === 'tech') {
+                    router.push('/tech/bookings');
+                  } else {
+                    router.push('/bookings');
+                  }
+                } else {
+                  router.push('/bookings');
+                }
               }}
               className={cn(
                 'flex flex-col items-center justify-center transition-all duration-300 relative',

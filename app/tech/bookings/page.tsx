@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Clock, User, Sparkles, CheckCircle, XCircle } from 'lucide-react';
+import { BottomNav } from '@/components/bottom-nav';
 
 export default function TechBookingsPage() {
   const router = useRouter();
@@ -100,54 +100,58 @@ export default function TechBookingsPage() {
     }
   };
 
+  const startNewDesign = () => {
+    router.push("/capture")
+  }
+
   const BookingCard = ({ booking, isPending }: { booking: any; isPending: boolean }) => (
-    <Card className="border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-lg transition-all">
+    <Card className="border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-lg transition-all duration-700">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <User className="h-4 w-4" />
+            <CardTitle className="text-lg flex items-center gap-2 font-serif font-light tracking-tight">
+              <User className="h-4 w-4" strokeWidth={1} />
               {booking.client?.username}
             </CardTitle>
-            <CardDescription>{booking.service?.name}</CardDescription>
+            <CardDescription className="text-[10px] tracking-[0.2em] uppercase font-light">{booking.service?.name}</CardDescription>
           </div>
-          <Badge variant={isPending ? 'secondary' : 'default'}>
+          <Badge variant={isPending ? 'secondary' : 'default'} className="text-[10px] tracking-wider uppercase font-light">
             {booking.status}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            {new Date(booking.appointmentDate).toLocaleDateString()}
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-4 text-sm font-light">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1} />
+            <span className="text-[#1A1A1A]">{new Date(booking.appointmentDate).toLocaleDateString()}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4 text-gray-500" />
-            {new Date(booking.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1} />
+            <span className="text-[#1A1A1A]">{new Date(booking.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </div>
 
         {booking.look && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
               <img
                 src={booking.look.imageUrl}
                 alt="Design"
-                className="w-20 h-20 object-cover rounded cursor-pointer"
+                className="w-24 h-24 object-cover border border-[#E8E8E8] cursor-pointer hover:border-[#8B7355] transition-all duration-700"
                 onClick={() => window.open(booking.look.imageUrl, '_blank')}
               />
               <div className="flex-1">
-                <p className="font-medium">{booking.look.title}</p>
+                <p className="font-serif font-light text-base tracking-tight mb-2">{booking.look.title}</p>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-1 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all"
+                  className="border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light h-9"
                   onClick={() => generateDesignBreakdown(booking.look.id, booking.id)}
                   disabled={loadingBreakdown}
                 >
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  {loadingBreakdown ? 'Generating...' : 'Get Design Breakdown'}
+                  <Sparkles className="h-3 w-3 mr-1.5" strokeWidth={1} />
+                  {loadingBreakdown ? 'Generating...' : 'Get Breakdown'}
                 </Button>
               </div>
             </div>
@@ -155,61 +159,61 @@ export default function TechBookingsPage() {
         )}
 
         {/* Payment Info */}
-        <div className="bg-[#F8F7F5] p-3 rounded border border-[#E8E8E8]">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-[#1A1A1A]">Payment</span>
-            <Badge className="bg-green-500">Paid</Badge>
+        <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm font-light tracking-wide text-[#1A1A1A]">Payment</span>
+            <Badge className="bg-green-500 text-[10px] tracking-wider uppercase font-light">Paid</Badge>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm font-light mb-1">
             <span className="text-[#6B6B6B]">Service Price:</span>
-            <span className="font-medium">${booking.servicePrice}</span>
+            <span className="text-[#1A1A1A]">${booking.servicePrice}</span>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm font-light mb-2">
             <span className="text-[#6B6B6B]">Platform Fee:</span>
-            <span className="font-medium">${booking.serviceFee}</span>
+            <span className="text-[#1A1A1A]">${booking.serviceFee}</span>
           </div>
-          <div className="flex justify-between text-sm font-bold border-t border-[#E8E8E8] pt-1 mt-1">
-            <span>Total Paid:</span>
-            <span>${booking.totalPrice}</span>
+          <div className="flex justify-between text-sm font-light border-t border-[#E8E8E8] pt-2">
+            <span className="text-[#1A1A1A]">Total Paid:</span>
+            <span className="text-[#1A1A1A] font-medium">${booking.totalPrice}</span>
           </div>
-          <p className="text-xs text-[#6B6B6B] mt-2">
+          <p className="text-xs text-[#6B6B6B] mt-3 font-light leading-relaxed">
             You'll receive ${booking.servicePrice} after the appointment is completed.
           </p>
         </div>
 
         {booking.clientNotes && (
-          <div className="bg-[#F8F7F5] p-3 rounded border border-[#E8E8E8]">
-            <p className="text-sm font-medium mb-1 text-[#1A1A1A]">Client Notes:</p>
-            <p className="text-sm text-[#6B6B6B]">{booking.clientNotes}</p>
+          <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
+            <p className="text-sm font-light mb-2 text-[#1A1A1A] tracking-wide">Client Notes:</p>
+            <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">{booking.clientNotes}</p>
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-2">
-          <span className="text-lg font-bold">${booking.totalPrice}</span>
-          <div className="flex gap-2">
+        <div className="flex justify-between items-center pt-3">
+          <span className="text-2xl font-light text-[#1A1A1A]">${booking.totalPrice}</span>
+          <div className="flex gap-3">
             {isPending ? (
               <>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#E8E8E8] hover:border-red-500 hover:bg-red-50 hover:text-red-600 transition-all"
+                  className="border-[#E8E8E8] hover:border-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light h-10 px-4"
                   onClick={() => {
                     setSelectedBooking(booking);
                     handleBookingAction(booking.id, 'cancelled');
                   }}
                 >
-                  <XCircle className="h-4 w-4 mr-1" />
+                  <XCircle className="h-4 w-4 mr-1.5" strokeWidth={1} />
                   Decline
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all"
+                  className="bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light h-10 px-4"
                   onClick={() => {
                     setSelectedBooking(booking);
                     handleBookingAction(booking.id, 'confirmed');
                   }}
                 >
-                  <CheckCircle className="h-4 w-4 mr-1" />
+                  <CheckCircle className="h-4 w-4 mr-1.5" strokeWidth={1} />
                   Confirm
                 </Button>
               </>
@@ -217,7 +221,7 @@ export default function TechBookingsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all"
+                className="border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light h-10 px-4"
                 onClick={() => handleBookingAction(booking.id, 'completed')}
               >
                 Mark Complete
@@ -230,39 +234,42 @@ export default function TechBookingsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FAFAF8] pb-24 lg:pl-20">
       {/* Header */}
-      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
-        <div className="max-w-screen-xl mx-auto px-5 sm:px-6 py-4 sm:py-5">
-          <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
-            MY BOOKINGS
+      <header className="bg-white/98 backdrop-blur-md border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-5 sm:py-6">
+          <h1 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
+            My Bookings
           </h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
+      <main className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-16 py-8 sm:py-12 pb-safe">
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="w-full mb-6 sm:mb-8 grid grid-cols-2 h-auto bg-white border-b border-[#E8E8E8] p-0 rounded-none">
+          <TabsList className="w-full mb-8 sm:mb-10 grid grid-cols-2 h-auto bg-white border border-[#E8E8E8] p-0 rounded-none">
             <TabsTrigger 
               value="pending"
-              className="text-xs sm:text-sm font-light tracking-wider uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-300"
+              className="text-[11px] tracking-[0.25em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-4 sm:py-5 transition-all duration-700 font-light"
             >
               Requests ({pendingBookings.length})
             </TabsTrigger>
             <TabsTrigger 
               value="upcoming"
-              className="text-xs sm:text-sm font-light tracking-wider uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-300"
+              className="text-[11px] tracking-[0.25em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-4 sm:py-5 transition-all duration-700 font-light"
             >
               Upcoming ({upcomingBookings.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pending" className="space-y-4 mt-6">
+          <TabsContent value="pending" className="space-y-5 sm:space-y-6 mt-0">
             {pendingBookings.length === 0 ? (
-              <Card className="border-[#E8E8E8]">
-                <CardContent className="py-12 text-center text-[#6B6B6B]">
-                  No pending booking requests
+              <Card className="border-[#E8E8E8] bg-white shadow-sm">
+                <CardContent className="py-16 sm:py-20 text-center">
+                  <div className="w-16 h-16 mx-auto mb-6 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center">
+                    <Calendar className="w-7 h-7 text-[#6B6B6B]" strokeWidth={1} />
+                  </div>
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">No pending booking requests</p>
                 </CardContent>
               </Card>
             ) : (
@@ -272,11 +279,14 @@ export default function TechBookingsPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="upcoming" className="space-y-4 mt-6">
+          <TabsContent value="upcoming" className="space-y-5 sm:space-y-6 mt-0">
             {upcomingBookings.length === 0 ? (
-              <Card className="border-[#E8E8E8]">
-                <CardContent className="py-12 text-center text-[#6B6B6B]">
-                  No upcoming appointments
+              <Card className="border-[#E8E8E8] bg-white shadow-sm">
+                <CardContent className="py-16 sm:py-20 text-center">
+                  <div className="w-16 h-16 mx-auto mb-6 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center">
+                    <Calendar className="w-7 h-7 text-[#6B6B6B]" strokeWidth={1} />
+                  </div>
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">No upcoming appointments</p>
                 </CardContent>
               </Card>
             ) : (
@@ -289,10 +299,10 @@ export default function TechBookingsPage() {
 
         {/* Design Breakdown Dialog */}
         <Dialog open={showBreakdown} onOpenChange={setShowBreakdown}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto border-[#E8E8E8]">
             <DialogHeader>
-              <DialogTitle>Design Breakdown</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="font-serif text-2xl font-light tracking-tight">Design Breakdown</DialogTitle>
+              <DialogDescription className="text-[10px] tracking-[0.2em] uppercase font-light">
                 Step-by-step instructions to recreate this design
               </DialogDescription>
             </DialogHeader>
@@ -301,27 +311,27 @@ export default function TechBookingsPage() {
               <div className="space-y-6">
                 {/* Overview */}
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 bg-gray-50 rounded">
-                    <p className="text-sm text-gray-600">Difficulty</p>
-                    <p className="font-semibold capitalize">{breakdown.difficulty}</p>
+                  <div className="text-center p-4 bg-[#F8F7F5] border border-[#E8E8E8]">
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#6B6B6B] font-light mb-2">Difficulty</p>
+                    <p className="font-light text-lg capitalize text-[#1A1A1A]">{breakdown.difficulty}</p>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded">
-                    <p className="text-sm text-gray-600">Est. Time</p>
-                    <p className="font-semibold">{breakdown.estimatedTime} min</p>
+                  <div className="text-center p-4 bg-[#F8F7F5] border border-[#E8E8E8]">
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#6B6B6B] font-light mb-2">Est. Time</p>
+                    <p className="font-light text-lg text-[#1A1A1A]">{breakdown.estimatedTime} min</p>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded">
-                    <p className="text-sm text-gray-600">Steps</p>
-                    <p className="font-semibold">{breakdown.breakdown?.steps?.length || 0}</p>
+                  <div className="text-center p-4 bg-[#F8F7F5] border border-[#E8E8E8]">
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#6B6B6B] font-light mb-2">Steps</p>
+                    <p className="font-light text-lg text-[#1A1A1A]">{breakdown.breakdown?.steps?.length || 0}</p>
                   </div>
                 </div>
 
                 {/* Products Needed */}
                 {breakdown.productsNeeded && breakdown.productsNeeded.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Products & Tools Needed:</h3>
-                    <ul className="list-disc list-inside space-y-1">
+                  <div className="border border-[#E8E8E8] p-5 bg-white">
+                    <h3 className="font-serif text-lg font-light tracking-tight mb-3 text-[#1A1A1A]">Products & Tools Needed:</h3>
+                    <ul className="list-disc list-inside space-y-2">
                       {breakdown.productsNeeded.map((product: string, idx: number) => (
-                        <li key={idx} className="text-sm">{product}</li>
+                        <li key={idx} className="text-sm font-light text-[#6B6B6B]">{product}</li>
                       ))}
                     </ul>
                   </div>
@@ -329,11 +339,11 @@ export default function TechBookingsPage() {
 
                 {/* Techniques */}
                 {breakdown.techniques && breakdown.techniques.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Techniques Used:</h3>
+                  <div className="border border-[#E8E8E8] p-5 bg-white">
+                    <h3 className="font-serif text-lg font-light tracking-tight mb-3 text-[#1A1A1A]">Techniques Used:</h3>
                     <div className="flex flex-wrap gap-2">
                       {breakdown.techniques.map((technique: string, idx: number) => (
-                        <Badge key={idx} variant="secondary">{technique}</Badge>
+                        <Badge key={idx} variant="secondary" className="text-[10px] tracking-wider uppercase font-light">{technique}</Badge>
                       ))}
                     </div>
                   </div>
@@ -341,17 +351,17 @@ export default function TechBookingsPage() {
 
                 {/* Steps */}
                 {breakdown.breakdown?.steps && (
-                  <div>
-                    <h3 className="font-semibold mb-3">Step-by-Step Instructions:</h3>
-                    <div className="space-y-4">
+                  <div className="border border-[#E8E8E8] p-5 bg-white">
+                    <h3 className="font-serif text-lg font-light tracking-tight mb-4 text-[#1A1A1A]">Step-by-Step Instructions:</h3>
+                    <div className="space-y-5">
                       {breakdown.breakdown.steps.map((step: any, idx: number) => (
-                        <div key={idx} className="border-l-4 border-primary pl-4">
-                          <h4 className="font-semibold">
+                        <div key={idx} className="border-l-2 border-[#8B7355] pl-5">
+                          <h4 className="font-light text-base text-[#1A1A1A] mb-2">
                             Step {step.stepNumber}: {step.title}
                           </h4>
-                          <p className="text-sm text-gray-600 mt-1">{step.description}</p>
+                          <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">{step.description}</p>
                           {step.tips && (
-                            <p className="text-sm text-primary mt-2">
+                            <p className="text-sm text-[#8B7355] mt-3 font-light">
                               💡 <strong>Tip:</strong> {step.tips}
                             </p>
                           )}
@@ -363,11 +373,11 @@ export default function TechBookingsPage() {
 
                 {/* Pro Tips */}
                 {breakdown.breakdown?.proTips && breakdown.breakdown.proTips.length > 0 && (
-                  <div className="bg-blue-50 p-4 rounded">
-                    <h3 className="font-semibold mb-2">Pro Tips:</h3>
-                    <ul className="list-disc list-inside space-y-1">
+                  <div className="bg-blue-50 border border-blue-200 p-5">
+                    <h3 className="font-serif text-lg font-light tracking-tight mb-3 text-[#1A1A1A]">Pro Tips:</h3>
+                    <ul className="list-disc list-inside space-y-2">
                       {breakdown.breakdown.proTips.map((tip: string, idx: number) => (
-                        <li key={idx} className="text-sm">{tip}</li>
+                        <li key={idx} className="text-sm font-light text-[#6B6B6B]">{tip}</li>
                       ))}
                     </ul>
                   </div>
@@ -375,11 +385,11 @@ export default function TechBookingsPage() {
 
                 {/* Common Mistakes */}
                 {breakdown.breakdown?.commonMistakes && breakdown.breakdown.commonMistakes.length > 0 && (
-                  <div className="bg-red-50 p-4 rounded">
-                    <h3 className="font-semibold mb-2">Common Mistakes to Avoid:</h3>
-                    <ul className="list-disc list-inside space-y-1">
+                  <div className="bg-red-50 border border-red-200 p-5">
+                    <h3 className="font-serif text-lg font-light tracking-tight mb-3 text-[#1A1A1A]">Common Mistakes to Avoid:</h3>
+                    <ul className="list-disc list-inside space-y-2">
                       {breakdown.breakdown.commonMistakes.map((mistake: string, idx: number) => (
-                        <li key={idx} className="text-sm">{mistake}</li>
+                        <li key={idx} className="text-sm font-light text-[#6B6B6B]">{mistake}</li>
                       ))}
                     </ul>
                   </div>
@@ -389,6 +399,9 @@ export default function TechBookingsPage() {
           </DialogContent>
         </Dialog>
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav onCenterAction={startNewDesign} centerActionLabel="Create" />
     </div>
   );
 }
