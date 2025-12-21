@@ -52,12 +52,35 @@ export default function CapturePage() {
   // Check localStorage immediately for loaded design to prevent camera flash
   const getInitialCapturedImage = () => {
     if (typeof window === 'undefined') return null
+    
+    // First check for loaded design (from edit)
     const loadedImage = localStorage.getItem("currentEditingImage")
     if (loadedImage) {
-      console.log('🎯 Found initial captured image in localStorage')
+      console.log('🎯 Found initial captured image in localStorage (loaded design)')
       console.log('🎯 Image length:', loadedImage.length)
       return loadedImage
     }
+    
+    // Then check for existing session
+    const savedTabs = localStorage.getItem("captureSession_designTabs")
+    const savedActiveTabId = localStorage.getItem("captureSession_activeTabId")
+    
+    if (savedTabs) {
+      try {
+        const tabs = JSON.parse(savedTabs)
+        // Find the active tab or first tab
+        const activeTab = tabs.find((t: DesignTab) => t.id === savedActiveTabId) || tabs[0]
+        
+        if (activeTab?.originalImage) {
+          console.log('🎯 Found initial captured image in session storage')
+          console.log('🎯 Image length:', activeTab.originalImage.length)
+          return activeTab.originalImage
+        }
+      } catch (e) {
+        console.error('Error parsing saved tabs:', e)
+      }
+    }
+    
     console.log('❌ No initial captured image found')
     return null
   }
@@ -97,7 +120,7 @@ export default function CapturePage() {
   // Tabs for multiple designs
   const [designTabs, setDesignTabs] = useState<DesignTab[]>([
     {
-      id: '1',
+      id: 'tab-initial-1',
       name: 'Design 1',
       finalPreviews: [],
       designSettings: {
@@ -118,7 +141,7 @@ export default function CapturePage() {
       generationProgress: 0
     }
   ])
-  const [activeTabId, setActiveTabId] = useState('1')
+  const [activeTabId, setActiveTabId] = useState('tab-initial-1')
   
   const [designSettings, setDesignSettings] = useState<DesignSettings>({
     nailLength: 'medium',
@@ -210,10 +233,16 @@ export default function CapturePage() {
   
   // Add new tab
   const addNewTab = () => {
-    const newId = String(designTabs.length + 1)
+    // Generate unique ID based on timestamp to avoid duplicates
+    const newId = `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const tabNumber = designTabs.length + 1
+    
+    // Use the original image from the first tab (or current active tab) if available
+    const originalImageToUse = designTabs[0]?.originalImage || activeTab?.originalImage || capturedImage
+    
     const newTab: DesignTab = {
       id: newId,
-      name: `Design ${newId}`,
+      name: `Design ${tabNumber}`,
       finalPreviews: [],
       designSettings: {
         nailLength: 'medium',
@@ -228,17 +257,23 @@ export default function CapturePage() {
       selectedDesignImages: [],
       drawingImageUrl: null,
       aiPrompt: '',
-      originalImage: null,
+      originalImage: originalImageToUse, // Use the same original image
       isGenerating: false,
       generationProgress: 0
     }
     setDesignTabs([...designTabs, newTab])
     setActiveTabId(newId)
     
-    // Auto-start camera for new tab
-    setTimeout(() => {
-      startCamera()
-    }, 100)
+    // Set the captured image immediately so camera doesn't start
+    if (originalImageToUse) {
+      setCapturedImage(originalImageToUse)
+      stopCamera() // Ensure camera is stopped
+    } else {
+      // Only start camera if there's no original image available
+      setTimeout(() => {
+        startCamera()
+      }, 100)
+    }
   }
   
   // Remove tab
@@ -304,7 +339,7 @@ export default function CapturePage() {
           
           // Create a new tab with the loaded design
           const newTab: DesignTab = {
-            id: '1',
+            id: 'tab-edit-loaded',
             name: 'Edit',
             finalPreviews: loadedPreview ? [loadedPreview] : [],
             designSettings: metadata.designSettings || designSettings,
@@ -318,11 +353,11 @@ export default function CapturePage() {
           
           // Save to session storage IMMEDIATELY so tab restoration logic sees it
           localStorage.setItem("captureSession_designTabs", JSON.stringify([newTab]))
-          localStorage.setItem("captureSession_activeTabId", '1')
+          localStorage.setItem("captureSession_activeTabId", 'tab-edit-loaded')
           console.log('✅ Saved loaded design to session storage')
           
           setDesignTabs([newTab])
-          setActiveTabId('1')
+          setActiveTabId('tab-edit-loaded')
           setCapturedImage(loadedEditingImage)
           console.log('✅ Set capturedImage to:', loadedEditingImage?.substring(0, 50) + '...')
           setDesignSettings(metadata.designSettings || designSettings)
@@ -1078,6 +1113,21 @@ export default function CapturePage() {
     startCamera()
   }
 
+  const replaceHandPhoto = () => {
+    // Clear the original image from ALL tabs but keep their designs
+    setDesignTabs(tabs => tabs.map(tab => ({
+      ...tab,
+      originalImage: null
+    })))
+    
+    // Clear current state
+    setCapturedImage(null)
+    setDesignMode(null)
+    
+    // Start camera for new hand photo
+    startCamera()
+  }
+
   const handleDrawingComplete = (dataUrl: string) => {
     setDrawingImageUrl(dataUrl)
     setShowDrawingCanvas(false)
@@ -1154,12 +1204,22 @@ export default function CapturePage() {
               </div>
               <div className="flex items-center gap-2 sm:gap-4 ml-auto">
                 <button
-                  onClick={changePhoto}
-                  className="h-10 sm:h-11 px-4 sm:px-6 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center gap-2 rounded-none"
+                  onClick={replaceHandPhoto}
+                  className="h-10 sm:h-11 px-3 sm:px-5 border border-[#8B7355] text-[#8B7355] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#8B7355] hover:text-white active:scale-[0.98] transition-all duration-500 flex items-center gap-2 rounded-none"
+                  title="Replace the hand reference photo for all designs"
                 >
                   <Upload className="w-4 h-4" strokeWidth={1} />
-                  <span className="hidden sm:inline">Change Photo</span>
-                  <span className="sm:hidden">Change</span>
+                  <span className="hidden md:inline">Replace Hand</span>
+                  <span className="md:hidden">Hand</span>
+                </button>
+                <button
+                  onClick={changePhoto}
+                  className="h-10 sm:h-11 px-3 sm:px-5 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center gap-2 rounded-none"
+                  title="Clear this design and start over"
+                >
+                  <X className="w-4 h-4" strokeWidth={1} />
+                  <span className="hidden md:inline">Clear Design</span>
+                  <span className="md:hidden">Clear</span>
                 </button>
                 <div className="flex items-center">
                   <CreditsDisplay showLabel={true} credits={credits} />
