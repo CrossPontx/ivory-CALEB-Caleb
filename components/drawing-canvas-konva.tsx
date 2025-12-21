@@ -87,8 +87,8 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   
   // Color picker state (HSL)
   const [hue, setHue] = useState(0) // 0-360
-  const [saturation, setSaturation] = useState(0) // 0-100
-  const [lightness, setLightness] = useState(0) // 0-100
+  const [saturation, setSaturation] = useState(100) // Always 100 for vibrant colors
+  const [lightness, setLightness] = useState(50) // 0-100
   
   // Convert HSL to hex
   const hslToHex = (h: number, s: number, l: number) => {
@@ -941,98 +941,69 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
 
       {/* Color Picker Panel - Slides from right */}
       {showColorPicker && (
-        <div className="absolute right-14 sm:right-20 top-1/2 -translate-y-1/2 w-56 sm:w-64 bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-3 sm:p-4 z-50 max-h-[80vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-gray-900">Color</span>
+        <div className="absolute right-14 sm:right-20 top-1/2 -translate-y-1/2 w-72 sm:w-80 bg-gradient-to-br from-white to-gray-50 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-6 z-50 max-h-[80vh] overflow-y-auto border border-white/20">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-2xl shadow-lg border-2 border-white ring-2 ring-gray-200"
+                style={{ backgroundColor: currentColor }}
+              />
+              <div>
+                <span className="text-base font-semibold text-gray-900 block">Color</span>
+                <span className="text-xs text-gray-500">{currentColor.toUpperCase()}</span>
+              </div>
+            </div>
             <button
               onClick={() => setShowColorPicker(false)}
-              className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-95"
+              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all active:scale-95"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
           
           {/* Hue Slider */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-600">Hue</label>
-              <span className="text-xs text-gray-900">{Math.round(hue)}°</span>
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-medium text-gray-700">Hue</label>
+              <span className="text-sm font-semibold text-gray-900 bg-gray-100 px-3 py-1 rounded-full">{Math.round(hue)}°</span>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="360"
-              value={hue}
-              onChange={(e) => setHue(Number(e.target.value))}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer"
-              style={{
-                background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
-              }}
-            />
-          </div>
-          
-          {/* Saturation Slider */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-600">Saturation</label>
-              <span className="text-xs text-gray-900">{Math.round(saturation)}%</span>
+            <div className="relative">
+              <input
+                type="range"
+                min="0"
+                max="360"
+                value={hue}
+                onChange={(e) => {
+                  setHue(Number(e.target.value))
+                  setSaturation(100) // Always use full saturation
+                }}
+                className="w-full h-3 rounded-full appearance-none cursor-pointer shadow-inner"
+                style={{
+                  background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
+                }}
+              />
             </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={saturation}
-              onChange={(e) => setSaturation(Number(e.target.value))}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, hsl(${hue}, 0%, ${lightness}%), hsl(${hue}, 100%, ${lightness}%))`
-              }}
-            />
           </div>
           
           {/* Lightness Slider */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-600">Lightness</label>
-              <span className="text-xs text-gray-900">{Math.round(lightness)}%</span>
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-medium text-gray-700">Brightness</label>
+              <span className="text-sm font-semibold text-gray-900 bg-gray-100 px-3 py-1 rounded-full">{Math.round(lightness)}%</span>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={lightness}
-              onChange={(e) => setLightness(Number(e.target.value))}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, hsl(${hue}, ${saturation}%, 0%), hsl(${hue}, ${saturation}%, 50%), hsl(${hue}, ${saturation}%, 100%))`
-              }}
-            />
-          </div>
-          
-          {/* Quick Color Presets */}
-          <div className="grid grid-cols-8 gap-2">
-            {[
-              { h: 0, s: 0, l: 0, name: 'Black' },
-              { h: 0, s: 0, l: 100, name: 'White' },
-              { h: 0, s: 100, l: 50, name: 'Red' },
-              { h: 30, s: 100, l: 50, name: 'Orange' },
-              { h: 60, s: 100, l: 50, name: 'Yellow' },
-              { h: 120, s: 100, l: 50, name: 'Green' },
-              { h: 240, s: 100, l: 50, name: 'Blue' },
-              { h: 300, s: 100, l: 50, name: 'Purple' },
-            ].map((preset) => (
-              <button
-                key={`${preset.h}-${preset.s}-${preset.l}`}
-                onClick={() => {
-                  setHue(preset.h)
-                  setSaturation(preset.s)
-                  setLightness(preset.l)
+            <div className="relative">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={lightness}
+                onChange={(e) => setLightness(Number(e.target.value))}
+                className="w-full h-3 rounded-full appearance-none cursor-pointer shadow-inner"
+                style={{
+                  background: `linear-gradient(to right, hsl(${hue}, 100%, 0%), hsl(${hue}, 100%, 50%), hsl(${hue}, 100%, 100%))`
                 }}
-                className="aspect-square rounded-lg border-2 border-gray-200 active:scale-95 transition-all hover:border-gray-400"
-                style={{ backgroundColor: hslToHex(preset.h, preset.s, preset.l) }}
-                title={preset.name}
               />
-            ))}
+            </div>
           </div>
         </div>
       )}
