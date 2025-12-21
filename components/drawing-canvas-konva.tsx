@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { Stage, Layer, Image as KonvaImage, Line, Rect, Circle, Text, Transformer } from 'react-konva'
-import { Undo, Redo, Trash2, Palette, X, ZoomIn, ZoomOut, Eye, EyeOff, Pencil, Eraser, Square, Circle as CircleIcon, Type, ChevronDown, ChevronUp, Hand, Scissors, ImagePlus } from 'lucide-react'
+import { Undo, Redo, X, Eye, EyeOff, Pencil, Eraser, Type, Hand, Scissors, ImagePlus, Check, Palette } from 'lucide-react'
 import Konva from 'konva'
 
 interface DrawingCanvasProps {
@@ -45,11 +45,6 @@ type CropArea = {
   height: number
 }
 
-const COLORS = [
-  '#000000', '#FFFFFF', '#FF0000', '#FF6B9D', '#FFD93D', '#00FF00',
-  '#00FFFF', '#0000FF', '#FF00FF', '#FFA500', '#C44569', '#A8E6CF',
-]
-
 const BRUSH_SIZES = [2, 4, 8, 12, 16, 24]
 
 const BRUSH_TEXTURES: { value: BrushTexture; label: string; icon: string }[] = [
@@ -82,8 +77,8 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   // UI state
   const [zoom, setZoom] = useState(1)
   const [showDrawing, setShowDrawing] = useState(true)
-  const [showZoomIndicator, setShowZoomIndicator] = useState(false)
-  const [toolbarExpanded, setToolbarExpanded] = useState(false)
+  const [showColorPicker, setShowColorPicker] = useState(false)
+  const [showBrushSize, setShowBrushSize] = useState(false)
   const [cropArea, setCropArea] = useState<CropArea | null>(null)
   const [isCropping, setIsCropping] = useState(false)
   const lastTouchDistanceRef = useRef<number>(0)
@@ -277,7 +272,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
           stage.scale({ x: newScale, y: newScale })
           stage.position(newPos)
           setZoom(newScale)
-          setShowZoomIndicator(true)
         }
       }
 
@@ -312,7 +306,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     if ('touches' in e.evt && e.evt.touches.length < 2) {
       lastTouchDistanceRef.current = 0
       lastTouchCenterRef.current = null
-      setTimeout(() => setShowZoomIndicator(false), 1500)
     }
     
     if (!isDrawing) return
@@ -536,18 +529,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     onSave(dataUrl)
   }
 
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.5, 5))
-    setShowZoomIndicator(true)
-    setTimeout(() => setShowZoomIndicator(false), 1500)
-  }
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.5, 0.5))
-    setShowZoomIndicator(true)
-    setTimeout(() => setShowZoomIndicator(false), 1500)
-  }
-
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault()
     
@@ -575,8 +556,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     
     stage.scale({ x: newScale, y: newScale })
     stage.position(newPos)
-    setShowZoomIndicator(true)
-    setTimeout(() => setShowZoomIndicator(false), 1500)
   }
 
   useEffect(() => {
@@ -613,54 +592,23 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     }
   }
 
-  const getToolIcon = (tool: ToolMode) => {
-    switch (tool) {
-      case 'draw': return <Pencil className="w-5 h-5" />
-      case 'eraser': return <Eraser className="w-5 h-5" />
-      case 'rect': return <Square className="w-5 h-5" />
-      case 'circle': return <CircleIcon className="w-5 h-5" />
-      case 'text': return <Type className="w-5 h-5" />
-      case 'pan': return <Hand className="w-5 h-5" />
-      case 'select': return <Hand className="w-5 h-5" />
-      case 'crop': return <Scissors className="w-5 h-5" />
-      case 'sticker': return <ImagePlus className="w-5 h-5" />
-    }
-  }
-
   return (
-    <div className="fixed inset-0 z-[200] bg-white flex flex-col select-none">
-      {/* Compact Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-white border-b border-[#E8E8E8] shrink-0 safe-top">
+    <div className="fixed inset-0 z-[200] bg-black flex flex-col select-none">
+      {/* Top Bar - Minimal */}
+      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 safe-top">
         <button
           onClick={onClose}
-          className="w-9 h-9 border border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] active:scale-95 transition-all flex items-center justify-center rounded touch-manipulation"
+          className="w-10 h-10 bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 active:scale-95 transition-all flex items-center justify-center rounded-full touch-manipulation"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
-        <h2 className="font-serif text-base font-light text-[#1A1A1A] tracking-tight">
-          {cropArea ? 'Crop Image' : 'Draw'}
-        </h2>
-        {cropArea ? (
-          <div className="flex gap-2">
-            <button
-              onClick={cancelCrop}
-              className="h-9 px-3 border border-[#E8E8E8] text-[#1A1A1A] font-light text-xs tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all rounded touch-manipulation"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={applyCrop}
-              className="h-9 px-3 bg-[#8B7355] text-white font-light text-xs tracking-wider uppercase hover:bg-[#8B7355]/90 active:scale-95 transition-all rounded touch-manipulation"
-            >
-              Apply
-            </button>
-          </div>
-        ) : (
+        
+        {cropArea && (
           <button
-            onClick={handleSave}
-            className="h-9 px-3 bg-[#8B7355] text-white font-light text-xs tracking-wider uppercase hover:bg-[#8B7355]/90 active:scale-95 transition-all rounded touch-manipulation"
+            onClick={applyCrop}
+            className="w-10 h-10 bg-[#8B7355] text-white hover:bg-[#8B7355]/90 active:scale-95 transition-all flex items-center justify-center rounded-full touch-manipulation shadow-lg"
           >
-            Save
+            <Check className="w-5 h-5" />
           </button>
         )}
       </div>
@@ -674,39 +622,11 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
         className="hidden"
       />
 
-      {/* Canvas Container */}
+      {/* Canvas Container - Full Screen */}
       <div 
         ref={containerRef}
-        className="flex-1 flex items-center justify-center overflow-hidden bg-[#F8F7F5] relative touch-none"
+        className="flex-1 flex items-center justify-center overflow-hidden relative touch-none"
       >
-        {/* Zoom Indicator */}
-        {showZoomIndicator && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-light z-50">
-            {Math.round(zoom * 100)}%
-          </div>
-        )}
-
-        {/* Floating Zoom Controls */}
-        <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-40">
-          <button
-            onClick={handleZoomIn}
-            className="w-9 h-9 bg-white/95 backdrop-blur border border-[#E8E8E8] text-[#1A1A1A] hover:bg-white active:scale-95 transition-all flex items-center justify-center shadow-lg rounded"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleZoomOut}
-            className="w-9 h-9 bg-white/95 backdrop-blur border border-[#E8E8E8] text-[#1A1A1A] hover:bg-white active:scale-95 transition-all flex items-center justify-center shadow-lg rounded"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setShowDrawing(!showDrawing)}
-            className="w-9 h-9 bg-white/95 backdrop-blur border border-[#E8E8E8] text-[#1A1A1A] hover:bg-white active:scale-95 transition-all flex items-center justify-center shadow-lg rounded"
-          >
-            {showDrawing ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-          </button>
-        </div>
 
         {image && (
           <Stage
@@ -838,253 +758,308 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
         )}
       </div>
 
-      {/* Bottom Toolbar - Collapsible */}
-      <div className="bg-white border-t border-[#E8E8E8] shrink-0 safe-bottom">
-        {/* Toolbar Toggle */}
+      {/* Right Vertical Toolbar - Snapchat Style */}
+      <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 z-40">
+        {/* Drawing Tools */}
         <button
           onClick={() => {
-            setToolbarExpanded(!toolbarExpanded)
-            // Haptic feedback
-            if ('vibrate' in navigator) {
-              navigator.vibrate(5)
-            }
+            setToolMode('draw')
+            if ('vibrate' in navigator) navigator.vibrate(5)
           }}
-          className="w-full flex items-center justify-center py-2 border-b border-[#E8E8E8] hover:bg-[#F8F7F5] transition-colors active:bg-[#F0EDE8]"
+          className={`w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 ${
+            toolMode === 'draw' 
+              ? 'bg-white text-[#8B7355]' 
+              : 'bg-black/40 backdrop-blur-sm text-white hover:bg-black/60'
+          }`}
         >
-          {toolbarExpanded ? <ChevronDown className="w-5 h-5 text-[#6B6B6B]" /> : <ChevronUp className="w-5 h-5 text-[#6B6B6B]" />}
+          <Pencil className="w-5 h-5" />
         </button>
 
-        {/* Quick Actions - Always Visible */}
-        <div className="px-3 py-2 flex items-center justify-between gap-2 overflow-x-auto">
-          {/* Tool Selector */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {(['draw', 'eraser', 'rect', 'circle', 'text', 'crop'] as ToolMode[]).map((tool) => (
-              <button
-                key={tool}
-                onClick={() => {
-                  if (tool === 'crop') {
-                    setCropArea(null)
-                  }
-                  setToolMode(tool)
-                  // Haptic feedback
-                  if ('vibrate' in navigator) {
-                    navigator.vibrate(5)
-                  }
-                }}
-                className={`flex-shrink-0 w-10 h-10 border flex items-center justify-center transition-all rounded active:scale-95 ${
-                  toolMode === tool 
-                    ? 'bg-[#8B7355] text-white border-[#8B7355]' 
-                    : 'bg-white text-[#1A1A1A] border-[#E8E8E8]'
-                }`}
-                title={tool}
-              >
-                {getToolIcon(tool)}
-              </button>
-            ))}
+        <button
+          onClick={() => {
+            setToolMode('eraser')
+            if ('vibrate' in navigator) navigator.vibrate(5)
+          }}
+          className={`w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 ${
+            toolMode === 'eraser' 
+              ? 'bg-white text-[#8B7355]' 
+              : 'bg-black/40 backdrop-blur-sm text-white hover:bg-black/60'
+          }`}
+        >
+          <Eraser className="w-5 h-5" />
+        </button>
+
+        {/* Color Picker Toggle */}
+        <button
+          onClick={() => {
+            setShowColorPicker(!showColorPicker)
+            setShowBrushSize(false)
+            if ('vibrate' in navigator) navigator.vibrate(5)
+          }}
+          className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg bg-black/40 backdrop-blur-sm hover:bg-black/60 relative active:scale-95"
+        >
+          <div 
+            className="w-6 h-6 rounded-full border-2 border-white"
+            style={{ backgroundColor: currentColor }}
+          />
+        </button>
+
+        {/* Brush Size Toggle */}
+        <button
+          onClick={() => {
+            setShowBrushSize(!showBrushSize)
+            setShowColorPicker(false)
+            if ('vibrate' in navigator) navigator.vibrate(5)
+          }}
+          className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 active:scale-95"
+        >
+          <div 
+            className="bg-white rounded-full"
+            style={{ 
+              width: toolMode === 'eraser' ? Math.min(eraserSize / 2, 20) : Math.min(brushSize * 1.5, 20), 
+              height: toolMode === 'eraser' ? Math.min(eraserSize / 2, 20) : Math.min(brushSize * 1.5, 20) 
+            }}
+          />
+        </button>
+
+        {/* Text Tool */}
+        <button
+          onClick={() => {
+            setToolMode('text')
+            if ('vibrate' in navigator) navigator.vibrate(5)
+          }}
+          className={`w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 ${
+            toolMode === 'text' 
+              ? 'bg-white text-[#8B7355]' 
+              : 'bg-black/40 backdrop-blur-sm text-white hover:bg-black/60'
+          }`}
+        >
+          <Type className="w-5 h-5" />
+        </button>
+
+        {/* Crop Tool */}
+        <button
+          onClick={() => {
+            setCropArea(null)
+            setToolMode('crop')
+            if ('vibrate' in navigator) navigator.vibrate(5)
+          }}
+          className={`w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 ${
+            toolMode === 'crop' 
+              ? 'bg-white text-[#8B7355]' 
+              : 'bg-black/40 backdrop-blur-sm text-white hover:bg-black/60'
+          }`}
+        >
+          <Scissors className="w-5 h-5" />
+        </button>
+
+        {/* Add Image */}
+        <button
+          onClick={() => {
+            fileInputRef.current?.click()
+            if ('vibrate' in navigator) navigator.vibrate(5)
+          }}
+          className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 active:scale-95"
+        >
+          <ImagePlus className="w-5 h-5" />
+        </button>
+
+        {/* Undo/Redo */}
+        <button
+          onClick={undo}
+          disabled={lines.length === 0 && shapes.length === 0}
+          className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 disabled:opacity-30 active:scale-95"
+        >
+          <Undo className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={redo}
+          disabled={undoneLines.length === 0 && undoneShapes.length === 0}
+          className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 disabled:opacity-30 active:scale-95"
+        >
+          <Redo className="w-5 h-5" />
+        </button>
+
+        {/* Toggle Drawing Visibility */}
+        <button
+          onClick={() => setShowDrawing(!showDrawing)}
+          className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 active:scale-95"
+        >
+          {showDrawing ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Color Picker Panel - Slides from right */}
+      {showColorPicker && (
+        <div className="absolute right-14 sm:right-20 top-1/2 -translate-y-1/2 w-56 sm:w-64 bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-3 sm:p-4 z-50 max-h-[80vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-900">Color</span>
             <button
-              onClick={() => {
-                fileInputRef.current?.click()
-                // Haptic feedback
-                if ('vibrate' in navigator) {
-                  navigator.vibrate(5)
-                }
-              }}
-              className="flex-shrink-0 w-10 h-10 border flex items-center justify-center transition-all rounded bg-white text-[#1A1A1A] border-[#E8E8E8] active:scale-95"
-              title="Add Image"
+              onClick={() => setShowColorPicker(false)}
+              className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-95"
             >
-              <ImagePlus className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Quick Actions */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={undo}
-              disabled={lines.length === 0 && shapes.length === 0}
-              className="w-10 h-10 border border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] active:scale-95 transition-all disabled:opacity-30 flex items-center justify-center rounded"
-            >
-              <Undo className="w-4 h-4" />
-            </button>
-            <button
-              onClick={redo}
-              disabled={undoneLines.length === 0 && undoneShapes.length === 0}
-              className="w-10 h-10 border border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] active:scale-95 transition-all disabled:opacity-30 flex items-center justify-center rounded"
-            >
-              <Redo className="w-4 h-4" />
-            </button>
+          
+          {/* Hue Slider */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-gray-600">Hue</label>
+              <span className="text-xs text-gray-900">{Math.round(hue)}°</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="360"
+              value={hue}
+              onChange={(e) => setHue(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer"
+              style={{
+                background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
+              }}
+            />
+          </div>
+          
+          {/* Saturation Slider */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-gray-600">Saturation</label>
+              <span className="text-xs text-gray-900">{Math.round(saturation)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={saturation}
+              onChange={(e) => setSaturation(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, hsl(${hue}, 0%, ${lightness}%), hsl(${hue}, 100%, ${lightness}%))`
+              }}
+            />
+          </div>
+          
+          {/* Lightness Slider */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-gray-600">Lightness</label>
+              <span className="text-xs text-gray-900">{Math.round(lightness)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={lightness}
+              onChange={(e) => setLightness(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, hsl(${hue}, ${saturation}%, 0%), hsl(${hue}, ${saturation}%, 50%), hsl(${hue}, ${saturation}%, 100%))`
+              }}
+            />
+          </div>
+          
+          {/* Quick Color Presets */}
+          <div className="grid grid-cols-8 gap-2">
+            {[
+              { h: 0, s: 0, l: 0, name: 'Black' },
+              { h: 0, s: 0, l: 100, name: 'White' },
+              { h: 0, s: 100, l: 50, name: 'Red' },
+              { h: 30, s: 100, l: 50, name: 'Orange' },
+              { h: 60, s: 100, l: 50, name: 'Yellow' },
+              { h: 120, s: 100, l: 50, name: 'Green' },
+              { h: 240, s: 100, l: 50, name: 'Blue' },
+              { h: 300, s: 100, l: 50, name: 'Purple' },
+            ].map((preset) => (
+              <button
+                key={`${preset.h}-${preset.s}-${preset.l}`}
+                onClick={() => {
+                  setHue(preset.h)
+                  setSaturation(preset.s)
+                  setLightness(preset.l)
+                }}
+                className="aspect-square rounded-lg border-2 border-gray-200 active:scale-95 transition-all hover:border-gray-400"
+                style={{ backgroundColor: hslToHex(preset.h, preset.s, preset.l) }}
+                title={preset.name}
+              />
+            ))}
           </div>
         </div>
+      )}
 
-        {/* Expanded Options */}
-        {toolbarExpanded && (
-          <div className="px-3 pb-3 space-y-3 max-h-[50vh] overflow-y-auto">
-            {/* Color Picker */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-xs font-light text-[#6B6B6B] uppercase tracking-wider">Color</div>
-                <div 
-                  className="w-8 h-8 rounded border-2 border-[#E8E8E8] shadow-sm"
-                  style={{ backgroundColor: currentColor }}
-                />
-              </div>
-              
-              {/* Hue Slider */}
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] font-light text-[#6B6B6B]">Hue</label>
-                  <span className="text-[10px] font-light text-[#1A1A1A]">{Math.round(hue)}°</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="360"
-                  value={hue}
-                  onChange={(e) => setHue(Number(e.target.value))}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
+      {/* Brush Size Panel - Slides from right */}
+      {showBrushSize && (
+        <div className="absolute right-14 sm:right-20 top-1/2 -translate-y-1/2 w-44 sm:w-48 bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-3 sm:p-4 z-50 max-h-[80vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-900">
+              {toolMode === 'eraser' ? 'Eraser' : 'Brush'} Size
+            </span>
+            <button
+              onClick={() => setShowBrushSize(false)}
+              className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-900 active:scale-95"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-2">
+            {BRUSH_SIZES.map(size => {
+              const currentSize = toolMode === 'eraser' ? eraserSize : brushSize
+              return (
+                <button
+                  key={size}
+                  onClick={() => {
+                    if (toolMode === 'eraser') {
+                      setEraserSize(size)
+                    } else {
+                      setBrushSize(size)
+                    }
                   }}
-                />
-              </div>
-              
-              {/* Saturation Slider */}
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] font-light text-[#6B6B6B]">Saturation</label>
-                  <span className="text-[10px] font-light text-[#1A1A1A]">{Math.round(saturation)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={saturation}
-                  onChange={(e) => setSaturation(Number(e.target.value))}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                  style={{
-                    background: `linear-gradient(to right, hsl(${hue}, 0%, ${lightness}%), hsl(${hue}, 100%, ${lightness}%))`
-                  }}
-                />
-              </div>
-              
-              {/* Lightness Slider */}
-              <div className="mb-2">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] font-light text-[#6B6B6B]">Lightness</label>
-                  <span className="text-[10px] font-light text-[#1A1A1A]">{Math.round(lightness)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={lightness}
-                  onChange={(e) => setLightness(Number(e.target.value))}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                  style={{
-                    background: `linear-gradient(to right, hsl(${hue}, ${saturation}%, 0%), hsl(${hue}, ${saturation}%, 50%), hsl(${hue}, ${saturation}%, 100%))`
-                  }}
-                />
-              </div>
-              
-              {/* Quick Color Presets */}
-              <div className="grid grid-cols-8 gap-1.5 mt-3">
-                {[
-                  { h: 0, s: 0, l: 0, name: 'Black' },
-                  { h: 0, s: 0, l: 100, name: 'White' },
-                  { h: 0, s: 100, l: 50, name: 'Red' },
-                  { h: 30, s: 100, l: 50, name: 'Orange' },
-                  { h: 60, s: 100, l: 50, name: 'Yellow' },
-                  { h: 120, s: 100, l: 50, name: 'Green' },
-                  { h: 240, s: 100, l: 50, name: 'Blue' },
-                  { h: 300, s: 100, l: 50, name: 'Purple' },
-                ].map((preset) => (
-                  <button
-                    key={`${preset.h}-${preset.s}-${preset.l}`}
-                    onClick={() => {
-                      setHue(preset.h)
-                      setSaturation(preset.s)
-                      setLightness(preset.l)
-                    }}
-                    className="aspect-square rounded border border-[#E8E8E8] active:scale-95 transition-all"
-                    style={{ backgroundColor: hslToHex(preset.h, preset.s, preset.l) }}
-                    title={preset.name}
+                  className={`aspect-square border-2 flex items-center justify-center transition-all active:scale-95 rounded-xl ${
+                    currentSize === size ? 'border-[#8B7355] bg-[#8B7355]/10' : 'border-gray-200 bg-white hover:border-gray-400'
+                  }`}
+                >
+                  <div 
+                    className="bg-gray-900 rounded-full"
+                    style={{ width: Math.min(size, 16), height: Math.min(size, 16) }}
                   />
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Brush Texture */}
+          {toolMode === 'draw' && (
+            <div className="mt-4">
+              <div className="text-xs text-gray-600 mb-2">Texture</div>
+              <div className="grid grid-cols-3 gap-2">
+                {BRUSH_TEXTURES.map(texture => (
+                  <button
+                    key={texture.value}
+                    onClick={() => setBrushTexture(texture.value)}
+                    className={`flex flex-col items-center p-2 border-2 transition-all active:scale-95 rounded-xl ${
+                      brushTexture === texture.value ? 'border-[#8B7355] bg-[#8B7355]/10' : 'border-gray-200 bg-white hover:border-gray-400'
+                    }`}
+                  >
+                    <span className="text-lg mb-0.5">{texture.icon}</span>
+                    <span className="text-[9px] text-gray-600">{texture.label}</span>
+                  </button>
                 ))}
               </div>
             </div>
+          )}
+        </div>
+      )}
 
-            {/* Brush Size */}
-            <div>
-              <div className="text-xs font-light text-[#6B6B6B] mb-2 uppercase tracking-wider">
-                {toolMode === 'eraser' ? 'Eraser' : 'Brush'} Size: {toolMode === 'eraser' ? eraserSize : brushSize}px
-              </div>
-              <div className="grid grid-cols-6 gap-2">
-                {BRUSH_SIZES.map(size => {
-                  const currentSize = toolMode === 'eraser' ? eraserSize : brushSize
-                  return (
-                    <button
-                      key={size}
-                      onClick={() => {
-                        if (toolMode === 'eraser') {
-                          setEraserSize(size)
-                        } else {
-                          setBrushSize(size)
-                        }
-                      }}
-                      className={`aspect-square border flex items-center justify-center transition-all active:scale-95 rounded ${
-                        currentSize === size ? 'border-[#8B7355] bg-[#F8F7F5]' : 'border-[#E8E8E8] bg-white'
-                      }`}
-                    >
-                      <div 
-                        className="bg-[#1A1A1A] rounded-full"
-                        style={{ width: Math.min(size, 16), height: Math.min(size, 16) }}
-                      />
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Brush Texture */}
-            {toolMode === 'draw' && (
-              <div>
-                <div className="text-xs font-light text-[#6B6B6B] mb-2 uppercase tracking-wider">Texture</div>
-                <div className="grid grid-cols-3 gap-2">
-                  {BRUSH_TEXTURES.map(texture => (
-                    <button
-                      key={texture.value}
-                      onClick={() => setBrushTexture(texture.value)}
-                      className={`flex flex-col items-center p-3 border transition-all active:scale-95 rounded ${
-                        brushTexture === texture.value ? 'border-[#8B7355] bg-[#F8F7F5]' : 'border-[#E8E8E8] bg-white'
-                      }`}
-                    >
-                      <span className="text-2xl mb-1">{texture.icon}</span>
-                      <span className="text-[10px] font-light">{texture.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-2 pt-2">
-              {selectedShapeId && (
-                <button
-                  onClick={deleteSelected}
-                  className="flex-1 h-10 px-3 border border-red-300 text-red-600 font-light text-xs tracking-wider uppercase hover:bg-red-50 active:scale-95 transition-all rounded"
-                >
-                  Delete Selected
-                </button>
-              )}
-              <button
-                onClick={clear}
-                disabled={lines.length === 0 && shapes.length === 0}
-                className="flex-1 h-10 px-3 border border-[#E8E8E8] text-[#1A1A1A] font-light text-xs tracking-wider uppercase hover:bg-[#F8F7F5] active:scale-95 transition-all disabled:opacity-30 rounded"
-              >
-                Clear All
-              </button>
-            </div>
-          </div>
-        )}
+      {/* Bottom Save Button */}
+      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 safe-bottom">
+        <button
+          onClick={handleSave}
+          className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-[#8B7355] font-medium text-sm rounded-full shadow-2xl hover:bg-gray-50 active:scale-95 transition-all"
+        >
+          Save Design
+        </button>
       </div>
     </div>
   )
