@@ -1623,38 +1623,49 @@ export default function CapturePage() {
                   <div className="border-t border-[#E8E8E8] pt-4">
                     <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-widest mb-4">Design Parameters</p>
 
-                    {/* Nail Length - Collapsible */}
-                    <div className="mb-3">
+                    {/* Nail Length - Redesigned */}
+                    <div className="mb-4">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'length' ? null : 'length')}
-                        className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
+                        className="w-full flex items-center justify-between p-4 rounded-lg border border-[#E8E8E8] bg-gradient-to-br from-white to-[#FEFEFE] hover:border-[#8B7355] hover:shadow-md transition-all duration-300 active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 flex-1">
-                          <span className="text-sm font-light text-[#1A1A1A] tracking-wide">Nail Length</span>
-                          <span className="text-xs text-[#6B6B6B] capitalize font-light">{designSettings.nailLength.replace('-', ' ')}</span>
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8B7355] to-[#A0826D] flex items-center justify-center shadow-sm">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 text-left">
+                            <span className="text-sm font-medium text-[#1A1A1A] tracking-wide block">Nail Length</span>
+                            <span className="text-xs text-[#8B7355] capitalize font-light">{designSettings.nailLength.replace('-', ' ')}</span>
+                          </div>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'length' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-5 h-5 text-[#6B6B6B] transition-transform duration-300 ${expandedSection === 'length' ? 'rotate-180' : ''}`} strokeWidth={1.5} />
                       </button>
                       {expandedSection === 'length' && (
-                        <div className="mt-2 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
-                          <div className="grid grid-cols-4 gap-2">
+                        <div className="mt-3 p-4 bg-gradient-to-br from-[#FAFAFA] to-white rounded-lg border border-[#E8E8E8] shadow-inner animate-fade-in">
+                          <div className="grid grid-cols-4 gap-3">
                             {[
-                              { value: 'short', label: 'Short', height: 'h-6' },
-                              { value: 'medium', label: 'Medium', height: 'h-10' },
-                              { value: 'long', label: 'Long', height: 'h-14' },
-                              { value: 'extra-long', label: 'Extra', height: 'h-16' }
+                              { value: 'short', label: 'Short', height: 'h-8' },
+                              { value: 'medium', label: 'Medium', height: 'h-12' },
+                              { value: 'long', label: 'Long', height: 'h-16' },
+                              { value: 'extra-long', label: 'Extra', height: 'h-20' }
                             ].map((length) => (
                               <button
                                 key={length.value}
                                 onClick={() => handleDesignSettingChange('nailLength', length.value)}
-                                className={`flex flex-col items-center justify-end p-2 border transition-all ${
+                                className={`group relative flex flex-col items-center justify-end p-3 rounded-xl border-2 transition-all duration-300 ${
                                   designSettings.nailLength === length.value
-                                    ? 'border-[#8B7355] bg-white'
-                                    : 'border-[#E8E8E8] bg-white hover:border-[#8B7355]'
+                                    ? 'border-[#8B7355] bg-gradient-to-br from-[#8B7355]/5 to-[#8B7355]/10 shadow-lg scale-105'
+                                    : 'border-[#E8E8E8] bg-white hover:border-[#8B7355]/50 hover:shadow-md hover:scale-102'
                                 }`}
                               >
-                                <div className={`w-4 ${length.height} bg-[#8B7355] mb-1.5`} />
-                                <span className="text-[10px] font-light text-[#1A1A1A]">{length.label}</span>
+                                <div className={`w-5 ${length.height} bg-gradient-to-t from-[#8B7355] to-[#A0826D] rounded-t-full mb-2 shadow-sm transition-all duration-300 ${
+                                  designSettings.nailLength === length.value ? 'scale-110' : ''
+                                }`} />
+                                <span className={`text-[10px] font-medium tracking-wide transition-colors ${
+                                  designSettings.nailLength === length.value ? 'text-[#8B7355]' : 'text-[#6B6B6B]'
+                                }`}>{length.label}</span>
                               </button>
                             ))}
                           </div>
@@ -1662,21 +1673,28 @@ export default function CapturePage() {
                       )}
                     </div>
 
-                    {/* Nail Shape - Collapsible */}
-                    <div className="mb-3">
+                    {/* Nail Shape - Redesigned */}
+                    <div className="mb-4">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'shape' ? null : 'shape')}
-                        className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
+                        className="w-full flex items-center justify-between p-4 rounded-lg border border-[#E8E8E8] bg-gradient-to-br from-white to-[#FEFEFE] hover:border-[#8B7355] hover:shadow-md transition-all duration-300 active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 flex-1">
-                          <span className="text-sm font-light text-[#1A1A1A] tracking-wide">Nail Shape</span>
-                          <span className="text-xs text-[#6B6B6B] capitalize font-light">{designSettings.nailShape}</span>
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8B7355] to-[#A0826D] flex items-center justify-center shadow-sm">
+                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2 C9 2 7 4 7 8 L7 18 C7 20 9 22 12 22 C15 22 17 20 17 18 L17 8 C17 4 15 2 12 2 Z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 text-left">
+                            <span className="text-sm font-medium text-[#1A1A1A] tracking-wide block">Nail Shape</span>
+                            <span className="text-xs text-[#8B7355] capitalize font-light">{designSettings.nailShape}</span>
+                          </div>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'shape' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-5 h-5 text-[#6B6B6B] transition-transform duration-300 ${expandedSection === 'shape' ? 'rotate-180' : ''}`} strokeWidth={1.5} />
                       </button>
                       {expandedSection === 'shape' && (
-                        <div className="mt-2 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
-                          <div className="grid grid-cols-3 gap-2">
+                        <div className="mt-3 p-4 bg-gradient-to-br from-[#FAFAFA] to-white rounded-lg border border-[#E8E8E8] shadow-inner animate-fade-in">
+                          <div className="grid grid-cols-3 gap-3">
                             {[
                               { value: 'oval', label: 'Oval', path: 'M12 4 C8 4 6 6 6 10 L6 18 C6 20 8 22 12 22 C16 22 18 20 18 18 L18 10 C18 6 16 4 12 4 Z' },
                               { value: 'square', label: 'Square', path: 'M8 4 L16 4 L16 20 C16 21 15 22 12 22 C9 22 8 21 8 20 Z' },
@@ -1688,16 +1706,22 @@ export default function CapturePage() {
                               <button
                                 key={shape.value}
                                 onClick={() => handleDesignSettingChange('nailShape', shape.value)}
-                                className={`flex flex-col items-center p-2 border transition-all ${
+                                className={`group relative flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300 ${
                                   designSettings.nailShape === shape.value
-                                    ? 'border-[#8B7355] bg-white'
-                                    : 'border-[#E8E8E8] bg-white hover:border-[#8B7355]'
+                                    ? 'border-[#8B7355] bg-gradient-to-br from-[#8B7355]/5 to-[#8B7355]/10 shadow-lg scale-105'
+                                    : 'border-[#E8E8E8] bg-white hover:border-[#8B7355]/50 hover:shadow-md hover:scale-102'
                                 }`}
                               >
-                                <svg viewBox="0 0 24 24" className="w-6 h-10 mb-1">
-                                  <path d={shape.path} fill="currentColor" className="text-[#8B7355]" />
+                                <svg viewBox="0 0 24 24" className={`w-8 h-12 mb-2 transition-all duration-300 ${
+                                  designSettings.nailShape === shape.value ? 'scale-110' : ''
+                                }`}>
+                                  <path d={shape.path} fill="currentColor" className={`transition-colors ${
+                                    designSettings.nailShape === shape.value ? 'text-[#8B7355]' : 'text-[#C4B5A0]'
+                                  }`} />
                                 </svg>
-                                <span className="text-[10px] font-light text-[#1A1A1A]">{shape.label}</span>
+                                <span className={`text-[10px] font-medium tracking-wide transition-colors ${
+                                  designSettings.nailShape === shape.value ? 'text-[#8B7355]' : 'text-[#6B6B6B]'
+                                }`}>{shape.label}</span>
                               </button>
                             ))}
                           </div>
@@ -1705,51 +1729,58 @@ export default function CapturePage() {
                       )}
                     </div>
 
-                    {/* Base Color - Collapsible */}
-                    <div className="mb-3">
+                    {/* Base Color - Redesigned with Sliders */}
+                    <div className="mb-4">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'color' ? null : 'color')}
-                        className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
+                        className="w-full flex items-center justify-between p-4 rounded-lg border border-[#E8E8E8] bg-gradient-to-br from-white to-[#FEFEFE] hover:border-[#8B7355] hover:shadow-md transition-all duration-300 active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 flex-1">
-                          <span className="text-sm font-light text-[#1A1A1A] tracking-wide">Base Color</span>
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-6 h-6 border border-[#E8E8E8]"
-                              style={{ backgroundColor: designSettings.baseColor }}
-                            />
-                            <span className="text-xs text-[#6B6B6B] font-light">{designSettings.baseColor}</span>
+                          <div 
+                            className="w-10 h-10 rounded-full shadow-md ring-2 ring-white ring-offset-2 transition-all duration-300"
+                            style={{ backgroundColor: designSettings.baseColor }}
+                          />
+                          <div className="flex-1 text-left">
+                            <span className="text-sm font-medium text-[#1A1A1A] tracking-wide block">Base Color</span>
+                            <span className="text-xs text-[#8B7355] font-light">{designSettings.baseColor}</span>
                           </div>
+                          <span className="text-xs font-medium text-white bg-gradient-to-r from-[#8B7355] to-[#A0826D] px-3 py-1.5 rounded-full shadow-sm">
+                            {influenceWeights.nailEditor_baseColor}%
+                          </span>
                         </div>
-                        <span className="text-xs font-light text-[#1A1A1A] bg-[#F8F7F5] border border-[#E8E8E8] px-2 py-1 mr-2">{influenceWeights.nailEditor_baseColor}%</span>
-                        <ChevronDown className={`w-4 h-4 text-[#6B6B6B] transition-transform ${expandedSection === 'color' ? 'rotate-180' : ''}`} strokeWidth={1} />
+                        <ChevronDown className={`w-5 h-5 text-[#6B6B6B] transition-transform duration-300 ml-2 ${expandedSection === 'color' ? 'rotate-180' : ''}`} strokeWidth={1.5} />
                       </button>
                       {expandedSection === 'color' && (
-                        <div className="mt-2 space-y-3 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
+                        <div className="mt-3 space-y-4 p-5 bg-gradient-to-br from-[#FAFAFA] to-white rounded-lg border border-[#E8E8E8] shadow-inner animate-fade-in">
+                          {/* Hue Slider */}
                           <div>
-                            <label className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase mb-1.5 block">Hue</label>
-                            <div className="relative">
-                              <div className="absolute inset-0 h-2 rounded-full" style={{
+                            <div className="flex items-center justify-between mb-3">
+                              <label className="text-xs text-[#1A1A1A] font-medium tracking-wider uppercase">Hue</label>
+                              <span className="text-xs text-[#8B7355] font-medium">{hexToHsl(designSettings.baseColor).hue}°</span>
+                            </div>
+                            <div className="relative h-5 rounded-full overflow-hidden shadow-sm">
+                              <div className="absolute inset-0 rounded-full" style={{
                                 background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)',
-                                top: '50%',
-                                transform: 'translateY(-50%)'
                               }} />
                               <Slider
                                 value={[hexToHsl(designSettings.baseColor).hue]}
                                 onValueChange={handleHueChange}
                                 max={360}
                                 step={1}
-                                className="w-full relative z-10"
+                                className="w-full relative z-10 slider-transparent"
                               />
                             </div>
                           </div>
+                          
+                          {/* Lightness Slider */}
                           <div>
-                            <label className="text-xs text-[#6B6B6B] font-light tracking-wider uppercase mb-1.5 block">Lightness</label>
-                            <div className="relative">
-                              <div className="absolute inset-0 h-2 rounded-full" style={{
+                            <div className="flex items-center justify-between mb-3">
+                              <label className="text-xs text-[#1A1A1A] font-medium tracking-wider uppercase">Lightness</label>
+                              <span className="text-xs text-[#8B7355] font-medium">{colorLightness}%</span>
+                            </div>
+                            <div className="relative h-5 rounded-full overflow-hidden shadow-sm">
+                              <div className="absolute inset-0 rounded-full" style={{
                                 background: 'linear-gradient(to right, #1a1a1a 0%, #808080 50%, #ffffff 100%)',
-                                top: '50%',
-                                transform: 'translateY(-50%)'
                               }} />
                               <Slider
                                 value={[colorLightness]}
@@ -1757,20 +1788,22 @@ export default function CapturePage() {
                                 max={100}
                                 min={10}
                                 step={1}
-                                className="w-full relative z-10"
+                                className="w-full relative z-10 slider-transparent"
                               />
                             </div>
                           </div>
-                          <div className="border-t border-[#E8E8E8] pt-3">
-                            <div className="flex justify-between items-center mb-2">
-                              <label className="text-xs font-light tracking-wider uppercase text-[#6B6B6B]">Base Color</label>
-                              <span className="text-xs font-light text-[#1A1A1A]">{influenceWeights.nailEditor_baseColor}%</span>
+                          
+                          {/* Influence Slider */}
+                          <div className="pt-4 border-t border-[#E8E8E8]">
+                            <div className="flex items-center justify-between mb-3">
+                              <label className="text-xs text-[#1A1A1A] font-medium tracking-wider uppercase">Color Influence</label>
+                              <span className="text-xs text-white bg-gradient-to-r from-[#8B7355] to-[#A0826D] px-2.5 py-1 rounded-full font-medium shadow-sm">
+                                {influenceWeights.nailEditor_baseColor}%
+                              </span>
                             </div>
-                            <div className="relative">
-                              <div className="absolute inset-0 h-2 rounded-full" style={{
+                            <div className="relative h-5 rounded-full overflow-hidden shadow-sm">
+                              <div className="absolute inset-0 rounded-full" style={{
                                 background: 'linear-gradient(to right, #e0e0e0 0%, #FF6B9D 50%, #FF1493 100%)',
-                                top: '50%',
-                                transform: 'translateY(-50%)'
                               }} />
                               <Slider
                                 value={[influenceWeights.nailEditor_baseColor]}
@@ -1778,12 +1811,14 @@ export default function CapturePage() {
                                 min={0}
                                 max={100}
                                 step={5}
-                                className="w-full relative z-10"
+                                className="w-full relative z-10 slider-transparent"
                               />
                             </div>
-                            <p className="text-[10px] text-[#6B6B6B] font-light mt-1">
-                              {selectedDesignImages.length > 0 && `Design Images: ${influenceWeights.nailEditor_designImage}%`}
-                            </p>
+                            {selectedDesignImages.length > 0 && (
+                              <p className="text-[10px] text-[#6B6B6B] font-light mt-2 text-center">
+                                Design Images: {influenceWeights.nailEditor_designImage}%
+                              </p>
+                            )}
                           </div>
                         </div>
                       )}
