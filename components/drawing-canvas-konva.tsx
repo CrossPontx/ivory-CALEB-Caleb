@@ -95,30 +95,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   const [showBrushSize, setShowBrushSize] = useState(false)
   const [cropArea, setCropArea] = useState<CropArea | null>(null)
   const [isCropping, setIsCropping] = useState(false)
-  const [stickers, setStickers] = useState<Sticker[]>(() => {
-    // Load stickers from localStorage on mount
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('drawingCanvas_stickers')
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved)
-          // Convert saved data back to Sticker objects with HTMLImageElement
-          return parsed.map((s: any) => {
-            const img = new window.Image()
-            img.src = s.thumbnail
-            return {
-              id: s.id,
-              image: img,
-              thumbnail: s.thumbnail
-            }
-          })
-        } catch (e) {
-          console.error('Error loading stickers:', e)
-        }
-      }
-    }
-    return []
-  })
+  const [stickers, setStickers] = useState<Sticker[]>([])
   const [cutoutPath, setCutoutPath] = useState<CutoutPath | null>(null)
   const [isDrawingCutout, setIsDrawingCutout] = useState(false)
   const [showStickerLibrary, setShowStickerLibrary] = useState(false)
@@ -151,17 +128,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   useEffect(() => {
     setCurrentColor(hslToHex(hue, saturation, lightness))
   }, [hue, saturation, lightness])
-
-  // Save stickers to localStorage whenever they change
-  useEffect(() => {
-    if (typeof window !== 'undefined' && stickers.length > 0) {
-      const stickerData = stickers.map(s => ({
-        id: s.id,
-        thumbnail: s.thumbnail
-      }))
-      localStorage.setItem('drawingCanvas_stickers', JSON.stringify(stickerData))
-    }
-  }, [stickers])
 
   // Load image
   useEffect(() => {
@@ -624,18 +590,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                 thumbnail: event.target?.result as string
               }
               
-              setStickers(prevStickers => {
-                const updated = [...prevStickers, newSticker]
-                // Save to localStorage
-                try {
-                  localStorage.setItem('drawingCanvas_stickers', JSON.stringify(
-                    updated.map(s => ({ id: s.id, thumbnail: s.thumbnail }))
-                  ))
-                } catch (e) {
-                  console.error('Error saving to localStorage:', e)
-                }
-                return updated
-              })
+              setStickers(prevStickers => [...prevStickers, newSticker])
               
               // Also add directly to canvas
               const maxSize = 200
@@ -1642,7 +1597,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                   onClick={() => {
                     if (confirm('Clear all stickers from library?')) {
                       setStickers([])
-                      localStorage.removeItem('drawingCanvas_stickers')
                       if ('vibrate' in navigator) navigator.vibrate(10)
                     }
                   }}
