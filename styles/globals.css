@@ -573,16 +573,65 @@ input[type="range"]:active::-moz-range-thumb {
 
 /* Custom slider styles to show only gradient backgrounds */
 [role="slider"] {
-  background: transparent !important;
+  width: 28px !important;
+  height: 28px !important;
+  background: white !important;
+  border: 3px solid #8B7355 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 4px rgba(139, 115, 85, 0.1) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: grab !important;
+}
+
+[role="slider"]:active {
+  cursor: grabbing !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 6px rgba(139, 115, 85, 0.15) !important;
+}
+
+/* Mobile touch optimization */
+@media (max-width: 640px) {
+  [role="slider"] {
+    width: 32px !important;
+    height: 32px !important;
+  }
 }
 
 /* Hide the default slider track */
 .slider-transparent [data-orientation="horizontal"] {
   background: transparent !important;
+  height: 100% !important;
 }
 
 /* Make slider thumb more visible */
 [role="slider"]:focus-visible {
-  outline: 2px solid #8B7355;
-  outline-offset: 2px;
+  outline: 3px solid #8B7355;
+  outline-offset: 3px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 6px rgba(139, 115, 85, 0.2) !important;
+}
+
+/* Smooth slider track interaction */
+.slider-transparent {
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Add haptic-like visual feedback */
+[role="slider"]:active::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 115, 85, 0.2) 0%, transparent 70%);
+  animation: pulse-ring 0.3s ease-out;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
 }
