@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Palette, Sparkles, Upload, Loader2, X, ChevronDown, Share2, Trash2 } from "lucide-react"
+import { Palette, Sparkles, Upload, Loader2, X, ChevronDown, Share2, Trash2, Camera } from "lucide-react"
 import Image from "next/image"
 import { Slider } from "@/components/ui/slider"
 import { CreditsDisplay } from "@/components/credits-display"
@@ -113,6 +113,7 @@ export default function CapturePage() {
   const [colorLightness, setColorLightness] = useState(65) // 0-100 for lightness (matches initial color)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false) // Bottom drawer toggle state
+  const [isUploadDrawerOpen, setIsUploadDrawerOpen] = useState(false) // Upload drawer toggle state
   const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null)
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
   const [drawingImageUrl, setDrawingImageUrl] = useState<string | null>(null)
@@ -1309,6 +1310,22 @@ export default function CapturePage() {
                 
                 {/* Snapchat-Style Vertical Icon Bar - Right Side */}
                 <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 sm:gap-5 z-20 pointer-events-auto">
+                  {/* Upload Design Image Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsUploadDrawerOpen(!isUploadDrawerOpen)
+                    }}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full backdrop-blur-md border-2 flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 ${
+                      isUploadDrawerOpen 
+                        ? 'bg-[#8B7355] border-[#8B7355] text-white' 
+                        : 'bg-white/90 border-[#8B7355] text-[#8B7355]'
+                    }`}
+                    title="Upload design images"
+                  >
+                    <Upload className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
+                  </button>
+
                   {/* Draw Button */}
                   <button
                     onClick={(e) => {
@@ -1346,7 +1363,7 @@ export default function CapturePage() {
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#E8E8E8] text-[#1A1A1A] flex items-center justify-center shadow-xl hover:scale-110 hover:border-[#8B7355] active:scale-95 transition-all duration-300"
                     title="Replace hand photo"
                   >
-                    <Upload className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
+                    <Camera className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
                   </button>
                 </div>
                 
@@ -1523,27 +1540,6 @@ export default function CapturePage() {
                       </div>
                     </div>
                   )}
-
-                  {/* Elegant Upload Design Image Button */}
-                  <button 
-                    onClick={() => designUploadRef.current?.click()}
-                    className="w-full h-11 sm:h-12 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={isUploadingDesign || selectedDesignImages.length >= 3}
-                  >
-                    {isUploadingDesign ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1} />
-                        <span>Uploading...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" strokeWidth={1} />
-                        <span className="hidden sm:inline">Upload Design Images</span>
-                        <span className="sm:hidden">Upload Images</span>
-                        <span className="text-[10px] opacity-70">({selectedDesignImages.length}/3)</span>
-                      </>
-                    )}
-                  </button>
 
                   {/* Uploaded Design Previews with Influence Control */}
                   {selectedDesignImages.length > 0 && (
@@ -1888,6 +1884,119 @@ export default function CapturePage() {
               onChange={handleDesignUpload}
               className="hidden"
             />
+          </div>
+        </div>
+
+        {/* Upload Design Images Drawer */}
+        <div 
+          data-drawer="upload"
+          className={`fixed inset-0 bg-white z-40 touch-action-pan-y transition-all duration-500 ${
+            isUploadDrawerOpen 
+              ? 'translate-y-0 opacity-100 pointer-events-auto' 
+              : 'translate-y-full opacity-0 pointer-events-none'
+          }`}
+          style={{ 
+            visibility: isUploadDrawerOpen ? 'visible' : 'hidden'
+          }}
+        >
+          <div className="max-w-4xl mx-auto h-full flex flex-col">
+            {/* Elegant Drag Handle */}
+            <button
+              onClick={() => setIsUploadDrawerOpen(false)}
+              className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355] cursor-pointer"
+              aria-label="Close drawer"
+            />
+
+            <div className="w-full flex-1 flex flex-col overflow-hidden">
+              <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide">
+                <h2 className="text-xl sm:text-2xl font-serif text-[#1A1A1A] mb-4">Upload Design Images</h2>
+                
+                {/* Upload Button */}
+                <button 
+                  onClick={() => designUploadRef.current?.click()}
+                  className="w-full h-32 border-2 border-dashed border-[#E8E8E8] text-[#1A1A1A] font-light text-sm tracking-[0.15em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex flex-col items-center justify-center gap-3 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isUploadingDesign || selectedDesignImages.length >= 3}
+                >
+                  {isUploadingDesign ? (
+                    <>
+                      <Loader2 className="w-8 h-8 animate-spin text-[#8B7355]" strokeWidth={1.5} />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-[#8B7355]" strokeWidth={1.5} />
+                      <span>Upload Design Images</span>
+                      <span className="text-xs opacity-70">({selectedDesignImages.length}/3)</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Uploaded Design Previews with Influence Control */}
+                {selectedDesignImages.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="border border-[#E8E8E8] rounded-sm p-4 bg-white shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-light tracking-[0.15em] uppercase text-[#1A1A1A]">
+                          {selectedDesignImages.length} Design{selectedDesignImages.length > 1 ? 's' : ''} Uploaded
+                        </h3>
+                        <span className="text-sm font-medium text-[#8B7355]">{influenceWeights.nailEditor_designImage}%</span>
+                      </div>
+                      
+                      {/* Design Images Grid */}
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        {selectedDesignImages.map((img, idx) => (
+                          <div key={idx} className="relative aspect-square rounded-sm overflow-hidden group border border-[#E8E8E8]">
+                            <Image src={img} alt={`Design ${idx + 1}`} fill className="object-cover" />
+                            <button
+                              onClick={() => removeDesignImage(img)}
+                              className="absolute top-2 right-2 w-7 h-7 bg-black/70 hover:bg-black/90 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Influence Slider */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-xs font-light text-[#6B6B6B] uppercase tracking-wider">Design Influence</label>
+                          <span className="text-xs font-medium text-[#8B7355]">{influenceWeights.nailEditor_designImage}%</span>
+                        </div>
+                        <Slider
+                          value={[influenceWeights.nailEditor_designImage]}
+                          onValueChange={(value) => handleNailEditorDesignImageInfluence(value[0])}
+                          min={0}
+                          max={100}
+                          step={5}
+                          className="w-full"
+                        />
+                        <p className="text-[10px] text-[#6B6B6B] font-light">
+                          Base Color: {influenceWeights.nailEditor_baseColor}%
+                        </p>
+                      </div>
+                      
+                      <button
+                        onClick={() => {
+                          setSelectedDesignImages([])
+                          setIsUploadDrawerOpen(false)
+                        }}
+                        className="w-full mt-4 h-10 border border-red-300 text-red-600 text-xs font-light tracking-[0.15em] uppercase hover:bg-red-50 hover:border-red-400 transition-all duration-300 rounded-sm"
+                      >
+                        Remove All Images
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDesignImages.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-[#6B6B6B] font-light">No design images uploaded yet</p>
+                    <p className="text-xs text-[#6B6B6B] font-light mt-2">Upload up to 3 reference images to guide your design</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
