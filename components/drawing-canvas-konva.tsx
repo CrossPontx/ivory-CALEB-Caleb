@@ -241,8 +241,16 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
       return
     }
     
-    if (e.target === e.target.getStage()) {
+    // Deselect if clicking on empty canvas or base image
+    const clickedOnEmpty = e.target === e.target.getStage()
+    const layer = e.target.getLayer()
+    const clickedOnBaseImage = e.target.getClassName() === 'Image' && layer && layer.getAttr('listening') === false
+    
+    if (clickedOnEmpty || clickedOnBaseImage) {
       setSelectedShapeId(null)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(5)
+      }
       return
     }
     
@@ -986,6 +994,13 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
           </div>
         )}
 
+        {/* Sticker Selected Hint */}
+        {selectedShapeId && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-[#8B7355]/90 text-white px-4 py-2 rounded-full text-xs sm:text-sm font-medium z-50 backdrop-blur-sm shadow-lg">
+            Tap empty space to deselect
+          </div>
+        )}
+
         {image && (
           <Stage
             ref={stageRef}
@@ -1000,7 +1015,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
             onWheel={handleWheel}
             scaleX={zoom}
             scaleY={zoom}
-            draggable={toolMode === 'pan' || toolMode === 'select'}
+            draggable={toolMode === 'pan' && !selectedShapeId}
             dragBoundFunc={(pos) => {
               // Allow free dragging
               return pos
@@ -1011,8 +1026,12 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
               touchAction: 'none'
             }}
           >
-            <Layer>
-              <KonvaImage image={image} width={canvasDimensions.width} height={canvasDimensions.height} />
+            <Layer listening={false}>
+              <KonvaImage 
+                image={image} 
+                width={canvasDimensions.width} 
+                height={canvasDimensions.height}
+              />
             </Layer>
             {showDrawing && (
               <>
@@ -1072,6 +1091,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                       )
                     }
                     if (shape.type === 'image' || shape.type === 'sticker' && shape.image) {
+                      const isSelected = selectedShapeId === shape.id
                       return (
                         <KonvaImage
                           key={shape.id}
@@ -1084,7 +1104,12 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                           rotation={shape.rotation || 0}
                           scaleX={shape.scaleX || 1}
                           scaleY={shape.scaleY || 1}
-                          draggable={selectedShapeId === shape.id || toolMode === 'select'}
+                          draggable={true}
+                          opacity={isSelected ? 1 : 0.95}
+                          shadowEnabled={isSelected}
+                          shadowColor="#8B7355"
+                          shadowBlur={isSelected ? 15 : 0}
+                          shadowOpacity={0.5}
                           onClick={() => {
                             setSelectedShapeId(shape.id)
                             setToolMode('select')
@@ -1094,6 +1119,41 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                             setSelectedShapeId(shape.id)
                             setToolMode('select')
                             if ('vibrate' in navigator) navigator.vibrate(5)
+                          }}
+                          onDragStart={() => {
+                            setSelectedShapeId(shape.id)
+                            setToolMode('select')
+                            if ('vibrate' in navigator) navigator.vibrate(5)
+                          }}
+                          onDragEnd={(e) => {
+                            // Update shape position after drag
+                            const node = e.target
+                            const updatedShapes = shapes.map(s => 
+                              s.id === shape.id 
+                                ? { ...s, x: node.x(), y: node.y() }
+                                : s
+                            )
+                            setShapes(updatedShapes)
+                          }}
+                          onTransformEnd={(e) => {
+                            // Update shape after transform
+                            const node = e.target
+                            const scaleX = node.scaleX()
+                            const scaleY = node.scaleY()
+                            
+                            const updatedShapes = shapes.map(s => 
+                              s.id === shape.id 
+                                ? { 
+                                    ...s, 
+                                    x: node.x(), 
+                                    y: node.y(),
+                                    rotation: node.rotation(),
+                                    scaleX,
+                                    scaleY
+                                  }
+                                : s
+                            )
+                            setShapes(updatedShapes)
                           }}
                         />
                       )
