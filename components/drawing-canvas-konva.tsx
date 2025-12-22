@@ -1031,11 +1031,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
             </Layer>
             {showDrawing && (
               <>
-                <Layer>
-                  {lines.map((line, i) => (
-                    <Line key={i} {...getLineProps(line)} />
-                  ))}
-                </Layer>
                 <Layer ref={shapeLayerRef}>
                   {shapes.map((shape) => {
                     if (shape.type === 'rect') {
@@ -1265,21 +1260,27 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                     />
                   )}
                 </Layer>
+                {/* Lines layer - rendered AFTER shapes so drawings appear on top */}
+                <Layer>
+                  {lines.map((line, i) => (
+                    <Line key={i} {...getLineProps(line)} />
+                  ))}
+                </Layer>
+                {/* Cutout path overlay */}
+                {cutoutPath && (
+                  <Layer>
+                    <Line
+                      points={cutoutPath.points}
+                      stroke="#8B7355"
+                      strokeWidth={3}
+                      dash={[10, 5]}
+                      lineCap="round"
+                      lineJoin="round"
+                      closed={false}
+                    />
+                  </Layer>
+                )}
               </>
-            )}
-            {/* Cutout path overlay */}
-            {cutoutPath && (
-              <Layer>
-                <Line
-                  points={cutoutPath.points}
-                  stroke="#8B7355"
-                  strokeWidth={3}
-                  dash={[10, 5]}
-                  lineCap="round"
-                  lineJoin="round"
-                  closed={false}
-                />
-              </Layer>
             )}
             {/* Crop overlay */}
             {(isCropping || cropArea) && shapeStart && (
