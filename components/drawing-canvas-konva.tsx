@@ -1096,6 +1096,9 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                           shadowColor="#8B7355"
                           shadowBlur={isSelected ? 15 : 0}
                           shadowOpacity={0.5}
+                          hitStrokeWidth={20}
+                          perfectDrawEnabled={false}
+                          listening={true}
                           onClick={() => {
                             setSelectedShapeId(shape.id)
                             setToolMode('select')
@@ -1108,7 +1111,12 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                           }}
                           onTouchStart={(e) => {
                             const evt = e.evt as TouchEvent
-                            if (evt.touches.length === 2) {
+                            if (evt.touches.length === 1) {
+                              // Single finger - select and prepare for drag
+                              setSelectedShapeId(shape.id)
+                              setToolMode('select')
+                              if ('vibrate' in navigator) navigator.vibrate(5)
+                            } else if (evt.touches.length === 2) {
                               // Two finger touch - prepare for pinch resize
                               e.cancelBubble = true
                               setSelectedShapeId(shape.id)
