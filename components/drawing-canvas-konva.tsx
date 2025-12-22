@@ -1084,27 +1084,36 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                           rotation={shape.rotation || 0}
                           scaleX={shape.scaleX || 1}
                           scaleY={shape.scaleY || 1}
-                          draggable={toolMode === 'select'}
-                          onClick={() => toolMode === 'select' && setSelectedShapeId(shape.id)}
+                          draggable={selectedShapeId === shape.id || toolMode === 'select'}
+                          onClick={() => {
+                            setSelectedShapeId(shape.id)
+                            setToolMode('select')
+                            if ('vibrate' in navigator) navigator.vibrate(5)
+                          }}
+                          onTap={() => {
+                            setSelectedShapeId(shape.id)
+                            setToolMode('select')
+                            if ('vibrate' in navigator) navigator.vibrate(5)
+                          }}
                         />
                       )
                     }
                     return null
                   })}
-                  {toolMode === 'select' && (
+                  {selectedShapeId && (
                     <Transformer 
                       ref={transformerRef}
                       enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
                       rotateEnabled={true}
                       borderStroke="#8B7355"
-                      borderStrokeWidth={3}
+                      borderStrokeWidth={4}
                       anchorFill="#8B7355"
                       anchorStroke="#ffffff"
-                      anchorStrokeWidth={3}
-                      anchorSize={20}
-                      anchorCornerRadius={10}
+                      anchorStrokeWidth={4}
+                      anchorSize={35}
+                      anchorCornerRadius={12}
                       keepRatio={false}
-                      rotateAnchorOffset={40}
+                      rotateAnchorOffset={50}
                       rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
                       boundBoxFunc={(oldBox, newBox) => {
                         // Limit resize to prevent too small

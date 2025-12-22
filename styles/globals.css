@@ -627,4 +627,18 @@ input[type="range"]:active::-moz-range-thumb {
   .konvajs-content canvas {
     touch-action: none !important;
   }
+  
+  /* Increase touch target for transformer anchors */
+  .konvajs-content .konvajs-transformer {
+    cursor: move !important;
+  }
+}
+
+/* Better cursor feedback for transforming */
+.konvajs-content canvas {
+  cursor: grab;
+}
+
+.konvajs-content canvas:active {
+  cursor: grabbing;
 }
