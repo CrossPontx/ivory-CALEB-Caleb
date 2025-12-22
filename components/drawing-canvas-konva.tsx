@@ -95,7 +95,30 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   const [showBrushSize, setShowBrushSize] = useState(false)
   const [cropArea, setCropArea] = useState<CropArea | null>(null)
   const [isCropping, setIsCropping] = useState(false)
-  const [stickers, setStickers] = useState<Sticker[]>([])
+  const [stickers, setStickers] = useState<Sticker[]>(() => {
+    // Load stickers from localStorage on mount
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('drawingCanvas_stickers')
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          // Convert saved data back to Sticker objects with HTMLImageElement
+          return parsed.map((s: any) => {
+            const img = new window.Image()
+            img.src = s.thumbnail
+            return {
+              id: s.id,
+              image: img,
+              thumbnail: s.thumbnail
+            }
+          })
+        } catch (e) {
+          console.error('Error loading stickers:', e)
+        }
+      }
+    }
+    return []
+  })
   const [cutoutPath, setCutoutPath] = useState<CutoutPath | null>(null)
   const [isDrawingCutout, setIsDrawingCutout] = useState(false)
   const [showStickerLibrary, setShowStickerLibrary] = useState(false)
@@ -124,6 +147,17 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   useEffect(() => {
     setCurrentColor(hslToHex(hue, saturation, lightness))
   }, [hue, saturation, lightness])
+
+  // Save stickers to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && stickers.length > 0) {
+      const stickerData = stickers.map(s => ({
+        id: s.id,
+        thumbnail: s.thumbnail
+      }))
+      localStorage.setItem('drawingCanvas_stickers', JSON.stringify(stickerData))
+    }
+  }, [stickers])
 
   // Load image
   useEffect(() => {
@@ -1374,44 +1408,61 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
 
           {/* Sticker Grid */}
           {stickers.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3">
-              {stickers.map((sticker) => (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-gray-600 font-medium">{stickers.length} Sticker{stickers.length !== 1 ? 's' : ''}</span>
                 <button
-                  key={sticker.id}
                   onClick={() => {
-                    // Add sticker to canvas
-                    const newShape: Shape = {
-                      id: `sticker-${Date.now()}`,
-                      type: 'sticker',
-                      x: canvasDimensions.width / 2 - 75,
-                      y: canvasDimensions.height / 2 - 75,
-                      width: 150,
-                      height: 150,
-                      image: sticker.image,
-                      fill: 'transparent',
-                      stroke: 'transparent',
-                      strokeWidth: 0,
-                      rotation: 0,
-                      scaleX: 1,
-                      scaleY: 1
+                    if (confirm('Clear all stickers from library?')) {
+                      setStickers([])
+                      localStorage.removeItem('drawingCanvas_stickers')
+                      if ('vibrate' in navigator) navigator.vibrate(10)
                     }
-                    setShapes([...shapes, newShape])
-                    setUndoneShapes([])
-                    setToolMode('select')
-                    setSelectedShapeId(newShape.id)
-                    setShowStickerLibrary(false)
-                    if ('vibrate' in navigator) navigator.vibrate(10)
                   }}
-                  className="aspect-square rounded-2xl border-2 border-gray-200 hover:border-[#8B7355] active:scale-95 transition-all overflow-hidden bg-white shadow-sm hover:shadow-md"
+                  className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
                 >
-                  <img 
-                    src={sticker.thumbnail} 
-                    alt="Sticker" 
-                    className="w-full h-full object-contain p-2"
-                  />
+                  Clear All
                 </button>
-              ))}
-            </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {stickers.map((sticker) => (
+                  <button
+                    key={sticker.id}
+                    onClick={() => {
+                      // Add sticker to canvas
+                      const newShape: Shape = {
+                        id: `sticker-${Date.now()}`,
+                        type: 'sticker',
+                        x: canvasDimensions.width / 2 - 75,
+                        y: canvasDimensions.height / 2 - 75,
+                        width: 150,
+                        height: 150,
+                        image: sticker.image,
+                        fill: 'transparent',
+                        stroke: 'transparent',
+                        strokeWidth: 0,
+                        rotation: 0,
+                        scaleX: 1,
+                        scaleY: 1
+                      }
+                      setShapes([...shapes, newShape])
+                      setUndoneShapes([])
+                      setToolMode('select')
+                      setSelectedShapeId(newShape.id)
+                      setShowStickerLibrary(false)
+                      if ('vibrate' in navigator) navigator.vibrate(10)
+                    }}
+                    className="aspect-square rounded-2xl border-2 border-gray-200 hover:border-[#8B7355] active:scale-95 transition-all overflow-hidden bg-white shadow-sm hover:shadow-md"
+                  >
+                    <img 
+                      src={sticker.thumbnail} 
+                      alt="Sticker" 
+                      className="w-full h-full object-contain p-2"
+                    />
+                  </button>
+                ))}
+              </div>
+            </>
           ) : (
             <div className="text-center py-8 text-gray-400">
               <ImagePlus className="w-12 h-12 mx-auto mb-3 opacity-50" />
