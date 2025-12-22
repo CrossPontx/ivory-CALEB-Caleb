@@ -222,7 +222,8 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     const transformedPos = transform.point(pos)
     
     // Handle drawing/eraser mode BEFORE checking for clicks on shapes
-    if (toolMode === 'draw' || toolMode === 'eraser') {
+    // But NOT when sticker library is open
+    if ((toolMode === 'draw' || toolMode === 'eraser') && !showStickerLibrary) {
       setIsDrawing(true)
       const currentSize = toolMode === 'eraser' ? eraserSize : brushSize
       
@@ -265,13 +266,18 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
       return
     }
     
-    if (toolMode === 'cutout') {
+    if (toolMode === 'cutout' && !showStickerLibrary) {
       // Start drawing cutout path
       setIsDrawingCutout(true)
       setCutoutPath({
         points: [transformedPos.x, transformedPos.y],
         closed: false
       })
+      return
+    }
+    
+    // If sticker library is open, don't handle canvas interactions
+    if (showStickerLibrary) {
       return
     }
     
