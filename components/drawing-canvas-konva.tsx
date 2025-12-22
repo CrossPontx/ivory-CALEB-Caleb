@@ -939,9 +939,10 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
               // Allow free dragging
               return pos
             }}
-            className="shadow-lg max-w-full max-h-full"
+            className="shadow-lg max-w-full max-h-full touch-none"
             style={{
-              cursor: toolMode === 'pan' ? 'grab' : toolMode === 'draw' || toolMode === 'eraser' ? 'crosshair' : 'default'
+              cursor: toolMode === 'pan' ? 'grab' : toolMode === 'draw' || toolMode === 'eraser' ? 'crosshair' : toolMode === 'select' ? 'move' : 'default',
+              touchAction: 'none'
             }}
           >
             <Layer>
@@ -1030,16 +1031,18 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                       enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
                       rotateEnabled={true}
                       borderStroke="#8B7355"
-                      borderStrokeWidth={2}
+                      borderStrokeWidth={3}
                       anchorFill="#8B7355"
                       anchorStroke="#ffffff"
-                      anchorStrokeWidth={2}
-                      anchorSize={12}
-                      anchorCornerRadius={6}
+                      anchorStrokeWidth={3}
+                      anchorSize={20}
+                      anchorCornerRadius={10}
                       keepRatio={false}
+                      rotateAnchorOffset={40}
+                      rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
                       boundBoxFunc={(oldBox, newBox) => {
                         // Limit resize to prevent too small
-                        if (newBox.width < 20 || newBox.height < 20) {
+                        if (newBox.width < 30 || newBox.height < 30) {
                           return oldBox
                         }
                         return newBox

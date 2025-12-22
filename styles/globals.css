@@ -614,3 +614,17 @@ input[type="range"]:active::-moz-range-thumb {
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Konva canvas touch optimization */
+.konvajs-content {
+  touch-action: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Improve Konva transformer anchors on mobile */
+@media (max-width: 768px) {
+  .konvajs-content canvas {
+    touch-action: none !important;
+  }
+}
