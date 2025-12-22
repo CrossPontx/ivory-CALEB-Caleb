@@ -576,94 +576,121 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) {
-      console.log('No file selected')
-      return
-    }
-    
-    console.log('File selected:', file.name, file.type, file.size)
-    
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file')
-      return
-    }
-    
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Image is too large. Please select an image under 10MB')
-      return
-    }
-    
-    const reader = new FileReader()
-    
-    reader.onerror = () => {
-      console.error('Error reading file')
-      alert('Error reading file. Please try again.')
-    }
-    
-    reader.onload = (event) => {
-      const img = new window.Image()
-      
-      img.onerror = () => {
-        console.error('Error loading image')
-        alert('Error loading image. Please try a different file.')
+    try {
+      const file = e.target.files?.[0]
+      if (!file) {
+        console.log('No file selected')
+        return
       }
       
-      img.onload = () => {
-        console.log('Image loaded successfully:', img.width, 'x', img.height)
-        
-        // Add to sticker library
-        const newSticker: Sticker = {
-          id: `sticker-lib-${Date.now()}`,
-          image: img,
-          thumbnail: event.target?.result as string
-        }
-        setStickers([...stickers, newSticker])
-        
-        // Also add directly to canvas
-        const maxSize = 200
-        let width = img.width
-        let height = img.height
-        
-        if (width > maxSize || height > maxSize) {
-          const ratio = Math.min(maxSize / width, maxSize / height)
-          width = width * ratio
-          height = height * ratio
-        }
-        
-        const newShape: Shape = {
-          id: `sticker-${Date.now()}`,
-          type: 'sticker',
-          x: canvasDimensions.width / 2 - width / 2,
-          y: canvasDimensions.height / 2 - height / 2,
-          width,
-          height,
-          image: img,
-          fill: 'transparent',
-          stroke: 'transparent',
-          strokeWidth: 0,
-          rotation: 0,
-          scaleX: 1,
-          scaleY: 1
-        }
-        
-        setShapes([...shapes, newShape])
-        setUndoneShapes([])
-        setToolMode('select')
-        setSelectedShapeId(newShape.id)
-        setShowStickerLibrary(false)
-        
-        if ('vibrate' in navigator) navigator.vibrate(10)
+      console.log('File selected:', file.name, file.type, file.size)
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file')
+        return
       }
-      img.src = event.target?.result as string
-    }
-    reader.readAsDataURL(file)
-    
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image is too large. Please select an image under 10MB')
+        return
+      }
+      
+      const reader = new FileReader()
+      
+      reader.onerror = () => {
+        console.error('Error reading file')
+        alert('Error reading file. Please try again.')
+      }
+      
+      reader.onload = (event) => {
+        try {
+          const img = new window.Image()
+          
+          img.onerror = () => {
+            console.error('Error loading image')
+            alert('Error loading image. Please try a different file.')
+          }
+          
+          img.onload = () => {
+            try {
+              console.log('Image loaded successfully:', img.width, 'x', img.height)
+              
+              // Add to sticker library
+              const newSticker: Sticker = {
+                id: `sticker-lib-${Date.now()}`,
+                image: img,
+                thumbnail: event.target?.result as string
+              }
+              
+              setStickers(prevStickers => {
+                const updated = [...prevStickers, newSticker]
+                // Save to localStorage
+                try {
+                  localStorage.setItem('drawingCanvas_stickers', JSON.stringify(
+                    updated.map(s => ({ id: s.id, thumbnail: s.thumbnail }))
+                  ))
+                } catch (e) {
+                  console.error('Error saving to localStorage:', e)
+                }
+                return updated
+              })
+              
+              // Also add directly to canvas
+              const maxSize = 200
+              let width = img.width
+              let height = img.height
+              
+              if (width > maxSize || height > maxSize) {
+                const ratio = Math.min(maxSize / width, maxSize / height)
+                width = width * ratio
+                height = height * ratio
+              }
+              
+              const newShape: Shape = {
+                id: `sticker-${Date.now()}`,
+                type: 'sticker',
+                x: canvasDimensions.width / 2 - width / 2,
+                y: canvasDimensions.height / 2 - height / 2,
+                width,
+                height,
+                image: img,
+                fill: 'transparent',
+                stroke: 'transparent',
+                strokeWidth: 0,
+                rotation: 0,
+                scaleX: 1,
+                scaleY: 1
+              }
+              
+              setShapes(prevShapes => [...prevShapes, newShape])
+              setUndoneShapes([])
+              setToolMode('select')
+              setSelectedShapeId(newShape.id)
+              setShowStickerLibrary(false)
+              
+              if ('vibrate' in navigator) navigator.vibrate(10)
+            } catch (error) {
+              console.error('Error in img.onload:', error)
+              alert('Error processing image. Please try again.')
+            }
+          }
+          img.src = event.target?.result as string
+        } catch (error) {
+          console.error('Error in reader.onload:', error)
+          alert('Error loading image. Please try again.')
+        }
+      }
+      reader.readAsDataURL(file)
+      
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } catch (error) {
+      console.error('Error in handleImageUpload:', error)
+      alert('Error uploading image. Please try again.')
     }
   }
 
