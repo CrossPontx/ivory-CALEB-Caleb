@@ -120,34 +120,54 @@ export function ColorWheelPicker({
     const dy = y - centerY
     const distance = Math.sqrt(dx * dx + dy * dy)
 
+    // Increased tolerance for mobile touch
+    const hueInnerTolerance = 30 // Increased from 20
+    const lightnessOuterTolerance = 30 // Increased from 20
+
     // If already dragging, continue with that type
-    if (isDragging && draggingType === 'hue' && distance >= innerRadius - 20) {
+    if (isDragging && draggingType === 'hue' && distance >= innerRadius - hueInnerTolerance) {
       let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90
       if (angle < 0) angle += 360
       onHueChange(Math.round(angle))
+      // Haptic feedback on mobile
+      if ('vibrate' in navigator) {
+        navigator.vibrate(1)
+      }
       return
     }
     
-    if (isDragging && draggingType === 'lightness' && distance <= lightnessRadius + 20) {
+    if (isDragging && draggingType === 'lightness' && distance <= lightnessRadius + lightnessOuterTolerance) {
       const lightnessValue = 100 - (distance / lightnessRadius) * 100
       onLightnessChange(Math.max(10, Math.min(100, Math.round(lightnessValue))))
+      // Haptic feedback on mobile
+      if ('vibrate' in navigator) {
+        navigator.vibrate(1)
+      }
       return
     }
 
-    // Initial click - determine which circle
+    // Initial click - determine which circle with larger tolerance
     if (!isDragging) {
-      // Check if click is on hue ring (outer)
-      if (distance >= innerRadius && distance <= outerRadius) {
+      // Check if click is on hue ring (outer) - with larger tolerance
+      if (distance >= innerRadius - hueInnerTolerance && distance <= outerRadius + 10) {
         setDraggingType('hue')
         let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90
         if (angle < 0) angle += 360
         onHueChange(Math.round(angle))
+        // Haptic feedback on mobile
+        if ('vibrate' in navigator) {
+          navigator.vibrate(5)
+        }
       }
-      // Check if click is in lightness circle (inner)
-      else if (distance <= lightnessRadius) {
+      // Check if click is in lightness circle (inner) - with larger tolerance
+      else if (distance <= lightnessRadius + lightnessOuterTolerance) {
         setDraggingType('lightness')
         const lightnessValue = 100 - (distance / lightnessRadius) * 100
         onLightnessChange(Math.max(10, Math.min(100, Math.round(lightnessValue))))
+        // Haptic feedback on mobile
+        if ('vibrate' in navigator) {
+          navigator.vibrate(5)
+        }
       }
     }
   }, [centerX, centerY, innerRadius, outerRadius, lightnessRadius, onHueChange, onLightnessChange, isDragging, draggingType])

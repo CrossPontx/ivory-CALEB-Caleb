@@ -2202,6 +2202,29 @@ export default function CapturePage() {
           </div>
         )}
 
+        {isGenerating && (
+          <div className="fixed inset-0 bg-gradient-to-b from-[#1A1A1A] via-black to-[#1A1A1A] flex flex-col items-center justify-center backdrop-blur-sm z-[150]">
+            <div className="flex flex-col items-center gap-6 animate-fade-in">
+              <div className="relative">
+                <Loader2 className="w-16 h-16 text-white animate-spin" strokeWidth={1.5} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">{Math.round(generationProgress)}%</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-white text-lg font-light tracking-[0.2em] uppercase">Generating Design</p>
+                <p className="text-white/60 text-sm font-light">This usually takes about 1 minute</p>
+              </div>
+              <div className="w-64 h-2 bg-white/20 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#8B7355] to-[#A0826D] transition-all duration-500 ease-out"
+                  style={{ width: `${generationProgress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Elegant Top Bar */}
         <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-6 pb-5 z-10 bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
