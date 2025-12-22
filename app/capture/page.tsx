@@ -199,6 +199,11 @@ export default function CapturePage() {
     if (isInitializing) return
     
     if (activeTab) {
+      console.log('🔄 Syncing to active tab:', activeTabId)
+      console.log('  - originalImage:', activeTab.originalImage ? 'EXISTS' : 'NULL')
+      console.log('  - selectedDesignImages:', activeTab.selectedDesignImages?.length || 0)
+      console.log('  - drawingImageUrl:', activeTab.drawingImageUrl ? 'EXISTS' : 'NULL')
+      
       setFinalPreviews(activeTab.finalPreviews)
       setDesignSettings(activeTab.designSettings)
       setSelectedDesignImages(activeTab.selectedDesignImages)
@@ -1321,6 +1326,31 @@ export default function CapturePage() {
                     }`}
                   >
                     {tab.name}
+                    {/* Show reference image indicator */}
+                    {tab.selectedDesignImages && tab.selectedDesignImages.length > 0 && (
+                      <span 
+                        className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm flex items-center gap-1 ${
+                          activeTabId === tab.id ? 'bg-white/20' : 'bg-[#8B7355]/10 text-[#8B7355]'
+                        }`}
+                        title={`${tab.selectedDesignImages.length} reference image${tab.selectedDesignImages.length > 1 ? 's' : ''}`}
+                      >
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                        </svg>
+                        {tab.selectedDesignImages.length}
+                      </span>
+                    )}
+                    {/* Show drawing indicator */}
+                    {tab.drawingImageUrl && (
+                      <span 
+                        className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm ${
+                          activeTabId === tab.id ? 'bg-white/20' : 'bg-purple-100 text-purple-600'
+                        }`}
+                        title="Has drawing overlay"
+                      >
+                        <Pencil className="w-2.5 h-2.5" />
+                      </span>
+                    )}
                     {tab.isGenerating && (
                       <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
                     )}
