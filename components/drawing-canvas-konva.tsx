@@ -203,6 +203,11 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
       lastTapTimeRef.current = now
     }
     
+    // If event was cancelled by a child (sticker/transformer), don't process
+    if (e.cancelBubble) {
+      return
+    }
+    
     // Allow panning when not in drawing/eraser mode or when middle mouse button
     const isMiddleButton = 'button' in e.evt && e.evt.button === 1
     const shouldPan = toolMode === 'pan' || isMiddleButton
@@ -220,6 +225,19 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     
     const transform = stage.getAbsoluteTransform().copy().invert()
     const transformedPos = transform.point(pos)
+    
+    // Handle cutout mode FIRST - needs to work anywhere on canvas
+    if (toolMode === 'cutout' && !showStickerLibrary) {
+      setIsDrawingCutout(true)
+      setCutoutPath({
+        points: [transformedPos.x, transformedPos.y],
+        closed: false
+      })
+      if ('vibrate' in navigator) {
+        navigator.vibrate(5)
+      }
+      return
+    }
     
     // Handle drawing/eraser mode BEFORE checking for clicks on shapes
     // But NOT when sticker library is open
@@ -263,16 +281,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
           navigator.vibrate(10)
         }
       }
-      return
-    }
-    
-    if (toolMode === 'cutout' && !showStickerLibrary) {
-      // Start drawing cutout path
-      setIsDrawingCutout(true)
-      setCutoutPath({
-        points: [transformedPos.x, transformedPos.y],
-        closed: false
-      })
       return
     }
     
@@ -658,12 +666,21 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   }
 
   const createStickerFromCutout = () => {
-    if (!cutoutPath || !stageRef.current) return
+    if (!cutoutPath || !stageRef.current || !image) return
     
     const stage = stageRef.current
     
     // Calculate bounding box of the cutout path
     const points = cutoutPath.points
+    
+    // Need at least 3 points to make a valid cutout
+    if (points.length < 6) {
+      alert('Draw a larger area to create a cutout')
+      setCutoutPath(null)
+      setToolMode('draw')
+      return
+    }
+    
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     
     for (let i = 0; i < points.length; i += 2) {
@@ -676,107 +693,96 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     const width = maxX - minX
     const height = maxY - minY
     
-    if (width < 10 || height < 10) {
+    if (width < 20 || height < 20) {
+      alert('Draw a larger area to create a cutout')
       setCutoutPath(null)
       setToolMode('draw')
       return
     }
     
-    // Get the current stage scale and position
-    const originalScale = stage.scaleX()
-    const originalPosition = stage.position()
-    
-    // Reset scale and position for accurate extraction
-    stage.scale({ x: 1, y: 1 })
-    stage.position({ x: 0, y: 0 })
-    
-    // Create a temporary canvas to extract the cutout from the entire stage
+    // Create a temporary canvas to extract the cutout from the BASE IMAGE ONLY
     const tempCanvas = document.createElement('canvas')
     tempCanvas.width = width
     tempCanvas.height = height
-    const ctx = tempCanvas.getContext('2d')
+    const ctx = tempCanvas.getContext('2d', { willReadFrequently: true })
     
     if (!ctx) {
-      stage.scale({ x: originalScale, y: originalScale })
-      stage.position(originalPosition)
+      setCutoutPath(null)
+      setToolMode('draw')
       return
     }
     
-    // Export the stage to get all layers
-    const stageDataUrl = stage.toDataURL({ pixelRatio: 1 })
-    const stageImage = new window.Image()
+    // Draw the clipped portion from the base image
+    ctx.save()
+    ctx.beginPath()
     
-    stageImage.onload = () => {
-      // Draw the clipped portion
-      ctx.save()
-      ctx.beginPath()
-      
-      // Translate path points relative to bounding box
-      for (let i = 0; i < points.length; i += 2) {
-        const x = points[i] - minX
-        const y = points[i + 1] - minY
-        if (i === 0) {
-          ctx.moveTo(x, y)
-        } else {
-          ctx.lineTo(x, y)
-        }
+    // Translate path points relative to bounding box
+    for (let i = 0; i < points.length; i += 2) {
+      const x = points[i] - minX
+      const y = points[i + 1] - minY
+      if (i === 0) {
+        ctx.moveTo(x, y)
+      } else {
+        ctx.lineTo(x, y)
       }
-      ctx.closePath()
-      ctx.clip()
-      
-      // Draw the stage image portion
-      ctx.drawImage(
-        stageImage,
-        minX, minY, width, height,
-        0, 0, width, height
-      )
-      ctx.restore()
-      
-      // Restore stage scale and position
-      stage.scale({ x: originalScale, y: originalScale })
-      stage.position(originalPosition)
-      
-      // Convert to image
-      const dataUrl = tempCanvas.toDataURL('image/png')
-      const img = new window.Image()
-      img.onload = () => {
-        // Add to sticker library
-        const newSticker: Sticker = {
-          id: `cutout-${Date.now()}`,
-          image: img,
-          thumbnail: dataUrl
-        }
-        setStickers([...stickers, newSticker])
-        
-        // Add to canvas at center
-        const newShape: Shape = {
-          id: `sticker-${Date.now()}`,
-          type: 'sticker',
-          x: canvasDimensions.width / 2 - width / 2,
-          y: canvasDimensions.height / 2 - height / 2,
-          width,
-          height,
-          image: img,
-          fill: 'transparent',
-          stroke: 'transparent',
-          strokeWidth: 0,
-          rotation: 0,
-          scaleX: 1,
-          scaleY: 1
-        }
-        
-        setShapes([...shapes, newShape])
-        setUndoneShapes([])
-        setToolMode('select')
-        setSelectedShapeId(newShape.id)
-        setCutoutPath(null)
-        
-        if ('vibrate' in navigator) navigator.vibrate([10, 50, 10])
+    }
+    // Close the path to complete the cutout
+    ctx.closePath()
+    ctx.clip()
+    
+    // Draw only the base image portion (not the entire stage with drawings)
+    ctx.drawImage(
+      image,
+      minX, minY, width, height,
+      0, 0, width, height
+    )
+    ctx.restore()
+    
+    // Convert to image
+    const dataUrl = tempCanvas.toDataURL('image/png')
+    const img = new window.Image()
+    img.onload = () => {
+      // Add to sticker library
+      const newSticker: Sticker = {
+        id: `cutout-${Date.now()}`,
+        image: img,
+        thumbnail: dataUrl
       }
-      img.src = dataUrl
+      setStickers(prevStickers => [...prevStickers, newSticker])
+      
+      // Add to canvas at center
+      const newShape: Shape = {
+        id: `sticker-${Date.now()}`,
+        type: 'sticker',
+        x: canvasDimensions.width / 2 - width / 2,
+        y: canvasDimensions.height / 2 - height / 2,
+        width,
+        height,
+        image: img,
+        fill: 'transparent',
+        stroke: 'transparent',
+        strokeWidth: 0,
+        rotation: 0,
+        scaleX: 1,
+        scaleY: 1
+      }
+      
+      setShapes(prevShapes => [...prevShapes, newShape])
+      setUndoneShapes([])
+      setToolMode('select')
+      setSelectedShapeId(newShape.id)
+      setCutoutPath(null)
+      
+      if ('vibrate' in navigator) navigator.vibrate([10, 50, 10])
     }
     
-    stageImage.src = stageDataUrl
+    img.onerror = () => {
+      alert('Failed to create cutout. Please try again.')
+      setCutoutPath(null)
+      setToolMode('draw')
+    }
+    
+    img.src = dataUrl
   }
 
   const handleSave = () => {
@@ -982,11 +988,12 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
       >
         {/* Cutout Mode Instructions */}
         {toolMode === 'cutout' && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/80 text-white px-6 py-3 rounded-full text-sm font-medium z-50 backdrop-blur-sm shadow-2xl">
-            <div className="flex items-center gap-2">
-              <Scissors className="w-4 h-4" />
-              <span>Draw around an area, then release to create sticker</span>
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/90 text-white px-6 py-3 rounded-2xl text-sm font-medium z-50 backdrop-blur-sm shadow-2xl max-w-[90vw] text-center">
+            <div className="flex items-center gap-2 justify-center">
+              <Scissors className="w-4 h-4 flex-shrink-0" />
+              <span>Draw around the area you want to cut out</span>
             </div>
+            <div className="text-xs text-white/70 mt-1">Release to create sticker</div>
           </div>
         )}
 
@@ -1115,6 +1122,9 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                             if ('vibrate' in navigator) navigator.vibrate(5)
                           }}
                           onTouchStart={(e) => {
+                            // Prevent stage from handling this event
+                            e.cancelBubble = true
+                            
                             const evt = e.evt as TouchEvent
                             if (evt.touches.length === 1) {
                               // Single finger - select and prepare for drag
@@ -1123,7 +1133,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                               if ('vibrate' in navigator) navigator.vibrate(5)
                             } else if (evt.touches.length === 2) {
                               // Two finger touch - prepare for pinch resize
-                              e.cancelBubble = true
+                              evt.preventDefault()
                               setSelectedShapeId(shape.id)
                               setToolMode('select')
                               
@@ -1145,10 +1155,12 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                             }
                           }}
                           onTouchMove={(e) => {
+                            // Prevent stage from handling this event
+                            e.cancelBubble = true
+                            
                             const evt = e.evt as TouchEvent
                             if (evt.touches.length === 2 && stickerPinchDistanceRef.current > 0 && stickerInitialScaleRef.current) {
                               // Two finger move - pinch to resize
-                              e.cancelBubble = true
                               evt.preventDefault()
                               
                               const touch1 = evt.touches[0]
@@ -1170,6 +1182,9 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                             }
                           }}
                           onTouchEnd={(e) => {
+                            // Prevent stage from handling this event
+                            e.cancelBubble = true
+                            
                             const evt = e.evt as TouchEvent
                             if (evt.touches.length < 2) {
                               // Re-enable dragging
@@ -1195,12 +1210,16 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                               stickerInitialScaleRef.current = null
                             }
                           }}
-                          onDragStart={() => {
+                          onDragStart={(e) => {
+                            // Prevent stage from handling this event
+                            e.cancelBubble = true
                             setSelectedShapeId(shape.id)
                             setToolMode('select')
                             if ('vibrate' in navigator) navigator.vibrate(5)
                           }}
                           onDragEnd={(e) => {
+                            // Prevent stage from handling this event
+                            e.cancelBubble = true
                             // Update shape position after drag
                             const node = e.target
                             const updatedShapes = shapes.map(s => 
@@ -1210,7 +1229,17 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                             )
                             setShapes(updatedShapes)
                           }}
+                          onTransformStart={(e) => {
+                            // Prevent stage from handling this event
+                            e.cancelBubble = true
+                          }}
+                          onTransform={(e) => {
+                            // Prevent stage from handling this event during transform
+                            e.cancelBubble = true
+                          }}
                           onTransformEnd={(e) => {
+                            // Prevent stage from handling this event
+                            e.cancelBubble = true
                             // Update shape after transform
                             const node = e.target
                             const scaleX = node.scaleX()
@@ -1250,6 +1279,15 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                       keepRatio={false}
                       rotateAnchorOffset={50}
                       rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
+                      ignoreStroke={true}
+                      onMouseDown={(e) => {
+                        // Prevent stage dragging when interacting with transformer
+                        e.cancelBubble = true
+                      }}
+                      onTouchStart={(e) => {
+                        // Prevent stage dragging when interacting with transformer
+                        e.cancelBubble = true
+                      }}
                       boundBoxFunc={(oldBox, newBox) => {
                         // Limit resize to prevent too small
                         if (newBox.width < 30 || newBox.height < 30) {
@@ -1269,6 +1307,17 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                 {/* Cutout path overlay */}
                 {cutoutPath && (
                   <Layer>
+                    {/* White outline for better visibility */}
+                    <Line
+                      points={cutoutPath.points}
+                      stroke="white"
+                      strokeWidth={5}
+                      lineCap="round"
+                      lineJoin="round"
+                      closed={false}
+                      opacity={0.8}
+                    />
+                    {/* Main colored line */}
                     <Line
                       points={cutoutPath.points}
                       stroke="#8B7355"
