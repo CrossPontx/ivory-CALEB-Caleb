@@ -1250,8 +1250,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                       anchorFill="#8B7355"
                       anchorStroke="#ffffff"
                       anchorStrokeWidth={3}
-                      anchorSize={20}
-                      anchorCornerRadius={10}
                       anchorSize={35}
                       anchorCornerRadius={12}
                       keepRatio={false}

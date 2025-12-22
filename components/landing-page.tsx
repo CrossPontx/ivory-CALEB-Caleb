@@ -173,52 +173,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className="py-20 sm:py-32 lg:py-40 bg-white">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
-          <div className="text-center mb-16 sm:mb-24 lg:mb-32">
-            <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-6 sm:mb-8 font-light">Inspiration</p>
-            <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
-              Real Designs. Real Results.
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7 lg:gap-8">
-            {[
-              "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1610992015732-2449b76344bc?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&h=500&fit=crop&q=80",
-              "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=400&h=500&fit=crop&q=80"
-            ].map((src, idx) => (
-              <div key={idx} className="relative aspect-[4/5] overflow-hidden group cursor-pointer" onClick={() => router.push('/explore')}>
-                <Image
-                  src={src}
-                  alt={`Nail design inspiration ${idx + 1}`}
-                  fill
-                  className="object-cover transition-all duration-1000 ease-out group-hover:scale-110"
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-16 sm:mt-20 lg:mt-24">
-            <Button 
-              onClick={() => router.push('/explore')}
-              className="bg-transparent border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-700 ease-out px-10 sm:px-14 h-14 sm:h-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
-            >
-              View More Designs
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* The Craft Section */}
       <section id="craft" className="py-20 sm:py-32 lg:py-40 bg-[#F8F7F5]">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
