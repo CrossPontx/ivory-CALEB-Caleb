@@ -1308,6 +1308,16 @@ export default function CapturePage() {
               >
                 <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
                 
+                {/* Drawing Overlay - Only for current tab */}
+                {drawingImageUrl && (
+                  <Image 
+                    src={drawingImageUrl} 
+                    alt="Drawing overlay" 
+                    fill 
+                    className="object-contain p-2 sm:p-4 md:p-6 pointer-events-none z-10" 
+                  />
+                )}
+                
                 {/* Snapchat-Style Vertical Icon Bar - Right Side */}
                 <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 sm:gap-5 z-20 pointer-events-auto">
                   {/* Upload Design Image Button */}

@@ -698,12 +698,90 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     stage.scale({ x: 1, y: 1 })
     stage.position({ x: 0, y: 0 })
     
-    const dataUrl = stage.toDataURL({ pixelRatio: 2 })
+    // Create a temporary canvas to export only the drawing layers (without the original image)
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = canvasDimensions.width
+    tempCanvas.height = canvasDimensions.height
+    const ctx = tempCanvas.getContext('2d')
+    
+    if (ctx) {
+      // Draw lines
+      lines.forEach(line => {
+        ctx.save()
+        ctx.globalCompositeOperation = line.globalCompositeOperation || 'source-over'
+        ctx.strokeStyle = line.color
+        ctx.lineWidth = line.width
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        
+        // Apply texture effects
+        if (line.texture === 'soft') {
+          ctx.globalAlpha = 0.6
+          ctx.shadowBlur = 2
+          ctx.shadowColor = line.color
+        } else if (line.texture === 'marker') {
+          ctx.globalAlpha = 0.7
+          ctx.lineCap = 'square'
+        } else if (line.texture === 'spray') {
+          ctx.globalAlpha = 0.3
+          ctx.lineWidth = line.width * 1.5
+        }
+        
+        ctx.beginPath()
+        for (let i = 0; i < line.points.length; i += 2) {
+          if (i === 0) {
+            ctx.moveTo(line.points[i], line.points[i + 1])
+          } else {
+            ctx.lineTo(line.points[i], line.points[i + 1])
+          }
+        }
+        ctx.stroke()
+        ctx.restore()
+      })
+      
+      // Draw shapes
+      shapes.forEach(shape => {
+        ctx.save()
+        ctx.fillStyle = shape.fill
+        ctx.strokeStyle = shape.stroke
+        ctx.lineWidth = shape.strokeWidth
+        
+        if (shape.type === 'rect' && shape.width && shape.height) {
+          if (shape.fill !== 'transparent') {
+            ctx.fillRect(shape.x, shape.y, shape.width, shape.height)
+          }
+          if (shape.stroke !== 'transparent') {
+            ctx.strokeRect(shape.x, shape.y, shape.width, shape.height)
+          }
+        } else if (shape.type === 'circle' && shape.radius) {
+          ctx.beginPath()
+          ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI)
+          if (shape.fill !== 'transparent') {
+            ctx.fill()
+          }
+          if (shape.stroke !== 'transparent') {
+            ctx.stroke()
+          }
+        } else if (shape.type === 'text' && shape.text) {
+          ctx.font = '24px sans-serif'
+          ctx.fillStyle = shape.fill
+          ctx.fillText(shape.text, shape.x, shape.y)
+        } else if ((shape.type === 'image' || shape.type === 'sticker') && shape.image && shape.width && shape.height) {
+          ctx.translate(shape.x + shape.width / 2, shape.y + shape.height / 2)
+          ctx.rotate((shape.rotation || 0) * Math.PI / 180)
+          ctx.scale(shape.scaleX || 1, shape.scaleY || 1)
+          ctx.drawImage(shape.image, -shape.width / 2, -shape.height / 2, shape.width, shape.height)
+        }
+        ctx.restore()
+      })
+    }
+    
+    const drawingOnlyDataUrl = tempCanvas.toDataURL('image/png')
     
     stage.scale({ x: originalScale, y: originalScale })
     stage.position(originalPosition)
     
-    onSave(dataUrl)
+    onSave(drawingOnlyDataUrl)
   }
 
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
