@@ -65,6 +65,7 @@ const BRUSH_TEXTURES: { value: BrushTexture; label: string; icon: string }[] = [
   { value: 'solid', label: 'Solid', icon: '●' },
   { value: 'soft', label: 'Soft', icon: '◉' },
   { value: 'marker', label: 'Marker', icon: '▬' },
+  { value: 'pencil', label: 'Pencil', icon: '✎' },
 ]
 
 export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasProps) {
@@ -927,6 +928,8 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
         return { ...baseProps, opacity: 0.6, shadowBlur: 2, shadowColor: line.color }
       case 'marker':
         return { ...baseProps, opacity: 0.7, lineCap: 'square' as const }
+      case 'pencil':
+        return { ...baseProps, opacity: 0.8, strokeWidth: line.width * 0.8, shadowBlur: 0.5, shadowColor: line.color }
       case 'spray':
         return { ...baseProps, opacity: 0.3, strokeWidth: line.width * 1.5 }
       default:
