@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { Stage, Layer, Image as KonvaImage, Line, Rect, Circle, Text, Transformer } from 'react-konva'
-import { Undo, Redo, X, Eye, EyeOff, Pencil, Eraser, Type, Hand, Scissors, ImagePlus, Check, Palette } from 'lucide-react'
+import { Undo, Redo, X, Eye, EyeOff, Pencil, Eraser, Hand, Scissors, ImagePlus, Check, Palette } from 'lucide-react'
 import Konva from 'konva'
 
 interface DrawingCanvasProps {
@@ -252,28 +252,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
       return
     }
     
-    if (toolMode === 'text') {
-      const text = prompt('Enter text:')
-      if (text) {
-        const newShape: Shape = {
-          id: `text-${Date.now()}`,
-          type: 'text',
-          x: transformedPos.x,
-          y: transformedPos.y,
-          text,
-          fill: currentColor,
-          stroke: currentColor,
-          strokeWidth: 0
-        }
-        setShapes([...shapes, newShape])
-        setUndoneShapes([])
-        // Haptic feedback
-        if ('vibrate' in navigator) {
-          navigator.vibrate(10)
-        }
-      }
-      return
-    }
     
     if (toolMode === 'draw' || toolMode === 'eraser') {
       setIsDrawing(true)
@@ -1052,21 +1030,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
           />
         </button>
 
-        {/* Text Tool */}
-        <button
-          onClick={() => {
-            setToolMode('text')
-            if ('vibrate' in navigator) navigator.vibrate(5)
-          }}
-          className={`w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg active:scale-95 ${
-            toolMode === 'text' 
-              ? 'bg-white text-[#8B7355]' 
-              : 'bg-black/40 backdrop-blur-sm text-white hover:bg-black/60'
-          }`}
-        >
-          <Type className="w-5 h-5" />
-        </button>
-
         {/* Scissors/Sticker Tool */}
         <button
           onClick={() => {
@@ -1082,17 +1045,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
           }`}
         >
           <Scissors className="w-5 h-5" />
-        </button>
-
-        {/* Add Image */}
-        <button
-          onClick={() => {
-            fileInputRef.current?.click()
-            if ('vibrate' in navigator) navigator.vibrate(5)
-          }}
-          className="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all shadow-lg bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 active:scale-95"
-        >
-          <ImagePlus className="w-5 h-5" />
         </button>
 
         {/* Undo/Redo */}
@@ -1268,7 +1220,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
           </div>
 
           {/* Action Buttons */}
-          <div className="space-y-2 mb-4">
+          <div className="mb-4">
             <button
               onClick={() => {
                 setToolMode('cutout')
@@ -1280,14 +1232,6 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
             >
               <Scissors className="w-4 h-4" />
               <span>Draw Cutout</span>
-            </button>
-            
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 bg-white border-2 border-[#8B7355] text-[#8B7355] rounded-2xl font-medium text-sm shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
-            >
-              <ImagePlus className="w-4 h-4" />
-              <span>Upload Image</span>
             </button>
           </div>
 
