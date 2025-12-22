@@ -34,7 +34,6 @@ export default function LandingPage() {
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-12 lg:space-x-14">
-              <button onClick={() => router.push('/explore')} className="text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light">Explore</button>
               <a href="#experience" className="text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light">Experience</a>
               <a href="#craft" className="text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light">The Craft</a>
               <a href="#collection" className="text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light">Collection</a>
@@ -80,15 +79,8 @@ export default function LandingPage() {
               
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center lg:justify-start pt-4">
                 <Button 
-                  onClick={() => router.push('/explore')}
-                  className="bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-700 ease-out px-10 sm:px-14 h-14 sm:h-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Browse Designs
-                </Button>
-                <Button 
-                  variant="outline"
                   onClick={() => router.push('/auth?signup=true')}
-                  className="border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-700 ease-out px-10 sm:px-14 h-14 sm:h-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
+                  className="bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-700 ease-out px-10 sm:px-14 h-14 sm:h-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Get Started
                 </Button>
