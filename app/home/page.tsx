@@ -192,13 +192,35 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* Section Headers - Create Design and Your Designs side by side */}
         <div className={`${isWatch ? 'mb-3' : 'mb-6 sm:mb-8'} transition-all duration-700 delay-100 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <HideOnWatch>
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 font-light">Collection</p>
-          </HideOnWatch>
-          <h2 className={`font-serif font-light text-[#1A1A1A] tracking-tight ${isWatch ? 'text-sm text-center' : 'text-2xl sm:text-3xl'}`}>
-            Your Designs
-          </h2>
+          <div className={`flex ${isWatch ? 'flex-col gap-2' : 'items-end justify-between gap-4'}`}>
+            {/* Your Designs */}
+            <div className="flex-1">
+              <HideOnWatch>
+                <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 font-light">Collection</p>
+              </HideOnWatch>
+              <h2 className={`font-serif font-light text-[#1A1A1A] tracking-tight ${isWatch ? 'text-sm text-center' : 'text-2xl sm:text-3xl'}`}>
+                Your Designs
+              </h2>
+            </div>
+
+            {/* Create Design Button */}
+            {isWatch ? (
+              <WatchButton onClick={startNewDesign} className="rounded-full w-full">
+                <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+                Create
+              </WatchButton>
+            ) : (
+              <Button
+                className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 flex-shrink-0"
+                onClick={startNewDesign}
+              >
+                <Plus className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:rotate-90" strokeWidth={1.5} />
+                Create Design
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Gallery Grid */}
@@ -278,25 +300,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Create Button - Large */}
-        {looks.length > 0 && (
-          <div className={`flex justify-center px-4 transition-all duration-700 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            {isWatch ? (
-              <WatchButton onClick={startNewDesign} className="rounded-full">
-                <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
-                Create
-              </WatchButton>
-            ) : (
-              <Button
-                className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 w-full sm:w-auto text-xs tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5"
-                onClick={startNewDesign}
-              >
-                <Plus className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:rotate-90" strokeWidth={1.5} />
-                Create Design
-              </Button>
-            )}
-          </div>
-        )}
+
       </main>
 
       {/* Bottom Navigation */}
