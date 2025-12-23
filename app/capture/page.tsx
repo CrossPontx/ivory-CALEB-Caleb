@@ -1412,12 +1412,22 @@ export default function CapturePage() {
               >
                 {/* Show loading GIF when generating, otherwise show original image */}
                 {isGenerating ? (
-                  <Image 
-                    src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bXN6aG5wbWhlbTIwZ2F3ajNjdXRhemdpanhlMXEwZnhnOHNlZHpjYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YlEMMJMwAeaPK/giphy.gif" 
-                    alt="Generating design..." 
-                    fill 
-                    className="object-contain p-2 sm:p-4 md:p-6 pointer-events-none" 
-                  />
+                  <>
+                    <Image 
+                      src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bXN6aG5wbWhlbTIwZ2F3ajNjdXRhemdpanhlMXEwZnhnOHNlZHpjYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YlEMMJMwAeaPK/giphy.gif" 
+                      alt="Generating design..." 
+                      fill 
+                      className="object-contain p-2 sm:p-4 md:p-6 pointer-events-none" 
+                    />
+                    {/* Centered percentage text overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                      <div className="bg-black/50 backdrop-blur-sm rounded-xl px-6 py-4">
+                        <div className="text-white text-5xl font-bold tracking-wide">
+                          {Math.round(generationProgress)}%
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
                 )}
