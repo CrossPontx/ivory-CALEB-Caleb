@@ -1525,7 +1525,7 @@ export default function CapturePage() {
           </div>
         </div>
 
-        {/* Fixed Generate Design Button Bar - At Bottom Above Nav */}
+        {/* Fixed Visualize Button Bar - At Bottom Above Nav */}
         <div className="fixed left-0 right-0 bottom-20 z-30 px-3 pb-3 bg-gradient-to-t from-white via-white to-transparent pt-6 pointer-events-none">
           <div className="max-w-4xl mx-auto pointer-events-auto">
             {!isGenerating ? (
@@ -1539,8 +1539,8 @@ export default function CapturePage() {
                 }}
               >
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" strokeWidth={1.5} />
-                <span className="hidden xs:inline">Generate Design</span>
-                <span className="xs:hidden">Generate</span>
+                <span className="hidden xs:inline">Visualize</span>
+                <span className="xs:hidden">Visualize</span>
                 {credits !== null && (
                   <span className="ml-1 text-[10px] sm:text-xs opacity-70 font-light">
                     (1 credit)
