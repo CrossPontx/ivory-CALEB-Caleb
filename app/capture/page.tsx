@@ -1427,8 +1427,8 @@ export default function CapturePage() {
                     />
                     {/* Centered percentage text overlay */}
                     <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                      <div className="bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg border border-white/20">
-                        <div className="text-white text-sm sm:text-base font-semibold tracking-wider">
+                      <div className="bg-black/50 backdrop-blur-sm rounded-xl px-6 py-4">
+                        <div className="text-white text-5xl font-bold tracking-wide">
                           {Math.round(generationProgress)}%
                         </div>
                       </div>
