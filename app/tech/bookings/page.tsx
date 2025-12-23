@@ -27,17 +27,26 @@ export default function TechBookingsPage() {
   const fetchBookings = async () => {
     try {
       const token = localStorage.getItem('token');
+      console.log('Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'null');
+      
+      if (!token) {
+        console.error('No token found in localStorage');
+        router.push('/auth');
+        return;
+      }
       
       const pendingRes = await fetch('/api/bookings?status=pending', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const pendingData = await pendingRes.json();
+      console.log('Pending bookings response:', pendingRes.status, pendingData);
       if (pendingRes.ok) setPendingBookings(pendingData.bookings || []);
 
       const upcomingRes = await fetch('/api/bookings?status=confirmed', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const upcomingData = await upcomingRes.json();
+      console.log('Upcoming bookings response:', upcomingRes.status, upcomingData);
       if (upcomingRes.ok) setUpcomingBookings(upcomingData.bookings || []);
     } catch (error) {
       console.error('Error fetching bookings:', error);

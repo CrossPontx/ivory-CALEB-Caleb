@@ -12,7 +12,10 @@ export async function GET(request: NextRequest) {
       token = request.cookies.get('session')?.value;
     }
     
+    console.log('Token received:', token ? `${token.substring(0, 20)}...` : 'null');
+    
     if (!token) {
+      console.log('No token found in request');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -21,7 +24,10 @@ export async function GET(request: NextRequest) {
       with: { user: true },
     });
 
+    console.log('Session found:', session ? `User ID: ${session.userId}` : 'null');
+
     if (!session || new Date(session.expiresAt) < new Date()) {
+      console.log('Invalid or expired session');
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 

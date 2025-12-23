@@ -1410,10 +1410,20 @@ export default function CapturePage() {
                 }}
                 title="Click to draw on image"
               >
-                <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
+                {/* Show loading GIF when generating, otherwise show original image */}
+                {isGenerating ? (
+                  <Image 
+                    src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bXN6aG5wbWhlbTIwZ2F3ajNjdXRhemdpanhlMXEwZnhnOHNlZHpjYyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YlEMMJMwAeaPK/giphy.gif" 
+                    alt="Generating design..." 
+                    fill 
+                    className="object-contain p-2 sm:p-4 md:p-6 pointer-events-none" 
+                  />
+                ) : (
+                  <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
+                )}
                 
-                {/* Drawing Overlay - Only for current tab */}
-                {drawingImageUrl && (
+                {/* Drawing Overlay - Only for current tab (hide during generation) */}
+                {drawingImageUrl && !isGenerating && (
                   <Image 
                     src={drawingImageUrl} 
                     alt="Drawing overlay" 
