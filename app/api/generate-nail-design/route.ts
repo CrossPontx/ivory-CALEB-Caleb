@@ -171,6 +171,17 @@ ${imageInputsSection}
 7. DO NOT add extra hands, arms, bodies, or props
 8. ONLY modify the fingernail surfaces
 
+NAIL ANATOMY & STRUCTURE (CRITICAL):
+- Every nail MUST start from the nail matrix (the base where the nail grows from the finger/cuticle area)
+- The nail should begin at the natural cuticle line and extend outward from there
+- Even for VERY LONG nails (extra-long, stiletto, etc.), the nail MUST originate from the nail bed/matrix
+- DO NOT create "floating" nails that appear disconnected from the finger
+- DO NOT make nails that start mid-finger or appear to hover above the finger
+- The nail base should be anchored at the cuticle, with the length extending naturally from that point
+- For long nails: extend the length FORWARD from the fingertip, not by moving the base away from the cuticle
+- Maintain realistic nail bed proportions - the visible nail should show both the nail bed (attached to finger) and free edge (extended portion)
+- The nail should look like it naturally grew from the finger, regardless of length
+
 NAIL DIRECTION & ORIENTATION ALIGNMENT (CRITICAL):
 - ANALYZE the direction and angle of each fingernail in the original hand image
 - Each nail has a specific orientation based on how the finger is positioned (pointing up, down, left, right, or at an angle)
@@ -233,6 +244,17 @@ NAIL SHAPE CRITICAL INSTRUCTIONS:
 - For "square": Keep edges straight with a flat, perpendicular tip
 - For "squoval": Square shape with gently rounded corners
 - The nail shape is a CRITICAL parameter - it must be obvious and correct in the final result
+
+NAIL LENGTH CRITICAL INSTRUCTIONS:
+- Nail length "${nailLength}" refers to how far the nail extends BEYOND the fingertip
+- CRITICAL: ALL nails must start from the nail matrix/cuticle area, regardless of length
+- For "short" nails: Minimal extension beyond fingertip, but still starts at cuticle
+- For "medium" nails: Moderate extension beyond fingertip, starts at cuticle
+- For "long" nails: Significant extension beyond fingertip, starts at cuticle
+- For "extra-long" nails: Dramatic extension beyond fingertip, starts at cuticle
+- NEVER create floating nails - the base must always be anchored at the natural nail bed
+- Length is achieved by extending FORWARD from the fingertip, not by detaching from the finger
+- Even the longest nails should show a natural connection to the finger at the cuticle line
 
 QUALITY REQUIREMENTS:
 - Professional salon-quality nail art
