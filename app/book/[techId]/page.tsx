@@ -114,6 +114,13 @@ export default function BookAppointmentPage() {
 
       const uploadData = await uploadResponse.json();
       
+      // Get user ID from localStorage
+      const userStr = localStorage.getItem('ivoryUser');
+      if (!userStr) {
+        throw new Error('User session not found');
+      }
+      const user = JSON.parse(userStr);
+      
       const lookResponse = await fetch('/api/looks', {
         method: 'POST',
         headers: {
@@ -121,6 +128,7 @@ export default function BookAppointmentPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          userId: user.id,
           title: `Uploaded Design - ${new Date().toLocaleDateString()}`,
           imageUrl: uploadData.url,
           isPublic: false,
