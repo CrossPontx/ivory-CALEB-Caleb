@@ -2,13 +2,14 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Send, Pencil, Sparkles, Check } from "lucide-react"
+import { ArrowLeft, Send, Sparkles, Check, Plus, X, Edit2 } from "lucide-react"
 import Image from "next/image"
+import { Input } from "@/components/ui/input"
 
 type DesignRequest = {
   id: string
@@ -31,9 +32,6 @@ export default function TechReviewPage() {
   const router = useRouter()
   const params = useParams()
   const [notes, setNotes] = useState("")
-  const [isDrawing, setIsDrawing] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null)
   const [request, setRequest] = useState<DesignRequest | null>(null)
   const [loading, setLoading] = useState(true)
   const [addOns, setAddOns] = useState<AddOn[]>([
@@ -41,6 +39,10 @@ export default function TechReviewPage() {
     { id: "rhinestone", label: "Rhinestone Charms", price: 15, selected: false },
     { id: "gel", label: "Gel Extension", price: 25, selected: false },
   ])
+  const [newAddonLabel, setNewAddonLabel] = useState("")
+  const [newAddonPrice, setNewAddonPrice] = useState("")
+  const [editingAddonId, setEditingAddonId] = useState<string | null>(null)
+  const [editingPrice, setEditingPrice] = useState("")
 
   const toggleAddOn = (id: string) => {
     setAddOns(prev => prev.map(addon => 
@@ -48,20 +50,48 @@ export default function TechReviewPage() {
     ))
   }
 
-  const totalAddOns = addOns.filter(a => a.selected).reduce((sum, a) => sum + a.price, 0)
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current
-      const context = canvas.getContext("2d")
-      if (context) {
-        context.strokeStyle = "#8B7355"
-        context.lineWidth = 2
-        context.lineCap = "round"
-        setCtx(context)
-      }
+  const addNewAddon = () => {
+    if (!newAddonLabel.trim() || !newAddonPrice.trim()) return
+    
+    const price = parseFloat(newAddonPrice)
+    if (isNaN(price) || price < 0) return
+    
+    const newAddon: AddOn = {
+      id: `addon-${Date.now()}`,
+      label: newAddonLabel.trim(),
+      price: price,
+      selected: false
     }
-  }, [])
+    
+    setAddOns(prev => [...prev, newAddon])
+    setNewAddonLabel("")
+    setNewAddonPrice("")
+  }
+
+  const startEditingPrice = (id: string, currentPrice: number) => {
+    setEditingAddonId(id)
+    setEditingPrice(currentPrice.toString())
+  }
+
+  const saveEditedPrice = (id: string) => {
+    const price = parseFloat(editingPrice)
+    if (isNaN(price) || price < 0) {
+      setEditingAddonId(null)
+      return
+    }
+    
+    setAddOns(prev => prev.map(addon => 
+      addon.id === id ? { ...addon, price } : addon
+    ))
+    setEditingAddonId(null)
+    setEditingPrice("")
+  }
+
+  const removeAddon = (id: string) => {
+    setAddOns(prev => prev.filter(addon => addon.id !== id))
+  }
+
+  const totalAddOns = addOns.filter(a => a.selected).reduce((sum, a) => sum + a.price, 0)
 
   useEffect(() => {
     const loadRequest = async () => {
@@ -114,36 +144,6 @@ export default function TechReviewPage() {
 
     loadRequest()
   }, [router, params.id])
-
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!ctx) return
-    setIsDrawing(true)
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (rect) {
-      ctx.beginPath()
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top)
-    }
-  }
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !ctx) return
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (rect) {
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top)
-      ctx.stroke()
-    }
-  }
-
-  const stopDrawing = () => {
-    if (ctx) ctx.closePath()
-    setIsDrawing(false)
-  }
-
-  const clearNotes = () => {
-    if (ctx && canvasRef.current) {
-      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-    }
-  }
 
   const handleSend = () => {
     // In real app, send feedback to client
@@ -219,74 +219,16 @@ export default function TechReviewPage() {
               </p>
             </div>
 
-            {/* Design Image with Drawing Canvas */}
+            {/* Design Image */}
             <div className="relative group">
               <div className="relative aspect-square bg-[#F8F7F5] border border-[#E8E8E8] overflow-hidden">
                 <Image
                   src={request.designImage || "/placeholder.svg"}
                   alt="Client design"
                   fill
-                  className="object-cover pointer-events-none"
+                  className="object-cover"
                   unoptimized
                 />
-                <canvas
-                  ref={canvasRef}
-                  width={800}
-                  height={800}
-                  className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                  onTouchStart={(e) => {
-                    e.preventDefault()
-                    const touch = e.touches[0]
-                    const rect = canvasRef.current?.getBoundingClientRect()
-                    if (rect && ctx) {
-                      setIsDrawing(true)
-                      ctx.beginPath()
-                      ctx.moveTo(
-                        ((touch.clientX - rect.left) / rect.width) * 800,
-                        ((touch.clientY - rect.top) / rect.height) * 800
-                      )
-                    }
-                  }}
-                  onTouchMove={(e) => {
-                    e.preventDefault()
-                    if (!isDrawing || !ctx) return
-                    const touch = e.touches[0]
-                    const rect = canvasRef.current?.getBoundingClientRect()
-                    if (rect) {
-                      ctx.lineTo(
-                        ((touch.clientX - rect.left) / rect.width) * 800,
-                        ((touch.clientY - rect.top) / rect.height) * 800
-                      )
-                      ctx.stroke()
-                    }
-                  }}
-                  onTouchEnd={() => {
-                    if (ctx) ctx.closePath()
-                    setIsDrawing(false)
-                  }}
-                />
-              </div>
-              
-              {/* Drawing Controls */}
-              <div className="absolute top-4 right-4 flex gap-2">
-                <Button 
-                  size="sm" 
-                  className="bg-white/95 backdrop-blur-sm hover:bg-[#8B7355] text-[#1A1A1A] hover:text-white border border-[#E8E8E8] transition-all duration-500 text-[10px] tracking-[0.2em] uppercase font-light h-9 px-4"
-                >
-                  <Pencil className="w-3.5 h-3.5 mr-2" />
-                  Draw
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={clearNotes}
-                  className="bg-white/95 backdrop-blur-sm hover:bg-[#1A1A1A] text-[#1A1A1A] hover:text-white border border-[#E8E8E8] transition-all duration-500 text-[10px] tracking-[0.2em] uppercase font-light h-9 px-4"
-                >
-                  Clear
-                </Button>
               </div>
             </div>
 
@@ -325,34 +267,125 @@ export default function TechReviewPage() {
                 <Sparkles className="w-5 h-5 text-[#8B7355]" />
                 <h3 className="text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] font-light">Offer Add-ons</h3>
               </div>
-              <div className="space-y-4 sm:space-y-5">
+              
+              {/* Existing Add-ons */}
+              <div className="space-y-4 sm:space-y-5 mb-6">
                 {addOns.map((addon) => (
-                  <button
+                  <div
                     key={addon.id}
-                    onClick={() => toggleAddOn(addon.id)}
                     className={`w-full flex items-center justify-between p-4 sm:p-5 border transition-all duration-500 group ${
                       addon.selected 
                         ? 'border-[#8B7355] bg-white shadow-lg shadow-[#8B7355]/10' 
                         : 'border-[#E8E8E8] bg-white hover:border-[#8B7355]/50'
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-5 h-5 border flex items-center justify-center transition-all duration-500 ${
-                        addon.selected 
-                          ? 'border-[#8B7355] bg-[#8B7355]' 
-                          : 'border-[#E8E8E8] group-hover:border-[#8B7355]'
-                      }`}>
+                    <div className="flex items-center gap-4 flex-1">
+                      <button
+                        onClick={() => toggleAddOn(addon.id)}
+                        className={`w-5 h-5 border flex items-center justify-center transition-all duration-500 flex-shrink-0 ${
+                          addon.selected 
+                            ? 'border-[#8B7355] bg-[#8B7355]' 
+                            : 'border-[#E8E8E8] group-hover:border-[#8B7355]'
+                        }`}
+                      >
                         {addon.selected && <Check className="w-3.5 h-3.5 text-white" />}
-                      </div>
+                      </button>
                       <span className="text-sm sm:text-base text-[#1A1A1A] font-light tracking-wide">
                         {addon.label}
                       </span>
                     </div>
-                    <span className="text-sm sm:text-base text-[#8B7355] font-light">
-                      +${addon.price}
-                    </span>
-                  </button>
+                    
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      {editingAddonId === addon.id ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-[#8B7355]">$</span>
+                          <Input
+                            type="number"
+                            value={editingPrice}
+                            onChange={(e) => setEditingPrice(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') saveEditedPrice(addon.id)
+                              if (e.key === 'Escape') setEditingAddonId(null)
+                            }}
+                            className="w-20 h-8 text-sm border-[#8B7355] focus:border-[#8B7355]"
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => saveEditedPrice(addon.id)}
+                            className="h-8 px-2 bg-[#8B7355] hover:bg-[#1A1A1A] text-white"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-sm sm:text-base text-[#8B7355] font-light">
+                            +${addon.price}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => startEditingPrice(addon.id, addon.price)}
+                            className="h-8 w-8 p-0 hover:bg-[#8B7355]/10"
+                          >
+                            <Edit2 className="w-3.5 h-3.5 text-[#8B7355]" />
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeAddon(addon.id)}
+                        className="h-8 w-8 p-0 hover:bg-red-50"
+                      >
+                        <X className="w-3.5 h-3.5 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
                 ))}
+              </div>
+
+              {/* Add New Addon */}
+              <div className="border-t border-[#E8E8E8] pt-6">
+                <p className="text-xs text-[#6B6B6B] font-light tracking-wide mb-4">Add New Add-on</p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Input
+                    type="text"
+                    placeholder="Add-on name"
+                    value={newAddonLabel}
+                    onChange={(e) => setNewAddonLabel(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') addNewAddon()
+                    }}
+                    className="flex-1 border-[#E8E8E8] focus:border-[#8B7355] h-11"
+                  />
+                  <div className="flex gap-2">
+                    <div className="relative flex-shrink-0">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B]">$</span>
+                      <Input
+                        type="number"
+                        placeholder="Price"
+                        value={newAddonPrice}
+                        onChange={(e) => setNewAddonPrice(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') addNewAddon()
+                        }}
+                        className="w-24 pl-7 border-[#E8E8E8] focus:border-[#8B7355] h-11"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                    <Button
+                      onClick={addNewAddon}
+                      disabled={!newAddonLabel.trim() || !newAddonPrice.trim()}
+                      className="h-11 px-4 bg-[#8B7355] hover:bg-[#1A1A1A] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+                </div>
               </div>
               
               {totalAddOns > 0 && (
