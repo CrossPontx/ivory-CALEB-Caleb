@@ -26,6 +26,8 @@ export default function TechRequestDetailPage() {
   const [loading, setLoading] = useState(true)
   const [implementationGuidance, setImplementationGuidance] = useState<string>("")
   const [loadingGuidance, setLoadingGuidance] = useState(false)
+  const [typingText, setTypingText] = useState("")
+  const [isTyping, setIsTyping] = useState(false)
 
   useEffect(() => {
     const loadRequest = async () => {
@@ -69,6 +71,10 @@ export default function TechRequestDetailPage() {
     if (!request?.designImage) return
     
     setLoadingGuidance(true)
+    setIsTyping(false)
+    setTypingText("")
+    setImplementationGuidance("")
+    
     try {
       const response = await fetch('/api/analyze-design-for-tech', {
         method: 'POST',
@@ -79,12 +85,28 @@ export default function TechRequestDetailPage() {
       if (response.ok) {
         const data = await response.json()
         setImplementationGuidance(data.guidance)
+        setLoadingGuidance(false)
+        
+        // Start typing animation
+        setIsTyping(true)
+        const text = data.guidance
+        let index = 0
+        
+        const typingInterval = setInterval(() => {
+          if (index < text.length) {
+            setTypingText(text.substring(0, index + 1))
+            index++
+          } else {
+            setIsTyping(false)
+            clearInterval(typingInterval)
+          }
+        }, 15) // 15ms per character for smooth typing
       } else {
         console.error('Failed to generate guidance')
+        setLoadingGuidance(false)
       }
     } catch (error) {
       console.error('Error generating guidance:', error)
-    } finally {
       setLoadingGuidance(false)
     }
   }
@@ -111,8 +133,11 @@ export default function TechRequestDetailPage() {
     router.push(`/tech/review/${request?.id}`)
   }
 
-  // Split guidance into two paragraphs
-  const guidanceParagraphs = implementationGuidance.split('\n\n').filter(p => p.trim())
+  // Split guidance into two paragraphs for display with safety checks
+  const textToSplit = isTyping ? typingText : implementationGuidance
+  const guidanceParagraphs = (textToSplit && typeof textToSplit === 'string') 
+    ? textToSplit.split('\n\n').filter(p => p && p.trim())
+    : []
 
   if (loading) {
     return (
@@ -245,16 +270,16 @@ export default function TechRequestDetailPage() {
           </Card>
         )}
 
-        {/* Implementation Guidance */}
-        <Card className="border border-[#E8E8E8] mb-10 rounded-none bg-gradient-to-br from-[#F8F7F5] to-white">
-          <CardContent className="p-8 sm:p-10">
-            <div className="flex items-start gap-4 mb-6">
-              <Sparkles className="w-6 h-6 text-[#8B7355] mt-1" strokeWidth={1} />
-              <div className="flex-1">
-                <h3 className="text-[10px] tracking-[0.3em] uppercase text-[#6B6B6B] font-light mb-2">
+        {/* Implementation Guidance - Mobile Optimized */}
+        <Card className="border border-[#E8E8E8] mb-8 sm:mb-10 rounded-none bg-gradient-to-br from-[#F8F7F5] to-white">
+          <CardContent className="p-6 sm:p-8 lg:p-10">
+            <div className="flex items-start gap-3 sm:gap-4 mb-5 sm:mb-6">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355] mt-0.5 sm:mt-1 flex-shrink-0" strokeWidth={1} />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] uppercase text-[#6B6B6B] font-light mb-1.5 sm:mb-2">
                   AI Implementation Guide
                 </h3>
-                <p className="text-sm text-[#6B6B6B] font-light tracking-wide">
+                <p className="text-xs sm:text-sm text-[#6B6B6B] font-light tracking-wide leading-relaxed">
                   Get professional guidance on how to recreate this design
                 </p>
               </div>
@@ -263,42 +288,54 @@ export default function TechRequestDetailPage() {
             {!implementationGuidance && !loadingGuidance && (
               <Button
                 onClick={generateImplementationGuidance}
-                className="w-full h-14 text-sm font-light tracking-[0.25em] uppercase bg-[#8B7355] hover:bg-[#1A1A1A] text-white shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-700 rounded-none"
+                className="w-full h-12 sm:h-14 text-xs sm:text-sm font-light tracking-[0.2em] sm:tracking-[0.25em] uppercase bg-[#8B7355] hover:bg-[#1A1A1A] text-white shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-700 rounded-none"
               >
-                <Sparkles className="w-5 h-5 mr-3" strokeWidth={1} />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1} />
                 Generate Implementation Guide
               </Button>
             )}
 
             {loadingGuidance && (
-              <div className="flex items-center justify-center py-12">
+              <div className="flex items-center justify-center py-8 sm:py-12">
                 <div className="text-center">
-                  <Loader2 className="w-10 h-10 text-[#8B7355] animate-spin mx-auto mb-4" strokeWidth={1} />
-                  <p className="text-sm text-[#6B6B6B] font-light tracking-wide">
-                    Analyzing design and generating professional guidance...
+                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-4">
+                    <div className="absolute inset-0 border-2 border-[#8B7355]/20 rounded-full"></div>
+                    <div className="absolute inset-0 border-2 border-[#8B7355] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#6B6B6B] font-light tracking-wide px-4">
+                    Analyzing design...
                   </p>
                 </div>
               </div>
             )}
 
-            {implementationGuidance && !loadingGuidance && (
-              <div className="space-y-6 pl-10">
-                {guidanceParagraphs.map((paragraph, index) => (
-                  <p
-                    key={index}
-                    className="text-base sm:text-lg text-[#1A1A1A] leading-relaxed font-light tracking-wide"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-                <Button
-                  onClick={generateImplementationGuidance}
-                  variant="outline"
-                  className="mt-6 h-12 text-xs font-light tracking-[0.25em] uppercase border-2 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white active:scale-[0.98] transition-all duration-700 rounded-none"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" strokeWidth={1} />
-                  Regenerate Guide
-                </Button>
+            {(implementationGuidance || isTyping) && !loadingGuidance && (
+              <div className="space-y-4 sm:space-y-6">
+                <div className="space-y-4 sm:space-y-5 pl-0 sm:pl-10">
+                  {guidanceParagraphs.map((paragraph, index) => (
+                    <div key={index} className="relative">
+                      <p className="text-sm sm:text-base lg:text-lg text-[#1A1A1A] leading-relaxed sm:leading-loose font-light tracking-wide">
+                        {paragraph}
+                        {isTyping && index === guidanceParagraphs.length - 1 && (
+                          <span className="inline-block w-0.5 h-4 sm:h-5 bg-[#8B7355] ml-0.5 animate-pulse"></span>
+                        )}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                
+                {!isTyping && (
+                  <div className="pt-4 sm:pt-6 border-t border-[#E8E8E8]">
+                    <Button
+                      onClick={generateImplementationGuidance}
+                      variant="outline"
+                      className="w-full sm:w-auto h-10 sm:h-12 text-xs font-light tracking-[0.2em] sm:tracking-[0.25em] uppercase border-2 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white active:scale-[0.98] transition-all duration-700 rounded-none"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" strokeWidth={1} />
+                      Regenerate Guide
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
