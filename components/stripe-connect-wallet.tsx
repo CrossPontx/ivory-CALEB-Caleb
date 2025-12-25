@@ -171,13 +171,13 @@ export function StripeConnectWallet() {
             )}
             {isPending && (
               <>
-                Complete your Stripe account setup to start receiving payments. You'll need to provide business information 
+                Complete your account setup to start receiving payments. You'll need to provide business information 
                 and bank account details.
               </>
             )}
             {isNotSetup && (
               <>
-                Setup your Stripe Connect wallet to receive payments from client bookings. The platform charges a 12.5% service fee, 
+                Setup your payout wallet to receive payments from client bookings. The platform charges a 12.5% service fee, 
                 and you receive the remaining amount directly to your bank account.
               </>
             )}

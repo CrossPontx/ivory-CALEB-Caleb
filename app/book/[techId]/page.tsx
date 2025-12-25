@@ -29,10 +29,8 @@ export default function BookAppointmentPage() {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [clientNotes, setClientNotes] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isNative, setIsNative] = useState(false);
 
   useEffect(() => {
-    setIsNative(iapManager.isNativePlatform());
     fetchTechDetails();
     fetchMyDesigns();
   }, [techId]);
@@ -190,12 +188,8 @@ export default function BookAppointmentPage() {
         return;
       }
 
-      // Use IAP for native app, Stripe for web
-      if (isNative) {
-        await handleIAPPayment(bookingData.booking);
-      } else {
-        await handleStripePayment(bookingData.booking.id);
-      }
+      // Always use IAP - Stripe only available via web browser
+      await handleIAPPayment(bookingData.booking);
     } catch (error) {
       console.error('Error creating booking:', error);
       alert('Failed to create booking');
@@ -251,31 +245,6 @@ export default function BookAppointmentPage() {
     } catch (error) {
       console.error('Error initiating IAP payment:', error);
       alert('Failed to initiate payment');
-    }
-  };
-
-  const handleStripePayment = async (bookingId: number) => {
-    try {
-      const checkoutResponse = await fetch('/api/stripe/create-booking-checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          bookingId,
-        }),
-      });
-
-      const checkoutData = await checkoutResponse.json();
-      if (!checkoutResponse.ok) {
-        alert(checkoutData.error || 'Failed to create payment session');
-        return;
-      }
-
-      window.location.href = checkoutData.url;
-    } catch (error) {
-      console.error('Error creating Stripe checkout:', error);
-      alert('Failed to create payment session');
     }
   };
 
@@ -622,7 +591,7 @@ export default function BookAppointmentPage() {
                 )}
                 
                 <p className="text-sm text-center text-[#6B6B6B] mt-6 font-light leading-[1.7] tracking-wide">
-                  Secure payment via {isNative ? 'Apple In-App Purchase' : 'Stripe'}. Your booking will be confirmed after payment.
+                  Secure payment via Apple In-App Purchase. Your booking will be confirmed after payment.
                 </p>
               </div>
             </div>
