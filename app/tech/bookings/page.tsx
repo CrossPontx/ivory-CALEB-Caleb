@@ -161,7 +161,6 @@ export default function TechBookingsPage() {
                             <p className="font-serif font-light text-base tracking-tight ">{booking.look.title}</p>
                           </div>
                         </div>
-                      </div>
                     )}
 
                     <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
@@ -255,7 +254,6 @@ export default function TechBookingsPage() {
                             <p className="font-serif font-light text-base tracking-tight ">{booking.look.title}</p>
                           </div>
                         </div>
-                      </div>
                     )}
 
                     <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
