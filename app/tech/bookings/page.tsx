@@ -72,6 +72,44 @@ export default function TechBookingsPage() {
     }
   };
 
+  const renderPaymentSection = (booking: any) => (
+    <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
+      <div className="flex justify-between items-center mb-3">
+        <span className="text-sm font-light tracking-wide text-[#1A1A1A]">Payment</span>
+        <Badge className={booking.paymentStatus === 'paid' ? 'bg-green-500' : 'bg-yellow-500'}>
+          <span className="text-[10px] tracking-wider uppercase font-light text-white">
+            {booking.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'}
+          </span>
+        </Badge>
+      </div>
+      {booking.paymentStatus === 'paid' ? (
+        <>
+          <div className="flex justify-between text-sm font-light mb-1">
+            <span className="text-[#6B6B6B]">Service Price:</span>
+            <span className="text-[#1A1A1A]">${booking.servicePrice}</span>
+          </div>
+          <div className="flex justify-between text-sm font-light ">
+            <span className="text-[#6B6B6B]">Platform Fee:</span>
+            <span className="text-[#1A1A1A]">${booking.serviceFee}</span>
+          </div>
+          <div className="flex justify-between text-sm font-light border-t border-[#E8E8E8] pt-2 mt-2">
+            <span className="text-[#1A1A1A]">Total Paid:</span>
+            <span className="text-[#1A1A1A] font-medium">${booking.totalPrice}</span>
+          </div>
+          <p className="text-xs text-[#6B6B6B] mt-3 font-light leading-relaxed">
+            You'll receive ${booking.servicePrice} after the appointment is completed.
+          </p>
+        </>
+      ) : (
+        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+          <p className="text-sm text-yellow-700 font-light leading-relaxed">
+            ⏳ Waiting for client to complete payment. This booking will be confirmed once payment is received.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-24 lg:pl-20">
@@ -163,27 +201,7 @@ export default function TechBookingsPage() {
                         </div>
                     )}
 
-                    <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-sm font-light tracking-wide text-[#1A1A1A]">Payment</span>
-                        <Badge className="bg-green-500 text-[10px] tracking-wider uppercase font-light">Paid</Badge>
-                      </div>
-                      <div className="flex justify-between text-sm font-light mb-1">
-                        <span className="text-[#6B6B6B]">Service Price:</span>
-                        <span className="text-[#1A1A1A]">${booking.servicePrice}</span>
-                      </div>
-                      <div className="flex justify-between text-sm font-light ">
-                        <span className="text-[#6B6B6B]">Platform Fee:</span>
-                        <span className="text-[#1A1A1A]">${booking.serviceFee}</span>
-                      </div>
-                      <div className="flex justify-between text-sm font-light border-t border-[#E8E8E8] pt-2">
-                        <span className="text-[#1A1A1A]">Total Paid:</span>
-                        <span className="text-[#1A1A1A] font-medium">${booking.totalPrice}</span>
-                      </div>
-                      <p className="text-xs text-[#6B6B6B] mt-3 font-light leading-relaxed">
-                        You'll receive ${booking.servicePrice} after the appointment is completed.
-                      </p>
-                    </div>
+                    {renderPaymentSection(booking)}
 
                     {booking.clientNotes && (
                       <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
@@ -256,27 +274,7 @@ export default function TechBookingsPage() {
                         </div>
                     )}
 
-                    <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-sm font-light tracking-wide text-[#1A1A1A]">Payment</span>
-                        <Badge className="bg-green-500 text-[10px] tracking-wider uppercase font-light">Paid</Badge>
-                      </div>
-                      <div className="flex justify-between text-sm font-light mb-1">
-                        <span className="text-[#6B6B6B]">Service Price:</span>
-                        <span className="text-[#1A1A1A]">${booking.servicePrice}</span>
-                      </div>
-                      <div className="flex justify-between text-sm font-light ">
-                        <span className="text-[#6B6B6B]">Platform Fee:</span>
-                        <span className="text-[#1A1A1A]">${booking.serviceFee}</span>
-                      </div>
-                      <div className="flex justify-between text-sm font-light border-t border-[#E8E8E8] pt-2">
-                        <span className="text-[#1A1A1A]">Total Paid:</span>
-                        <span className="text-[#1A1A1A] font-medium">${booking.totalPrice}</span>
-                      </div>
-                      <p className="text-xs text-[#6B6B6B] mt-3 font-light leading-relaxed">
-                        You'll receive ${booking.servicePrice} after the appointment is completed.
-                      </p>
-                    </div>
+                    {renderPaymentSection(booking)}
 
                     {booking.clientNotes && (
                       <div className="bg-[#F8F7F5] p-4 border border-[#E8E8E8]">
