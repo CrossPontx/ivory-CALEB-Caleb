@@ -12,6 +12,8 @@ export default function TechSettingsPage() {
   const [credits, setCredits] = useState<number | null>(null);
   const [subscriptionTier, setSubscriptionTier] = useState('free');
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive');
+  const [isTech, setIsTech] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -22,6 +24,15 @@ export default function TechSettingsPage() {
       }
 
       const user = JSON.parse(userStr);
+      
+      // Check if user is a tech
+      if (user.userType !== 'tech') {
+        // Redirect clients to their settings page
+        router.push('/settings');
+        return;
+      }
+      
+      setIsTech(true);
       setSubscriptionTier(user.subscriptionTier || 'free');
       setSubscriptionStatus(user.subscriptionStatus || 'inactive');
 
@@ -35,10 +46,29 @@ export default function TechSettingsPage() {
       } catch (error) {
         console.error('Error loading credits:', error);
       }
+      
+      setLoading(false);
     };
 
     loadUserData();
   }, [router]);
+
+  // Show loading state while checking user type
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
+          <p className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not a tech (will redirect)
+  if (!isTech) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-24 lg:pl-20">

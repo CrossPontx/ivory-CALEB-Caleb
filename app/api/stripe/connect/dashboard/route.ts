@@ -32,7 +32,10 @@ export async function POST(request: NextRequest) {
     // Verify user is a tech
     const user = session.user as any;
     if (user.userType !== 'tech') {
-      return NextResponse.json({ error: 'Only nail techs can access dashboard' }, { status: 403 });
+      return NextResponse.json({ 
+        error: 'Access denied',
+        message: 'Dashboard access is only available for nail technicians'
+      }, { status: 403 });
     }
 
     // Get tech profile

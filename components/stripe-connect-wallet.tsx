@@ -66,8 +66,8 @@ export function StripeConnectWallet() {
         const error = await response.json();
         
         // Show user-friendly message for Connect not enabled
-        if (response.status === 503 || error.message?.includes('being configured')) {
-          alert('The payout system is being set up. Please try again in a few minutes or contact support.');
+        if (response.status === 503 || error.message?.includes('being configured') || error.message?.includes('being set up')) {
+          alert('The payout system is being set up. Please try again later or contact support.');
         } else {
           alert(error.error || error.message || 'Failed to setup wallet');
         }

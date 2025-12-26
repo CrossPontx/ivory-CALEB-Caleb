@@ -40,7 +40,10 @@ export async function POST(request: NextRequest) {
     console.log('Stripe Connect Onboard - User type:', user.userType);
     
     if (user.userType !== 'tech') {
-      return NextResponse.json({ error: 'Only nail techs can setup wallet' }, { status: 403 });
+      return NextResponse.json({ 
+        error: 'Access denied',
+        message: 'Payout wallet is only available for nail technicians'
+      }, { status: 403 });
     }
 
     // Get tech profile
@@ -94,12 +97,14 @@ export async function POST(request: NextRequest) {
       } catch (stripeError: any) {
         console.error('Stripe Connect Onboard - Stripe account creation error:', stripeError);
         
-        // Check if it's a Connect not enabled error
-        if (stripeError.message?.includes('signed up for Connect')) {
+        // Check if it's a platform profile incomplete error
+        if (stripeError.message?.includes('complete your platform profile') || 
+            stripeError.message?.includes('signed up for Connect')) {
           return NextResponse.json({ 
-            error: 'Stripe Connect not enabled',
-            message: 'The payment system is being configured. Please contact support or try again later.',
-            details: 'Stripe Connect needs to be enabled in the Stripe Dashboard'
+            error: 'Platform setup incomplete',
+            message: 'The payout system is being set up by the platform administrator. Please try again in a few hours or contact support.',
+            adminMessage: 'Complete the platform questionnaire at: https://dashboard.stripe.com/connect/accounts/overview',
+            details: stripeError.message
           }, { status: 503 }); // Service Unavailable
         }
         
