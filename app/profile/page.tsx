@@ -10,6 +10,7 @@ import { BottomNav } from "@/components/bottom-nav"
 import { BuyCreditsDialog } from "@/components/buy-credits-dialog"
 import { SubscriptionPlans } from "@/components/subscription-plans"
 import { ReferralCard } from "@/components/referral-card"
+import { AutoRechargeSettings } from "@/components/auto-recharge-settings"
 import { useIsAppleWatch } from "@/components/watch-optimized-layout"
 import { format } from 'date-fns'
 import { CREDIT_PACKAGES } from '@/lib/stripe-config'
@@ -517,6 +518,11 @@ export default function ProfilePage() {
             <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-8">
               Settings
             </h3>
+
+            {/* Auto-Recharge Settings - At the top */}
+            <div className="mb-8">
+              <AutoRechargeSettings />
+            </div>
 
           {/* Privacy & Security */}
           <div className="mb-8">

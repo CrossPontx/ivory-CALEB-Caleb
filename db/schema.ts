@@ -26,6 +26,10 @@ export const users: any = pgTable('users', {
   stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
   stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
   subscriptionCurrentPeriodEnd: timestamp('subscription_current_period_end'),
+  subscriptionProvider: varchar('subscription_provider', { length: 50 }).default('stripe'), // stripe, apple
+  // Auto-recharge settings
+  autoRechargeEnabled: boolean('auto_recharge_enabled').default(false),
+  autoRechargeAmount: integer('auto_recharge_amount').default(5), // 5 or 10 credits
   resetPasswordToken: varchar('reset_password_token', { length: 255 }),
   resetPasswordExpires: timestamp('reset_password_expires'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
