@@ -131,15 +131,19 @@ export default function ExplorePage() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             <button 
               onClick={() => router.push('/')}
+              className="flex items-center gap-2 sm:gap-3"
             >
               <Image 
                 src="/Web_logo.png" 
                 alt="Ivory's Choice" 
-                width={180}
+                width={50}
                 height={50}
                 className="h-8 sm:h-10 w-auto"
                 priority
               />
+              <span className="font-serif text-xl sm:text-2xl tracking-tight text-[#1A1A1A] font-light">
+                IVORY'S CHOICE
+              </span>
             </button>
             
             <div className="flex items-center space-x-3 sm:space-x-4">
