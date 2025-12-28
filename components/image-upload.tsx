@@ -160,7 +160,6 @@ export function ImageUpload({
             type="file"
             accept="image/*"
             multiple={multiple}
-            capture="environment"
             onChange={handleFileSelect}
             className="hidden"
             disabled={uploading}
