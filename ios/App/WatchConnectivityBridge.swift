@@ -125,7 +125,7 @@ public class WatchConnectivityBridge: NSObject, WCSessionDelegate {
             if let profile = result as? [String: Any] {
                 replyHandler(profile)
             } else {
-                replyHandler(["user": nil, "credits": 0])
+                replyHandler(["user": NSNull(), "credits": 0])
             }
         }
     }
@@ -162,19 +162,19 @@ public class WatchConnectivityBridge: NSObject, WCSessionDelegate {
                 "id": "sample-1",
                 "title": "Classic French",
                 "description": "Elegant French manicure",
-                "imageUrl": nil
+                "imageUrl": NSNull()
             ],
             [
                 "id": "sample-2",
                 "title": "Floral Spring",
                 "description": "Delicate floral patterns",
-                "imageUrl": nil
+                "imageUrl": NSNull()
             ],
             [
                 "id": "sample-3",
                 "title": "Geometric Modern",
                 "description": "Bold geometric design",
-                "imageUrl": nil
+                "imageUrl": NSNull()
             ]
         ]
     }

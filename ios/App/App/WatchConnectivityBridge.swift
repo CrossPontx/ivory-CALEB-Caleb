@@ -125,7 +125,7 @@ public class WatchConnectivityBridge: NSObject, WCSessionDelegate {
             if let profile = result as? [String: Any] {
                 replyHandler(profile)
             } else {
-                replyHandler(["user": nil, "credits": 0])
+                replyHandler(["user": NSNull(), "credits": 0])
             }
         }
     }
