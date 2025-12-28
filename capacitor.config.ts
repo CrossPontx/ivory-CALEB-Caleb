@@ -23,7 +23,7 @@ const config: CapacitorConfig = {
     },
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#FFF5F0',
+      backgroundColor: '#000000',
       showSpinner: false
     },
     GoogleAuth: {
