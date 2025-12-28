@@ -18,7 +18,7 @@ Go to: https://appstoreconnect.apple.com
 
 #### Subscription 1: Pro Monthly (for Clients)
 - Click [+] → Auto-Renewable Subscription
-- Product ID: `com.ivory.app.subscription.pro`
+- Product ID: `com.ivory.app.subscription.pro.monthly`
 - Reference Name: `Pro Monthly Subscription`
 - Subscription Group: Create new "Subscriptions"
 - Duration: 1 Month
@@ -29,7 +29,7 @@ Go to: https://appstoreconnect.apple.com
 
 #### Subscription 2: Business Monthly (for Nail Techs)
 - Click [+] → Auto-Renewable Subscription
-- Product ID: `com.ivory.app.subscription.business`
+- Product ID: `com.ivory.app.subscription.business.monthly`
 - Reference Name: `Business Monthly Subscription`
 - Subscription Group: Select "Subscriptions"
 - Duration: 1 Month
@@ -104,7 +104,7 @@ In Xcode:
 **Expected Console Output:**
 ```
 ✅ Available IAP products: [
-  { productId: "com.ivory.app.subscription.pro", price: 19.99, title: "Pro Monthly" },
+  { productId: "com.ivory.app.subscription.pro.monthly", price: 19.99, title: "Pro Monthly" },
   { productId: "com.ivory.app.credits.5", price: 7.49, title: "5 Credits" },
   { productId: "com.ivory.app.credits.10", price: 14.99, title: "10 Credits" }
 ]

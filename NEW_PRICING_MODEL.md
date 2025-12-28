@@ -28,14 +28,14 @@ Simplified subscription model with auto-recharge functionality.
 ## IAP Products to Create in App Store Connect
 
 ### 1. Pro Monthly Subscription (Clients)
-- **Product ID:** `com.ivory.app.subscription.pro`
+- **Product ID:** `com.ivory.app.subscription.pro.monthly`
 - **Type:** Auto-Renewable Subscription
 - **Price:** $19.99/month
 - **Display Name:** Pro Monthly
 - **Description:** 15 AI-generated nail designs per month with auto-recharge
 
 ### 2. Business Monthly Subscription (Nail Techs)
-- **Product ID:** `com.ivory.app.subscription.business`
+- **Product ID:** `com.ivory.app.subscription.business.monthly`
 - **Type:** Auto-Renewable Subscription
 - **Price:** $59.99/month
 - **Display Name:** Business Monthly

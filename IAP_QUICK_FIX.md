@@ -28,13 +28,13 @@ npx cap open ios
 Go to [App Store Connect](https://appstoreconnect.apple.com) and create these products:
 
 **For Client Subscriptions:**
-- Product ID: `com.ivory.app.subscription.pro`
+- Product ID: `com.ivory.app.subscription.pro.monthly`
 - Type: Auto-Renewable Subscription
 - Price: $19.99/month
 - Name: "Pro Monthly"
 
 **For Tech Subscriptions:**
-- Product ID: `com.ivory.app.subscription.business`
+- Product ID: `com.ivory.app.subscription.business.monthly`
 - Type: Auto-Renewable Subscription
 - Price: $59.99/month
 - Name: "Business Monthly"
@@ -65,8 +65,8 @@ I've fixed:
 4. ✅ PRODUCT_TIERS mapping - Updated to use new product IDs
 
 **Important:** The tier mapping changed:
-- Old: `com.yourcompany.ivory.business2` → New: `com.ivory.app.subscription.pro` (client tier)
-- Old: `com.yourcompany.ivory.pro` → New: `com.ivory.app.subscription.business` (tech tier)
+- Old: `com.yourcompany.ivory.business2` → New: `com.ivory.app.subscription.pro.monthly` (client tier)
+- Old: `com.yourcompany.ivory.pro` → New: `com.ivory.app.subscription.business.monthly` (tech tier)
 
 ## Testing with Sandbox
 
@@ -81,13 +81,13 @@ After these fixes, you should see:
 ```
 ⚡️  [log] - Available IAP products: [
   {
-    productId: "com.ivory.app.subscription.pro",
+    productId: "com.ivory.app.subscription.pro.monthly",
     title: "Pro Monthly",
     price: 19.99,
     priceString: "$19.99"
   },
   {
-    productId: "com.ivory.app.subscription.business",
+    productId: "com.ivory.app.subscription.business.monthly",
     title: "Business Monthly",
     price: 59.99,
     priceString: "$59.99"

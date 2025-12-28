@@ -51,8 +51,8 @@ npx cap open ios
 
 ### Step 3: App Store Connect (15 minutes)
 Create these products:
-- `com.ivory.app.subscription.pro` - $19.99/month
-- `com.ivory.app.subscription.business` - $59.99/month
+- `com.ivory.app.subscription.pro.monthly` - $19.99/month
+- `com.ivory.app.subscription.business.monthly` - $59.99/month
 
 ### Step 4: Wait (2-4 hours)
 Apple needs to sync your products.

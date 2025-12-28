@@ -88,7 +88,7 @@ My Apps → [Your App] → Features → In-App Purchases → [+]
 ┌─────────────────────────────────────────┐
 │ Type: Auto-Renewable Subscription      │
 │ Reference Name: Pro Monthly             │
-│ Product ID: com.ivory.app.subscription.pro
+│ Product ID: com.ivory.app.subscription.pro.monthly
 │ Subscription Group: [Create new]       │
 │ Price: $19.99                          │
 │ Subscription Duration: 1 Month         │
@@ -100,7 +100,7 @@ My Apps → [Your App] → Features → In-App Purchases → [+]
 ┌─────────────────────────────────────────┐
 │ Type: Auto-Renewable Subscription      │
 │ Reference Name: Business Monthly        │
-│ Product ID: com.ivory.app.subscription.business
+│ Product ID: com.ivory.app.subscription.business.monthly
 │ Subscription Group: [Same as above]    │
 │ Price: $59.99                          │
 │ Subscription Duration: 1 Month         │
@@ -185,7 +185,7 @@ Click: [▶ Run] or press Cmd+R
    ```
    ✅ Good:
    ⚡️  [log] - Available IAP products: [
-     { productId: "com.ivory.app.subscription.pro", ... }
+     { productId: "com.ivory.app.subscription.pro.monthly", ... }
    ]
    
    ❌ Bad:
@@ -207,7 +207,7 @@ Click: [▶ Run] or press Cmd+R
 ⚡️  [log] - Loading IAP products...
 ⚡️  [log] - Available IAP products: [
   {
-    productId: "com.ivory.app.subscription.pro",
+    productId: "com.ivory.app.subscription.pro.monthly",
     title: "Pro Monthly",
     price: 19.99,
     priceString: "$19.99"

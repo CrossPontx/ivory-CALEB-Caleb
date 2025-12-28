@@ -31,8 +31,8 @@ PRO_MONTHLY: 'com.yourcompany.ivory.business2'
 BUSINESS_MONTHLY: 'com.yourcompany.ivory.pro'
 
 // NEW (matches com.ivory.app)
-PRO_MONTHLY: 'com.ivory.app.subscription.pro'
-BUSINESS_MONTHLY: 'com.ivory.app.subscription.business'
+PRO_MONTHLY: 'com.ivory.app.subscription.pro.monthly'
+BUSINESS_MONTHLY: 'com.ivory.app.subscription.business.monthly'
 ```
 
 All 13 product IDs updated to use `com.ivory.app.*` prefix.
@@ -56,8 +56,8 @@ Then in Xcode:
 Create these products at [appstoreconnect.apple.com](https://appstoreconnect.apple.com):
 
 **Subscriptions (Auto-Renewable):**
-1. `com.ivory.app.subscription.pro` - $19.99/month (Client Pro)
-2. `com.ivory.app.subscription.business` - $59.99/month (Tech Business)
+1. `com.ivory.app.subscription.pro.monthly` - $19.99/month (Client Pro)
+2. `com.ivory.app.subscription.business.monthly` - $59.99/month (Tech Business)
 
 **Consumables (Credits):**
 3. `com.ivory.app.credits.5` - $4.99
@@ -118,14 +118,14 @@ Create these products at [appstoreconnect.apple.com](https://appstoreconnect.app
 ⚡️  [log] - Loading IAP products...
 ⚡️  [log] - Available IAP products: [
   {
-    productId: "com.ivory.app.subscription.pro",
+    productId: "com.ivory.app.subscription.pro.monthly",
     title: "Pro Monthly",
     price: 19.99,
     priceString: "$19.99",
     currency: "USD"
   },
   {
-    productId: "com.ivory.app.subscription.business",
+    productId: "com.ivory.app.subscription.business.monthly",
     title: "Business Monthly",
     price: 59.99,
     priceString: "$59.99",

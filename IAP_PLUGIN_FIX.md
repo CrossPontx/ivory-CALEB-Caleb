@@ -33,10 +33,10 @@ You need to complete these steps in Xcode:
 Your product IDs are defined in `lib/iap.ts` and now match your bundle ID `com.ivory.app`:
 
 **Client Subscriptions:**
-- `com.ivory.app.subscription.pro` - Pro Monthly ($20/month)
+- `com.ivory.app.subscription.pro.monthly` - Pro Monthly ($19.99/month)
 
 **Tech Subscriptions:**
-- `com.ivory.app.subscription.business` - Business Monthly ($60/month)
+- `com.ivory.app.subscription.business.monthly` - Business Monthly ($59.99/month)
 
 **Credit Packages:**
 - `com.ivory.app.credits.5` - 5 credits

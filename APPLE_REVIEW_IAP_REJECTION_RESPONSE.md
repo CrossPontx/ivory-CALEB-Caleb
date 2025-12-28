@@ -38,8 +38,8 @@ The IAP plugin has a bug (`UNIMPLEMENTED` error) AND the product IDs in App Stor
 - 60 Credits
 
 **What Your App Requests:**
-- `com.ivory.app.subscription.pro`
-- `com.ivory.app.subscription.business`
+- `com.ivory.app.subscription.pro.monthly`
+- `com.ivory.app.subscription.business.monthly`
 - `com.ivory.app.credits.*`
 
 **Problem:** Product names don't match product IDs!
@@ -53,7 +53,7 @@ Go to [App Store Connect](https://appstoreconnect.apple.com) → Your App → Fe
 #### Required Products for Apple Review:
 
 **1. Pro Subscription (for clients)**
-- Product ID: `com.ivory.app.subscription.pro`
+- Product ID: `com.ivory.app.subscription.pro.monthly`
 - Reference Name: `Pro Monthly Subscription`
 - Type: Auto-Renewable Subscription
 - Subscription Group: Create "Subscriptions"
@@ -63,7 +63,7 @@ Go to [App Store Connect](https://appstoreconnect.apple.com) → Your App → Fe
 - Description: `20 AI-generated nail designs per month`
 
 **2. Business Subscription (for techs)**
-- Product ID: `com.ivory.app.subscription.business`
+- Product ID: `com.ivory.app.subscription.business.monthly`
 - Reference Name: `Business Monthly Subscription`
 - Type: Auto-Renewable Subscription
 - Subscription Group: Same as above
@@ -125,8 +125,8 @@ Thank you for identifying the In-App Purchase issues. We have resolved both prob
 - Root cause: Products were not created in App Store Connect
 - Fix: Created all required IAP products with proper configuration
 - Products created:
-  - Pro Monthly Subscription (com.ivory.app.subscription.pro) - $19.99/month
-  - Business Monthly Subscription (com.ivory.app.subscription.business) - $59.99/month
+  - Pro Monthly Subscription (com.ivory.app.subscription.pro.monthly) - $19.99/month
+  - Business Monthly Subscription (com.ivory.app.subscription.business.monthly) - $59.99/month
   - 5 Credits (com.ivory.app.credits.5) - $4.99
   - 10 Credits (com.ivory.app.credits.10) - $9.99
   - 25 Credits (com.ivory.app.credits.25) - $19.99

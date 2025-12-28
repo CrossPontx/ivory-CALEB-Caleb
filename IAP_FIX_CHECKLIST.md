@@ -23,8 +23,8 @@ Use this checklist to track your progress fixing the IAP issue.
 ## 🏪 App Store Connect (You Need To Do)
 
 ### Subscriptions
-- [ ] Create: `com.ivory.app.subscription.pro` ($19.99/month)
-- [ ] Create: `com.ivory.app.subscription.business` ($59.99/month)
+- [ ] Create: `com.ivory.app.subscription.pro.monthly` ($19.99/month)
+- [ ] Create: `com.ivory.app.subscription.business.monthly` ($59.99/month)
 - [ ] Set up subscription group
 - [ ] Add descriptions and screenshots
 - [ ] Set to "Ready to Submit"
@@ -81,7 +81,7 @@ Use this checklist to track your progress fixing the IAP issue.
 ```
 ✅ ⚡️  [log] - Available IAP products: [
   {
-    productId: "com.ivory.app.subscription.pro",
+    productId: "com.ivory.app.subscription.pro.monthly",
     title: "Pro Monthly",
     price: 19.99,
     priceString: "$19.99"

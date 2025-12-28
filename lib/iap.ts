@@ -44,10 +44,10 @@ const IAP = registerPlugin<IAPPlugin>('IAPPlugin');
 // Bundle ID: com.ivory.app
 export const IAP_PRODUCT_IDS = {
   // Client Subscription
-  PRO_MONTHLY: 'com.ivory.app.subscription.pro', // $20/month for 15 credits
+  PRO_MONTHLY: 'com.ivory.app.subscription.pro.monthly', // $19.99/month for 15 credits
   
   // Tech Subscription
-  BUSINESS_MONTHLY: 'com.ivory.app.subscription.business', // $60/month for 40 credits + unlimited bookings
+  BUSINESS_MONTHLY: 'com.ivory.app.subscription.business.monthly', // $59.99/month for 40 credits + unlimited bookings
   
   // Auto-Recharge Credit Packages (when credits hit 0)
   CREDITS_5: 'com.ivory.app.credits5',   // $7.50 ($1.50/credit) - NO DOT
