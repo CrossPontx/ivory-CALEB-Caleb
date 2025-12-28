@@ -7,16 +7,34 @@ export const CLIENT_SUBSCRIPTION_PLANS = [
     id: 'pro',
     name: 'Pro',
     price: 2000, // $20/month in cents
-    credits: 20,
+    credits: 15, // 15 credits per month
     interval: 'month' as const,
     userType: 'client' as const,
     features: [
-      '20 AI designs per month',
-      'Buy additional credits anytime',
+      '15 AI designs per month',
+      'Auto-recharge when credits hit 0',
       'Priority support',
       'Advanced design tools',
       'Save favorite designs',
       'Share with nail techs',
+    ],
+    popular: false,
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 6000, // $60/month in cents
+    credits: 40, // 40 credits per month
+    interval: 'month' as const,
+    userType: 'client' as const,
+    features: [
+      '40 AI designs per month',
+      'Auto-recharge when credits hit 0',
+      'Priority support',
+      'Advanced design tools',
+      'Save unlimited designs',
+      'Share with nail techs',
+      'Early access to new features',
     ],
     popular: true,
   },
@@ -51,47 +69,24 @@ export const SUBSCRIPTION_PLANS = [
   ...TECH_SUBSCRIPTION_PLANS,
 ] as const;
 
-// One-time credit packages (for additional credits - only for paid subscribers)
+// Auto-recharge credit packages (when credits hit 0 - only for subscribers)
+// Priced at $1.50 per credit
 export const CREDIT_PACKAGES = [
   {
     id: 'credits_5',
     name: '5 Credits',
     credits: 5,
-    price: 499, // $4.99 in cents
+    price: 750, // $7.50 in cents ($1.50/credit)
     popular: false,
-    savings: undefined,
+    pricePerCredit: 150, // $1.50 per credit
   },
   {
     id: 'credits_10',
     name: '10 Credits',
     credits: 10,
-    price: 899, // $8.99 in cents
-    popular: false,
-    savings: '10%',
-  },
-  {
-    id: 'credits_25',
-    name: '25 Credits',
-    credits: 25,
-    price: 1999, // $19.99 in cents
+    price: 1500, // $15.00 in cents ($1.50/credit)
     popular: true,
-    savings: '20%',
-  },
-  {
-    id: 'credits_50',
-    name: '50 Credits',
-    credits: 50,
-    price: 3499, // $34.99 in cents
-    popular: false,
-    savings: '30%',
-  },
-  {
-    id: 'credits_100',
-    name: '100 Credits',
-    credits: 100,
-    price: 5999, // $59.99 in cents
-    popular: false,
-    savings: '40%',
+    pricePerCredit: 150, // $1.50 per credit
   },
 ] as const;
 

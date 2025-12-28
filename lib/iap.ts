@@ -44,17 +44,15 @@ const IAP = registerPlugin<IAPPlugin>('IAPPlugin');
 // Bundle ID: com.ivory.app
 export const IAP_PRODUCT_IDS = {
   // Client Subscriptions
-  PRO_MONTHLY: 'com.ivory.app.subscription.pro', // $20/month for clients
+  PRO_MONTHLY: 'com.ivory.app.subscription.pro',      // $20/month for 15 credits
+  PREMIUM_MONTHLY: 'com.ivory.app.subscription.premium', // $60/month for 40 credits
   
   // Tech Subscriptions
-  BUSINESS_MONTHLY: 'com.ivory.app.subscription.business', // $60/month for techs
+  BUSINESS_MONTHLY: 'com.ivory.app.subscription.business', // $60/month for techs (unlimited bookings)
   
-  // Credit Packages (for clients only)
-  CREDITS_5: 'com.ivory.app.credits.5',
-  CREDITS_10: 'com.ivory.app.credits.10',
-  CREDITS_25: 'com.ivory.app.credits.25',
-  CREDITS_50: 'com.ivory.app.credits.50',
-  CREDITS_100: 'com.ivory.app.credits.100',
+  // Auto-Recharge Credit Packages (when credits hit 0)
+  CREDITS_5: 'com.ivory.app.credits.5',   // $7.50 ($1.50/credit)
+  CREDITS_10: 'com.ivory.app.credits.10', // $15.00 ($1.50/credit)
   
   // Booking Payments (dynamic pricing tiers)
   BOOKING_TIER_1: 'com.ivory.app.booking.tier1', // $0-50
@@ -64,19 +62,17 @@ export const IAP_PRODUCT_IDS = {
   BOOKING_TIER_5: 'com.ivory.app.booking.tier5', // $201+
 };
 
-// Map product IDs to credit amounts (for clients)
+// Map product IDs to credit amounts (for auto-recharge)
 export const PRODUCT_CREDITS: Record<string, number> = {
-  [IAP_PRODUCT_IDS.CREDITS_5]: 5,
-  [IAP_PRODUCT_IDS.CREDITS_10]: 10,
-  [IAP_PRODUCT_IDS.CREDITS_25]: 25,
-  [IAP_PRODUCT_IDS.CREDITS_50]: 50,
-  [IAP_PRODUCT_IDS.CREDITS_100]: 100,
+  [IAP_PRODUCT_IDS.CREDITS_5]: 5,   // $7.50
+  [IAP_PRODUCT_IDS.CREDITS_10]: 10, // $15.00
 };
 
 // Map product IDs to subscription tiers and user types
 export const PRODUCT_TIERS: Record<string, { tier: string; userType: string; credits?: number }> = {
-  [IAP_PRODUCT_IDS.PRO_MONTHLY]: { tier: 'pro', userType: 'client', credits: 20 },
-  [IAP_PRODUCT_IDS.BUSINESS_MONTHLY]: { tier: 'business', userType: 'tech', credits: 0 },
+  [IAP_PRODUCT_IDS.PRO_MONTHLY]: { tier: 'pro', userType: 'client', credits: 15 },       // $20/month = 15 credits
+  [IAP_PRODUCT_IDS.PREMIUM_MONTHLY]: { tier: 'premium', userType: 'client', credits: 40 }, // $60/month = 40 credits
+  [IAP_PRODUCT_IDS.BUSINESS_MONTHLY]: { tier: 'business', userType: 'tech', credits: 0 },  // $60/month for techs
 };
 
 class IAPManager {

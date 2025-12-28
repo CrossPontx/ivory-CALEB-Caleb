@@ -98,14 +98,18 @@ export async function POST(request: Request) {
       await db
         .update(users)
         .set({
-          subscriptionTier: tier,
+          subscriptionTier: tier.tier,
           subscriptionStatus: 'active',
           subscriptionProvider: 'apple',
         })
         .where(eq(users.id, userId));
 
       // Grant monthly credits based on tier
-      const monthlyCredits = tier === 'pro' ? 20 : 50;
+      let monthlyCredits = 0;
+      if (tier.tier === 'pro') monthlyCredits = 15;
+      else if (tier.tier === 'premium') monthlyCredits = 40;
+      else if (tier.tier === 'business') monthlyCredits = 0; // Techs don't get credits
+      
       const newBalance = user.credits + monthlyCredits;
 
       await db
@@ -117,13 +121,13 @@ export async function POST(request: Request) {
         userId,
         amount: monthlyCredits,
         type: 'subscription_renewal',
-        description: `IAP Subscription: ${tier}`,
+        description: `IAP Subscription: ${tier.tier}`,
         balanceAfter: newBalance,
       });
 
       return NextResponse.json({
         success: true,
-        tier,
+        tier: tier.tier,
         credits: newBalance,
         added: monthlyCredits,
       });
