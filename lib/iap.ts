@@ -50,8 +50,8 @@ export const IAP_PRODUCT_IDS = {
   BUSINESS_MONTHLY: 'com.ivory.app.subscription.business', // $60/month for 40 credits + unlimited bookings
   
   // Auto-Recharge Credit Packages (when credits hit 0)
-  CREDITS_5: 'com.ivory.app.credits.5',   // $7.50 ($1.50/credit)
-  CREDITS_10: 'com.ivory.app.credits.10', // $15.00 ($1.50/credit)
+  CREDITS_5: 'com.ivory.app.credits5',   // $7.50 ($1.50/credit) - NO DOT
+  CREDITS_10: 'com.ivory.app.credits10', // $15.00 ($1.50/credit) - NO DOT
   
   // Booking Payments (dynamic pricing tiers)
   BOOKING_TIER_1: 'com.ivory.app.booking.tier1', // $0-50

@@ -42,14 +42,14 @@ Simplified subscription model with auto-recharge functionality.
 - **Description:** Unlimited bookings + 40 AI designs per month with auto-recharge
 
 ### 3. Auto-Recharge: 5 Credits
-- **Product ID:** `com.ivory.app.credits.5`
+- **Product ID:** `com.ivory.app.credits5` (NO DOT)
 - **Type:** Consumable
 - **Price:** $7.49
 - **Display Name:** 5 Credits
 - **Description:** 5 AI-generated nail designs ($1.50/credit)
 
 ### 4. Auto-Recharge: 10 Credits
-- **Product ID:** `com.ivory.app.credits.10`
+- **Product ID:** `com.ivory.app.credits10` (NO DOT)
 - **Type:** Consumable
 - **Price:** $14.99
 - **Display Name:** 10 Credits

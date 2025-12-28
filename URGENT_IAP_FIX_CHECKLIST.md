@@ -42,7 +42,7 @@ Go to: https://appstoreconnect.apple.com
 
 **Product 3: 5 Credits**
 - Click [+] → Consumable
-- Product ID: `com.ivory.app.credits.5`
+- Product ID: `com.ivory.app.credits5` (NO DOT between credits and 5)
 - Reference Name: `5 Credits`
 - Price: $7.49
 - Display Name: `5 Credits`
@@ -51,7 +51,7 @@ Go to: https://appstoreconnect.apple.com
 
 **Product 4: 10 Credits**
 - Click [+] → Consumable
-- Product ID: `com.ivory.app.credits.10`
+- Product ID: `com.ivory.app.credits10` (NO DOT between credits and 10)
 - Reference Name: `10 Credits`
 - Price: $14.99
 - Display Name: `10 Credits`
@@ -143,8 +143,8 @@ Thank you for identifying the IAP issues. We have resolved both problems and sim
 2. IAP Products Created:
    - Pro Monthly Subscription: $19.99/month (15 credits for clients)
    - Business Monthly Subscription: $59.99/month (40 credits + unlimited bookings for techs)
-   - 5 Credits: $7.49 (auto-recharge option)
-   - 10 Credits: $14.99 (auto-recharge option)
+   - 5 Credits: $7.49 (com.ivory.app.credits5 - NO DOT)
+   - 10 Credits: $14.99 (com.ivory.app.credits10 - NO DOT)
    - All products set to "Ready to Submit"
 
 New Pricing Model:
