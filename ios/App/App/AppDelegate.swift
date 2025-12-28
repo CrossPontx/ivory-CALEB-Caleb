@@ -1,13 +1,17 @@
 import UIKit
 import Capacitor
+import os.log
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    private let logger = OSLog(subsystem: "com.ivory.app", category: "AppDelegate")
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        os_log("🟢 AppDelegate: Application did finish launching", log: logger, type: .info)
+        os_log("🔵 AppDelegate: Capacitor will auto-discover plugins using CAPBridgedPlugin protocol", log: logger, type: .info)
         return true
     }
 

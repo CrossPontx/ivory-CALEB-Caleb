@@ -45,9 +45,6 @@
 
 /* Begin PBXFileReference section */
 		034EDAFC2EF20FF700BA022C /* ivory Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ivory Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		039955CD2F01CC3400AB0A8F /* IAPPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPPlugin.swift; sourceTree = "<group>"; };
-		039955CF2F01CC7F00AB0A8F /* WatchConnectivityPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityPlugin.swift; sourceTree = "<group>"; };
-		039955D12F01CCB000AB0A8F /* WatchConnectivityBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityBridge.swift; sourceTree = "<group>"; };
 		03A3CF4C2F00E7DA00EF5B32 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		03D852062EF0FFF10040F36B /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
@@ -97,9 +94,6 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
-				039955CD2F01CC3400AB0A8F /* IAPPlugin.swift */,
-				039955CF2F01CC7F00AB0A8F /* WatchConnectivityPlugin.swift */,
-				039955D12F01CCB000AB0A8F /* WatchConnectivityBridge.swift */,
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				034EDAFD2EF20FF700BA022C /* ivory Watch App */,
