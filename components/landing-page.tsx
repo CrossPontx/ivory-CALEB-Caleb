@@ -27,9 +27,14 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-20 sm:h-24 lg:h-28">
             {/* Logo */}
             <div className="flex items-center">
-              <span className="font-serif text-xl sm:text-2xl lg:text-3xl tracking-tight text-[#1A1A1A] font-light">
-                IVORY'S CHOICE
-              </span>
+              <Image 
+                src="/Web_logo.png" 
+                alt="Ivory's Choice" 
+                width={180}
+                height={50}
+                className="h-8 sm:h-10 lg:h-12 w-auto"
+                priority
+              />
             </div>
             
             {/* Desktop Navigation */}
@@ -350,7 +355,13 @@ export default function LandingPage() {
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 sm:gap-14 lg:gap-16 mb-16 sm:mb-20">
             <div className="col-span-2 sm:col-span-1">
-              <h3 className="font-serif text-xl sm:text-2xl font-light mb-5 sm:mb-7 text-[#1A1A1A] tracking-tight">IVORY'S CHOICE</h3>
+              <Image 
+                src="/Web_logo.png" 
+                alt="Ivory's Choice" 
+                width={160}
+                height={45}
+                className="h-8 sm:h-9 w-auto mb-5 sm:mb-7"
+              />
               <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
                 Where artistry meets innovation
               </p>

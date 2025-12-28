@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Capacitor } from "@capacitor/core"
@@ -278,9 +279,16 @@ function AuthPageContent() {
       <div className="w-full max-w-md">
         <div className="border border-[#E8E8E8] bg-white p-6 sm:p-8 md:p-12">
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-2 tracking-tight">
-              IVORY'S CHOICE
-            </h1>
+            <div className="flex justify-center mb-4">
+              <Image 
+                src="/Web_logo.png" 
+                alt="Ivory's Choice" 
+                width={200}
+                height={56}
+                className="h-10 sm:h-12 w-auto"
+                priority
+              />
+            </div>
             <p className="text-xs sm:text-sm tracking-wider uppercase text-[#6B6B6B] font-light mb-4">
               {referralCode ? "Exclusive Invitation" : isSignUp ? "Begin Your Journey" : "Welcome Back"}
             </p>

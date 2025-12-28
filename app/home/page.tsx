@@ -179,9 +179,14 @@ export default function HomePage() {
       {/* Header */}
       <header className={`bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top backdrop-blur-sm bg-white/95 transition-all duration-300 ${isWatch ? 'watch-compact' : ''}`}>
         <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-2' : 'px-5 sm:px-6 py-4 sm:py-5'}`}>
-          <h1 className={`font-serif font-light text-[#1A1A1A] tracking-tight transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'} ${isWatch ? 'text-sm' : 'text-xl sm:text-2xl'}`}>
-            {isWatch ? "IVORY'S" : "IVORY'S CHOICE"}
-          </h1>
+          <Image 
+            src="/Web_logo.png" 
+            alt="Ivory's Choice" 
+            width={isWatch ? 80 : 180}
+            height={isWatch ? 22 : 50}
+            className={`transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'} ${isWatch ? 'h-5' : 'h-8 sm:h-10'} w-auto`}
+            priority
+          />
         </div>
       </header>
 

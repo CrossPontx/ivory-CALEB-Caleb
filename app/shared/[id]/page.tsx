@@ -274,7 +274,14 @@ export default function SharedDesignPage() {
         {/* Header */}
         <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 pt-safe">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
-            <h1 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">IVORY'S CHOICE</h1>
+            <Image 
+              src="/Web_logo.png" 
+              alt="Ivory's Choice" 
+              width={160}
+              height={45}
+              className="h-8 sm:h-9 w-auto"
+              priority
+            />
             <div className="flex items-center gap-2">
               <button
                 onClick={handleShare}
