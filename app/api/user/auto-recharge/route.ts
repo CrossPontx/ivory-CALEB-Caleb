@@ -1,17 +1,28 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, sessions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET(request: Request) {
   try {
-    const userStr = request.headers.get('cookie')?.match(/ivoryUser=([^;]+)/)?.[1];
-    if (!userStr) {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get('session')?.value;
+
+    if (!sessionToken) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const userData = JSON.parse(decodeURIComponent(userStr));
-    const userId = userData.id;
+    // Get user from session
+    const [session] = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.token, sessionToken))
+      .limit(1);
+
+    if (!session) {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
 
     const [user] = await db
       .select({
@@ -19,7 +30,7 @@ export async function GET(request: Request) {
         autoRechargeAmount: users.autoRechargeAmount,
       })
       .from(users)
-      .where(eq(users.id, userId));
+      .where(eq(users.id, session.userId));
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -40,13 +51,23 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const userStr = request.headers.get('cookie')?.match(/ivoryUser=([^;]+)/)?.[1];
-    if (!userStr) {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get('session')?.value;
+
+    if (!sessionToken) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const userData = JSON.parse(decodeURIComponent(userStr));
-    const userId = userData.id;
+    // Get user from session
+    const [session] = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.token, sessionToken))
+      .limit(1);
+
+    if (!session) {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
 
     const body = await request.json();
     const { autoRechargeEnabled, autoRechargeAmount } = body;
@@ -66,7 +87,7 @@ export async function POST(request: Request) {
         autoRechargeAmount: autoRechargeAmount,
         updatedAt: new Date(),
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, session.userId));
 
     return NextResponse.json({
       success: true,
