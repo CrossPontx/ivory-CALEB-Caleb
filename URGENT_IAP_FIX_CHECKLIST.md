@@ -14,9 +14,9 @@ Go to: https://appstoreconnect.apple.com
 2. Go to Features → In-App Purchases
 3. Click [+] to create new product
 
-**Create these 5 products exactly:**
+**Create these 4 products exactly:**
 
-#### Subscription 1: Pro Monthly
+#### Subscription 1: Pro Monthly (for Clients)
 - Click [+] → Auto-Renewable Subscription
 - Product ID: `com.ivory.app.subscription.pro`
 - Reference Name: `Pro Monthly Subscription`
@@ -27,18 +27,7 @@ Go to: https://appstoreconnect.apple.com
 - Description: `15 AI-generated nail designs per month with auto-recharge`
 - Click Save → Submit for Review
 
-#### Subscription 2: Premium Monthly
-- Click [+] → Auto-Renewable Subscription
-- Product ID: `com.ivory.app.subscription.premium`
-- Reference Name: `Premium Monthly Subscription`
-- Subscription Group: Select "Subscriptions"
-- Duration: 1 Month
-- Price: $59.99
-- Display Name: `Premium Monthly`
-- Description: `40 AI-generated nail designs per month with auto-recharge`
-- Click Save → Submit for Review
-
-#### Subscription 3: Business Monthly
+#### Subscription 2: Business Monthly (for Nail Techs)
 - Click [+] → Auto-Renewable Subscription
 - Product ID: `com.ivory.app.subscription.business`
 - Reference Name: `Business Monthly Subscription`
@@ -46,12 +35,12 @@ Go to: https://appstoreconnect.apple.com
 - Duration: 1 Month
 - Price: $59.99
 - Display Name: `Business Monthly`
-- Description: `Unlimited bookings for nail technicians`
+- Description: `Unlimited bookings + 40 AI designs per month with auto-recharge`
 - Click Save → Submit for Review
 
 #### Auto-Recharge Credits (Create 2 consumables):
 
-**Product 4: 5 Credits**
+**Product 3: 5 Credits**
 - Click [+] → Consumable
 - Product ID: `com.ivory.app.credits.5`
 - Reference Name: `5 Credits`
@@ -60,7 +49,7 @@ Go to: https://appstoreconnect.apple.com
 - Description: `5 AI-generated nail designs - Auto-recharge option`
 - Save → Submit for Review
 
-**Product 5: 10 Credits**
+**Product 4: 10 Credits**
 - Click [+] → Consumable
 - Product ID: `com.ivory.app.credits.10`
 - Reference Name: `10 Credits`
@@ -152,16 +141,15 @@ Thank you for identifying the IAP issues. We have resolved both problems and sim
    - Build [YOUR_BUILD_NUMBER] includes fix
 
 2. IAP Products Created:
-   - Pro Monthly Subscription: $19.99/month (15 credits)
-   - Premium Monthly Subscription: $59.99/month (40 credits)
-   - Business Monthly Subscription: $59.99/month (for nail techs)
+   - Pro Monthly Subscription: $19.99/month (15 credits for clients)
+   - Business Monthly Subscription: $59.99/month (40 credits + unlimited bookings for techs)
    - 5 Credits: $7.49 (auto-recharge option)
    - 10 Credits: $14.99 (auto-recharge option)
    - All products set to "Ready to Submit"
 
 New Pricing Model:
-- Pro: $19.99/month for 15 credits
-- Premium: $59.99/month for 40 credits
+- Clients: $19.99/month for 15 credits
+- Techs: $59.99/month for 40 credits + unlimited bookings
 - When credits hit 0, users can auto-recharge 5 or 10 credits
 - Credits priced at $1.50 each in auto-recharge
 
@@ -207,7 +195,7 @@ Best regards,
 
 Before submitting to Apple, verify:
 
-- ✅ All 5 products created in App Store Connect (3 subscriptions + 2 credit packages)
+- ✅ All 4 products created in App Store Connect (2 subscriptions + 2 credit packages)
 - ✅ All products show "Ready to Submit" status
 - ✅ Paid Apps Agreement signed
 - ✅ In-App Purchase capability added in Xcode

@@ -18,24 +18,6 @@ export const CLIENT_SUBSCRIPTION_PLANS = [
       'Save favorite designs',
       'Share with nail techs',
     ],
-    popular: false,
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: 6000, // $60/month in cents
-    credits: 40, // 40 credits per month
-    interval: 'month' as const,
-    userType: 'client' as const,
-    features: [
-      '40 AI designs per month',
-      'Auto-recharge when credits hit 0',
-      'Priority support',
-      'Advanced design tools',
-      'Save unlimited designs',
-      'Share with nail techs',
-      'Early access to new features',
-    ],
     popular: true,
   },
 ] as const;
@@ -46,11 +28,13 @@ export const TECH_SUBSCRIPTION_PLANS = [
     id: 'business',
     name: 'Business',
     price: 6000, // $60/month in cents
-    credits: 0, // Techs don't use credits
+    credits: 40, // Techs get 40 credits for creating designs
     interval: 'month' as const,
     userType: 'tech' as const,
     features: [
       'Unlimited bookings',
+      '40 AI designs per month',
+      'Auto-recharge when credits hit 0',
       'Portfolio showcase',
       'Client management',
       'Advanced analytics',

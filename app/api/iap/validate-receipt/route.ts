@@ -106,9 +106,8 @@ export async function POST(request: Request) {
 
       // Grant monthly credits based on tier
       let monthlyCredits = 0;
-      if (tier.tier === 'pro') monthlyCredits = 15;
-      else if (tier.tier === 'premium') monthlyCredits = 40;
-      else if (tier.tier === 'business') monthlyCredits = 0; // Techs don't get credits
+      if (tier.tier === 'pro') monthlyCredits = 15;        // Clients get 15 credits
+      else if (tier.tier === 'business') monthlyCredits = 40; // Techs get 40 credits
       
       const newBalance = user.credits + monthlyCredits;
 

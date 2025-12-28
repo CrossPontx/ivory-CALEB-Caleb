@@ -43,12 +43,11 @@ const IAP = registerPlugin<IAPPlugin>('IAPPlugin');
 // Product IDs - these must match what you configure in App Store Connect
 // Bundle ID: com.ivory.app
 export const IAP_PRODUCT_IDS = {
-  // Client Subscriptions
-  PRO_MONTHLY: 'com.ivory.app.subscription.pro',      // $20/month for 15 credits
-  PREMIUM_MONTHLY: 'com.ivory.app.subscription.premium', // $60/month for 40 credits
+  // Client Subscription
+  PRO_MONTHLY: 'com.ivory.app.subscription.pro', // $20/month for 15 credits
   
-  // Tech Subscriptions
-  BUSINESS_MONTHLY: 'com.ivory.app.subscription.business', // $60/month for techs (unlimited bookings)
+  // Tech Subscription
+  BUSINESS_MONTHLY: 'com.ivory.app.subscription.business', // $60/month for 40 credits + unlimited bookings
   
   // Auto-Recharge Credit Packages (when credits hit 0)
   CREDITS_5: 'com.ivory.app.credits.5',   // $7.50 ($1.50/credit)
@@ -70,9 +69,8 @@ export const PRODUCT_CREDITS: Record<string, number> = {
 
 // Map product IDs to subscription tiers and user types
 export const PRODUCT_TIERS: Record<string, { tier: string; userType: string; credits?: number }> = {
-  [IAP_PRODUCT_IDS.PRO_MONTHLY]: { tier: 'pro', userType: 'client', credits: 15 },       // $20/month = 15 credits
-  [IAP_PRODUCT_IDS.PREMIUM_MONTHLY]: { tier: 'premium', userType: 'client', credits: 40 }, // $60/month = 40 credits
-  [IAP_PRODUCT_IDS.BUSINESS_MONTHLY]: { tier: 'business', userType: 'tech', credits: 0 },  // $60/month for techs
+  [IAP_PRODUCT_IDS.PRO_MONTHLY]: { tier: 'pro', userType: 'client', credits: 15 },         // $20/month = 15 credits
+  [IAP_PRODUCT_IDS.BUSINESS_MONTHLY]: { tier: 'business', userType: 'tech', credits: 40 }, // $60/month = 40 credits + unlimited bookings
 };
 
 class IAPManager {

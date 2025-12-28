@@ -13,12 +13,6 @@ Simplified subscription model with auto-recharge functionality.
 - Auto-recharge when credits hit 0
 - Credits roll over (never expire)
 
-**Premium Subscription: $60/month**
-- 40 credits included monthly
-- Auto-recharge when credits hit 0
-- Credits roll over (never expire)
-- Early access to new features
-
 **Auto-Recharge Options (when credits = 0):**
 - 5 credits for $7.50 ($1.50/credit)
 - 10 credits for $15.00 ($1.50/credit)
@@ -27,40 +21,34 @@ Simplified subscription model with auto-recharge functionality.
 
 **Business Subscription: $60/month**
 - Unlimited bookings
-- No credits needed
+- 40 credits per month for creating designs
+- Auto-recharge when credits hit 0
 - Portfolio and client management
 
 ## IAP Products to Create in App Store Connect
 
-### 1. Pro Monthly Subscription
+### 1. Pro Monthly Subscription (Clients)
 - **Product ID:** `com.ivory.app.subscription.pro`
 - **Type:** Auto-Renewable Subscription
 - **Price:** $19.99/month
 - **Display Name:** Pro Monthly
 - **Description:** 15 AI-generated nail designs per month with auto-recharge
 
-### 2. Premium Monthly Subscription
-- **Product ID:** `com.ivory.app.subscription.premium`
-- **Type:** Auto-Renewable Subscription
-- **Price:** $59.99/month
-- **Display Name:** Premium Monthly
-- **Description:** 40 AI-generated nail designs per month with auto-recharge
-
-### 3. Business Monthly Subscription  
+### 2. Business Monthly Subscription (Nail Techs)
 - **Product ID:** `com.ivory.app.subscription.business`
 - **Type:** Auto-Renewable Subscription
 - **Price:** $59.99/month
 - **Display Name:** Business Monthly
-- **Description:** Unlimited bookings for nail technicians
+- **Description:** Unlimited bookings + 40 AI designs per month with auto-recharge
 
-### 4. Auto-Recharge: 5 Credits
+### 3. Auto-Recharge: 5 Credits
 - **Product ID:** `com.ivory.app.credits.5`
 - **Type:** Consumable
 - **Price:** $7.49
 - **Display Name:** 5 Credits
 - **Description:** 5 AI-generated nail designs ($1.50/credit)
 
-### 5. Auto-Recharge: 10 Credits
+### 4. Auto-Recharge: 10 Credits
 - **Product ID:** `com.ivory.app.credits.10`
 - **Type:** Consumable
 - **Price:** $14.99
@@ -72,8 +60,8 @@ Simplified subscription model with auto-recharge functionality.
 Update in Stripe Dashboard:
 
 ### Subscriptions
-- **Pro Monthly:** $20.00/month - 15 credits per month with auto-recharge
-- **Premium Monthly:** $60.00/month - 40 credits per month with auto-recharge
+- **Pro Monthly (Clients):** $20.00/month - 15 credits per month with auto-recharge
+- **Business Monthly (Techs):** $60.00/month - 40 credits + unlimited bookings with auto-recharge
 
 ### One-Time Purchases
 - **5 Credits:** $7.50
