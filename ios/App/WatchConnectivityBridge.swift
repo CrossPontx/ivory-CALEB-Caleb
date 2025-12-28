@@ -162,19 +162,19 @@ public class WatchConnectivityBridge: NSObject, WCSessionDelegate {
                 "id": "sample-1",
                 "title": "Classic French",
                 "description": "Elegant French manicure",
-                "imageUrl": NSNull()
+                "imageUrl": nil
             ],
             [
                 "id": "sample-2",
                 "title": "Floral Spring",
                 "description": "Delicate floral patterns",
-                "imageUrl": NSNull()
+                "imageUrl": nil
             ],
             [
                 "id": "sample-3",
                 "title": "Geometric Modern",
                 "description": "Bold geometric design",
-                "imageUrl": NSNull()
+                "imageUrl": nil
             ]
         ]
     }

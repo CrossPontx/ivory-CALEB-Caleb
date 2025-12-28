@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		034EDB062EF20FF800BA022C /* ivory Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 034EDAFC2EF20FF700BA022C /* ivory Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		039955CE2F01CC3400AB0A8F /* IAPPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 039955CD2F01CC3400AB0A8F /* IAPPlugin.swift */; };
+		039955D02F01CC7F00AB0A8F /* WatchConnectivityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 039955CF2F01CC7F00AB0A8F /* WatchConnectivityPlugin.swift */; };
+		039955D22F01CCB000AB0A8F /* WatchConnectivityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 039955D12F01CCB000AB0A8F /* WatchConnectivityBridge.swift */; };
 		03A3CF4D2F00E7DA00EF5B32 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03A3CF4C2F00E7DA00EF5B32 /* StoreKit.framework */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
@@ -45,6 +48,9 @@
 
 /* Begin PBXFileReference section */
 		034EDAFC2EF20FF700BA022C /* ivory Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ivory Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		039955CD2F01CC3400AB0A8F /* IAPPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPPlugin.swift; sourceTree = "<group>"; };
+		039955CF2F01CC7F00AB0A8F /* WatchConnectivityPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityPlugin.swift; sourceTree = "<group>"; };
+		039955D12F01CCB000AB0A8F /* WatchConnectivityBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityBridge.swift; sourceTree = "<group>"; };
 		03A3CF4C2F00E7DA00EF5B32 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		03D852062EF0FFF10040F36B /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
@@ -94,6 +100,9 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				039955CD2F01CC3400AB0A8F /* IAPPlugin.swift */,
+				039955CF2F01CC7F00AB0A8F /* WatchConnectivityPlugin.swift */,
+				039955D12F01CCB000AB0A8F /* WatchConnectivityBridge.swift */,
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				034EDAFD2EF20FF700BA022C /* ivory Watch App */,
@@ -250,7 +259,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				039955D02F01CC7F00AB0A8F /* WatchConnectivityPlugin.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				039955CE2F01CC3400AB0A8F /* IAPPlugin.swift in Sources */,
+				039955D22F01CCB000AB0A8F /* WatchConnectivityBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
