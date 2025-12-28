@@ -3,9 +3,28 @@ import Capacitor
 import StoreKit
 
 @objc(IAPPlugin)
-public class IAPPlugin: CAPPlugin {
+public class IAPPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "IAPPlugin"
+    public let jsName = "IAPPlugin"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "getProducts", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "purchase", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "restorePurchases", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "finishTransaction", returnType: CAPPluginReturnPromise)
+    ]
+    
     private var products: [SKProduct] = []
     private var productsRequest: SKProductsRequest?
+    private var pendingCalls: [String: CAPPluginCall] = [:]
+    
+    public override func load() {
+        super.load()
+        SKPaymentQueue.default().add(self)
+    }
+    
+    deinit {
+        SKPaymentQueue.default().remove(self)
+    }
     
     @objc func getProducts(_ call: CAPPluginCall) {
         guard let productIds = call.getArray("productIds", String.self) else {
@@ -16,10 +35,11 @@ public class IAPPlugin: CAPPlugin {
         let request = SKProductsRequest(productIdentifiers: Set(productIds))
         request.delegate = self
         productsRequest = request
-        request.start()
         
         // Store call for later response
-        self.bridge?.saveCall(call)
+        pendingCalls["getProducts"] = call
+        
+        request.start()
     }
     
     @objc func purchase(_ call: CAPPluginCall) {
@@ -33,11 +53,11 @@ public class IAPPlugin: CAPPlugin {
             return
         }
         
+        // Store call for later response
+        pendingCalls["purchase_\(productId)"] = call
+        
         let payment = SKPayment(product: product)
         SKPaymentQueue.default().add(payment)
-        
-        // Store call for later response
-        self.bridge?.saveCall(call)
     }
     
     @objc func restorePurchases(_ call: CAPPluginCall) {
@@ -84,17 +104,19 @@ extension IAPPlugin: SKProductsRequestDelegate {
             ]
         }
         
-        if let call = self.bridge?.savedCall(withID: "getProducts") {
+        if let call = pendingCalls["getProducts"] {
             call.resolve([
                 "products": productsData,
                 "invalidProductIds": response.invalidProductIdentifiers
             ])
+            pendingCalls.removeValue(forKey: "getProducts")
         }
     }
     
     public func request(_ request: SKRequest, didFailWithError error: Error) {
-        if let call = self.bridge?.savedCall(withID: "getProducts") {
+        if let call = pendingCalls["getProducts"] {
             call.reject("Failed to load products: \(error.localizedDescription)")
+            pendingCalls.removeValue(forKey: "getProducts")
         }
     }
 }
@@ -124,12 +146,20 @@ extension IAPPlugin: SKPaymentTransactionObserver {
            let receiptData = try? Data(contentsOf: receiptURL) {
             let receiptString = receiptData.base64EncodedString()
             
-            notifyListeners("purchaseCompleted", data: [
+            let data: [String: Any] = [
                 "transactionId": transaction.transactionIdentifier ?? "",
                 "productId": transaction.payment.productIdentifier,
                 "receipt": receiptString,
                 "transactionDate": transaction.transactionDate?.timeIntervalSince1970 ?? 0
-            ])
+            ]
+            
+            notifyListeners("purchaseCompleted", data: data)
+            
+            // Also resolve pending purchase call if exists
+            if let call = pendingCalls["purchase_\(transaction.payment.productIdentifier)"] {
+                call.resolve(data)
+                pendingCalls.removeValue(forKey: "purchase_\(transaction.payment.productIdentifier)")
+            }
         }
         
         // Don't finish transaction here - let the app do it after server validation
@@ -140,11 +170,19 @@ extension IAPPlugin: SKPaymentTransactionObserver {
         let errorCode = error?.code.rawValue ?? -1
         let errorMessage = error?.localizedDescription ?? "Unknown error"
         
-        notifyListeners("purchaseFailed", data: [
+        let data: [String: Any] = [
             "productId": transaction.payment.productIdentifier,
             "errorCode": errorCode,
             "errorMessage": errorMessage
-        ])
+        ]
+        
+        notifyListeners("purchaseFailed", data: data)
+        
+        // Also reject pending purchase call if exists
+        if let call = pendingCalls["purchase_\(transaction.payment.productIdentifier)"] {
+            call.reject(errorMessage, "\(errorCode)", error, nil)
+            pendingCalls.removeValue(forKey: "purchase_\(transaction.payment.productIdentifier)")
+        }
         
         SKPaymentQueue.default().finishTransaction(transaction)
     }
@@ -164,12 +202,4 @@ extension IAPPlugin: SKPaymentTransactionObserver {
         SKPaymentQueue.default().finishTransaction(transaction)
     }
     
-    public override func load() {
-        super.load()
-        SKPaymentQueue.default().add(self)
-    }
-    
-    deinit {
-        SKPaymentQueue.default().remove(self)
-    }
 }

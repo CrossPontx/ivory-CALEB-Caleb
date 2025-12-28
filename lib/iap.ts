@@ -41,26 +41,27 @@ export interface PurchaseResult {
 const IAP = registerPlugin<IAPPlugin>('IAPPlugin');
 
 // Product IDs - these must match what you configure in App Store Connect
+// Bundle ID: com.ivory.app
 export const IAP_PRODUCT_IDS = {
   // Client Subscriptions
-  PRO_MONTHLY: 'com.yourcompany.ivory.business2', // $20/month for clients
+  PRO_MONTHLY: 'com.ivory.app.subscription.pro', // $20/month for clients
   
   // Tech Subscriptions
-  BUSINESS_MONTHLY: 'com.yourcompany.ivory.pro', // $60/month for techs
+  BUSINESS_MONTHLY: 'com.ivory.app.subscription.business', // $60/month for techs
   
   // Credit Packages (for clients only)
-  CREDITS_5: 'com.yourcompany.ivory.credits.5',
-  CREDITS_10: 'com.yourcompany.ivory.credits.10',
-  CREDITS_25: 'com.yourcompany.ivory.credits.25',
-  CREDITS_50: 'com.yourcompany.ivory.credits.50',
-  CREDITS_100: 'com.yourcompany.ivory.credits.100',
+  CREDITS_5: 'com.ivory.app.credits.5',
+  CREDITS_10: 'com.ivory.app.credits.10',
+  CREDITS_25: 'com.ivory.app.credits.25',
+  CREDITS_50: 'com.ivory.app.credits.50',
+  CREDITS_100: 'com.ivory.app.credits.100',
   
   // Booking Payments (dynamic pricing tiers)
-  BOOKING_TIER_1: 'com.yourcompany.ivory.booking.tier1', // $0-50
-  BOOKING_TIER_2: 'com.yourcompany.ivory.booking.tier2', // $51-100
-  BOOKING_TIER_3: 'com.yourcompany.ivory.booking.tier3', // $101-150
-  BOOKING_TIER_4: 'com.yourcompany.ivory.booking.tier4', // $151-200
-  BOOKING_TIER_5: 'com.yourcompany.ivory.booking.tier5', // $201+
+  BOOKING_TIER_1: 'com.ivory.app.booking.tier1', // $0-50
+  BOOKING_TIER_2: 'com.ivory.app.booking.tier2', // $51-100
+  BOOKING_TIER_3: 'com.ivory.app.booking.tier3', // $101-150
+  BOOKING_TIER_4: 'com.ivory.app.booking.tier4', // $151-200
+  BOOKING_TIER_5: 'com.ivory.app.booking.tier5', // $201+
 };
 
 // Map product IDs to credit amounts (for clients)
