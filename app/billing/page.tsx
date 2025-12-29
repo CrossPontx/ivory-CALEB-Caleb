@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Capacitor } from '@capacitor/core';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BuyCreditsDialog } from '@/components/buy-credits-dialog';
 import { SubscriptionPlans } from '@/components/subscription-plans';
@@ -288,11 +286,9 @@ export default function BillingPage() {
                         <div className="text-2xl font-light text-[#1A1A1A] mb-2">
                           ${(pkg.price / 100).toFixed(2)}
                         </div>
-                        {pkg.savings && (
-                          <div className="text-xs text-green-600 font-light">
-                            Save {pkg.savings}
-                          </div>
-                        )}
+                        <div className="text-xs text-[#6B6B6B] font-light">
+                          ${(pkg.pricePerCredit / 100).toFixed(2)}/credit
+                        </div>
                       </div>
                     </div>
                   </BuyCreditsDialog>
