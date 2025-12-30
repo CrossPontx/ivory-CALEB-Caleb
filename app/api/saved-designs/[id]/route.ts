@@ -6,7 +6,7 @@ import { eq, and } from 'drizzle-orm';
 // GET /api/saved-designs/[id] - Get single saved design
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get session from cookie
@@ -27,7 +27,8 @@ export async function GET(
     }
 
     const user = { id: session.userId };
-    const designId = parseInt(params.id);
+    const { id } = await params;
+    const designId = parseInt(id);
 
     // Verify ownership
     const [design] = await db
@@ -53,7 +54,7 @@ export async function GET(
 // PATCH /api/saved-designs/[id] - Update saved design
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get session from cookie
@@ -74,7 +75,8 @@ export async function PATCH(
     }
 
     const user = { id: session.userId };
-    const designId = parseInt(params.id);
+    const { id } = await params;
+    const designId = parseInt(id);
     const body = await request.json();
     const { title, sourceUrl, notes, tags, collectionId, isFavorite } = body;
 
@@ -116,7 +118,7 @@ export async function PATCH(
 // DELETE /api/saved-designs/[id] - Delete saved design
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get session from cookie
@@ -137,7 +139,8 @@ export async function DELETE(
     }
 
     const user = { id: session.userId };
-    const designId = parseInt(params.id);
+    const { id } = await params;
+    const designId = parseInt(id);
 
     // Verify ownership
     const [design] = await db

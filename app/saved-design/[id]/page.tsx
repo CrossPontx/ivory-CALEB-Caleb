@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Trash2, Send, ExternalLink } from "lucide-react"
+import { ArrowLeft, Trash2, Send, ExternalLink, Share2 } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 
@@ -49,6 +49,11 @@ export default function SavedDesignDetailPage() {
   const handleSendToTech = () => {
     // TODO: Implement send to tech functionality
     alert('Send to Nail Tech feature coming soon!')
+  }
+
+  const handleShare = () => {
+    // TODO: Implement share functionality
+    alert('Share with Friends feature coming soon!')
   }
 
   const handleViewSource = () => {
@@ -127,6 +132,15 @@ export default function SavedDesignDetailPage() {
           >
             <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
             Send to Nail Tech
+          </Button>
+
+          <Button 
+            onClick={handleShare}
+            disabled={isLoading}
+            className="w-full bg-transparent border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 ease-out h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <Share2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
+            Share with Friends
           </Button>
 
           {design?.sourceUrl && (
