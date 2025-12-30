@@ -1524,7 +1524,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
               <label className="text-sm font-medium text-gray-700">Hue</label>
               <span className="text-sm font-semibold text-gray-900 bg-gray-100 px-3 py-1 rounded-full">{Math.round(hue)}°</span>
             </div>
-            <div className="relative">
+            <div className="relative py-2 -my-2">
               <input
                 type="range"
                 min="0"
@@ -1534,9 +1534,10 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
                   setHue(Number(e.target.value))
                   setSaturation(100) // Always use full saturation
                 }}
-                className="w-full h-3 rounded-full appearance-none cursor-pointer shadow-inner"
+                className="w-full h-8 rounded-full appearance-none cursor-pointer shadow-inner touch-manipulation"
                 style={{
-                  background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
+                  background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)',
+                  WebkitAppearance: 'none',
                 }}
               />
             </div>
@@ -1548,16 +1549,17 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
               <label className="text-sm font-medium text-gray-700">Brightness</label>
               <span className="text-sm font-semibold text-gray-900 bg-gray-100 px-3 py-1 rounded-full">{Math.round(lightness)}%</span>
             </div>
-            <div className="relative">
+            <div className="relative py-2 -my-2">
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={lightness}
                 onChange={(e) => setLightness(Number(e.target.value))}
-                className="w-full h-3 rounded-full appearance-none cursor-pointer shadow-inner"
+                className="w-full h-8 rounded-full appearance-none cursor-pointer shadow-inner touch-manipulation"
                 style={{
-                  background: `linear-gradient(to right, hsl(${hue}, 100%, 0%), hsl(${hue}, 100%, 50%), hsl(${hue}, 100%, 100%))`
+                  background: `linear-gradient(to right, hsl(${hue}, 100%, 0%), hsl(${hue}, 100%, 50%), hsl(${hue}, 100%, 100%))`,
+                  WebkitAppearance: 'none',
                 }}
               />
             </div>
