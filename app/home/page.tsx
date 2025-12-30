@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Plus, Sparkles, Gift, Share2, X, Search, MapPin, Calendar, Clock, Star, ArrowRight, ExternalLink, FolderOpen } from "lucide-react"
+import { Plus, Sparkles, Gift, Share2, X, Search, MapPin, Calendar, Clock, Star, ArrowRight, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import { useCredits } from "@/hooks/use-credits"
 import { BottomNav } from "@/components/bottom-nav"
@@ -13,7 +13,6 @@ import ContentModerationMenu from "@/components/content-moderation-menu"
 import { useIsAppleWatch, HideOnWatch, WatchButton, WatchGrid } from "@/components/watch-optimized-layout"
 import { BookingReviewDialog } from "@/components/booking-review-dialog"
 import { UploadDesignDialog } from "@/components/upload-design-dialog"
-import { CollectionsManager } from "@/components/collections-manager"
 
 type NailLook = {
   id: string
@@ -379,51 +378,6 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="flex gap-3 flex-wrap">
-                    <CollectionsManager 
-                      trigger={
-                        <Button variant="outline" className="h-12 sm:h-14 px-6 sm:px-8 border-[#E8E8E8] hover:border-[#8B7355] text-xs tracking-widest uppercase rounded-none font-light">
-                          <FolderOpen className="w-5 h-5 mr-2" strokeWidth={1.5} />
-                          Collections
-                        </Button>
-                      }
-                      onCollectionChange={() => {
-                        // Reload designs when collections change
-                        const loadData = async () => {
-                          const userStr = localStorage.getItem("ivoryUser")
-                          if (!userStr) return
-                          const user = JSON.parse(userStr)
-                          
-                          const looksResponse = await fetch(`/api/looks?userId=${user.id}&currentUserId=${user.id}`, { cache: 'no-store' })
-                          const aiLooks: NailLook[] = []
-                          if (looksResponse.ok) {
-                            const data = await looksResponse.json()
-                            aiLooks.push(...data.map((look: any) => ({ ...look, type: 'ai' as const })))
-                          }
-
-                          const savedResponse = await fetch('/api/saved-designs', { cache: 'no-store' })
-                          const savedDesigns: NailLook[] = []
-                          if (savedResponse.ok) {
-                            const data = await savedResponse.json()
-                            savedDesigns.push(...data.designs.map((design: any) => ({
-                              id: `saved-${design.id}`,
-                              imageUrl: design.imageUrl,
-                              title: design.title || 'Saved Design',
-                              createdAt: design.createdAt,
-                              userId: user.id,
-                              sourceUrl: design.sourceUrl,
-                              sourceType: design.sourceType,
-                              type: 'saved' as const
-                            })))
-                          }
-
-                          const allDesigns = [...aiLooks, ...savedDesigns].sort((a, b) => 
-                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                          )
-                          setLooks(allDesigns)
-                        }
-                        loadData()
-                      }}
-                    />
                     <UploadDesignDialog 
                       onUploadComplete={() => {
                         // Reload designs

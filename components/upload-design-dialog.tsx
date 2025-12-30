@@ -1,20 +1,13 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, Camera, Image as ImageIcon, Loader2, X } from "lucide-react"
 import Image from "next/image"
-
-interface Collection {
-  id: number
-  name: string
-  isDefault: boolean
-}
 
 interface UploadDesignDialogProps {
   onUploadComplete?: () => void
@@ -29,37 +22,7 @@ export function UploadDesignDialog({ onUploadComplete, trigger }: UploadDesignDi
   const [title, setTitle] = useState("")
   const [sourceUrl, setSourceUrl] = useState("")
   const [notes, setNotes] = useState("")
-  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null)
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [loadingCollections, setLoadingCollections] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Load collections when dialog opens
-  useEffect(() => {
-    if (open) {
-      loadCollections()
-    }
-  }, [open])
-
-  const loadCollections = async () => {
-    try {
-      setLoadingCollections(true)
-      const response = await fetch('/api/collections')
-      if (response.ok) {
-        const data = await response.json()
-        setCollections(data.collections || [])
-        // Auto-select default collection
-        const defaultCollection = data.collections?.find((c: Collection) => c.isDefault)
-        if (defaultCollection) {
-          setSelectedCollectionId(defaultCollection.id)
-        }
-      }
-    } catch (error) {
-      console.error('Error loading collections:', error)
-    } finally {
-      setLoadingCollections(false)
-    }
-  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -124,7 +87,7 @@ export function UploadDesignDialog({ onUploadComplete, trigger }: UploadDesignDi
           sourceUrl: sourceUrl.trim() || null,
           sourceType: 'upload',
           notes: notes.trim() || null,
-          collectionId: selectedCollectionId,
+          collectionId: null, // Will use default collection
         }),
       })
 
@@ -264,34 +227,6 @@ export function UploadDesignDialog({ onUploadComplete, trigger }: UploadDesignDi
               placeholder="e.g., https://instagram.com/..."
               className="border-[#E8E8E8] focus:border-[#8B7355]"
             />
-          </div>
-
-          {/* Collection */}
-          <div className="space-y-2">
-            <Label htmlFor="collection" className="text-xs tracking-wider uppercase text-[#6B6B6B]">
-              Collection
-            </Label>
-            {loadingCollections ? (
-              <div className="h-10 flex items-center justify-center border border-[#E8E8E8] rounded-md">
-                <Loader2 className="w-4 h-4 animate-spin text-[#6B6B6B]" />
-              </div>
-            ) : (
-              <Select
-                value={selectedCollectionId?.toString()}
-                onValueChange={(value) => setSelectedCollectionId(parseInt(value))}
-              >
-                <SelectTrigger className="border-[#E8E8E8] focus:border-[#8B7355]">
-                  <SelectValue placeholder="Select collection" />
-                </SelectTrigger>
-                <SelectContent>
-                  {collections.map((collection) => (
-                    <SelectItem key={collection.id} value={collection.id.toString()}>
-                      {collection.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
           </div>
 
           {/* Notes */}
