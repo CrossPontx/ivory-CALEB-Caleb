@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import { BottomNav } from "@/components/bottom-nav"
 import { DrawingCanvasKonva as DrawingCanvas } from "@/components/drawing-canvas-konva"
 import { Pencil } from "lucide-react"
+import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -1295,6 +1296,9 @@ export default function CapturePage() {
   if (capturedImage) {
     return (
       <div className="fixed inset-0 z-[100] bg-gradient-to-b from-[#F8F7F5] via-white to-white flex flex-col">
+        {/* Zero Credits Banner */}
+        <ZeroCreditsBanner credits={credits} />
+        
         {/* Elegant Header */}
         <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-8 lg:px-12 pb-5 sm:pb-6 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
           <div className="max-w-7xl mx-auto">

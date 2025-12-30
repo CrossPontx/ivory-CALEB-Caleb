@@ -13,6 +13,7 @@ import ContentModerationMenu from "@/components/content-moderation-menu"
 import { useIsAppleWatch, HideOnWatch, WatchButton, WatchGrid } from "@/components/watch-optimized-layout"
 import { BookingReviewDialog } from "@/components/booking-review-dialog"
 import { UploadDesignDialog } from "@/components/upload-design-dialog"
+import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
 
 type NailLook = {
   id: string
@@ -211,6 +212,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white lg:pl-20">
+      {/* Zero Credits Banner */}
+      <ZeroCreditsBanner credits={credits} />
+      
       {/* Header */}
       <header className={`bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top backdrop-blur-sm bg-white/95 transition-all duration-300 ${isWatch ? 'watch-compact' : ''}`}>
         <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-2' : 'px-5 sm:px-6 py-4 sm:py-5'} flex items-center gap-2 sm:gap-3`}>
