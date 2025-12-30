@@ -51,8 +51,9 @@ export default function SavedDesignDetailPage() {
   const handleVisualize = () => {
     if (!design) return
     
-    // Store the design image URL in localStorage to load in capture page
+    // Store the design image URL and flag for auto-generation
     localStorage.setItem('loadedDesignImage', design.imageUrl)
+    localStorage.setItem('autoShowConfirmDialog', 'true')
     localStorage.setItem('loadedDesignMetadata', JSON.stringify({
       source: 'saved-design',
       designId: design.id,

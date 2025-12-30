@@ -54,8 +54,9 @@ export default function LookDetailPage() {
   const handleVisualize = () => {
     if (!look) return
     
-    // Store the design image URL in localStorage to load in capture page
+    // Store the design image URL and flag for auto-generation
     localStorage.setItem('loadedDesignImage', look.imageUrl)
+    localStorage.setItem('autoShowConfirmDialog', 'true')
     localStorage.setItem('loadedDesignMetadata', JSON.stringify({
       source: 'ai-generated',
       lookId: look.id,

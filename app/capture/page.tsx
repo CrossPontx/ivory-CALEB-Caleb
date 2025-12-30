@@ -333,13 +333,47 @@ export default function CapturePage() {
       console.log('=== CAPTURE PAGE INIT DEBUG ===')
       const loadedMetadata = localStorage.getItem("loadedDesignMetadata")
       const loadedEditingImage = localStorage.getItem("currentEditingImage")
+      const loadedDesignImage = localStorage.getItem("loadedDesignImage")
+      const autoShowConfirm = localStorage.getItem("autoShowConfirmDialog")
       const loadedPreview = localStorage.getItem("generatedPreview")
       
       console.log('Checking localStorage:')
       console.log('- loadedMetadata:', loadedMetadata ? 'EXISTS' : 'NULL')
       console.log('- loadedEditingImage:', loadedEditingImage ? 'EXISTS' : 'NULL')
+      console.log('- loadedDesignImage:', loadedDesignImage ? 'EXISTS' : 'NULL')
+      console.log('- autoShowConfirm:', autoShowConfirm)
       console.log('- loadedPreview:', loadedPreview ? 'EXISTS' : 'NULL')
       console.log('- hasLoadedDesignRef:', hasLoadedDesignRef.current)
+      
+      // Handle auto-visualize from design detail pages
+      if (loadedDesignImage && autoShowConfirm === 'true' && !hasLoadedDesignRef.current) {
+        try {
+          hasLoadedDesignRef.current = true
+          
+          console.log('✅ Auto-loading design for visualization')
+          
+          // Set the design image as selected design image
+          setSelectedDesignImages([loadedDesignImage])
+          setCapturedImage(loadedDesignImage)
+          setIsInitializing(false)
+          
+          // Clear the flags
+          localStorage.removeItem('loadedDesignImage')
+          localStorage.removeItem('autoShowConfirmDialog')
+          localStorage.removeItem('loadedDesignMetadata')
+          
+          // Show confirmation dialog after a brief moment to let the UI update
+          setTimeout(() => {
+            setPendingGenerationSettings(designSettings)
+            setShowConfirmDialog(true)
+          }, 500)
+          
+          return
+        } catch (e) {
+          console.error('Error loading design for visualization:', e)
+          hasLoadedDesignRef.current = false
+        }
+      }
       
       if (loadedMetadata && loadedEditingImage && !hasLoadedDesignRef.current) {
         try {
