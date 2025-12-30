@@ -123,10 +123,10 @@ export default function TechDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F7F5] via-white to-white pb-24">
+    <div className="min-h-screen bg-white pb-24">
 
       {/* Elegant Header */}
-      <header className="bg-white/98 backdrop-blur-md border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
+      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 pt-safe">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-6 sm:py-7">
           <div className="flex items-center justify-between">
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em]">
