@@ -351,12 +351,24 @@ export default function CapturePage() {
           hasLoadedDesignRef.current = true
           
           console.log('✅ Auto-loading design for visualization')
+          console.log('✅ Design image URL:', loadedDesignImage)
           
-          // Set the design image as selected design image
-          setSelectedDesignImages([loadedDesignImage])
-          setCapturedImage(loadedDesignImage)
+          // First, update the tabs with the design image
+          setDesignTabs(prevTabs => {
+            const updatedTabs = prevTabs.map(tab => 
+              tab.id === 'tab-initial-1' 
+                ? {
+                    ...tab,
+                    selectedDesignImages: [loadedDesignImage],
+                    originalImage: loadedDesignImage
+                  }
+                : tab
+            )
+            console.log('✅ Updated tabs with design image:', updatedTabs[0].selectedDesignImages)
+            return updatedTabs
+          })
           
-          // Set design image influence to 100% and base color to 0%
+          // Set the design image influence to 100% and base color to 0%
           setInfluenceWeights({
             nailEditor_designImage: 100,
             nailEditor_baseColor: 0,
@@ -364,34 +376,29 @@ export default function CapturePage() {
             nailEditor_texture: 100
           })
           
-          // Update the active tab immediately to prevent sync issues
-          setDesignTabs(tabs => tabs.map(tab => 
-            tab.id === activeTabId 
-              ? {
-                  ...tab,
-                  selectedDesignImages: [loadedDesignImage],
-                  originalImage: loadedDesignImage
-                }
-              : tab
-          ))
-          
-          setIsInitializing(false)
-          
           // Clear the flags
           localStorage.removeItem('loadedDesignImage')
           localStorage.removeItem('autoShowConfirmDialog')
           localStorage.removeItem('loadedDesignMetadata')
           
-          // Show confirmation dialog after a brief moment to let the UI update
+          // Use a longer delay to ensure tab state is fully updated before allowing sync
           setTimeout(() => {
-            setPendingGenerationSettings(designSettings)
-            setShowConfirmDialog(true)
-          }, 500)
+            console.log('✅ Finishing initialization')
+            setIsInitializing(false)
+            
+            // Show confirmation dialog after initialization is complete
+            setTimeout(() => {
+              console.log('✅ Showing confirmation dialog')
+              setPendingGenerationSettings(designSettings)
+              setShowConfirmDialog(true)
+            }, 200)
+          }, 300)
           
           return
         } catch (e) {
           console.error('Error loading design for visualization:', e)
           hasLoadedDesignRef.current = false
+          setIsInitializing(false)
         }
       }
       
