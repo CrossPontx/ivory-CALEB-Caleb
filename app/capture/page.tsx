@@ -357,6 +357,14 @@ export default function CapturePage() {
           setCapturedImage(loadedDesignImage)
           setIsInitializing(false)
           
+          // Set design image influence to 100% and base color to 0%
+          setInfluenceWeights({
+            nailEditor_designImage: 100,
+            nailEditor_baseColor: 0,
+            nailEditor_finish: 100,
+            nailEditor_texture: 100
+          })
+          
           // Clear the flags
           localStorage.removeItem('loadedDesignImage')
           localStorage.removeItem('autoShowConfirmDialog')
