@@ -259,33 +259,33 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#FAFAF8] pb-24 lg:pl-20">
       {/* Header */}
       <header className="bg-white/98 backdrop-blur-md border-b border-[#E8E8E8] sticky top-0 z-10 safe-top">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-5 sm:py-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-16 py-3 sm:py-6 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button 
               onClick={() => router.back()} 
-              className="w-10 h-10 flex items-center justify-center hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300"
+              className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300"
             >
-              <ArrowLeft className="w-5 h-5 text-[#1A1A1A]" strokeWidth={1} />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[#1A1A1A]" strokeWidth={1} />
             </button>
-            <h1 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
+            <h1 className="font-serif text-lg sm:text-3xl font-light text-[#1A1A1A] tracking-tight">
               Profile
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className={`flex items-center gap-2 px-4 py-2 hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 text-sm font-light tracking-wide ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 text-xs sm:text-sm font-light tracking-wide ${
                 showSettings ? 'text-[#8B7355] bg-[#F8F7F5]' : 'text-[#1A1A1A]'
               }`}
             >
-              <Settings className="w-4 h-4" strokeWidth={1} />
+              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1} />
               <span className="hidden sm:inline">Settings</span>
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-[#1A1A1A] hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 text-sm font-light tracking-wide"
+              className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[#1A1A1A] hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 text-xs sm:text-sm font-light tracking-wide"
             >
-              <LogOut className="w-4 h-4" strokeWidth={1} />
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1} />
               <span className="hidden sm:inline">Log Out</span>
             </button>
           </div>
@@ -293,10 +293,10 @@ export default function ProfilePage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-20 pb-safe">
+      <main className="max-w-4xl mx-auto px-4 sm:px-8 lg:px-16 py-6 sm:py-16 lg:py-20 pb-safe">
         {/* Profile Card */}
-        <div className="border border-[#E8E8E8] p-10 sm:p-14 lg:p-16 text-center mb-8 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-shadow duration-700">
-          <div className="relative w-36 h-36 sm:w-40 sm:h-40 lg:w-44 lg:h-44 mx-auto mb-8 sm:mb-10 group">
+        <div className="border border-[#E8E8E8] p-6 sm:p-14 lg:p-16 text-center mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-shadow duration-700">
+          <div className="relative w-28 h-28 sm:w-40 sm:h-40 lg:w-44 lg:h-44 mx-auto mb-5 sm:mb-10 group">
             {profileImage ? (
               <div className="relative w-full h-full overflow-hidden border border-[#E8E8E8]">
                 <Image
@@ -308,7 +308,7 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="w-full h-full bg-[#F8F7F5] flex items-center justify-center border border-[#E8E8E8]">
-                <span className="text-5xl sm:text-6xl lg:text-7xl font-light text-[#1A1A1A]">
+                <span className="text-4xl sm:text-6xl lg:text-7xl font-light text-[#1A1A1A]">
                   {username ? username.charAt(0).toUpperCase() : 'U'}
                 </span>
               </div>
@@ -322,18 +322,18 @@ export default function ProfilePage() {
               aria-label="Change profile picture"
             >
               {uploadingProfile ? (
-                <Loader2 className="w-8 h-8 text-white animate-spin" />
+                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-spin" />
               ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Camera className="w-8 h-8 text-white drop-shadow-lg" strokeWidth={1} />
-                  <span className="text-[10px] text-white font-light tracking-[0.25em] uppercase">Change Photo</span>
+                <div className="flex flex-col items-center gap-1.5 sm:gap-2">
+                  <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white drop-shadow-lg" strokeWidth={1} />
+                  <span className="text-[9px] sm:text-[10px] text-white font-light tracking-[0.25em] uppercase">Change Photo</span>
                 </div>
               )}
             </button>
             
             {/* Mobile hint badge */}
-            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-[#1A1A1A] flex items-center justify-center sm:hidden border-2 border-white shadow-lg">
-              <Camera className="w-5 h-5 text-white" strokeWidth={1} />
+            <div className="absolute -bottom-1.5 -right-1.5 w-10 h-10 sm:w-12 sm:h-12 bg-[#1A1A1A] flex items-center justify-center sm:hidden border-2 border-white shadow-lg">
+              <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={1} />
             </div>
             
             <input
@@ -346,30 +346,30 @@ export default function ProfilePage() {
           </div>
           
           {isEditingUsername ? (
-            <div className="space-y-6 w-full max-w-md mx-auto">
+            <div className="space-y-4 sm:space-y-6 w-full max-w-md mx-auto">
               <input
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
                 placeholder="Enter username"
-                className="w-full px-6 py-4 border border-[#E8E8E8] text-center font-light text-lg tracking-wide focus:outline-none focus:border-[#8B7355] transition-all duration-700 bg-white"
+                className="w-full px-4 py-3 sm:px-6 sm:py-4 border border-[#E8E8E8] text-center font-light text-base sm:text-lg tracking-wide focus:outline-none focus:border-[#8B7355] transition-all duration-700 bg-white"
                 autoFocus
               />
               {usernameError && (
-                <p className="text-sm text-red-600 font-light tracking-wide">{usernameError}</p>
+                <p className="text-xs sm:text-sm text-red-600 font-light tracking-wide">{usernameError}</p>
               )}
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4">
                 <button
                   onClick={handleUsernameCancel}
                   disabled={savingUsername}
-                  className="flex-1 h-14 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#F8F7F5] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700"
+                  className="flex-1 h-11 sm:h-14 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.25em] uppercase hover:bg-[#F8F7F5] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUsernameSave}
                   disabled={savingUsername}
-                  className="flex-1 h-14 bg-[#1A1A1A] text-white font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#8B7355] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700"
+                  className="flex-1 h-11 sm:h-14 bg-[#1A1A1A] text-white font-light text-[10px] sm:text-[11px] tracking-[0.25em] uppercase hover:bg-[#8B7355] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700"
                 >
                   {savingUsername ? "Saving..." : "Save"}
                 </button>
@@ -377,30 +377,30 @@ export default function ProfilePage() {
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight">
                   {needsUsername ? 'Add Username' : username}
                 </h2>
                 <button
                   onClick={handleUsernameEdit}
-                  className="p-2.5 text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5] transition-all duration-500 hover:scale-110"
+                  className="p-2 sm:p-2.5 text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5] transition-all duration-500 hover:scale-110"
                   aria-label="Edit username"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-5 h-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                   </svg>
                 </button>
               </div>
               {needsUsername && (
-                <p className="text-[10px] text-[#6B6B6B] mb-5 px-4 font-light tracking-[0.25em] uppercase">Click the edit icon to set your username</p>
+                <p className="text-[9px] sm:text-[10px] text-[#6B6B6B] mb-4 sm:mb-5 px-4 font-light tracking-[0.25em] uppercase">Click the edit icon to set your username</p>
               )}
-              <div className="inline-flex items-center gap-2.5 px-5 py-2.5 border border-[#E8E8E8] bg-[#F8F7F5]">
+              <div className="inline-flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 border border-[#E8E8E8] bg-[#F8F7F5]">
                 {userType === "tech" && (
-                  <svg className="w-4 h-4 text-[#8B7355]" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B7355]" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 )}
-                <span className="text-[10px] tracking-[0.25em] uppercase text-[#1A1A1A] font-light">
+                <span className="text-[9px] sm:text-[10px] tracking-[0.25em] uppercase text-[#1A1A1A] font-light">
                   {userType === "tech" ? "Verified Professional" : "Member"}
                 </span>
               </div>
@@ -413,22 +413,22 @@ export default function ProfilePage() {
         {/* Tech Profile Setup for Tech Users */}
         {userType === "tech" && (
           <div
-            className="border border-[#E8E8E8] p-8 sm:p-10 bg-white cursor-pointer hover:border-[#8B7355] hover:shadow-lg hover:scale-[1.01] transition-all duration-700 mb-8 sm:mb-10 group"
+            className="border border-[#E8E8E8] p-5 sm:p-10 bg-white cursor-pointer hover:border-[#8B7355] hover:shadow-lg hover:scale-[1.01] transition-all duration-700 mb-5 sm:mb-10 group"
             onClick={() => router.push("/tech/profile-setup")}
           >
-            <div className="flex items-center gap-6">
-              <div className="w-16 h-16 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center flex-shrink-0 group-hover:border-[#8B7355] group-hover:bg-[#8B7355] transition-all duration-700">
-                <Settings className="w-7 h-7 text-[#1A1A1A] group-hover:text-white transition-colors duration-700" strokeWidth={1} />
+            <div className="flex items-center gap-4 sm:gap-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center flex-shrink-0 group-hover:border-[#8B7355] group-hover:bg-[#8B7355] transition-all duration-700">
+                <Settings className="w-5 h-5 sm:w-7 sm:h-7 text-[#1A1A1A] group-hover:text-white transition-colors duration-700" strokeWidth={1} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-serif font-light text-xl sm:text-2xl text-[#1A1A1A] tracking-tight mb-2">
+                <div className="font-serif font-light text-base sm:text-2xl text-[#1A1A1A] tracking-tight mb-1 sm:mb-2">
                   Tech Profile Setup
                 </div>
-                <div className="text-[10px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">
+                <div className="text-[9px] sm:text-[10px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">
                   Services, Prices & Gallery
                 </div>
               </div>
-              <svg className="w-6 h-6 text-[#6B6B6B] flex-shrink-0 group-hover:text-[#8B7355] group-hover:translate-x-1 transition-all duration-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#6B6B6B] flex-shrink-0 group-hover:text-[#8B7355] group-hover:translate-x-1 transition-all duration-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -437,28 +437,28 @@ export default function ProfilePage() {
 
         {/* Portfolio Gallery for Tech Users */}
         {userType === "tech" && (
-          <div className="border border-[#E8E8E8] p-8 sm:p-10 lg:p-12 mb-8 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-shadow duration-700">
-            <div className="flex items-center justify-between mb-10">
+          <div className="border border-[#E8E8E8] p-5 sm:p-10 lg:p-12 mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-shadow duration-700">
+            <div className="flex items-center justify-between mb-6 sm:mb-10">
               <div>
-                <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-2">
+                <h3 className="font-serif text-xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-1 sm:mb-2">
                   Portfolio
                 </h3>
-                <p className="text-[10px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">
+                <p className="text-[9px] sm:text-[10px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">
                   {portfolioImages.length} {portfolioImages.length === 1 ? 'Photo' : 'Photos'}
                 </p>
               </div>
               <button
                 onClick={() => router.push("/tech/profile-setup")}
-                className="h-12 px-6 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#1A1A1A] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 flex items-center gap-2"
+                className="h-9 sm:h-12 px-3 sm:px-6 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.25em] uppercase hover:bg-[#1A1A1A] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 flex items-center gap-1.5 sm:gap-2"
               >
-                <Upload className="w-4 h-4" strokeWidth={1} />
+                <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1} />
                 <span className="hidden sm:inline">Manage</span>
                 <span className="sm:hidden">Edit</span>
               </button>
             </div>
 
             {portfolioImages.length > 0 ? (
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 {portfolioImages.slice(0, 9).map((url, index) => (
                   <div
                     key={url}
@@ -483,28 +483,28 @@ export default function ProfilePage() {
                     className="relative aspect-square overflow-hidden bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center cursor-pointer hover:bg-[#8B7355] hover:border-[#8B7355] hover:shadow-lg transition-all duration-700 group"
                     onClick={() => router.push("/tech/profile-setup")}
                   >
-                    <span className="text-[#1A1A1A] group-hover:text-white text-3xl sm:text-4xl font-light transition-colors duration-700">
+                    <span className="text-[#1A1A1A] group-hover:text-white text-2xl sm:text-4xl font-light transition-colors duration-700">
                       +{portfolioImages.length - 9}
                     </span>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center py-16 sm:py-20 lg:py-24 border border-[#E8E8E8] bg-[#F8F7F5]">
-                <div className="w-20 h-20 mx-auto mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center">
-                  <Upload className="w-8 h-8 text-[#6B6B6B]" strokeWidth={1} />
+              <div className="text-center py-12 sm:py-20 lg:py-24 border border-[#E8E8E8] bg-[#F8F7F5]">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 sm:mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center">
+                  <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-[#6B6B6B]" strokeWidth={1} />
                 </div>
-                <h4 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-3">
+                <h4 className="font-serif text-lg sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-2 sm:mb-3">
                   No Portfolio Yet
                 </h4>
-                <p className="text-[10px] text-[#6B6B6B] mb-8 px-4 font-light tracking-[0.25em] uppercase">
+                <p className="text-[9px] sm:text-[10px] text-[#6B6B6B] mb-5 sm:mb-8 px-4 font-light tracking-[0.25em] uppercase">
                   Showcase your best work
                 </p>
                 <button
                   onClick={() => router.push("/tech/profile-setup")}
-                  className="h-14 px-8 bg-[#1A1A1A] text-white font-light text-[11px] tracking-[0.25em] uppercase hover:bg-[#8B7355] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 inline-flex items-center gap-2"
+                  className="h-11 sm:h-14 px-6 sm:px-8 bg-[#1A1A1A] text-white font-light text-[10px] sm:text-[11px] tracking-[0.25em] uppercase hover:bg-[#8B7355] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 inline-flex items-center gap-2"
                 >
-                  <Plus className="w-4 h-4" strokeWidth={1} />
+                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1} />
                   Add Photos
                 </button>
               </div>
@@ -514,151 +514,151 @@ export default function ProfilePage() {
 
         {/* Settings Section - Collapsible */}
         {showSettings && (
-          <div className="border border-[#E8E8E8] p-8 sm:p-10 lg:p-12 mb-8 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-all duration-700 animate-in fade-in slide-in-from-top-4">
-            <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-8">
+          <div className="border border-[#E8E8E8] p-5 sm:p-10 lg:p-12 mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-all duration-700 animate-in fade-in slide-in-from-top-4">
+            <h3 className="font-serif text-xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-5 sm:mb-8">
               Settings
             </h3>
 
             {/* Auto-Recharge Settings - At the top */}
-            <div className="mb-8">
+            <div className="mb-5 sm:mb-8">
               <AutoRechargeSettings />
             </div>
 
           {/* Privacy & Security */}
-          <div className="mb-8">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 font-light">Privacy & Security</p>
-            <div className="space-y-2">
+          <div className="mb-5 sm:mb-8">
+            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Privacy & Security</p>
+            <div className="space-y-1.5 sm:space-y-2">
               <button
                 onClick={() => router.push('/settings/privacy')}
-                className="w-full border border-[#E8E8E8] p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+                className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
               >
-                <div className="flex items-center gap-4">
-                  <Shield className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1} />
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                   <div className="text-left">
-                    <p className="font-serif text-base font-light text-[#1A1A1A]">Privacy & Data</p>
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Privacy & Data</p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
               </button>
 
               <button
                 onClick={() => router.push('/settings/account')}
-                className="w-full border border-[#E8E8E8] p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+                className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
               >
-                <div className="flex items-center gap-4">
-                  <Lock className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1} />
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                   <div className="text-left">
-                    <p className="font-serif text-base font-light text-[#1A1A1A]">Account Security</p>
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Account Security</p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
               </button>
 
               <button
                 onClick={() => router.push('/settings/blocked-users')}
-                className="w-full border border-[#E8E8E8] p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+                className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
               >
-                <div className="flex items-center gap-4">
-                  <UserX className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1} />
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <UserX className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                   <div className="text-left">
-                    <p className="font-serif text-base font-light text-[#1A1A1A]">Blocked Users</p>
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Blocked Users</p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
               </button>
             </div>
           </div>
 
           {/* Billing & Subscription */}
-          <div className="mb-8">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 font-light">Billing & Subscription</p>
+          <div className="mb-5 sm:mb-8">
+            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Billing & Subscription</p>
             <button
               onClick={() => router.push('/billing')}
-              className="w-full border border-[#E8E8E8] p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
             >
-              <div className="flex items-center gap-4">
-                <CreditCard className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1} />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                 <div className="text-left">
-                  <p className="font-serif text-base font-light text-[#1A1A1A]">Manage Subscription</p>
-                  <p className="text-xs text-[#6B6B6B] font-light">
+                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Manage Subscription</p>
+                  <p className="text-[10px] sm:text-xs text-[#6B6B6B] font-light">
                     {subscriptionTier !== 'free' && subscriptionStatus === 'active' 
                       ? `${subscriptionTier === 'pro' ? 'Pro' : 'Business'} Plan` 
                       : 'Basic Plan'}
                   </p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
             </button>
           </div>
 
           {/* Credits */}
-          <div className="mb-8">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 font-light">Credits</p>
+          <div className="mb-5 sm:mb-8">
+            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Credits</p>
             <button
               onClick={() => router.push('/settings/credits')}
-              className="w-full border border-[#E8E8E8] p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
             >
-              <div className="flex items-center gap-4">
-                <Coins className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1} />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                 <div className="text-left">
-                  <p className="font-serif text-base font-light text-[#1A1A1A]">Credits & Referrals</p>
-                  <p className="text-xs text-[#6B6B6B] font-light">
+                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Credits & Referrals</p>
+                  <p className="text-[10px] sm:text-xs text-[#6B6B6B] font-light">
                     {credits !== null ? `${credits} credits available` : 'Loading...'}
                   </p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
             </button>
           </div>
 
           {/* Preferences */}
-          <div className="mb-8">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 font-light">Preferences</p>
+          <div className="mb-5 sm:mb-8">
+            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Preferences</p>
             <button
               onClick={() => router.push('/settings/notifications')}
-              className="w-full border border-[#E8E8E8] p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
             >
-              <div className="flex items-center gap-4">
-                <Bell className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1} />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                 <div className="text-left">
-                  <p className="font-serif text-base font-light text-[#1A1A1A]">Notifications</p>
+                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Notifications</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
             </button>
           </div>
 
           {/* Support */}
-          <div className="mb-8">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-4 font-light">Support</p>
+          <div className="mb-5 sm:mb-8">
+            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Support</p>
             <button
               onClick={() => router.push('/settings/help')}
-              className="w-full border border-[#E8E8E8] p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
             >
-              <div className="flex items-center gap-4">
-                <HelpCircle className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1} />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                 <div className="text-left">
-                  <p className="font-serif text-base font-light text-[#1A1A1A]">Get Help</p>
+                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Get Help</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
             </button>
           </div>
 
           {/* Danger Zone */}
           <div>
-            <p className="text-xs tracking-[0.3em] uppercase text-red-600 mb-4 font-light">Danger Zone</p>
+            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-red-600 mb-3 sm:mb-4 font-light">Danger Zone</p>
             <button
               onClick={() => router.push('/settings/delete-account')}
-              className="w-full border border-red-200 p-4 bg-white hover:border-red-500 transition-all flex items-center justify-between group"
+              className="w-full border border-red-200 p-3 sm:p-4 bg-white hover:border-red-500 transition-all flex items-center justify-between group"
             >
-              <div className="flex items-center gap-4">
-                <Trash2 className="w-5 h-5 text-red-600" strokeWidth={1} />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" strokeWidth={1} />
                 <div className="text-left">
-                  <p className="font-serif text-base font-light text-red-600">Delete Account</p>
+                  <p className="font-serif text-sm sm:text-base font-light text-red-600">Delete Account</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-red-600 group-hover:text-red-700 transition-colors" strokeWidth={1} />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 group-hover:text-red-700 transition-colors" strokeWidth={1} />
             </button>
           </div>
         </div>
