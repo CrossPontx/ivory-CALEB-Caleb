@@ -127,23 +127,23 @@ export default function TechDashboardPage() {
 
       {/* Elegant Header */}
       <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-10 pt-safe">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-6 sm:py-7">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-5">
           <div className="flex items-center justify-between">
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em]">
+            <h1 className="font-serif text-xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em]">
               Dashboard
             </h1>
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-none">
-                <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B7355]" strokeWidth={1} />
-                <CreditsDisplay showLabel={false} className="text-sm sm:text-base font-light" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#F8F7F5] border border-[#E8E8E8] rounded-none">
+                <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B7355]" strokeWidth={1} />
+                <CreditsDisplay showLabel={false} className="text-xs sm:text-sm font-light" />
               </div>
               {subscriptionTier !== 'free' && subscriptionStatus === 'active' ? (
                 <BuyCreditsDialog>
                   <Button 
                     size="sm" 
-                    className="hidden sm:flex gap-2 h-11 sm:h-12 px-5 sm:px-6 bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light rounded-none hover:scale-[1.02] active:scale-[0.98]"
+                    className="hidden sm:flex gap-2 h-9 sm:h-10 px-4 sm:px-5 bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light rounded-none hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <Coins className="w-4 h-4" strokeWidth={1} />
+                    <Coins className="w-3.5 h-3.5" strokeWidth={1} />
                     Buy
                   </Button>
                 </BuyCreditsDialog>
@@ -151,9 +151,9 @@ export default function TechDashboardPage() {
                 <Button 
                   size="sm" 
                   onClick={() => router.push('/billing')}
-                  className="hidden sm:flex gap-2 h-11 sm:h-12 px-5 sm:px-6 bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light rounded-none hover:scale-[1.02] active:scale-[0.98]"
+                  className="hidden sm:flex gap-2 h-9 sm:h-10 px-4 sm:px-5 bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light rounded-none hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <Sparkles className="w-4 h-4" strokeWidth={1} />
+                  <Sparkles className="w-3.5 h-3.5" strokeWidth={1} />
                   Upgrade
                 </Button>
               )}
@@ -163,39 +163,39 @@ export default function TechDashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-10 sm:py-14 lg:py-16 pb-safe">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-5 sm:py-8 lg:py-10 pb-safe">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full mb-10 sm:mb-14 grid grid-cols-4 h-auto bg-white border border-[#E8E8E8] p-0 rounded-none shadow-sm">
+          <TabsList className="w-full mb-5 sm:mb-8 grid grid-cols-4 h-auto bg-white border border-[#E8E8E8] p-0 rounded-none shadow-sm">
 
             <TabsTrigger 
               value="requests" 
-              className="text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-5 sm:py-6 transition-all duration-700 font-light"
+              className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-700 font-light"
             >
-              <Clock className="w-4 h-4 mr-1.5 sm:mr-2" strokeWidth={1} />
+              <Clock className="w-3.5 h-3.5 mr-1 sm:mr-1.5" strokeWidth={1} />
               <span className="hidden xs:inline">Requests</span>
               <span className="xs:hidden">New</span>
             </TabsTrigger>
             <TabsTrigger 
               value="approved" 
-              className="text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-5 sm:py-6 transition-all duration-700 font-light"
+              className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-700 font-light"
             >
-              <CheckCircle2 className="w-4 h-4 mr-1.5 sm:mr-2" strokeWidth={1} />
+              <CheckCircle2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5" strokeWidth={1} />
               <span className="hidden xs:inline">Approved</span>
               <span className="xs:hidden">Done</span>
             </TabsTrigger>
             <TabsTrigger 
               value="designs" 
-              className="text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-5 sm:py-6 transition-all duration-700 font-light"
+              className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-700 font-light"
             >
-              <Sparkles className="w-4 h-4 mr-1.5 sm:mr-2" strokeWidth={1} />
+              <Sparkles className="w-3.5 h-3.5 mr-1 sm:mr-1.5" strokeWidth={1} />
               <span className="hidden xs:inline">Designs</span>
               <span className="xs:hidden">AI</span>
             </TabsTrigger>
             <TabsTrigger 
               value="gallery" 
-              className="text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-5 sm:py-6 transition-all duration-700 font-light"
+              className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase rounded-none border-b-2 border-transparent data-[state=active]:border-[#1A1A1A] data-[state=active]:text-[#1A1A1A] data-[state=active]:bg-[#F8F7F5] text-[#6B6B6B] py-3 sm:py-4 transition-all duration-700 font-light"
             >
-              <svg className="w-4 h-4 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+              <svg className="w-3.5 h-3.5 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span className="hidden xs:inline">Gallery</span>
@@ -203,7 +203,7 @@ export default function TechDashboardPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="requests" className="space-y-6 sm:space-y-8">
+          <TabsContent value="requests" className="space-y-4 sm:space-y-6">
 
             {requests
               .filter((req) => req.status === "pending")
@@ -215,7 +215,7 @@ export default function TechDashboardPage() {
                 >
                   <CardContent className="p-0">
                     <div className="flex gap-0 flex-col sm:flex-row">
-                      <div className="w-full sm:w-72 md:w-80 lg:w-96 h-72 sm:h-auto relative flex-shrink-0 bg-gradient-to-br from-[#F8F7F5] to-white">
+                      <div className="w-full sm:w-64 md:w-72 lg:w-80 h-64 sm:h-auto relative flex-shrink-0 bg-gradient-to-br from-[#F8F7F5] to-white">
                         <Image
                           src={request.designImage || "/placeholder.svg"}
                           alt="Client design"
@@ -223,23 +223,23 @@ export default function TechDashboardPage() {
                           className="object-cover group-hover:scale-105 transition-transform duration-1000"
                           unoptimized
                         />
-                        <div className="absolute top-5 right-5">
-                          <Badge className="bg-[#8B7355] text-white border-0 shadow-lg text-[10px] tracking-[0.2em] uppercase font-light px-3 py-1.5">
+                        <div className="absolute top-3 right-3">
+                          <Badge className="bg-[#8B7355] text-white border-0 shadow-lg text-[9px] tracking-[0.15em] uppercase font-light px-2.5 py-1">
                             New
                           </Badge>
                         </div>
                       </div>
 
-                      <div className="flex-1 min-w-0 p-6 sm:p-8 lg:p-10">
-                        <div className="mb-6">
-                          <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-[-0.01em]">
+                      <div className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+                        <div className="mb-4 sm:mb-5">
+                          <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] mb-2 tracking-[-0.01em]">
                             {request.clientName}
                           </h3>
-                          <div className="flex items-center gap-2 text-sm text-[#6B6B6B] font-light">
-                            <Clock className="w-4 h-4" strokeWidth={1} />
+                          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B6B6B] font-light">
+                            <Clock className="w-3.5 h-3.5" strokeWidth={1} />
                             <span>
                               {new Date(request.date).toLocaleDateString("en-US", {
-                                month: "long",
+                                month: "short",
                                 day: "numeric",
                                 year: "numeric",
                               })}
@@ -248,23 +248,23 @@ export default function TechDashboardPage() {
                         </div>
 
                         {request.message && (
-                          <div className="mb-8 p-6 bg-[#F8F7F5] border border-[#E8E8E8] rounded-none">
-                            <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed line-clamp-3 font-light tracking-wide">
+                          <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-[#F8F7F5] border border-[#E8E8E8] rounded-none">
+                            <p className="text-xs sm:text-sm text-[#6B6B6B] leading-relaxed line-clamp-3 font-light tracking-wide">
                               {request.message}
                             </p>
                           </div>
                         )}
 
-                        <div className="flex gap-3 flex-wrap">
+                        <div className="flex gap-2 flex-wrap">
                           <Button 
                             size="sm" 
                             onClick={(e) => {
                               e.stopPropagation()
                               handleApprove(request.id)
                             }} 
-                            className="h-12 px-6 sm:px-8 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light bg-[#1A1A1A] hover:bg-[#8B7355] text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
+                            className="h-10 sm:h-11 px-4 sm:px-6 text-[9px] sm:text-[10px] tracking-[0.2em] uppercase font-light bg-[#1A1A1A] hover:bg-[#8B7355] text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
                           >
-                            <Check className="w-4 h-4 mr-2" strokeWidth={1} />
+                            <Check className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
                             Approve
                           </Button>
                           <Button 
@@ -274,11 +274,11 @@ export default function TechDashboardPage() {
                               e.stopPropagation()
                               handleRequestModification(request.id)
                             }} 
-                            className="h-12 px-5 sm:px-7 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
+                            className="h-10 sm:h-11 px-3 sm:px-5 text-[9px] sm:text-[10px] tracking-[0.2em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
                           >
-                            <MessageCircle className="w-4 h-4 mr-2" strokeWidth={1} />
-                            <span className="hidden sm:inline">Request Changes</span>
-                            <span className="sm:hidden">Changes</span>
+                            <MessageCircle className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
+                            <span className="hidden sm:inline">Changes</span>
+                            <span className="sm:hidden">Edit</span>
                           </Button>
                           <Button 
                             size="sm" 
@@ -287,9 +287,9 @@ export default function TechDashboardPage() {
                               e.stopPropagation()
                               router.push(`/tech/review/${request.id}`)
                             }}
-                            className="h-12 px-5 sm:px-7 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
+                            className="h-10 sm:h-11 px-3 sm:px-5 text-[9px] sm:text-[10px] tracking-[0.2em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
                           >
-                            <DollarSign className="w-4 h-4 mr-2" strokeWidth={1} />
+                            <DollarSign className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
                             <span className="hidden sm:inline">Add-ons</span>
                             <span className="sm:hidden">$</span>
                           </Button>
@@ -301,19 +301,19 @@ export default function TechDashboardPage() {
               ))}
 
             {requests.filter((req) => req.status === "pending").length === 0 && (
-              <div className="p-20 sm:p-28 lg:p-32 text-center border border-[#E8E8E8] bg-white rounded-none">
+              <div className="p-12 sm:p-20 lg:p-24 text-center border border-[#E8E8E8] bg-white rounded-none">
                 <div className="max-w-md mx-auto">
-                  <div className="w-24 h-24 mx-auto mb-10 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center rounded-none">
-                    <Clock className="w-11 h-11 text-[#8B7355]" strokeWidth={1} />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center rounded-none">
+                    <Clock className="w-8 h-8 sm:w-10 sm:h-10 text-[#8B7355]" strokeWidth={1} />
                   </div>
-                  <h3 className="font-serif text-3xl sm:text-4xl font-light text-[#1A1A1A] mb-4 tracking-[-0.01em]">All Caught Up</h3>
-                  <p className="text-base text-[#6B6B6B] font-light leading-relaxed tracking-wide">No pending requests at the moment</p>
+                  <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-3 tracking-[-0.01em]">All Caught Up</h3>
+                  <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-relaxed tracking-wide">No pending requests</p>
                 </div>
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="approved" className="space-y-5 sm:space-y-6">
+          <TabsContent value="approved" className="space-y-4 sm:space-y-5">
             {requests
               .filter((req) => req.status === "approved")
               .map((request) => (
@@ -322,9 +322,9 @@ export default function TechDashboardPage() {
                   className="group overflow-hidden border border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-lg transition-all duration-700 bg-white cursor-pointer rounded-none"
                   onClick={() => router.push(`/tech/request/${request.id}`)}
                 >
-                  <CardContent className="p-6 sm:p-8">
-                    <div className="flex gap-5 sm:gap-6 items-center">
-                      <div className="w-28 h-28 sm:w-32 sm:h-32 relative overflow-hidden flex-shrink-0 border border-[#E8E8E8] rounded-none bg-[#F8F7F5]">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex gap-3 sm:gap-4 items-center">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 relative overflow-hidden flex-shrink-0 border border-[#E8E8E8] rounded-none bg-[#F8F7F5]">
                         <Image
                           src={request.designImage || "/placeholder.svg"}
                           alt="Approved design"
@@ -334,18 +334,18 @@ export default function TechDashboardPage() {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-4 truncate tracking-[-0.01em]">
+                        <h3 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-2 sm:mb-3 truncate tracking-[-0.01em]">
                           {request.clientName}
                         </h3>
-                        <Badge className="bg-green-500 text-white border-0 text-[10px] tracking-[0.2em] uppercase font-light px-3 py-1.5">
-                          <CheckCircle2 className="w-3 h-3 mr-1.5" strokeWidth={1} />
+                        <Badge className="bg-green-500 text-white border-0 text-[9px] tracking-[0.15em] uppercase font-light px-2.5 py-1">
+                          <CheckCircle2 className="w-3 h-3 mr-1" strokeWidth={1} />
                           Approved
                         </Badge>
                       </div>
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="hidden sm:flex h-11 px-6 hover:bg-[#F8F7F5] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 text-[10px] tracking-[0.25em] uppercase font-light rounded-none"
+                        className="hidden sm:flex h-9 px-4 hover:bg-[#F8F7F5] hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light rounded-none"
                       >
                         View
                       </Button>
@@ -355,42 +355,42 @@ export default function TechDashboardPage() {
               ))}
 
             {requests.filter((req) => req.status === "approved").length === 0 && (
-              <div className="p-20 sm:p-28 lg:p-32 text-center border border-[#E8E8E8] bg-white rounded-none">
+              <div className="p-12 sm:p-20 lg:p-24 text-center border border-[#E8E8E8] bg-white rounded-none">
                 <div className="max-w-md mx-auto">
-                  <div className="w-24 h-24 mx-auto mb-10 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center rounded-none">
-                    <CheckCircle2 className="w-11 h-11 text-[#8B7355]" strokeWidth={1} />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center rounded-none">
+                    <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-[#8B7355]" strokeWidth={1} />
                   </div>
-                  <h3 className="font-serif text-3xl sm:text-4xl font-light text-[#1A1A1A] mb-4 tracking-[-0.01em]">No Approved Designs</h3>
-                  <p className="text-base text-[#6B6B6B] font-light leading-relaxed tracking-wide">Approved requests will appear here</p>
+                  <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-3 tracking-[-0.01em]">No Approved Designs</h3>
+                  <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-relaxed tracking-wide">Approved requests will appear here</p>
                 </div>
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="designs" className="space-y-8 sm:space-y-10">
+          <TabsContent value="designs" className="space-y-5 sm:space-y-8">
             {subscriptionTier !== 'free' && subscriptionStatus === 'active' ? (
               <Card className="border border-[#E8E8E8] bg-white shadow-sm rounded-none">
-                <CardContent className="p-8 sm:p-10">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                    <div className="flex items-start gap-5">
-                      <div className="w-16 h-16 bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center rounded-none flex-shrink-0">
-                        <Coins className="w-8 h-8 text-[#8B7355]" strokeWidth={1} />
+                <CardContent className="p-5 sm:p-8">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center rounded-none flex-shrink-0">
+                        <Coins className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355]" strokeWidth={1} />
                       </div>
                       <div>
-                        <div className="flex items-center gap-4 mb-3">
-                          <span className="text-sm font-light tracking-wide text-[#6B6B6B]">Your Credits</span>
-                          <CreditsDisplay showLabel={false} className="text-4xl font-light text-[#1A1A1A]" />
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-xs sm:text-sm font-light tracking-wide text-[#6B6B6B]">Your Credits</span>
+                          <CreditsDisplay showLabel={false} className="text-2xl sm:text-3xl font-light text-[#1A1A1A]" />
                         </div>
-                        <p className="text-sm text-[#6B6B6B] font-light tracking-wide">1 credit per AI design generation</p>
+                        <p className="text-xs sm:text-sm text-[#6B6B6B] font-light tracking-wide">1 credit per design</p>
                       </div>
                     </div>
                     <BuyCreditsDialog>
                       <Button 
                         size="sm"
-                        className="h-12 px-8 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 text-[11px] tracking-[0.25em] uppercase font-light hover:scale-[1.02] active:scale-[0.98] rounded-none"
+                        className="h-10 sm:h-11 px-5 sm:px-6 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 text-[10px] tracking-[0.2em] uppercase font-light hover:scale-[1.02] active:scale-[0.98] rounded-none"
                       >
-                        <Coins className="w-4 h-4 mr-2" strokeWidth={1} />
-                        Buy Credits
+                        <Coins className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
+                        Buy
                       </Button>
                     </BuyCreditsDialog>
                   </div>
@@ -398,27 +398,27 @@ export default function TechDashboardPage() {
               </Card>
             ) : (
               <Card className="border border-[#E8E8E8] bg-white shadow-sm rounded-none">
-                <CardContent className="p-8 sm:p-10">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                    <div className="flex items-start gap-5">
-                      <div className="w-16 h-16 bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center rounded-none flex-shrink-0">
-                        <Sparkles className="w-8 h-8 text-[#8B7355]" strokeWidth={1} />
+                <CardContent className="p-5 sm:p-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#F8F7F5] border border-[#E8E8E8] flex items-center justify-center rounded-none flex-shrink-0">
+                        <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355]" strokeWidth={1} />
                       </div>
                       <div>
-                        <h3 className="font-serif text-2xl font-light text-[#1A1A1A] mb-3 tracking-[-0.01em]">
+                        <h3 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-2 tracking-[-0.01em]">
                           Upgrade Your Plan
                         </h3>
-                        <p className="text-sm text-[#6B6B6B] font-light leading-relaxed tracking-wide max-w-lg">
-                          Subscribe to get monthly credits and unlock the ability to purchase additional credits anytime
+                        <p className="text-xs sm:text-sm text-[#6B6B6B] font-light leading-relaxed tracking-wide max-w-lg">
+                          Get monthly credits and purchase more anytime
                         </p>
                       </div>
                     </div>
                     <Button 
                       onClick={() => router.push('/billing')}
                       size="sm"
-                      className="h-12 px-8 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 whitespace-nowrap text-[11px] tracking-[0.25em] uppercase font-light hover:scale-[1.02] active:scale-[0.98] rounded-none"
+                      className="h-10 sm:h-11 px-5 sm:px-6 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 whitespace-nowrap text-[10px] tracking-[0.2em] uppercase font-light hover:scale-[1.02] active:scale-[0.98] rounded-none"
                     >
-                      <Sparkles className="w-4 h-4 mr-2" strokeWidth={1} />
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
                       View Plans
                     </Button>
                   </div>

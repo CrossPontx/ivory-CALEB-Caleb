@@ -217,132 +217,132 @@ export default function HomePage() {
       
       {/* Header */}
       <header className={`bg-white border-b border-[#E8E8E8] sticky top-0 z-10 safe-top backdrop-blur-sm bg-white/95 transition-all duration-300 ${isWatch ? 'watch-compact' : ''}`}>
-        <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-2' : 'px-5 sm:px-6 py-4 sm:py-5'} flex items-center gap-2 sm:gap-3`}>
+        <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-2' : 'px-4 sm:px-6 py-3 sm:py-4'} flex items-center gap-2 sm:gap-3`}>
           <Image 
             src="/Web_logo.png" 
             alt="Ivory's Choice" 
             width={isWatch ? 32 : 50}
             height={isWatch ? 32 : 50}
-            className={`transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'} ${isWatch ? 'h-6' : 'h-8 sm:h-10'} w-auto`}
+            className={`transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'} ${isWatch ? 'h-6' : 'h-7 sm:h-9'} w-auto`}
             priority
           />
-          <h1 className={`font-serif font-light text-[#1A1A1A] tracking-tight transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'} ${isWatch ? 'text-sm' : 'text-xl sm:text-2xl'}`}>
+          <h1 className={`font-serif font-light text-[#1A1A1A] tracking-tight transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'} ${isWatch ? 'text-sm' : 'text-base sm:text-xl'}`}>
             {isWatch ? "IVORY'S" : "IVORY'S CHOICE"}
           </h1>
         </div>
       </header>
 
       {/* Tab Navigation */}
-      <div className={`bg-white border-b border-[#E8E8E8] sticky ${isWatch ? 'top-8' : 'top-16 sm:top-18'} z-40`}>
-        <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3' : 'px-5 sm:px-6'}`}>
+      <div className={`bg-white border-b border-[#E8E8E8] sticky ${isWatch ? 'top-8' : 'top-12 sm:top-14'} z-40`}>
+        <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3' : 'px-4 sm:px-6'}`}>
           <div className="flex">
             <button
               onClick={() => setActiveTab('designs')}
-              className={`flex-1 py-4 sm:py-5 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
+              className={`flex-1 py-3 sm:py-4 text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
                 activeTab === 'designs'
                   ? 'border-[#1A1A1A] text-[#1A1A1A]'
                   : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
               }`}
             >
-              My Designs
+              Designs
             </button>
             <button
               onClick={() => setActiveTab('search')}
-              className={`flex-1 py-4 sm:py-5 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
+              className={`flex-1 py-3 sm:py-4 text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
                 activeTab === 'search'
                   ? 'border-[#1A1A1A] text-[#1A1A1A]'
                   : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
               }`}
             >
-              Find Nail Tech
+              Find Tech
             </button>
             <button
               onClick={() => setActiveTab('bookings')}
-              className={`flex-1 py-4 sm:py-5 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
+              className={`flex-1 py-3 sm:py-4 text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
                 activeTab === 'bookings'
                   ? 'border-[#1A1A1A] text-[#1A1A1A]'
                   : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
               }`}
             >
-              My Bookings {myBookings.length > 0 && `(${myBookings.length})`}
+              Bookings {myBookings.length > 0 && `(${myBookings.length})`}
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-3 pb-20' : 'px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32'}`}>
+      <main className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-3 pb-20' : 'px-4 sm:px-6 py-4 sm:py-6 pb-24 sm:pb-28'}`}>
         {/* My Designs Tab */}
         {activeTab === 'designs' && (
           <>
             {/* Credits/Subscription Banner - Hidden on Watch */}
             {showReferralBanner && !isWatch && (
-              <div className={`mb-6 sm:mb-8 relative transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
-                <div className="border border-[#E8E8E8] p-6 sm:p-8 relative bg-[#F8F7F5] transition-all duration-300 hover:shadow-sm">
+              <div className={`mb-4 sm:mb-6 relative transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+                <div className="border border-[#E8E8E8] p-4 sm:p-6 relative bg-[#F8F7F5] transition-all duration-300 hover:shadow-sm">
                   {/* Close button */}
                   <button
                     onClick={() => setShowReferralBanner(false)}
-                    className="absolute top-4 right-4 text-[#6B6B6B] hover:text-[#1A1A1A] transition-all duration-300 hover:scale-110 hover:rotate-90"
+                    className="absolute top-3 right-3 text-[#6B6B6B] hover:text-[#1A1A1A] transition-all duration-300 hover:scale-110 hover:rotate-90"
                   >
-                    <X className="w-5 h-5" strokeWidth={1} />
+                    <X className="w-4 h-4" strokeWidth={1} />
                   </button>
 
-                  <div className="max-w-2xl">
+                  <div className="max-w-2xl pr-6">
                     {subscriptionTier !== 'free' && subscriptionStatus === 'active' ? (
                       // Paid users - show referral program
                       <>
-                        <div className="flex items-start gap-4 sm:gap-6 mb-6">
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white transition-all duration-500 hover:border-[#8B7355] hover:scale-105">
-                            <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355] transition-transform duration-500 hover:rotate-12" strokeWidth={1} />
+                        <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white transition-all duration-500 hover:border-[#8B7355] hover:scale-105">
+                            <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355] transition-transform duration-500 hover:rotate-12" strokeWidth={1} />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                            <h3 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-1 tracking-tight">
                               Referral Program
                             </h3>
-                            <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
-                              Refer 3 friends and receive <span className="text-[#1A1A1A] font-normal">1 complimentary credit</span> to create more designs
+                            <p className="text-xs sm:text-sm text-[#6B6B6B] leading-relaxed font-light">
+                              Refer 3 friends and receive <span className="text-[#1A1A1A] font-normal">1 complimentary credit</span>
                             </p>
                           </div>
                         </div>
 
                         <Button
                           onClick={() => router.push('/settings/credits')}
-                          className="h-11 sm:h-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-6 sm:px-8 text-xs tracking-widest uppercase rounded-none font-light"
+                          className="h-10 sm:h-11 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-5 sm:px-6 text-[10px] sm:text-xs tracking-widest uppercase rounded-none font-light"
                         >
-                          <Share2 className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                          Get Referral Link
+                          <Share2 className="w-3.5 h-3.5 mr-1.5" strokeWidth={1.5} />
+                          Get Link
                         </Button>
                       </>
                     ) : (
                       // Free users - show upgrade prompt
                       <>
-                        <div className="flex items-start gap-4 sm:gap-6 mb-6">
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white transition-all duration-500 hover:border-[#8B7355] hover:scale-105">
-                            <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355] transition-transform duration-500 hover:rotate-12" strokeWidth={1} />
+                        <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 bg-white transition-all duration-500 hover:border-[#8B7355] hover:scale-105">
+                            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355] transition-transform duration-500 hover:rotate-12" strokeWidth={1} />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                            <h3 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-1 tracking-tight">
                               Upgrade Your Plan
                             </h3>
-                            <p className="text-sm sm:text-base text-[#6B6B6B] leading-relaxed font-light">
-                              Subscribe to get <span className="text-[#1A1A1A] font-normal">monthly credits</span> and unlock the ability to purchase additional credits anytime
+                            <p className="text-xs sm:text-sm text-[#6B6B6B] leading-relaxed font-light">
+                              Get <span className="text-[#1A1A1A] font-normal">monthly credits</span> and purchase more anytime
                             </p>
                           </div>
                         </div>
 
                         <Button
                           onClick={() => router.push('/billing')}
-                          className="h-11 sm:h-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-6 sm:px-8 text-xs tracking-widest uppercase rounded-none font-light"
+                          className="h-10 sm:h-11 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 px-5 sm:px-6 text-[10px] sm:text-xs tracking-widest uppercase rounded-none font-light"
                         >
-                          <Sparkles className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                          <Sparkles className="w-3.5 h-3.5 mr-1.5" strokeWidth={1.5} />
                           View Plans
                         </Button>
                       </>
                     )}
 
                     {credits !== null && (
-                      <p className="text-xs tracking-wider text-[#6B6B6B] mt-4 font-light uppercase">
-                        Current Balance: <span className="text-[#1A1A1A] font-normal">{credits} Credit{credits !== 1 ? 's' : ''}</span>
+                      <p className="text-[10px] sm:text-xs tracking-wider text-[#6B6B6B] mt-3 font-light uppercase">
+                        Balance: <span className="text-[#1A1A1A] font-normal">{credits} Credit{credits !== 1 ? 's' : ''}</span>
                       </p>
                     )}
                   </div>
@@ -360,14 +360,14 @@ export default function HomePage() {
             )}
 
             {/* Section Headers - Create Design and Your Designs side by side */}
-            <div className={`${isWatch ? 'mb-3' : 'mb-6 sm:mb-8'} transition-all duration-700 delay-100 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <div className={`flex ${isWatch ? 'flex-col gap-2' : 'items-end justify-between gap-4'}`}>
+            <div className={`${isWatch ? 'mb-3' : 'mb-4 sm:mb-6'} transition-all duration-700 delay-100 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <div className={`flex ${isWatch ? 'flex-col gap-2' : 'items-end justify-between gap-3'}`}>
                 {/* Your Designs */}
                 <div className="flex-1">
                   <HideOnWatch>
-                    <p className="text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 font-light">Collection</p>
+                    <p className="text-[10px] sm:text-xs tracking-[0.25em] sm:tracking-[0.3em] uppercase text-[#8B7355] mb-1.5 sm:mb-2 font-light">Collection</p>
                   </HideOnWatch>
-                  <h2 className={`font-serif font-light text-[#1A1A1A] tracking-tight ${isWatch ? 'text-sm text-center' : 'text-2xl sm:text-3xl'}`}>
+                  <h2 className={`font-serif font-light text-[#1A1A1A] tracking-tight ${isWatch ? 'text-sm text-center' : 'text-xl sm:text-2xl'}`}>
                     Your Designs
                   </h2>
                 </div>
@@ -381,7 +381,7 @@ export default function HomePage() {
                     </WatchButton>
                   </div>
                 ) : (
-                  <div className="flex gap-3 flex-wrap">
+                  <div className="flex gap-2 sm:gap-3 flex-wrap">
                     <UploadDesignDialog 
                       onUploadComplete={() => {
                         // Reload designs
@@ -422,11 +422,11 @@ export default function HomePage() {
                       }}
                     />
                     <Button
-                      className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 flex-shrink-0"
+                      className="h-10 sm:h-12 px-6 sm:px-10 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 flex-shrink-0"
                       onClick={startNewDesign}
                     >
-                      <Plus className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:rotate-90" strokeWidth={1.5} />
-                      Create Design
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 transition-transform duration-300 group-hover:rotate-90" strokeWidth={1.5} />
+                      Create
                     </Button>
                   </div>
                 )}
@@ -540,41 +540,41 @@ export default function HomePage() {
 
         {/* Find Nail Tech Tab */}
         {activeTab === 'search' && (
-          <div className="space-y-12 sm:space-y-16 lg:space-y-20">
+          <div className="space-y-8 sm:space-y-12 lg:space-y-16">
             {/* Search Hero Section */}
-            <div className="text-center space-y-6 sm:space-y-8">
-              <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] font-light">
+            <div className="text-center space-y-3 sm:space-y-5">
+              <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light">
                 Discover
               </p>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
                 Find Your Perfect Match
               </h2>
-              <p className="text-base sm:text-lg text-[#6B6B6B] leading-[1.7] font-light max-w-2xl mx-auto tracking-wide">
-                Connect with skilled nail technicians who bring your vision to life
+              <p className="text-sm sm:text-base text-[#6B6B6B] leading-[1.6] font-light max-w-2xl mx-auto tracking-wide">
+                Connect with skilled nail technicians
               </p>
             </div>
 
             {/* Elegant Search Box */}
             <div className="max-w-4xl mx-auto">
-              <div className="bg-[#F8F7F5] border border-[#E8E8E8] p-6 sm:p-8 lg:p-10 space-y-5 sm:space-y-6">
-                <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+              <div className="bg-[#F8F7F5] border border-[#E8E8E8] p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4">
+                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B6B6B] group-focus-within:text-[#8B7355] transition-colors" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6B6B6B] group-focus-within:text-[#8B7355] transition-colors" />
                     <Input
                       placeholder="Name or specialty..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-12 h-14 border-[#E8E8E8] bg-white focus:border-[#8B7355] rounded-none text-base font-light"
+                      className="pl-10 h-11 sm:h-12 border-[#E8E8E8] bg-white focus:border-[#8B7355] rounded-none text-sm font-light"
                       onKeyDown={(e) => e.key === 'Enter' && searchTechs()}
                     />
                   </div>
                   <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B6B6B] group-focus-within:text-[#8B7355] transition-colors" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6B6B6B] group-focus-within:text-[#8B7355] transition-colors" />
                     <Input
                       placeholder="Location..."
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="pl-12 h-14 border-[#E8E8E8] bg-white focus:border-[#8B7355] rounded-none text-base font-light"
+                      className="pl-10 h-11 sm:h-12 border-[#E8E8E8] bg-white focus:border-[#8B7355] rounded-none text-sm font-light"
                       onKeyDown={(e) => e.key === 'Enter' && searchTechs()}
                     />
                   </div>
@@ -582,9 +582,9 @@ export default function HomePage() {
                 <Button 
                   onClick={searchTechs} 
                   disabled={searchLoading}
-                  className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-14 text-[11px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-11 sm:h-12 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 hover:scale-[1.01] active:scale-[0.99]"
                 >
-                  {searchLoading ? 'Searching...' : 'Search Nail Technicians'}
+                  {searchLoading ? 'Searching...' : 'Search'}
                 </Button>
               </div>
             </div>
@@ -592,15 +592,15 @@ export default function HomePage() {
             {/* Tech Results Grid */}
             {techs.length > 0 && (
               <div>
-                <div className="mb-8 sm:mb-12">
-                  <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-3 font-light">
+                <div className="mb-5 sm:mb-8">
+                  <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] mb-2 font-light">
                     Results
                   </p>
-                  <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em]">
+                  <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-[-0.01em]">
                     Available Nail Technicians
                   </h3>
                 </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                   {techs.map((tech) => (
                     <div
                       key={tech.id}
@@ -632,36 +632,36 @@ export default function HomePage() {
                       )}
 
                       {/* Tech Info */}
-                      <div className="p-6 sm:p-8 space-y-4 sm:space-y-5">
+                      <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                         <div>
-                          <h4 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                          <h4 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-1.5 tracking-tight">
                             {tech.businessName || tech.user.username}
                           </h4>
-                          <div className="flex items-center gap-2 text-sm text-[#6B6B6B] font-light">
-                            <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B6B6B] font-light">
+                            <MapPin className="h-3 w-3" strokeWidth={1.5} />
                             {tech.location || 'Location not set'}
                           </div>
                         </div>
 
                         {/* Rating */}
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1.5">
-                            <Star className="h-4 w-4 fill-[#8B7355] text-[#8B7355]" strokeWidth={1.5} />
-                            <span className="text-base font-light text-[#1A1A1A]">{tech.rating || '0.00'}</span>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3.5 w-3.5 fill-[#8B7355] text-[#8B7355]" strokeWidth={1.5} />
+                            <span className="text-sm font-light text-[#1A1A1A]">{tech.rating || '0.00'}</span>
                           </div>
-                          <span className="text-sm text-[#6B6B6B] font-light">
-                            ({tech.totalReviews || 0} reviews)
+                          <span className="text-xs text-[#6B6B6B] font-light">
+                            ({tech.totalReviews || 0})
                           </span>
                         </div>
 
                         {/* Services */}
                         {tech.services && tech.services.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5">
                             {tech.services.slice(0, 3).map((service: any) => (
                               <Badge
                                 key={service.id}
                                 variant="outline"
-                                className="text-[10px] tracking-[0.15em] uppercase font-light border-[#E8E8E8] text-[#6B6B6B]"
+                                className="text-[9px] tracking-[0.15em] uppercase font-light border-[#E8E8E8] text-[#6B6B6B]"
                               >
                                 {service.name}
                               </Badge>
@@ -670,14 +670,14 @@ export default function HomePage() {
                         )}
 
                         <Button
-                          className="w-full bg-transparent border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white h-12 text-[11px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 group-hover:bg-[#1A1A1A] group-hover:text-white"
+                          className="w-full bg-transparent border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white h-10 sm:h-11 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 group-hover:bg-[#1A1A1A] group-hover:text-white"
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/book/${tech.id}`);
                           }}
                         >
                           Book Now
-                          <ArrowRight className="ml-2 h-4 w-4" strokeWidth={1.5} />
+                          <ArrowRight className="ml-1.5 h-3.5 w-3.5" strokeWidth={1.5} />
                         </Button>
                       </div>
                     </div>
@@ -702,13 +702,13 @@ export default function HomePage() {
 
         {/* My Bookings Tab */}
         {activeTab === 'bookings' && (
-          <div className="space-y-12 sm:space-y-16 lg:space-y-20">
+          <div className="space-y-8 sm:space-y-12 lg:space-y-16">
             {/* Bookings Hero */}
-            <div className="text-center space-y-6 sm:space-y-8">
-              <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] font-light">
+            <div className="text-center space-y-3 sm:space-y-5">
+              <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light">
                 Your Appointments
               </p>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
                 Upcoming & Past Bookings
               </h2>
             </div>
@@ -730,42 +730,41 @@ export default function HomePage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-6 sm:gap-8 max-w-4xl mx-auto">
+              <div className="grid gap-4 sm:gap-6 max-w-4xl mx-auto">
                 {myBookings.map((booking) => (
                   <div
                     key={booking.id}
                     className="border border-[#E8E8E8] hover:border-[#8B7355] transition-all duration-700 hover:shadow-xl hover:shadow-[#8B7355]/5 cursor-pointer"
                     onClick={() => router.push(`/booking/${booking.id}`)}
                   >
-                    <div className="p-6 sm:p-8 lg:p-10 space-y-6">
+                    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5">
                       {/* Header */}
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                          <h3 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-1 tracking-tight">
                             {booking.techProfile?.businessName || booking.techProfile?.user?.username}
                           </h3>
-                          <p className="text-sm sm:text-base text-[#6B6B6B] font-light tracking-wide">
+                          <p className="text-xs sm:text-sm text-[#6B6B6B] font-light tracking-wide">
                             {booking.service?.name}
                           </p>
                         </div>
-                        <Badge className={`${getStatusColor(booking.status)} text-white text-[10px] tracking-[0.2em] uppercase font-light`}>
+                        <Badge className={`${getStatusColor(booking.status)} text-white text-[9px] tracking-[0.15em] uppercase font-light`}>
                           {booking.status}
                         </Badge>
                       </div>
 
                       {/* Date & Time */}
-                      <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm sm:text-base text-[#6B6B6B] font-light">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" strokeWidth={1.5} />
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-[#6B6B6B] font-light">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
                           {new Date(booking.appointmentDate).toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: 'numeric'
                           })}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" strokeWidth={1.5} />
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" strokeWidth={1.5} />
                           {new Date(booking.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
