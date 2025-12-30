@@ -342,7 +342,7 @@ export default function HomePage() {
 
                     {credits !== null && (
                       <p className="text-[10px] sm:text-xs tracking-wider text-[#6B6B6B] mt-3 font-light uppercase">
-                        Balance: <span className="text-[#1A1A1A] font-normal">{credits} Credit{credits !== 1 ? 's' : ''}</span>
+                        <span className="text-[#1A1A1A] font-normal">{credits} Credit{credits !== 1 ? 's' : ''}</span>
                       </p>
                     )}
                   </div>
