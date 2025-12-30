@@ -17,6 +17,7 @@ import { BottomNav } from "@/components/bottom-nav"
 import { DrawingCanvasKonva as DrawingCanvas } from "@/components/drawing-canvas-konva"
 import { Pencil } from "lucide-react"
 import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
+import { GenerationConfirmationDialog } from "@/components/generation-confirmation-dialog"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -120,6 +121,8 @@ export default function CapturePage() {
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
   const [drawingImageUrl, setDrawingImageUrl] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(true) // Track if we're still initializing
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [pendingGenerationSettings, setPendingGenerationSettings] = useState<DesignSettings | null>(null)
   
   // Tabs for multiple designs
   const [designTabs, setDesignTabs] = useState<DesignTab[]>([
@@ -712,6 +715,25 @@ export default function CapturePage() {
       .join(' ')
     
     return `Ultra-detailed, high-resolution nail art design applied ONLY inside a fingernail area. Nail length: ${settings.nailLength}, Nail shape: ${formattedShape}. Base color: ${settings.baseColor}. Finish: ${settings.finish}. Texture: ${settings.texture}. Design style: ${settings.patternType} pattern, ${settings.styleVibe} aesthetic. Accent color: ${settings.accentColor}. Highly realistic nail polish appearance: smooth polish, crisp clean edges, even color distribution, professional salon quality with maximum detail, subtle natural reflections. Design must: stay strictly within the nail surface, follow realistic nail curvature, respect nail boundaries, appear physically painted onto the nail with expert precision. Ultra-high resolution rendering, realistic lighting, natural skin reflection preserved, sharp details, vibrant colors with accurate saturation.`
+  }
+
+  const handleVisualizeClick = (settings: DesignSettings) => {
+    // Show confirmation dialog
+    setPendingGenerationSettings(settings)
+    setShowConfirmDialog(true)
+  }
+
+  const handleConfirmGeneration = () => {
+    setShowConfirmDialog(false)
+    if (pendingGenerationSettings) {
+      generateAIPreview(pendingGenerationSettings)
+      setPendingGenerationSettings(null)
+    }
+  }
+
+  const handleCancelGeneration = () => {
+    setShowConfirmDialog(false)
+    setPendingGenerationSettings(null)
   }
 
   const generateAIPreview = async (settings: DesignSettings) => {
@@ -1534,7 +1556,7 @@ export default function CapturePage() {
           <div className="max-w-4xl mx-auto pointer-events-auto">
             {!isGenerating ? (
               <button 
-                onClick={() => generateAIPreview(designSettings)} 
+                onClick={() => handleVisualizeClick(designSettings)} 
                 disabled={!hasCredits(1)}
                 className="w-full h-12 sm:h-14 bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white font-light text-xs sm:text-sm tracking-[0.2em] uppercase hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl rounded-sm disabled:opacity-50 disabled:cursor-not-allowed border border-[#E8E8E8]/20 backdrop-blur-sm animate-shimmer"
                 style={{
@@ -2239,6 +2261,14 @@ export default function CapturePage() {
 
         {/* Bottom Navigation */}
         <BottomNav onCenterAction={changePhoto} centerActionLabel="Capture" />
+
+        {/* Generation Confirmation Dialog */}
+        <GenerationConfirmationDialog
+          isOpen={showConfirmDialog}
+          onConfirm={handleConfirmGeneration}
+          onCancel={handleCancelGeneration}
+          credits={credits}
+        />
 
         {/* Drawing Canvas Modal */}
         {showDrawingCanvas && capturedImage && (

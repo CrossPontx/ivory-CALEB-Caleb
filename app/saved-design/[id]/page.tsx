@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Trash2, Send, ExternalLink, Share2 } from "lucide-react"
+import { ArrowLeft, Trash2, Send, ExternalLink, Share2, Sparkles } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
+import { useCredits } from "@/hooks/use-credits"
 
 type SavedDesign = {
   id: number
@@ -19,6 +20,7 @@ type SavedDesign = {
 export default function SavedDesignDetailPage() {
   const router = useRouter()
   const params = useParams()
+  const { credits } = useCredits()
   const [design, setDesign] = useState<SavedDesign | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -45,6 +47,21 @@ export default function SavedDesignDetailPage() {
 
     loadDesign()
   }, [params.id])
+
+  const handleVisualize = () => {
+    if (!design) return
+    
+    // Store the design image URL in localStorage to load in capture page
+    localStorage.setItem('loadedDesignImage', design.imageUrl)
+    localStorage.setItem('loadedDesignMetadata', JSON.stringify({
+      source: 'saved-design',
+      designId: design.id,
+      title: design.title
+    }))
+    
+    // Navigate to capture page
+    router.push('/capture')
+  }
 
   const handleSendToTech = () => {
     // TODO: Implement send to tech functionality
@@ -126,9 +143,19 @@ export default function SavedDesignDetailPage() {
         {/* Action Buttons - Always visible */}
         <div className={`space-y-3 sm:space-y-4 max-w-2xl mx-auto px-2 sm:px-0 transition-all duration-700 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <Button 
+            onClick={handleVisualize}
+            disabled={isLoading || !credits || credits < 1}
+            className="w-full bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] transition-all duration-500 ease-out h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 animate-shimmer"
+            style={{ backgroundSize: '200% 100%' }}
+          >
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 animate-pulse" strokeWidth={1.5} />
+            Visualize (1 Credit)
+          </Button>
+
+          <Button 
             onClick={handleSendToTech}
             disabled={isLoading}
-            className="w-full bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 ease-out h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5"
+            className="w-full bg-transparent border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 ease-out h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5"
           >
             <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
             Send to Nail Tech
