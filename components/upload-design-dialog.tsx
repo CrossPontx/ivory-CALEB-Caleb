@@ -183,42 +183,59 @@ export function UploadDesignDialog({ onUploadComplete, trigger }: UploadDesignDi
   // If showing title editor
   if (uploadedUrl && !uploading) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full space-y-4">
-          <h3 className="font-serif text-xl font-light text-[#1A1A1A] tracking-tight">
-            Name Your Design
-          </h3>
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-300">
+        <div className="bg-white w-full sm:max-w-md sm:rounded-lg overflow-hidden animate-in slide-in-from-bottom sm:slide-in-from-bottom-4 duration-300">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 border-b border-[#E8E8E8]">
+            <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
+              Name Your Design
+            </h3>
+            <p className="text-sm text-[#6B6B6B] font-light mt-1 tracking-wide">
+              Give your design a memorable name
+            </p>
+          </div>
           
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Design name"
-            className="border-[#E8E8E8] focus:border-[#8B7355]"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSave()
-              } else if (e.key === 'Escape') {
-                handleCancel()
-              }
-            }}
-          />
+          {/* Content */}
+          <div className="px-6 py-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs tracking-[0.2em] uppercase text-[#8B7355] font-light">
+                Design Name
+              </label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter design name..."
+                className="h-12 sm:h-14 border-[#E8E8E8] focus:border-[#8B7355] text-base sm:text-lg font-light rounded-none transition-all duration-300"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSave()
+                  } else if (e.key === 'Escape') {
+                    handleCancel()
+                  }
+                }}
+              />
+              <p className="text-xs text-[#6B6B6B] font-light">
+                Press Enter to save, Escape to cancel
+              </p>
+            </div>
+          </div>
           
-          <div className="flex gap-3">
-            <Button
-              onClick={handleSave}
-              className="flex-1 h-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light"
-            >
-              <Check className="w-4 h-4 mr-2" strokeWidth={1.5} />
-              Save
-            </Button>
+          {/* Actions */}
+          <div className="px-6 pb-6 pt-2 flex gap-3">
             <Button
               onClick={handleCancel}
               variant="outline"
-              className="flex-1 h-12 border-[#E8E8E8] hover:border-[#8B7355] text-xs tracking-widest uppercase rounded-none font-light"
+              className="flex-1 h-12 sm:h-14 border-[#E8E8E8] hover:border-[#1A1A1A] text-[#1A1A1A] text-xs sm:text-sm tracking-[0.2em] uppercase rounded-none font-light transition-all duration-300 active:scale-95"
             >
-              <X className="w-4 h-4 mr-2" strokeWidth={1.5} />
               Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="flex-1 h-12 sm:h-14 bg-[#1A1A1A] text-white hover:bg-[#8B7355] text-xs sm:text-sm tracking-[0.2em] uppercase rounded-none font-light transition-all duration-500 active:scale-95 hover:shadow-lg"
+            >
+              <Check className="w-4 h-4 mr-2" strokeWidth={1.5} />
+              Save Design
             </Button>
           </div>
         </div>
@@ -238,14 +255,14 @@ export function UploadDesignDialog({ onUploadComplete, trigger }: UploadDesignDi
       />
       
       {trigger ? (
-        <div onClick={handleButtonClick}>
+        <div onClick={handleButtonClick} className={uploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}>
           {trigger}
         </div>
       ) : (
         <Button
           onClick={handleButtonClick}
           disabled={uploading}
-          className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light"
+          className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#1A1A1A] disabled:hover:translate-y-0 disabled:hover:shadow-none"
         >
           {uploading ? (
             <>
