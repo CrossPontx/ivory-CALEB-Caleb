@@ -1,17 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { savedDesigns, collections } from '@/db/schema';
+import { savedDesigns, collections, sessions } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 
 // GET /api/saved-designs - Get user's saved designs
 export async function GET(request: NextRequest) {
   try {
-    const userStr = request.headers.get('x-user-data');
-    if (!userStr) {
+    // Get session from cookie
+    const cookieHeader = request.headers.get('cookie');
+    const sessionCookie = cookieHeader?.split(';').find(c => c.trim().startsWith('session='));
+    const sessionToken = sessionCookie?.split('=')[1];
+
+    if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = JSON.parse(userStr);
+    const session = await db.query.sessions.findFirst({
+      where: (sessions, { eq }) => eq(sessions.token, sessionToken),
+    });
+
+    if (!session || new Date(session.expiresAt) < new Date()) {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
+
+    const user = { id: session.userId };
     const { searchParams } = new URL(request.url);
     const collectionId = searchParams.get('collectionId');
 
@@ -53,12 +65,24 @@ export async function GET(request: NextRequest) {
 // POST /api/saved-designs - Save new design
 export async function POST(request: NextRequest) {
   try {
-    const userStr = request.headers.get('x-user-data');
-    if (!userStr) {
+    // Get session from cookie
+    const cookieHeader = request.headers.get('cookie');
+    const sessionCookie = cookieHeader?.split(';').find(c => c.trim().startsWith('session='));
+    const sessionToken = sessionCookie?.split('=')[1];
+
+    if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = JSON.parse(userStr);
+    const session = await db.query.sessions.findFirst({
+      where: (sessions, { eq }) => eq(sessions.token, sessionToken),
+    });
+
+    if (!session || new Date(session.expiresAt) < new Date()) {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
+
+    const user = { id: session.userId };
     const body = await request.json();
     const { imageUrl, title, sourceUrl, sourceType, notes, tags, collectionId } = body;
 
