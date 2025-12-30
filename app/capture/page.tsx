@@ -202,6 +202,13 @@ export default function CapturePage() {
     // Don't sync during initial load - let the initialization logic handle it
     if (isInitializing) return
     
+    // Don't sync if we're in auto-visualize mode - let the auto-visualize logic handle it
+    if (isAutoVisualizeRef.current) {
+      console.log('⏭️ Skipping tab sync - in auto-visualize mode')
+      isAutoVisualizeRef.current = false // Reset for next time
+      return
+    }
+    
     if (activeTab) {
       console.log('🔄 Syncing to active tab:', activeTabId)
       console.log('  - originalImage:', activeTab.originalImage ? 'EXISTS' : 'NULL')
@@ -302,6 +309,7 @@ export default function CapturePage() {
   const abortControllerRef = useRef<AbortController | null>(null)
   const hasLoadedDesignRef = useRef(false) // Track if we've loaded a design to prevent double-loading
   const isInitialLoadRef = useRef(true) // Track if we're in initial load to prevent premature saves
+  const isAutoVisualizeRef = useRef(false) // Track if we're in auto-visualize mode
 
   // Check for user session and existing tabs on mount
   useEffect(() => {
@@ -349,6 +357,7 @@ export default function CapturePage() {
       if (loadedDesignImage && autoShowConfirm === 'true' && !hasLoadedDesignRef.current) {
         try {
           hasLoadedDesignRef.current = true
+          isAutoVisualizeRef.current = true // Mark that we're in auto-visualize mode
           
           console.log('✅ Auto-loading design for visualization')
           console.log('✅ Design image URL:', loadedDesignImage)
@@ -367,6 +376,10 @@ export default function CapturePage() {
             console.log('✅ Updated tabs with design image:', updatedTabs[0].selectedDesignImages)
             return updatedTabs
           })
+          
+          // Directly set the state as well
+          setSelectedDesignImages([loadedDesignImage])
+          setCapturedImage(loadedDesignImage)
           
           // Set the design image influence to 100% and base color to 0%
           setInfluenceWeights({
@@ -398,6 +411,7 @@ export default function CapturePage() {
         } catch (e) {
           console.error('Error loading design for visualization:', e)
           hasLoadedDesignRef.current = false
+          isAutoVisualizeRef.current = false
           setIsInitializing(false)
         }
       }
