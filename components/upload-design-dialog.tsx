@@ -262,17 +262,19 @@ export function UploadDesignDialog({ onUploadComplete, trigger }: UploadDesignDi
         <Button
           onClick={handleButtonClick}
           disabled={uploading}
-          className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#1A1A1A] disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          className="w-full h-12 sm:h-14 bg-white border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 text-xs sm:text-sm tracking-[0.2em] sm:tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#1A1A1A] disabled:hover:translate-y-0 disabled:hover:shadow-none"
         >
           {uploading ? (
             <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
-              Uploading...
+              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" strokeWidth={1.5} />
+              <span className="hidden sm:inline">Uploading...</span>
+              <span className="sm:hidden">Uploading</span>
             </>
           ) : (
             <>
-              <Upload className="w-5 h-5 mr-2" strokeWidth={1.5} />
-              Upload Design
+              <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2" strokeWidth={1.5} />
+              <span className="hidden sm:inline">Upload Design</span>
+              <span className="sm:hidden">Upload</span>
             </>
           )}
         </Button>
