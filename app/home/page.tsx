@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Plus, Sparkles, Gift, Share2, X, Search, MapPin, Calendar, Clock, Star, ArrowRight, ExternalLink } from "lucide-react"
+import { Plus, Sparkles, Gift, Share2, X, Search, MapPin, Calendar, Clock, Star, ArrowRight, ExternalLink, Send, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useCredits } from "@/hooks/use-credits"
 import { BottomNav } from "@/components/bottom-nav"
@@ -42,6 +42,7 @@ export default function HomePage() {
   const [techs, setTechs] = useState<any[]>([])
   const [myBookings, setMyBookings] = useState<any[]>([])
   const [searchLoading, setSearchLoading] = useState(false)
+  const [selectedSavedDesign, setSelectedSavedDesign] = useState<NailLook | null>(null)
   const isWatch = useIsAppleWatch()
 
   useEffect(() => {
@@ -461,10 +462,8 @@ export default function HomePage() {
                         if (look.type === 'ai') {
                           router.push(`/look/${look.id}`)
                         } else {
-                          // For saved designs, show detail view or open source
-                          if (look.sourceUrl) {
-                            window.open(look.sourceUrl, '_blank')
-                          }
+                          // For saved designs, show action sheet
+                          setSelectedSavedDesign(look)
                         }
                       }}
                     >
@@ -870,6 +869,138 @@ export default function HomePage() {
 
       {/* Bottom Navigation */}
       <BottomNav onCenterAction={startNewDesign} centerActionLabel="Create" />
+
+      {/* Saved Design Action Sheet */}
+      {selectedSavedDesign && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-300"
+          onClick={() => setSelectedSavedDesign(null)}
+        >
+          <div 
+            className="bg-white w-full sm:max-w-md sm:rounded-lg overflow-hidden animate-in slide-in-from-bottom sm:slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image Preview */}
+            <div className="relative aspect-square w-full bg-[#F8F7F5]">
+              <Image
+                src={selectedSavedDesign.imageUrl}
+                alt={selectedSavedDesign.title}
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Title */}
+            <div className="px-6 py-4 border-b border-[#E8E8E8]">
+              <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight">
+                {selectedSavedDesign.title}
+              </h3>
+              {selectedSavedDesign.sourceUrl && (
+                <p className="text-sm text-[#6B6B6B] font-light mt-1 truncate">
+                  Source: {selectedSavedDesign.sourceUrl}
+                </p>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="p-6 space-y-3">
+              <Button
+                onClick={() => {
+                  // TODO: Implement send to tech functionality
+                  alert('Send to Nail Tech feature coming soon!')
+                  setSelectedSavedDesign(null)
+                }}
+                className="w-full h-12 sm:h-14 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-[0.2em] uppercase rounded-none font-light active:scale-95"
+              >
+                <Send className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                Send to Nail Tech
+              </Button>
+
+              {selectedSavedDesign.sourceUrl && (
+                <Button
+                  onClick={() => {
+                    window.open(selectedSavedDesign.sourceUrl, '_blank')
+                    setSelectedSavedDesign(null)
+                  }}
+                  variant="outline"
+                  className="w-full h-12 sm:h-14 border-[#E8E8E8] hover:border-[#8B7355] text-[#1A1A1A] text-xs tracking-[0.2em] uppercase rounded-none font-light transition-all duration-300 active:scale-95"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                  View Source
+                </Button>
+              )}
+
+              <Button
+                onClick={async () => {
+                  if (!confirm('Are you sure you want to delete this design?')) return
+
+                  try {
+                    const designId = selectedSavedDesign.id.replace('saved-', '')
+                    const response = await fetch(`/api/saved-designs/${designId}`, {
+                      method: 'DELETE',
+                    })
+
+                    if (response.ok) {
+                      // Reload designs
+                      const userStr = localStorage.getItem("ivoryUser")
+                      if (userStr) {
+                        const user = JSON.parse(userStr)
+                        
+                        const looksResponse = await fetch(`/api/looks?userId=${user.id}&currentUserId=${user.id}`, { cache: 'no-store' })
+                        const aiLooks: NailLook[] = []
+                        if (looksResponse.ok) {
+                          const data = await looksResponse.json()
+                          aiLooks.push(...data.map((look: any) => ({ ...look, type: 'ai' as const })))
+                        }
+
+                        const savedResponse = await fetch('/api/saved-designs', { cache: 'no-store' })
+                        const savedDesigns: NailLook[] = []
+                        if (savedResponse.ok) {
+                          const data = await savedResponse.json()
+                          savedDesigns.push(...data.designs.map((design: any) => ({
+                            id: `saved-${design.id}`,
+                            imageUrl: design.imageUrl,
+                            title: design.title || 'Saved Design',
+                            createdAt: design.createdAt,
+                            userId: user.id,
+                            sourceUrl: design.sourceUrl,
+                            sourceType: design.sourceType,
+                            type: 'saved' as const
+                          })))
+                        }
+
+                        const allDesigns = [...aiLooks, ...savedDesigns].sort((a, b) => 
+                          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                        )
+                        setLooks(allDesigns)
+                      }
+                      setSelectedSavedDesign(null)
+                    } else {
+                      alert('Failed to delete design')
+                    }
+                  } catch (error) {
+                    console.error('Error deleting design:', error)
+                    alert('An error occurred')
+                  }
+                }}
+                variant="outline"
+                className="w-full h-12 sm:h-14 border-red-200 hover:border-red-500 text-red-500 hover:bg-red-50 text-xs tracking-[0.2em] uppercase rounded-none font-light transition-all duration-300 active:scale-95"
+              >
+                <Trash2 className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                Delete Design
+              </Button>
+
+              <Button
+                onClick={() => setSelectedSavedDesign(null)}
+                variant="ghost"
+                className="w-full h-12 text-[#6B6B6B] hover:text-[#1A1A1A] text-xs tracking-[0.2em] uppercase rounded-none font-light"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
