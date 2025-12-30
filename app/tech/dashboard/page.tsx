@@ -134,7 +134,6 @@ export default function TechDashboardPage() {
             </h1>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#F8F7F5] border border-[#E8E8E8] rounded-none">
-                <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B7355]" strokeWidth={1} />
                 <CreditsDisplay showLabel={false} className="text-xs sm:text-sm font-light" />
               </div>
               {subscriptionTier !== 'free' && subscriptionStatus === 'active' ? (
