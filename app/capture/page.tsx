@@ -355,7 +355,6 @@ export default function CapturePage() {
           // Set the design image as selected design image
           setSelectedDesignImages([loadedDesignImage])
           setCapturedImage(loadedDesignImage)
-          setIsInitializing(false)
           
           // Set design image influence to 100% and base color to 0%
           setInfluenceWeights({
@@ -364,6 +363,19 @@ export default function CapturePage() {
             nailEditor_finish: 100,
             nailEditor_texture: 100
           })
+          
+          // Update the active tab immediately to prevent sync issues
+          setDesignTabs(tabs => tabs.map(tab => 
+            tab.id === activeTabId 
+              ? {
+                  ...tab,
+                  selectedDesignImages: [loadedDesignImage],
+                  originalImage: loadedDesignImage
+                }
+              : tab
+          ))
+          
+          setIsInitializing(false)
           
           // Clear the flags
           localStorage.removeItem('loadedDesignImage')
