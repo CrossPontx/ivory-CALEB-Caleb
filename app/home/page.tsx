@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Plus, Sparkles, Gift, Share2, X, Search, MapPin, Calendar, Clock, Star, ArrowRight } from "lucide-react"
+import { Plus, Sparkles, Gift, Share2, X, Search, MapPin, Calendar, Clock, Star, ArrowRight, ExternalLink, FolderOpen } from "lucide-react"
 import Image from "next/image"
 import { useCredits } from "@/hooks/use-credits"
 import { BottomNav } from "@/components/bottom-nav"
 import ContentModerationMenu from "@/components/content-moderation-menu"
 import { useIsAppleWatch, HideOnWatch, WatchButton, WatchGrid } from "@/components/watch-optimized-layout"
 import { BookingReviewDialog } from "@/components/booking-review-dialog"
+import { UploadDesignDialog } from "@/components/upload-design-dialog"
+import { CollectionsManager } from "@/components/collections-manager"
 
 type NailLook = {
   id: string
@@ -20,6 +22,9 @@ type NailLook = {
   createdAt: string
   userId?: number
   username?: string
+  sourceUrl?: string
+  sourceType?: string
+  type?: 'ai' | 'saved' // Distinguish between AI-generated and saved designs
 }
 
 export default function HomePage() {
@@ -68,15 +73,46 @@ export default function HomePage() {
           return
         }
 
-        // Load looks
-        const response = await fetch(`/api/looks?userId=${user.id}&currentUserId=${user.id}`, {
+        // Load AI-generated looks
+        const looksResponse = await fetch(`/api/looks?userId=${user.id}&currentUserId=${user.id}`, {
           cache: 'no-store'
         })
         
-        if (response.ok) {
-          const data = await response.json()
-          setLooks(data)
+        const aiLooks: NailLook[] = []
+        if (looksResponse.ok) {
+          const data = await looksResponse.json()
+          aiLooks.push(...data.map((look: any) => ({
+            ...look,
+            type: 'ai' as const
+          })))
         }
+
+        // Load saved designs
+        const savedResponse = await fetch('/api/saved-designs', {
+          cache: 'no-store'
+        })
+
+        const savedDesigns: NailLook[] = []
+        if (savedResponse.ok) {
+          const data = await savedResponse.json()
+          savedDesigns.push(...data.designs.map((design: any) => ({
+            id: `saved-${design.id}`,
+            imageUrl: design.imageUrl,
+            title: design.title || 'Saved Design',
+            createdAt: design.createdAt,
+            userId: user.id,
+            sourceUrl: design.sourceUrl,
+            sourceType: design.sourceType,
+            type: 'saved' as const
+          })))
+        }
+
+        // Combine and sort by date
+        const allDesigns = [...aiLooks, ...savedDesigns].sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        
+        setLooks(allDesigns)
 
         // Load bookings
         fetchMyBookings(user.id)
@@ -333,20 +369,108 @@ export default function HomePage() {
                   </h2>
                 </div>
 
-                {/* Create Design Button */}
+                {/* Action Buttons */}
                 {isWatch ? (
-                  <WatchButton onClick={startNewDesign} className="rounded-full w-full">
-                    <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
-                    Create
-                  </WatchButton>
+                  <div className="flex gap-2">
+                    <WatchButton onClick={startNewDesign} className="rounded-full flex-1">
+                      <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+                      Create
+                    </WatchButton>
+                  </div>
                 ) : (
-                  <Button
-                    className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 flex-shrink-0"
-                    onClick={startNewDesign}
-                  >
-                    <Plus className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:rotate-90" strokeWidth={1.5} />
-                    Create Design
-                  </Button>
+                  <div className="flex gap-3 flex-wrap">
+                    <CollectionsManager 
+                      trigger={
+                        <Button variant="outline" className="h-12 sm:h-14 px-6 sm:px-8 border-[#E8E8E8] hover:border-[#8B7355] text-xs tracking-widest uppercase rounded-none font-light">
+                          <FolderOpen className="w-5 h-5 mr-2" strokeWidth={1.5} />
+                          Collections
+                        </Button>
+                      }
+                      onCollectionChange={() => {
+                        // Reload designs when collections change
+                        const loadData = async () => {
+                          const userStr = localStorage.getItem("ivoryUser")
+                          if (!userStr) return
+                          const user = JSON.parse(userStr)
+                          
+                          const looksResponse = await fetch(`/api/looks?userId=${user.id}&currentUserId=${user.id}`, { cache: 'no-store' })
+                          const aiLooks: NailLook[] = []
+                          if (looksResponse.ok) {
+                            const data = await looksResponse.json()
+                            aiLooks.push(...data.map((look: any) => ({ ...look, type: 'ai' as const })))
+                          }
+
+                          const savedResponse = await fetch('/api/saved-designs', { cache: 'no-store' })
+                          const savedDesigns: NailLook[] = []
+                          if (savedResponse.ok) {
+                            const data = await savedResponse.json()
+                            savedDesigns.push(...data.designs.map((design: any) => ({
+                              id: `saved-${design.id}`,
+                              imageUrl: design.imageUrl,
+                              title: design.title || 'Saved Design',
+                              createdAt: design.createdAt,
+                              userId: user.id,
+                              sourceUrl: design.sourceUrl,
+                              sourceType: design.sourceType,
+                              type: 'saved' as const
+                            })))
+                          }
+
+                          const allDesigns = [...aiLooks, ...savedDesigns].sort((a, b) => 
+                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                          )
+                          setLooks(allDesigns)
+                        }
+                        loadData()
+                      }}
+                    />
+                    <UploadDesignDialog 
+                      onUploadComplete={() => {
+                        // Reload designs
+                        const loadData = async () => {
+                          const userStr = localStorage.getItem("ivoryUser")
+                          if (!userStr) return
+                          const user = JSON.parse(userStr)
+                          
+                          const looksResponse = await fetch(`/api/looks?userId=${user.id}&currentUserId=${user.id}`, { cache: 'no-store' })
+                          const aiLooks: NailLook[] = []
+                          if (looksResponse.ok) {
+                            const data = await looksResponse.json()
+                            aiLooks.push(...data.map((look: any) => ({ ...look, type: 'ai' as const })))
+                          }
+
+                          const savedResponse = await fetch('/api/saved-designs', { cache: 'no-store' })
+                          const savedDesigns: NailLook[] = []
+                          if (savedResponse.ok) {
+                            const data = await savedResponse.json()
+                            savedDesigns.push(...data.designs.map((design: any) => ({
+                              id: `saved-${design.id}`,
+                              imageUrl: design.imageUrl,
+                              title: design.title || 'Saved Design',
+                              createdAt: design.createdAt,
+                              userId: user.id,
+                              sourceUrl: design.sourceUrl,
+                              sourceType: design.sourceType,
+                              type: 'saved' as const
+                            })))
+                          }
+
+                          const allDesigns = [...aiLooks, ...savedDesigns].sort((a, b) => 
+                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                          )
+                          setLooks(allDesigns)
+                        }
+                        loadData()
+                      }}
+                    />
+                    <Button
+                      className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 text-xs tracking-widest uppercase rounded-none font-light active:scale-95 hover:shadow-lg hover:-translate-y-0.5 flex-shrink-0"
+                      onClick={startNewDesign}
+                    >
+                      <Plus className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:rotate-90" strokeWidth={1.5} />
+                      Create Design
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
@@ -379,7 +503,16 @@ export default function HomePage() {
                   >
                     <div 
                       className={`aspect-square relative overflow-hidden bg-[#F8F7F5] cursor-pointer ${isWatch ? 'watch-image' : ''}`}
-                      onClick={() => router.push(`/look/${look.id}`)}
+                      onClick={() => {
+                        if (look.type === 'ai') {
+                          router.push(`/look/${look.id}`)
+                        } else {
+                          // For saved designs, show detail view or open source
+                          if (look.sourceUrl) {
+                            window.open(look.sourceUrl, '_blank')
+                          }
+                        }
+                      }}
                     >
                       <Image 
                         src={look.imageUrl || "/placeholder.svg"} 
@@ -388,6 +521,24 @@ export default function HomePage() {
                         className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      {/* Badge for saved designs */}
+                      {look.type === 'saved' && !isWatch && (
+                        <div className="absolute top-2 left-2">
+                          <Badge className="bg-white/95 text-[#1A1A1A] border-0 text-[10px] tracking-[0.2em] uppercase font-light">
+                            Saved
+                          </Badge>
+                        </div>
+                      )}
+
+                      {/* Source link indicator */}
+                      {look.sourceUrl && !isWatch && (
+                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-8 h-8 bg-white/95 rounded-full flex items-center justify-center">
+                            <ExternalLink className="w-4 h-4 text-[#1A1A1A]" strokeWidth={1.5} />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     {!isWatch && currentUserId && look.userId && look.userId !== currentUserId && (
                       <div className={isWatch ? 'p-2' : 'p-3 sm:p-4 relative'}>
@@ -395,7 +546,7 @@ export default function HomePage() {
                           <ContentModerationMenu
                             currentUserId={currentUserId}
                             contentType="look"
-                            contentId={parseInt(look.id)}
+                            contentId={parseInt(look.id.toString().replace('saved-', ''))}
                             contentOwnerId={look.userId}
                             contentOwnerUsername={look.username || `User ${look.userId}`}
                             showBlockOption={true}
