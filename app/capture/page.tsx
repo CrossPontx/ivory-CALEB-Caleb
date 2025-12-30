@@ -1300,20 +1300,20 @@ export default function CapturePage() {
         <ZeroCreditsBanner credits={credits} />
         
         {/* Elegant Header */}
-        <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-8 lg:px-12 pb-5 sm:pb-6 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
+        <div className="absolute top-0 left-0 right-0 pt-10 sm:pt-12 px-3 sm:px-6 lg:px-10 pb-3 sm:pb-4 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               {/* Left side - Delete button */}
               <button
                 onClick={changePhoto}
-                className="h-10 sm:h-11 w-10 sm:w-11 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white active:scale-[0.98] transition-all duration-500 flex items-center justify-center rounded-none"
+                className="h-8 sm:h-10 w-8 sm:w-10 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white active:scale-[0.98] transition-all duration-500 flex items-center justify-center rounded-none"
                 title="Delete this design and start over"
               >
-                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
+                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.5} />
               </button>
               
               {/* Center - Title */}
-              <h1 className="font-serif text-lg sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-tight absolute left-1/2 -translate-x-1/2">
+              <h1 className="font-serif text-base sm:text-xl lg:text-2xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-tight absolute left-1/2 -translate-x-1/2">
                 Design Your Nails
               </h1>
               
@@ -1324,12 +1324,12 @@ export default function CapturePage() {
             </div>
             
             {/* Elegant Tabs */}
-            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:justify-end scrollbar-hide">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:justify-end scrollbar-hide">
               {designTabs.map((tab) => (
-                <div key={tab.id} className="flex items-center gap-1.5 sm:gap-2">
+                <div key={tab.id} className="flex items-center gap-1 sm:gap-1.5">
                   <button
                     onClick={() => setActiveTabId(tab.id)}
-                    className={`h-9 sm:h-10 px-4 sm:px-5 font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase transition-all duration-500 flex items-center gap-2 whitespace-nowrap rounded-none ${
+                    className={`h-8 sm:h-9 px-3 sm:px-4 font-light text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all duration-500 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-none ${
                       activeTabId === tab.id
                         ? 'bg-[#1A1A1A] text-white shadow-sm'
                         : 'border border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] hover:border-[#8B7355]'
@@ -1339,12 +1339,12 @@ export default function CapturePage() {
                     {/* Show reference image indicator */}
                     {tab.selectedDesignImages && tab.selectedDesignImages.length > 0 && (
                       <span 
-                        className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm flex items-center gap-1 ${
+                        className={`text-[8px] sm:text-[9px] px-1 py-0.5 rounded-sm flex items-center gap-0.5 sm:gap-1 ${
                           activeTabId === tab.id ? 'bg-white/20' : 'bg-[#8B7355]/10 text-[#8B7355]'
                         }`}
                         title={`${tab.selectedDesignImages.length} reference image${tab.selectedDesignImages.length > 1 ? 's' : ''}`}
                       >
-                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                         </svg>
                         {tab.selectedDesignImages.length}
@@ -1353,19 +1353,19 @@ export default function CapturePage() {
                     {/* Show drawing indicator */}
                     {tab.drawingImageUrl && (
                       <span 
-                        className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm ${
+                        className={`text-[8px] sm:text-[9px] px-1 py-0.5 rounded-sm ${
                           activeTabId === tab.id ? 'bg-white/20' : 'bg-purple-100 text-purple-600'
                         }`}
                         title="Has drawing overlay"
                       >
-                        <Pencil className="w-2.5 h-2.5" />
+                        <Pencil className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
                       </span>
                     )}
                     {tab.isGenerating && (
-                      <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
+                      <Loader2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 animate-spin" />
                     )}
                     {!tab.isGenerating && tab.finalPreviews.length > 0 && (
-                      <span className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm ${
+                      <span className={`text-[8px] sm:text-[9px] px-1 py-0.5 rounded-sm ${
                         activeTabId === tab.id ? 'bg-white/20' : 'bg-[#F8F7F5]'
                       }`}>
                         {tab.finalPreviews.length}
@@ -1375,9 +1375,9 @@ export default function CapturePage() {
                   {designTabs.length > 1 && (
                     <button
                       onClick={() => removeTab(tab.id)}
-                      className="w-7 h-7 sm:w-8 sm:h-8 border border-[#E8E8E8] text-[#6B6B6B] hover:bg-[#F8F7F5] hover:text-[#1A1A1A] hover:border-[#8B7355] transition-all duration-500 flex items-center justify-center rounded-none"
+                      className="w-6 h-6 sm:w-7 sm:h-7 border border-[#E8E8E8] text-[#6B6B6B] hover:bg-[#F8F7F5] hover:text-[#1A1A1A] hover:border-[#8B7355] transition-all duration-500 flex items-center justify-center rounded-none"
                     >
-                      <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={1} />
+                      <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" strokeWidth={1} />
                     </button>
                   )}
                 </div>
@@ -1385,9 +1385,9 @@ export default function CapturePage() {
               {designTabs.length < 5 && (
                 <button
                   onClick={addNewTab}
-                  className="h-9 sm:h-10 px-4 sm:px-5 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] transition-all duration-500 flex items-center gap-2 whitespace-nowrap rounded-none"
+                  className="h-8 sm:h-9 px-3 sm:px-4 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] transition-all duration-500 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-none"
                 >
-                  <span className="text-base sm:text-lg leading-none">+</span>
+                  <span className="text-sm sm:text-base leading-none">+</span>
                   <span className="hidden sm:inline">New Design</span>
                   <span className="sm:hidden">New</span>
                 </button>
