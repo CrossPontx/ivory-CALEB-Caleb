@@ -361,27 +361,35 @@ export default function CapturePage() {
           
           console.log('✅ Auto-loading design for visualization')
           console.log('✅ Design image URL:', loadedDesignImage)
+          console.log('✅ Current activeTabId:', activeTabId)
           
-          // First, update the tabs with the design image
+          // Stop camera immediately
+          stopCamera()
+          
+          // First, update the tabs with the design image (only selectedDesignImages, not originalImage)
           setDesignTabs(prevTabs => {
             const updatedTabs = prevTabs.map(tab => 
               tab.id === 'tab-initial-1' 
                 ? {
                     ...tab,
-                    selectedDesignImages: [loadedDesignImage],
-                    originalImage: loadedDesignImage
+                    selectedDesignImages: [loadedDesignImage]
+                    // Keep originalImage unchanged - don't overwrite the hand reference photo
                   }
                 : tab
             )
-            console.log('✅ Updated tabs with design image:', updatedTabs[0].selectedDesignImages)
+            console.log('✅ Updated tabs with design image')
+            console.log('✅ Tab 0 selectedDesignImages:', updatedTabs[0].selectedDesignImages)
+            console.log('✅ Tab 0 originalImage:', updatedTabs[0].originalImage ? 'EXISTS' : 'NULL')
             return updatedTabs
           })
           
-          // Directly set the state as well
+          // Directly set the state as well (only selectedDesignImages, not capturedImage)
+          console.log('✅ Setting selectedDesignImages state to:', [loadedDesignImage])
           setSelectedDesignImages([loadedDesignImage])
-          setCapturedImage(loadedDesignImage)
+          // Don't set capturedImage - keep the original hand reference photo
           
           // Set the design image influence to 100% and base color to 0%
+          console.log('✅ Setting influence weights: designImage=100, baseColor=0')
           setInfluenceWeights({
             nailEditor_designImage: 100,
             nailEditor_baseColor: 0,
@@ -498,7 +506,8 @@ export default function CapturePage() {
       const savedTabs = localStorage.getItem("captureSession_designTabs")
       const savedActiveTabId = localStorage.getItem("captureSession_activeTabId")
       
-      if (savedTabs) {
+      // Skip session restoration if we're in auto-visualize mode
+      if (savedTabs && !hasLoadedDesignRef.current) {
         try {
           const tabs = JSON.parse(savedTabs)
           // Check if any tab has content (original image or generated designs)
