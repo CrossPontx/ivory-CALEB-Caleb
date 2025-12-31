@@ -407,12 +407,19 @@ export default function CapturePage() {
             console.log('✅ Finishing initialization')
             setIsInitializing(false)
             
-            // Show confirmation dialog after initialization is complete
+            // Open the upload drawer to show the design was uploaded
+            setIsUploadDrawerOpen(true)
+            
+            // Close the drawer and show confirmation dialog after user sees it
             setTimeout(() => {
-              console.log('✅ Showing confirmation dialog')
-              setPendingGenerationSettings(designSettings)
-              setShowConfirmDialog(true)
-            }, 200)
+              setIsUploadDrawerOpen(false)
+              
+              setTimeout(() => {
+                console.log('✅ Showing confirmation dialog')
+                setPendingGenerationSettings(designSettings)
+                setShowConfirmDialog(true)
+              }, 300)
+            }, 1500) // Show drawer for 1.5 seconds
           }, 300)
           
           return
@@ -2252,6 +2259,25 @@ export default function CapturePage() {
 
             <div className="w-full flex-1 flex flex-col overflow-hidden">
               <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide">
+                {/* Success Banner when design is uploaded */}
+                {selectedDesignImages.length > 0 && (
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 p-4 rounded-lg animate-in fade-in slide-in-from-top duration-500">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-medium text-green-900 mb-1">Design Uploaded Successfully!</h3>
+                        <p className="text-sm text-green-700 font-light">
+                          {selectedDesignImages.length} design{selectedDesignImages.length > 1 ? 's' : ''} ready to influence your nail art
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <h2 className="text-xl sm:text-2xl font-serif text-[#1A1A1A] mb-4">Upload Design Images</h2>
                 
                 {/* Upload Button */}
