@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Edit2, Heart, Loader2, Download, Share2, Sparkles } from "lucide-react"
+import { Heart, Loader2, Download, Share2, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Head from "next/head"
 import ContentModerationMenu from "@/components/content-moderation-menu"
@@ -82,79 +82,54 @@ export default function SharedDesignPage() {
     }
   }, [params.id])
 
-  const handleEdit = () => {
+  const handleSaveDesign = async () => {
     // Check if user is logged in
     const userStr = localStorage.getItem("ivoryUser")
     if (!userStr) {
       localStorage.setItem('returnUrl', window.location.pathname)
-      toast.info('Sign in to edit this design')
+      toast.info('Sign in to save this design')
       router.push("/auth")
       return
     }
 
-    // Store the design in localStorage for editing with all metadata
+    // Save a copy of this design to the user's collection
     if (look) {
-      console.log('=== EDIT DESIGN DEBUG ===')
-      console.log('Look data:', look)
-      console.log('Original image:', look.originalImageUrl)
-      console.log('Generated image:', look.imageUrl)
-      console.log('Design metadata:', look.designMetadata)
-      console.log('Design metadata type:', typeof look.designMetadata)
-      console.log('Design metadata keys:', look.designMetadata ? Object.keys(look.designMetadata) : 'NULL')
-      console.log('selectedDesignImages from metadata:', look.designMetadata?.selectedDesignImages)
-      
-      localStorage.setItem("currentEditingImage", look.originalImageUrl || look.imageUrl)
-      localStorage.setItem("generatedPreview", look.imageUrl)
-      
-      // Store all design metadata if available, otherwise create basic metadata
-      // Also handle case where designMetadata exists but is null
-      const metadata = (look.designMetadata && Object.keys(look.designMetadata).length > 0) ? {
-        ...look.designMetadata,
-        // Preserve the original selectedDesignImages if they exist, otherwise use the generated image
-        selectedDesignImages: look.designMetadata.selectedDesignImages && look.designMetadata.selectedDesignImages.length > 0 
-          ? look.designMetadata.selectedDesignImages 
-          : [look.imageUrl]
-      } : {
-        designSettings: {
-          nailLength: 'medium',
-          nailShape: 'oval',
-          baseColor: '#FF6B9D',
-          finish: 'glossy',
-          texture: 'smooth',
-          patternType: 'solid',
-          styleVibe: 'elegant',
-          accentColor: '#FFFFFF'
-        },
-        selectedDesignImages: [look.imageUrl], // Use the generated image as a reference
-        drawingImageUrl: null,
-        aiPrompt: look.aiPrompt || null,
-        influenceWeights: {
-          nailEditor_designImage: 100, // Set to 100 since we're using the design image
-          nailEditor_baseColor: 0,
-          nailEditor_finish: 100,
-          nailEditor_texture: 100
-        },
-        handReference: 3,
-        designMode: 'design', // Set to design mode
-        colorLightness: 65
+      try {
+        const user = JSON.parse(userStr)
+        
+        toast.loading('Saving design...')
+        
+        const response = await fetch('/api/looks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            title: `${look.title} (Copy)`,
+            imageUrl: look.imageUrl,
+            originalImageUrl: look.originalImageUrl,
+            designSettings: look.designMetadata?.designSettings || null,
+            aiPrompt: look.aiPrompt,
+            designMetadata: look.designMetadata,
+            isPublic: false, // Save as private by default
+          }),
+        })
+
+        if (response.ok) {
+          const savedDesign = await response.json()
+          toast.success('Design saved to your collection!')
+          
+          // Navigate to the saved design
+          setTimeout(() => {
+            router.push(`/saved-design/${savedDesign.id}`)
+          }, 500)
+        } else {
+          toast.error('Failed to save design')
+        }
+      } catch (error) {
+        console.error('Error saving design:', error)
+        toast.error('Failed to save design')
       }
-      
-      console.log('Storing metadata:', metadata)
-      console.log('Metadata selectedDesignImages:', metadata.selectedDesignImages)
-      console.log('Metadata selectedDesignImages length:', metadata.selectedDesignImages?.length)
-      localStorage.setItem("loadedDesignMetadata", JSON.stringify(metadata))
-      
-      console.log('LocalStorage after setting:')
-      console.log('- currentEditingImage:', localStorage.getItem("currentEditingImage"))
-      console.log('- generatedPreview:', localStorage.getItem("generatedPreview"))
-      console.log('- loadedDesignMetadata:', localStorage.getItem("loadedDesignMetadata"))
-      console.log('=== END DEBUG ===')
-      
-      toast.success('Loading design for editing!')
-    } else {
-      console.error('No look data available!')
     }
-    router.push("/capture")
   }
 
   const handleDownload = async () => {
@@ -358,11 +333,11 @@ export default function SharedDesignPage() {
           {/* Action Buttons */}
           <div className="max-w-md mx-auto mb-8 sm:mb-10">
             <Button 
-              onClick={handleEdit}
+              onClick={handleSaveDesign}
               className="w-full bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation"
             >
-              <Edit2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
-              Edit This Design
+              <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
+              Save to My Designs
             </Button>
           </div>
 
