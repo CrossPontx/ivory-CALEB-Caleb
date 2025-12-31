@@ -133,14 +133,16 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
+  const prevExternalStepRef = useRef<number | undefined>(undefined)
 
   // Sync with external step changes from parent - continuously update when parent changes
   useEffect(() => {
-    if (externalStep !== undefined && externalStep !== currentStep) {
-      console.log('🔄 CaptureOnboarding: Syncing from parent:', externalStep, '(was:', currentStep, ')')
+    if (externalStep !== undefined && externalStep !== prevExternalStepRef.current) {
+      console.log('🔄 CaptureOnboarding: Syncing from parent:', externalStep, '(was:', prevExternalStepRef.current, ')')
       setCurrentStep(externalStep)
+      prevExternalStepRef.current = externalStep
     }
-  }, [externalStep, currentStep])
+  }, [externalStep]) // Remove currentStep from dependencies to prevent infinite loop
 
   // Notify parent of step changes
   useEffect(() => {
