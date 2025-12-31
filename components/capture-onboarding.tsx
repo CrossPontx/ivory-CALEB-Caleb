@@ -272,16 +272,16 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
             <defs>
               <mask id="spotlight-mask">
                 <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                {/* For step 1 (capture photo), create a large center cutout for the camera view */}
+                {/* For step 1 (capture photo), create a large elegant center cutout for the camera view */}
                 {currentStep === 0 ? (
                   <>
-                    {/* Large center area for viewing hand */}
+                    {/* Large elegant center area for viewing hand - bigger and more mobile-friendly */}
                     <rect
-                      x={window.innerWidth * 0.1}
-                      y={window.innerHeight * 0.15}
-                      width={window.innerWidth * 0.8}
-                      height={window.innerHeight * 0.5}
-                      rx="24"
+                      x={window.innerWidth * 0.05}
+                      y={window.innerHeight * 0.12}
+                      width={window.innerWidth * 0.9}
+                      height={window.innerHeight * 0.6}
+                      rx="32"
                       fill="black"
                     />
                     {/* Capture button area */}
@@ -313,6 +313,12 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
                   <feMergeNode in="SourceGraphic"/>
                 </feMerge>
               </filter>
+              {/* Elegant gradient for the viewing area border */}
+              <linearGradient id="elegant-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#8B7355', stopOpacity: 0.6 }} />
+                <stop offset="50%" style={{ stopColor: '#A0826D', stopOpacity: 0.5 }} />
+                <stop offset="100%" style={{ stopColor: '#8B7355', stopOpacity: 0.6 }} />
+              </linearGradient>
             </defs>
             <rect
               x="0"
@@ -329,19 +335,42 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
         {/* Elegant pulsing ring around target */}
         {targetRect && (
           <>
-            {/* For step 1, add a ring around the camera viewing area */}
+            {/* For step 1, add an elegant ring around the camera viewing area */}
             {currentStep === 0 && (
               <div
                 className="absolute pointer-events-none"
                 style={{
-                  top: window.innerHeight * 0.15,
-                  left: window.innerWidth * 0.1,
-                  width: window.innerWidth * 0.8,
-                  height: window.innerHeight * 0.5,
+                  top: window.innerHeight * 0.12,
+                  left: window.innerWidth * 0.05,
+                  width: window.innerWidth * 0.9,
+                  height: window.innerHeight * 0.6,
                   pointerEvents: 'none'
                 }}
               >
-                <div className="absolute inset-0 rounded-3xl border-[3px] border-[#8B7355]/40 animate-pulse shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 115, 85, 0.3))' }} />
+                {/* Outer glow ring */}
+                <div 
+                  className="absolute inset-0 rounded-[32px] animate-pulse" 
+                  style={{ 
+                    border: '3px solid transparent',
+                    backgroundImage: 'linear-gradient(135deg, rgba(139, 115, 85, 0.5), rgba(160, 130, 109, 0.4), rgba(139, 115, 85, 0.5))',
+                    backgroundOrigin: 'border-box',
+                    backgroundClip: 'border-box',
+                    boxShadow: '0 0 30px rgba(139, 115, 85, 0.3), inset 0 0 20px rgba(139, 115, 85, 0.1)',
+                    filter: 'drop-shadow(0 0 12px rgba(139, 115, 85, 0.4))'
+                  }} 
+                />
+                {/* Inner subtle ring */}
+                <div 
+                  className="absolute rounded-[32px]" 
+                  style={{
+                    top: '4px',
+                    left: '4px',
+                    right: '4px',
+                    bottom: '4px',
+                    border: '2px solid rgba(160, 130, 109, 0.3)',
+                    boxShadow: 'inset 0 0 15px rgba(255, 255, 255, 0.1)'
+                  }}
+                />
               </div>
             )}
             
