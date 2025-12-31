@@ -2610,8 +2610,8 @@ export default function CapturePage() {
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-[5] overflow-visible">
           <style jsx>{`
             @keyframes elegant-pulse {
-              0%, 100% { opacity: 0.4; transform: scale(1); }
-              50% { opacity: 0.7; transform: scale(1.02); }
+              0%, 100% { opacity: ${shouldShowOnboarding && onboardingStep === 0 ? '0.15' : '0.4'}; transform: scale(1); }
+              50% { opacity: ${shouldShowOnboarding && onboardingStep === 0 ? '0.25' : '0.7'}; transform: scale(1.02); }
             }
             .hand-outline {
               animation: elegant-pulse 3s ease-in-out infinite;

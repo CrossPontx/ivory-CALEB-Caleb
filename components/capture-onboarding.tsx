@@ -265,7 +265,7 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
   return (
     <>
       {/* Semi-transparent overlay that allows interaction */}
-      <div className="fixed inset-0 z-[200] pointer-events-none">
+      <div className="fixed inset-0 z-[200]" style={{ pointerEvents: 'none' }}>
         {/* Spotlight effect - cut out the target element */}
         {targetRect && (
           <svg className="absolute inset-0 w-full h-full pointer-events-none">
@@ -296,6 +296,7 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
               height="100%"
               fill="rgba(0, 0, 0, 0.75)"
               mask="url(#spotlight-mask)"
+              style={{ pointerEvents: 'none' }}
             />
           </svg>
         )}
@@ -309,6 +310,7 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
               left: targetRect.left - 8,
               width: targetRect.width + 16,
               height: targetRect.height + 16,
+              pointerEvents: 'none'
             }}
           >
             <div className="absolute inset-0 rounded-2xl border-[3px] border-[#8B7355]/60 animate-pulse shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 115, 85, 0.4))' }} />
