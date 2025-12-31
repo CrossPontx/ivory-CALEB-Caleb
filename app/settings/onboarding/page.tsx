@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RefreshCw, CheckCircle } from "lucide-react"
@@ -8,20 +8,25 @@ import { toast } from "sonner"
 
 export default function OnboardingSettingsPage() {
   const [isReset, setIsReset] = useState(false)
+  const [hasCompleted, setHasCompleted] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    // Check onboarding status on client side only
+    if (typeof window !== 'undefined') {
+      const completed = localStorage.getItem('ivory_capture_onboarding_completed') === 'true'
+      setHasCompleted(completed)
+    }
+  }, [])
 
   const handleResetOnboarding = () => {
     localStorage.removeItem('ivory_capture_onboarding_completed')
+    setHasCompleted(false)
     setIsReset(true)
     toast.success('Onboarding reset!', {
       description: 'Visit the capture page to see the onboarding tour again',
     })
     
     setTimeout(() => setIsReset(false), 3000)
-  }
-
-  const checkOnboardingStatus = () => {
-    const hasCompleted = localStorage.getItem('ivory_capture_onboarding_completed')
-    return hasCompleted === 'true'
   }
 
   return (
@@ -37,7 +42,12 @@ export default function OnboardingSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {checkOnboardingStatus() ? (
+              {hasCompleted === null ? (
+                <>
+                  <RefreshCw className="w-5 h-5 text-gray-400 animate-spin" />
+                  Loading...
+                </>
+              ) : hasCompleted ? (
                 <>
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   Onboarding Completed
@@ -50,9 +60,11 @@ export default function OnboardingSettingsPage() {
               )}
             </CardTitle>
             <CardDescription>
-              {checkOnboardingStatus() 
-                ? "You've completed the capture page onboarding tour"
-                : "You haven't completed the onboarding tour yet"
+              {hasCompleted === null 
+                ? "Checking onboarding status..."
+                : hasCompleted 
+                  ? "You've completed the capture page onboarding tour"
+                  : "You haven't completed the onboarding tour yet"
               }
             </CardDescription>
           </CardHeader>
