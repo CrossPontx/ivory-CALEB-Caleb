@@ -1047,12 +1047,18 @@ export default function CapturePage() {
 
   // Auto-advance onboarding when upload drawer opens (step 2 -> step 3)
   useEffect(() => {
-    console.log('🔍 Drawer state changed:', { shouldShowOnboarding, onboardingStep, isUploadDrawerOpen })
+    console.log('🔍 Drawer state changed:', { 
+      shouldShowOnboarding, 
+      onboardingStep, 
+      isUploadDrawerOpen,
+      willAdvance: shouldShowOnboarding && onboardingStep === 1 && isUploadDrawerOpen
+    })
     
     if (shouldShowOnboarding && onboardingStep === 1 && isUploadDrawerOpen) {
       // User opened upload drawer, advance to step 3 (upload button step) after drawer animation completes
       console.log('✅ Advancing from step 2 to step 3 (upload button)')
       setTimeout(() => {
+        console.log('✅ Setting onboarding step to 2')
         setOnboardingStep(2)
       }, 800) // Increased delay to ensure drawer is fully open and button is rendered
     }
