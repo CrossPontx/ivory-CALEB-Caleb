@@ -129,6 +129,7 @@ export default function CapturePage() {
   const [isInitializing, setIsInitializing] = useState(true) // Track if we're still initializing
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [pendingGenerationSettings, setPendingGenerationSettings] = useState<DesignSettings | null>(null)
+  const [savedImageBeforeReplace, setSavedImageBeforeReplace] = useState<string | null>(null) // Store image before replace
   
   // Tabs for multiple designs
   const [designTabs, setDesignTabs] = useState<DesignTab[]>([
@@ -748,9 +749,13 @@ export default function CapturePage() {
               if (uploadResponse.ok) {
                 const { url } = await uploadResponse.json()
                 setCapturedImage(url)
+                // Clear saved image since user took a new photo
+                setSavedImageBeforeReplace(null)
               } else {
                 const dataUrl = canvas.toDataURL("image/jpeg")
                 setCapturedImage(dataUrl)
+                // Clear saved image since user took a new photo
+                setSavedImageBeforeReplace(null)
               }
             }
           }, 'image/jpeg', 0.9)
@@ -758,6 +763,8 @@ export default function CapturePage() {
           console.error('Photo upload error:', error)
           const dataUrl = canvas.toDataURL("image/jpeg")
           setCapturedImage(dataUrl)
+          // Clear saved image since user took a new photo
+          setSavedImageBeforeReplace(null)
         }
 
         stopCamera()
@@ -782,10 +789,14 @@ export default function CapturePage() {
         if (uploadResponse.ok) {
           const { url } = await uploadResponse.json()
           setCapturedImage(url)
+          // Clear saved image since user uploaded a new photo
+          setSavedImageBeforeReplace(null)
         } else {
           const reader = new FileReader()
           reader.onload = (e) => {
             setCapturedImage(e.target?.result as string)
+            // Clear saved image since user uploaded a new photo
+            setSavedImageBeforeReplace(null)
           }
           reader.readAsDataURL(file)
         }
@@ -794,6 +805,8 @@ export default function CapturePage() {
         const reader = new FileReader()
         reader.onload = (e) => {
           setCapturedImage(e.target?.result as string)
+          // Clear saved image since user uploaded a new photo
+          setSavedImageBeforeReplace(null)
         }
         reader.readAsDataURL(file)
       } finally {
@@ -1515,6 +1528,11 @@ export default function CapturePage() {
   }
 
   const replaceHandPhoto = () => {
+    // Save the current image before clearing it
+    if (capturedImage) {
+      setSavedImageBeforeReplace(capturedImage)
+    }
+    
     // Clear the original image from ALL tabs but keep their designs
     setDesignTabs(tabs => tabs.map(tab => ({
       ...tab,
@@ -1527,6 +1545,25 @@ export default function CapturePage() {
     
     // Start camera for new hand photo
     startCamera()
+  }
+  
+  const cancelReplaceHandPhoto = () => {
+    // Restore the saved image
+    if (savedImageBeforeReplace) {
+      setCapturedImage(savedImageBeforeReplace)
+      
+      // Restore to all tabs
+      setDesignTabs(tabs => tabs.map(tab => ({
+        ...tab,
+        originalImage: savedImageBeforeReplace
+      })))
+      
+      // Clear the saved image
+      setSavedImageBeforeReplace(null)
+      
+      // Stop camera
+      stopCamera()
+    }
   }
 
   const handleDrawingComplete = (dataUrl: string) => {
@@ -2693,7 +2730,14 @@ export default function CapturePage() {
         <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-6 pb-5 z-10 bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => router.back()}
+              onClick={() => {
+                // If we have a saved image (user is in replace mode), restore it
+                if (savedImageBeforeReplace) {
+                  cancelReplaceHandPhoto()
+                } else {
+                  router.back()
+                }
+              }}
               data-onboarding="camera-close-button"
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-500 shadow-lg active:scale-95"
             >
