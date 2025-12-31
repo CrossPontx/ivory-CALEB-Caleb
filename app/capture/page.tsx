@@ -1032,6 +1032,19 @@ export default function CapturePage() {
     }
   }, [designSettings])
 
+  // Auto-advance onboarding when photo is captured (step 1 -> step 2)
+  useEffect(() => {
+    console.log('🔍 Photo captured check:', { shouldShowOnboarding, onboardingStep, hasCapturedImage: !!capturedImage })
+    
+    if (shouldShowOnboarding && onboardingStep === 0 && capturedImage) {
+      // User captured a photo, advance to step 2 (open upload drawer)
+      console.log('✅ Advancing from step 1 to step 2 (open upload drawer)')
+      setTimeout(() => {
+        setOnboardingStep(1)
+      }, 1000) // Wait for transition to design view
+    }
+  }, [capturedImage, shouldShowOnboarding, onboardingStep])
+
   // Auto-advance onboarding when upload drawer opens (step 2 -> step 3)
   useEffect(() => {
     console.log('🔍 Drawer state changed:', { shouldShowOnboarding, onboardingStep, isUploadDrawerOpen })
