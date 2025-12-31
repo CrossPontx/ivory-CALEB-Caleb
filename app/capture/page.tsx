@@ -1060,7 +1060,7 @@ export default function CapturePage() {
       setTimeout(() => {
         console.log('✅ Setting onboarding step to 2')
         setOnboardingStep(2)
-      }, 800) // Increased delay to ensure drawer is fully open and button is rendered
+      }, 1200) // Increased delay to ensure drawer is fully open and button is rendered
     }
   }, [isUploadDrawerOpen, shouldShowOnboarding, onboardingStep])
 
