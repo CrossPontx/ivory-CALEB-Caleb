@@ -272,14 +272,39 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
             <defs>
               <mask id="spotlight-mask">
                 <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                <rect
-                  x={targetRect.left - 8}
-                  y={targetRect.top - 8}
-                  width={targetRect.width + 16}
-                  height={targetRect.height + 16}
-                  rx="16"
-                  fill="black"
-                />
+                {/* For step 1 (capture photo), create a large center cutout for the camera view */}
+                {currentStep === 0 ? (
+                  <>
+                    {/* Large center area for viewing hand */}
+                    <rect
+                      x={window.innerWidth * 0.1}
+                      y={window.innerHeight * 0.15}
+                      width={window.innerWidth * 0.8}
+                      height={window.innerHeight * 0.5}
+                      rx="24"
+                      fill="black"
+                    />
+                    {/* Capture button area */}
+                    <rect
+                      x={targetRect.left - 8}
+                      y={targetRect.top - 8}
+                      width={targetRect.width + 16}
+                      height={targetRect.height + 16}
+                      rx="16"
+                      fill="black"
+                    />
+                  </>
+                ) : (
+                  /* Normal spotlight for other steps */
+                  <rect
+                    x={targetRect.left - 8}
+                    y={targetRect.top - 8}
+                    width={targetRect.width + 16}
+                    height={targetRect.height + 16}
+                    rx="16"
+                    fill="black"
+                  />
+                )}
               </mask>
               <filter id="spotlight-glow">
                 <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -303,19 +328,38 @@ export function CaptureOnboarding({ onComplete, currentPhase, currentStep: exter
         
         {/* Elegant pulsing ring around target */}
         {targetRect && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              top: targetRect.top - 8,
-              left: targetRect.left - 8,
-              width: targetRect.width + 16,
-              height: targetRect.height + 16,
-              pointerEvents: 'none'
-            }}
-          >
-            <div className="absolute inset-0 rounded-2xl border-[3px] border-[#8B7355]/60 animate-pulse shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 115, 85, 0.4))' }} />
-            <div className="absolute inset-0 rounded-2xl border-[2px] border-[#A0826D]/40 animate-ping opacity-60" />
-          </div>
+          <>
+            {/* For step 1, add a ring around the camera viewing area */}
+            {currentStep === 0 && (
+              <div
+                className="absolute pointer-events-none"
+                style={{
+                  top: window.innerHeight * 0.15,
+                  left: window.innerWidth * 0.1,
+                  width: window.innerWidth * 0.8,
+                  height: window.innerHeight * 0.5,
+                  pointerEvents: 'none'
+                }}
+              >
+                <div className="absolute inset-0 rounded-3xl border-[3px] border-[#8B7355]/40 animate-pulse shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 115, 85, 0.3))' }} />
+              </div>
+            )}
+            
+            {/* Ring around the actual target button */}
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                top: targetRect.top - 8,
+                left: targetRect.left - 8,
+                width: targetRect.width + 16,
+                height: targetRect.height + 16,
+                pointerEvents: 'none'
+              }}
+            >
+              <div className="absolute inset-0 rounded-2xl border-[3px] border-[#8B7355]/60 animate-pulse shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 115, 85, 0.4))' }} />
+              <div className="absolute inset-0 rounded-2xl border-[2px] border-[#A0826D]/40 animate-ping opacity-60" />
+            </div>
+          </>
         )}
       </div>
 
