@@ -92,6 +92,7 @@ export function GenerationConfirmationDialog({
           </Button>
           <Button
             onClick={onConfirm}
+            data-onboarding="confirm-generation-button"
             className="w-full sm:flex-1 h-14 sm:h-16 bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] text-sm tracking-[0.2em] uppercase rounded-xl font-light transition-all duration-500 active:scale-95 hover:shadow-2xl touch-manipulation animate-shimmer"
             style={{ backgroundSize: '200% 100%' }}
           >

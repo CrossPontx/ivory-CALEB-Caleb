@@ -972,6 +972,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
       <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 safe-top">
         <button
           onClick={onClose}
+          data-onboarding="close-drawing-canvas"
           className="w-10 h-10 bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 active:scale-95 transition-all flex items-center justify-center rounded-full touch-manipulation"
         >
           <X className="w-5 h-5" />

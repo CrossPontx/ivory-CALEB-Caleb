@@ -18,6 +18,8 @@ import { DrawingCanvasKonva as DrawingCanvas } from "@/components/drawing-canvas
 import { Pencil } from "lucide-react"
 import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
 import { GenerationConfirmationDialog } from "@/components/generation-confirmation-dialog"
+import { CaptureOnboarding } from "@/components/capture-onboarding"
+import { useOnboarding } from "@/hooks/use-onboarding"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -50,6 +52,10 @@ type DesignTab = {
 export default function CapturePage() {
   const router = useRouter()
   const { credits, hasCredits, refresh: refreshCredits } = useCredits()
+  const { shouldShowOnboarding, completeOnboarding } = useOnboarding()
+  
+  const [onboardingPhase, setOnboardingPhase] = useState<'capture' | 'design' | 'visualize'>('capture')
+  const [onboardingStep, setOnboardingStep] = useState(0)
   
   // Check localStorage immediately for loaded design to prevent camera flash
   const getInitialCapturedImage = () => {
@@ -820,6 +826,11 @@ export default function CapturePage() {
       generateAIPreview(pendingGenerationSettings)
       setPendingGenerationSettings(null)
     }
+    
+    // Complete onboarding when user confirms generation (step 13, index 12)
+    if (shouldShowOnboarding && onboardingStep === 12) {
+      completeOnboarding()
+    }
   }
 
   const handleCancelGeneration = () => {
@@ -1010,8 +1021,163 @@ export default function CapturePage() {
   useEffect(() => {
     if (capturedImage && !designMode) {
       setDesignMode('design')
+      setOnboardingPhase('design') // Update onboarding phase
     }
   }, [capturedImage, designMode])
+
+  // Update onboarding phase when user starts designing
+  useEffect(() => {
+    if (designSettings.baseColor !== '#FF6B9D' || designSettings.nailShape !== 'oval') {
+      setOnboardingPhase('visualize')
+    }
+  }, [designSettings])
+
+  // Auto-advance onboarding when upload drawer opens (step 2 -> step 3)
+  useEffect(() => {
+    console.log('🔍 Drawer state changed:', { shouldShowOnboarding, onboardingStep, isUploadDrawerOpen })
+    
+    if (shouldShowOnboarding && onboardingStep === 1 && isUploadDrawerOpen) {
+      // User opened upload drawer, advance to step 3 (upload button step) after drawer animation completes
+      console.log('✅ Advancing from step 2 to step 3 (upload button)')
+      setTimeout(() => {
+        setOnboardingStep(2)
+      }, 800) // Increased delay to ensure drawer is fully open and button is rendered
+    }
+  }, [isUploadDrawerOpen, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when design image is uploaded (step 3 -> step 4)
+  useEffect(() => {
+    console.log('🔍 Design images changed:', { shouldShowOnboarding, onboardingStep, selectedDesignImagesCount: selectedDesignImages.length })
+    
+    if (shouldShowOnboarding && onboardingStep === 2 && selectedDesignImages.length > 0) {
+      // User uploaded a design image, advance to step 4 (close drawer step) after showing success
+      console.log('✅ Advancing from step 3 to step 4 (close drawer)')
+      setTimeout(() => {
+        setOnboardingStep(3)
+      }, 1500) // Wait for success banner to be visible
+    }
+  }, [selectedDesignImages, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when upload drawer closes (step 4 -> step 5)
+  useEffect(() => {
+    console.log('🔍 Upload drawer closed check:', { shouldShowOnboarding, onboardingStep, isUploadDrawerOpen, hasDesignImages: selectedDesignImages.length > 0 })
+    
+    if (shouldShowOnboarding && onboardingStep === 3 && !isUploadDrawerOpen && selectedDesignImages.length > 0) {
+      // User closed the upload drawer after uploading, advance to step 5 (drawing canvas)
+      console.log('✅ Advancing from step 4 to step 5 (drawing canvas)')
+      setTimeout(() => {
+        setOnboardingStep(4)
+      }, 500) // Wait for drawer close animation
+    }
+  }, [isUploadDrawerOpen, shouldShowOnboarding, onboardingStep, selectedDesignImages])
+
+  // Auto-advance onboarding when drawing canvas opens (step 5 -> step 6)
+  useEffect(() => {
+    console.log('🔍 Drawing canvas opened check:', { shouldShowOnboarding, onboardingStep, showDrawingCanvas })
+    
+    if (shouldShowOnboarding && onboardingStep === 4 && showDrawingCanvas) {
+      // User opened drawing canvas, advance to step 6 (close canvas step) after a moment
+      console.log('✅ Advancing from step 5 to step 6 (close canvas) - canvas opened')
+      setTimeout(() => {
+        setOnboardingStep(5)
+      }, 1000) // Give them a moment to see the canvas
+    }
+  }, [showDrawingCanvas, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when drawing canvas is closed (step 6 -> step 7)
+  useEffect(() => {
+    console.log('🔍 Drawing canvas closed check:', { shouldShowOnboarding, onboardingStep, showDrawingCanvas })
+    
+    if (shouldShowOnboarding && onboardingStep === 5 && !showDrawingCanvas) {
+      // User closed drawing canvas, advance to step 7 (nail shape)
+      console.log('✅ Advancing from step 6 to step 7 (nail shape)')
+      setTimeout(() => {
+        setOnboardingStep(6)
+        // Auto-open the drawer so nail shape option is visible
+        setIsDrawerOpen(true)
+      }, 500)
+    }
+  }, [showDrawingCanvas, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when nail shape section opens (step 7 -> step 8)
+  useEffect(() => {
+    console.log('🔍 Nail shape section check:', { shouldShowOnboarding, onboardingStep, expandedSection })
+    
+    if (shouldShowOnboarding && onboardingStep === 6 && expandedSection === 'shape') {
+      // User opened nail shape section, advance to step 8 (select shape from slider)
+      console.log('✅ Advancing from step 7 to step 8 (nail shape slider)')
+      setTimeout(() => {
+        setOnboardingStep(7)
+      }, 500)
+    }
+  }, [expandedSection, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when nail shape is selected (step 8 -> step 9)
+  useEffect(() => {
+    console.log('🔍 Nail shape selection check:', { shouldShowOnboarding, onboardingStep, nailShape: designSettings.nailShape })
+    
+    if (shouldShowOnboarding && onboardingStep === 7) {
+      // User selected a nail shape (changed from default 'oval'), advance to next step
+      if (designSettings.nailShape !== 'oval') {
+        console.log('✅ Advancing from step 8 to step 9 (close design drawer) - nail shape selected')
+        setTimeout(() => {
+          setOnboardingStep(8)
+        }, 500)
+      }
+    }
+  }, [designSettings.nailShape, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when design drawer closes (step 9 -> step 10)
+  useEffect(() => {
+    console.log('🔍 Design drawer closed check:', { shouldShowOnboarding, onboardingStep, isDrawerOpen })
+    
+    if (shouldShowOnboarding && onboardingStep === 8 && !isDrawerOpen) {
+      // User closed the design drawer, advance to next step
+      console.log('✅ Advancing from step 9 to step 10 (replace photo)')
+      setTimeout(() => {
+        setOnboardingStep(9)
+      }, 500)
+    }
+  }, [isDrawerOpen, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when replace button is clicked and camera opens (step 10 -> step 11)
+  useEffect(() => {
+    console.log('🔍 Camera opened for replace check:', { shouldShowOnboarding, onboardingStep, capturedImage })
+    
+    if (shouldShowOnboarding && onboardingStep === 9 && !capturedImage) {
+      // User clicked replace and camera opened (capturedImage is null), advance to close camera step
+      console.log('✅ Advancing from step 10 to step 11 (close camera)')
+      setTimeout(() => {
+        setOnboardingStep(10)
+      }, 800)
+    }
+  }, [capturedImage, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when camera closes after replace (step 11 -> step 12)
+  useEffect(() => {
+    console.log('🔍 Camera closed after replace check:', { shouldShowOnboarding, onboardingStep, capturedImage })
+    
+    if (shouldShowOnboarding && onboardingStep === 10 && capturedImage) {
+      // User closed camera and has image again, advance to visualize step
+      console.log('✅ Advancing from step 11 to step 12 (visualize)')
+      setTimeout(() => {
+        setOnboardingStep(11)
+      }, 500)
+    }
+  }, [capturedImage, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when confirmation dialog opens (step 12 -> step 13)
+  useEffect(() => {
+    console.log('🔍 Confirmation dialog check:', { shouldShowOnboarding, onboardingStep, showConfirmDialog })
+    
+    if (shouldShowOnboarding && onboardingStep === 11 && showConfirmDialog) {
+      // User clicked visualize and dialog opened, advance to final step
+      console.log('✅ Advancing from step 12 to step 13 (confirm generation)')
+      setTimeout(() => {
+        setOnboardingStep(12)
+      }, 500)
+    }
+  }, [showConfirmDialog, shouldShowOnboarding, onboardingStep])
 
   const generateAIDesigns = async () => {
     if (!aiPrompt.trim()) return
@@ -1573,6 +1739,7 @@ export default function CapturePage() {
                       e.stopPropagation()
                       setIsUploadDrawerOpen(!isUploadDrawerOpen)
                     }}
+                    data-onboarding="design-images-option"
                     className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full backdrop-blur-md border-2 flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 ${
                       isUploadDrawerOpen 
                         ? 'bg-[#8B7355] border-[#8B7355] text-white' 
@@ -1589,6 +1756,7 @@ export default function CapturePage() {
                       e.stopPropagation()
                       setShowDrawingCanvas(true)
                     }}
+                    data-onboarding="drawing-canvas-button"
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#8B7355] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
                     title="Draw on image"
                   >
@@ -1623,6 +1791,7 @@ export default function CapturePage() {
                       e.stopPropagation()
                       replaceHandPhoto()
                     }}
+                    data-onboarding="replace-photo-button"
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#E8E8E8] text-[#1A1A1A] flex items-center justify-center shadow-xl hover:scale-110 hover:border-[#8B7355] active:scale-95 transition-all duration-300"
                     title="Replace hand photo"
                   >
@@ -1649,6 +1818,7 @@ export default function CapturePage() {
               <button 
                 onClick={() => handleVisualizeClick(designSettings)} 
                 disabled={!hasCredits(1)}
+                data-onboarding="visualize-button"
                 className="w-full h-12 sm:h-14 bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white font-light text-xs sm:text-sm tracking-[0.2em] uppercase hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl rounded-sm disabled:opacity-50 disabled:cursor-not-allowed border border-[#E8E8E8]/20 backdrop-blur-sm animate-shimmer"
                 style={{
                   backgroundSize: '200% 100%',
@@ -1726,13 +1896,17 @@ export default function CapturePage() {
             {/* Elegant Drag Handle */}
             <button
               onClick={() => setIsDrawerOpen(false)}
+              data-onboarding="close-design-drawer"
               className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355] cursor-pointer"
               aria-label="Close drawer"
             />
 
             <div className="w-full flex-1 flex flex-col overflow-hidden">
               {(designMode === 'design' || designMode === null) && (
-                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide">
+                <div 
+                  className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide"
+                  data-onboarding="design-parameters-drawer"
+                >
                   {/* Low Credits Warning */}
                   {credits !== null && credits <= 2 && credits > 0 && (
                     <div className="bg-gradient-to-r from-[#FFF9E6] to-[#FFF9E6]/50 border border-[#E8E8E8]/50 p-4 sm:p-5 text-sm rounded-sm shadow-sm animate-fade-in">
@@ -1883,7 +2057,7 @@ export default function CapturePage() {
                     </div>
                   )}
 
-                  <div className="border-t border-[#E8E8E8] pt-4">
+                  <div className="border-t border-[#E8E8E8] pt-4" data-onboarding="design-section">
                     <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-widest mb-4">Design Parameters</p>
 
                     {/* Nail Length - Redesigned */}
@@ -1940,6 +2114,7 @@ export default function CapturePage() {
                     <div className="mb-4">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'shape' ? null : 'shape')}
+                        data-onboarding="nail-shape-option"
                         className="w-full flex items-center justify-between p-4 rounded-lg border border-[#E8E8E8] bg-gradient-to-br from-white to-[#FEFEFE] hover:border-[#8B7355] hover:shadow-md transition-all duration-300 active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 flex-1">
@@ -1960,7 +2135,10 @@ export default function CapturePage() {
                           <div className="relative">
                             {/* Horizontal scrollable container */}
                             <div className="overflow-x-auto pb-2 scrollbar-hide -mx-1">
-                              <div className="flex gap-2 sm:gap-3 min-w-max px-1">
+                              <div 
+                                className="flex gap-2 sm:gap-3 min-w-max px-1"
+                                data-onboarding="nail-shape-slider"
+                              >
                                 {[
                                   { value: 'square', label: 'Square', image: '/SQUARE.png' },
                                   { value: 'squoval', label: 'Squoval', image: '/SQUARED OVAL SQUOVAL.png' },
@@ -2023,6 +2201,7 @@ export default function CapturePage() {
                     <div className="mb-4">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'color' ? null : 'color')}
+                        data-onboarding="base-color-option"
                         className="w-full flex items-center justify-between p-4 rounded-lg border border-[#E8E8E8] bg-gradient-to-br from-white to-[#FEFEFE] hover:border-[#8B7355] hover:shadow-md transition-all duration-300 active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 flex-1">
@@ -2143,6 +2322,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'finish' ? null : 'finish')}
+                        data-onboarding="finish-option"
                         className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3 flex-1">
@@ -2253,6 +2433,7 @@ export default function CapturePage() {
             {/* Elegant Drag Handle */}
             <button
               onClick={() => setIsUploadDrawerOpen(false)}
+              data-onboarding="close-upload-drawer"
               className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355] cursor-pointer"
               aria-label="Close drawer"
             />
@@ -2283,6 +2464,7 @@ export default function CapturePage() {
                 {/* Upload Button */}
                 <button 
                   onClick={() => designUploadRef.current?.click()}
+                  data-onboarding="upload-design-button"
                   className="w-full h-32 border-2 border-dashed border-[#E8E8E8] text-[#1A1A1A] font-light text-sm tracking-[0.15em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex flex-col items-center justify-center gap-3 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isUploadingDesign || selectedDesignImages.length >= 3}
                 >
@@ -2388,6 +2570,16 @@ export default function CapturePage() {
             onClose={() => setShowDrawingCanvas(false)}
           />
         )}
+        
+        {/* Onboarding Tour */}
+        {shouldShowOnboarding && (
+          <CaptureOnboarding 
+            onComplete={completeOnboarding}
+            currentPhase={onboardingPhase}
+            currentStep={onboardingStep}
+            onStepChange={setOnboardingStep}
+          />
+        )}
       </div>
     )
   }
@@ -2483,6 +2675,7 @@ export default function CapturePage() {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => router.back()}
+              data-onboarding="camera-close-button"
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-500 shadow-lg active:scale-95"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -2570,6 +2763,7 @@ export default function CapturePage() {
 
             <button
               onClick={capturePhoto}
+              data-onboarding="capture-button"
               className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all duration-500 active:scale-95 shadow-2xl hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]"
               style={{
                 background: 'linear-gradient(135deg, #ffffff 0%, #f8f7f5 100%)',
@@ -2592,6 +2786,16 @@ export default function CapturePage() {
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+      
+      {/* Onboarding Tour */}
+      {shouldShowOnboarding && (
+        <CaptureOnboarding 
+          onComplete={completeOnboarding}
+          currentPhase={onboardingPhase}
+          currentStep={onboardingStep}
+          onStepChange={setOnboardingStep}
+        />
+      )}
     </div>
   )
 }
