@@ -12,6 +12,7 @@ import { BottomNav } from "@/components/bottom-nav"
 import ContentModerationMenu from "@/components/content-moderation-menu"
 import { useIsAppleWatch, HideOnWatch, WatchButton, WatchGrid } from "@/components/watch-optimized-layout"
 import { BookingReviewDialog } from "@/components/booking-review-dialog"
+import { AnimatedTabs } from "@/components/animated-tabs"
 
 type NailLook = {
   id: string
@@ -196,38 +197,15 @@ export default function HomePage() {
       {/* Tab Navigation */}
       <div className={`bg-white border-b border-[#E8E8E8] sticky ${isWatch ? 'top-8' : 'top-16 sm:top-18'} z-40`}>
         <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3' : 'px-5 sm:px-6'}`}>
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab('designs')}
-              className={`flex-1 py-4 sm:py-5 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
-                activeTab === 'designs'
-                  ? 'border-[#1A1A1A] text-[#1A1A1A]'
-                  : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
-              }`}
-            >
-              My Designs
-            </button>
-            <button
-              onClick={() => setActiveTab('search')}
-              className={`flex-1 py-4 sm:py-5 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
-                activeTab === 'search'
-                  ? 'border-[#1A1A1A] text-[#1A1A1A]'
-                  : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
-              }`}
-            >
-              Find Nail Tech
-            </button>
-            <button
-              onClick={() => setActiveTab('bookings')}
-              className={`flex-1 py-4 sm:py-5 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
-                activeTab === 'bookings'
-                  ? 'border-[#1A1A1A] text-[#1A1A1A]'
-                  : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
-              }`}
-            >
-              My Bookings {myBookings.length > 0 && `(${myBookings.length})`}
-            </button>
-          </div>
+          <AnimatedTabs
+            tabs={[
+              { id: 'designs', label: 'My Designs' },
+              { id: 'search', label: 'Find Nail Tech' },
+              { id: 'bookings', label: 'My Bookings', count: myBookings.length }
+            ]}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as 'designs' | 'search' | 'bookings')}
+          />
         </div>
       </div>
 
@@ -235,7 +213,7 @@ export default function HomePage() {
       <main className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-3 pb-20' : 'px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32'}`}>
         {/* My Designs Tab */}
         {activeTab === 'designs' && (
-          <>
+          <div className="tab-content-enter page-container">
             {/* Credits/Subscription Banner - Hidden on Watch */}
             {showReferralBanner && !isWatch && (
               <div className={`mb-6 sm:mb-8 relative transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
@@ -427,12 +405,12 @@ export default function HomePage() {
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* Find Nail Tech Tab */}
         {activeTab === 'search' && (
-          <div className="space-y-12 sm:space-y-16 lg:space-y-20">
+          <div className="tab-content-enter page-container space-y-12 sm:space-y-16 lg:space-y-20">
             {/* Search Hero Section */}
             <div className="text-center space-y-6 sm:space-y-8">
               <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] font-light">
@@ -594,7 +572,7 @@ export default function HomePage() {
 
         {/* My Bookings Tab */}
         {activeTab === 'bookings' && (
-          <div className="space-y-12 sm:space-y-16 lg:space-y-20">
+          <div className="tab-content-enter page-container space-y-12 sm:space-y-16 lg:space-y-20">
             {/* Bookings Hero */}
             <div className="text-center space-y-6 sm:space-y-8">
               <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] font-light">

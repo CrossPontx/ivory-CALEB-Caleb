@@ -6,6 +6,7 @@ import { Home, Plus, User, Calendar, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsAppleWatch } from './watch-optimized-layout'
 import { haptics } from '@/lib/haptics'
+import { AnimatedNavButton } from './animated-nav-button'
 
 interface BottomNavProps {
   onCenterAction?: () => void
@@ -30,10 +31,17 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
     }
   }, [])
 
-  const navItems = [
-    { icon: Home, label: 'Home', path: '/home', altPaths: ['/bookings', '/book', '/tech/dashboard', '/tech/bookings'] },
-    { icon: User, label: 'Profile', path: '/profile', altPaths: ['/settings', '/billing'] },
-  ]
+  const handleHomeClick = () => {
+    const userStr = localStorage.getItem("ivoryUser");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user.userType === 'tech') {
+        router.push('/tech/dashboard');
+        return;
+      }
+    }
+    router.push('/home')
+  }
 
   return (
     <>
@@ -41,53 +49,24 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
       <nav className="vertical-sidebar hidden lg:flex fixed left-0 top-0 bottom-0 z-30 w-20 flex-col items-center justify-center bg-white/98 backdrop-blur-sm border-r border-[#E8E8E8]">
         <div className="flex flex-col items-center space-y-6">
           {/* Home navigation item */}
-          <button
-            onClick={async () => {
-              haptics.light()
-              const userStr = localStorage.getItem("ivoryUser");
-              if (userStr) {
-                const user = JSON.parse(userStr);
-                if (user.userType === 'tech') {
-                  router.push('/tech/dashboard');
-                  return;
-                }
-              }
-              router.push('/home')
-            }}
-            className={cn(
-              'flex items-center justify-center transition-all duration-300 relative',
-              'active:scale-95 w-12 h-12 rounded-lg',
-              (isActive('/home') || isActive('/tech/dashboard'))
-                ? 'text-[#1A1A1A] bg-[#F8F7F5]'
-                : 'text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5]/50'
-            )}
-          >
-            <Home className="w-6 h-6" strokeWidth={(isActive('/home') || isActive('/tech/dashboard')) ? 1.5 : 1} />
-            {(isActive('/home') || isActive('/tech/dashboard')) && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#1A1A1A] rounded-r-full" />
-            )}
-          </button>
+          <AnimatedNavButton
+            icon={Home}
+            path="/home"
+            isActive={isActive('/home') || isActive('/tech/dashboard')}
+            onClick={handleHomeClick}
+            variant="desktop"
+            direction="right"
+          />
 
           {/* Bookings for Tech Users */}
           {userType === 'tech' && (
-            <button
-              onClick={() => {
-                haptics.light()
-                router.push('/tech/bookings')
-              }}
-              className={cn(
-                'flex items-center justify-center transition-all duration-300 relative',
-                'active:scale-95 w-12 h-12 rounded-lg',
-                isActive('/tech/bookings')
-                  ? 'text-[#1A1A1A] bg-[#F8F7F5]'
-                  : 'text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5]/50'
-              )}
-            >
-              <Calendar className="w-6 h-6" strokeWidth={isActive('/tech/bookings') ? 1.5 : 1} />
-              {isActive('/tech/bookings') && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#1A1A1A] rounded-r-full" />
-              )}
-            </button>
+            <AnimatedNavButton
+              icon={Calendar}
+              path="/tech/bookings"
+              isActive={isActive('/tech/bookings')}
+              variant="desktop"
+              direction="right"
+            />
           )}
 
           {/* Center Action Button */}
@@ -96,51 +75,29 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
               haptics.medium()
               onCenterAction?.()
             }}
-            className="relative flex items-center justify-center bg-[#1A1A1A] hover:bg-[#8B7355] active:scale-95 transition-all duration-300 w-12 h-12 rounded-lg"
+            className="relative flex items-center justify-center bg-[#1A1A1A] hover:bg-[#8B7355] active:scale-95 transition-all duration-300 w-12 h-12 rounded-lg nav-button-ripple"
           >
             <Plus className="w-6 h-6 text-white" strokeWidth={1.5} />
           </button>
 
           {/* Profile navigation item */}
-          <button
-            onClick={() => {
-              haptics.light()
-              router.push('/profile')
-            }}
-            className={cn(
-              'flex items-center justify-center transition-all duration-300 relative',
-              'active:scale-95 w-12 h-12 rounded-lg',
-              isActive('/profile')
-                ? 'text-[#1A1A1A] bg-[#F8F7F5]'
-                : 'text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5]/50'
-            )}
-          >
-            <User className="w-6 h-6" strokeWidth={isActive('/profile') ? 1.5 : 1} />
-            {isActive('/profile') && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#1A1A1A] rounded-r-full" />
-            )}
-          </button>
+          <AnimatedNavButton
+            icon={User}
+            path="/profile"
+            isActive={isActive('/profile')}
+            variant="desktop"
+            direction="right"
+          />
 
           {/* Settings for Tech Users */}
           {userType === 'tech' && (
-            <button
-              onClick={() => {
-                haptics.light()
-                router.push('/tech/settings')
-              }}
-              className={cn(
-                'flex items-center justify-center transition-all duration-300 relative',
-                'active:scale-95 w-12 h-12 rounded-lg',
-                isActive('/tech/settings')
-                  ? 'text-[#1A1A1A] bg-[#F8F7F5]'
-                  : 'text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F8F7F5]/50'
-              )}
-            >
-              <Settings className="w-6 h-6" strokeWidth={isActive('/tech/settings') ? 1.5 : 1} />
-              {isActive('/tech/settings') && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#1A1A1A] rounded-r-full" />
-              )}
-            </button>
+            <AnimatedNavButton
+              icon={Settings}
+              path="/tech/settings"
+              isActive={isActive('/tech/settings')}
+              variant="desktop"
+              direction="right"
+            />
           )}
         </div>
       </nav>
@@ -164,59 +121,28 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
             userType === 'tech' ? "justify-around" : "justify-around"
           )}>
             {/* Home Button */}
-            <button
-              onClick={() => {
-                haptics.light();
-                const userStr = localStorage.getItem("ivoryUser");
-                if (userStr) {
-                  const user = JSON.parse(userStr);
-                  if (user.userType === 'tech') {
-                    router.push('/tech/dashboard');
-                  } else {
-                    router.push('/home');
-                  }
-                } else {
-                  router.push('/home');
-                }
-              }}
-              className={cn(
-                'flex flex-col items-center justify-center transition-all duration-300 relative',
-                'active:scale-95',
-                isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
-                (isActive('/home') || isActive('/tech/dashboard'))
-                  ? 'text-[#1A1A1A]' 
-                  : 'text-[#6B6B6B] hover:text-[#8B7355]'
-              )}
-            >
-              <Home className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={(isActive('/home') || isActive('/tech/dashboard')) ? 1.5 : 1} />
-              {isWatch && <span className="text-[8px] mt-0.5">Home</span>}
-              {(isActive('/home') || isActive('/tech/dashboard')) && (
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
-              )}
-            </button>
+            <AnimatedNavButton
+              icon={Home}
+              label="Home"
+              path="/home"
+              isActive={isActive('/home') || isActive('/tech/dashboard')}
+              onClick={handleHomeClick}
+              isWatch={isWatch}
+              variant="mobile"
+              direction="up"
+            />
 
             {/* Bookings for Tech Users */}
             {userType === 'tech' && (
-              <button
-                onClick={() => {
-                  haptics.light();
-                  router.push('/tech/bookings');
-                }}
-                className={cn(
-                  'flex flex-col items-center justify-center transition-all duration-300 relative',
-                  'active:scale-95',
-                  isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
-                  isActive('/tech/bookings')
-                    ? 'text-[#1A1A1A]' 
-                    : 'text-[#6B6B6B] hover:text-[#8B7355]'
-                )}
-              >
-                <Calendar className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={isActive('/tech/bookings') ? 1.5 : 1} />
-                {isWatch && <span className="text-[8px] mt-0.5">Book</span>}
-                {isActive('/tech/bookings') && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
-                )}
-              </button>
+              <AnimatedNavButton
+                icon={Calendar}
+                label="Book"
+                path="/tech/bookings"
+                isActive={isActive('/tech/bookings')}
+                isWatch={isWatch}
+                variant="mobile"
+                direction="up"
+              />
             )}
 
             {/* Center Action Button */}
@@ -226,7 +152,7 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
                 onCenterAction?.();
               }}
               className={cn(
-                "relative flex items-center justify-center bg-[#1A1A1A] hover:bg-[#8B7355] active:scale-95 transition-all duration-300",
+                "relative flex items-center justify-center bg-[#1A1A1A] hover:bg-[#8B7355] active:scale-95 transition-all duration-300 nav-button-ripple",
                 isWatch ? "w-10 h-10 rounded-full" : "w-12 h-12 -mt-2"
               )}
             >
@@ -234,49 +160,27 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
             </button>
 
             {/* Profile Button */}
-            <button
-              onClick={() => {
-                haptics.light();
-                router.push('/profile');
-              }}
-              className={cn(
-                'flex flex-col items-center justify-center transition-all duration-300 relative',
-                'active:scale-95',
-                isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
-                isActive('/profile')
-                  ? 'text-[#1A1A1A]' 
-                  : 'text-[#6B6B6B] hover:text-[#8B7355]'
-              )}
-            >
-              <User className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={isActive('/profile') ? 1.5 : 1} />
-              {isWatch && <span className="text-[8px] mt-0.5">Profile</span>}
-              {isActive('/profile') && (
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
-              )}
-            </button>
+            <AnimatedNavButton
+              icon={User}
+              label="Profile"
+              path="/profile"
+              isActive={isActive('/profile')}
+              isWatch={isWatch}
+              variant="mobile"
+              direction="up"
+            />
 
             {/* Settings for Tech Users */}
             {userType === 'tech' && (
-              <button
-                onClick={() => {
-                  haptics.light();
-                  router.push('/tech/settings');
-                }}
-                className={cn(
-                  'flex flex-col items-center justify-center transition-all duration-300 relative',
-                  'active:scale-95',
-                  isWatch ? 'w-10 h-10 watch-nav-item' : 'w-12 h-12',
-                  isActive('/tech/settings')
-                    ? 'text-[#1A1A1A]' 
-                    : 'text-[#6B6B6B] hover:text-[#8B7355]'
-                )}
-              >
-                <Settings className={isWatch ? "w-4 h-4" : "w-6 h-6"} strokeWidth={isActive('/tech/settings') ? 1.5 : 1} />
-                {isWatch && <span className="text-[8px] mt-0.5">Settings</span>}
-                {isActive('/tech/settings') && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#1A1A1A] rounded-full" />
-                )}
-              </button>
+              <AnimatedNavButton
+                icon={Settings}
+                label="Settings"
+                path="/tech/settings"
+                isActive={isActive('/tech/settings')}
+                isWatch={isWatch}
+                variant="mobile"
+                direction="up"
+              />
             )}
           </div>
         </div>

@@ -11,6 +11,7 @@ import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { CreditsDisplay } from "@/components/credits-display"
 import { BuyCreditsDialog } from "@/components/buy-credits-dialog"
+import { AnimatedTabs } from "@/components/animated-tabs"
 
 type ClientRequest = {
   id: string
