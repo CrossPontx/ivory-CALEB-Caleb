@@ -141,7 +141,7 @@ export default function CapturePage() {
         nailLength: 'medium',
         nailShape: 'oval',
         baseColor: '#FF6B9D',
-        finish: 'glossy',
+        finish: 'cateye',
         texture: 'smooth',
         patternType: 'solid',
         styleVibe: 'elegant',
@@ -161,7 +161,7 @@ export default function CapturePage() {
     nailLength: 'medium',
     nailShape: 'oval',
     baseColor: '#FF6B9D',
-    finish: 'glossy',
+    finish: 'cateye',
     texture: 'smooth',
     patternType: 'solid',
     styleVibe: 'elegant',
@@ -274,7 +274,7 @@ export default function CapturePage() {
         nailLength: 'medium',
         nailShape: 'oval',
         baseColor: '#FF6B9D',
-        finish: 'glossy',
+        finish: 'cateye',
         texture: 'smooth',
         patternType: 'solid',
         styleVibe: 'elegant',
@@ -451,7 +451,16 @@ export default function CapturePage() {
             id: 'tab-edit-loaded',
             name: 'Edit',
             finalPreviews: loadedPreview ? [loadedPreview] : [],
-            designSettings: metadata.designSettings || designSettings,
+            designSettings: metadata.designSettings || {
+              nailLength: 'medium',
+              nailShape: 'oval',
+              baseColor: '#FF6B9D',
+              finish: 'cateye',
+              texture: 'smooth',
+              patternType: 'solid',
+              styleVibe: 'elegant',
+              accentColor: '#FFFFFF'
+            },
             selectedDesignImages: metadata.selectedDesignImages || [],
             drawingImageUrl: metadata.drawingImageUrl || null,
             aiPrompt: metadata.aiPrompt || '',
@@ -524,18 +533,34 @@ export default function CapturePage() {
       if (savedTabs && !hasLoadedDesignRef.current) {
         try {
           const tabs = JSON.parse(savedTabs)
+          
+          // MIGRATION: Update any tabs with 'glossy' finish to 'cateye'
+          const migratedTabs = tabs.map((tab: DesignTab) => {
+            if (tab.designSettings.finish === 'glossy') {
+              console.log('🔄 Migrating tab', tab.id, 'from glossy to cateye')
+              return {
+                ...tab,
+                designSettings: {
+                  ...tab.designSettings,
+                  finish: 'cateye'
+                }
+              }
+            }
+            return tab
+          })
+          
           // Check if any tab has content (original image or generated designs)
-          const hasContent = tabs.some((tab: DesignTab) => tab.originalImage || tab.finalPreviews.length > 0)
+          const hasContent = migratedTabs.some((tab: DesignTab) => tab.originalImage || tab.finalPreviews.length > 0)
           
           if (hasContent) {
-            setDesignTabs(tabs)
+            setDesignTabs(migratedTabs)
             if (savedActiveTabId) {
               setActiveTabId(savedActiveTabId)
             }
-            console.log('✅ Restored design tabs from session:', tabs)
+            console.log('✅ Restored design tabs from session:', migratedTabs)
             
             // Find the active tab and check if it needs camera
-            const activeTabToRestore = tabs.find((t: DesignTab) => t.id === savedActiveTabId) || tabs[0]
+            const activeTabToRestore = migratedTabs.find((t: DesignTab) => t.id === savedActiveTabId) || migratedTabs[0]
             
             // Restore the active tab's state immediately
             if (activeTabToRestore.originalImage) {
@@ -2395,7 +2420,8 @@ export default function CapturePage() {
                               { value: 'matte', label: 'Matte', gradient: 'bg-pink-400' },
                               { value: 'satin', label: 'Satin', gradient: 'bg-gradient-to-b from-pink-300 to-pink-500' },
                               { value: 'metallic', label: 'Metallic', gradient: 'bg-gradient-to-r from-pink-300 via-pink-400 to-pink-300' },
-                              { value: 'chrome', label: 'Chrome', gradient: 'bg-gradient-to-br from-gray-300 via-pink-200 to-gray-300' }
+                              { value: 'chrome', label: 'Chrome', gradient: 'bg-gradient-to-br from-gray-300 via-pink-200 to-gray-300' },
+                              { value: 'cateye', label: 'Cat-Eye', gradient: 'bg-gradient-to-r from-pink-500 via-pink-300 to-pink-500' }
                             ].map((finish) => (
                               <button
                                 key={finish.value}
