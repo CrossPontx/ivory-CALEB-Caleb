@@ -146,6 +146,7 @@ export const looks = pgTable('looks', {
   aiPrompt: text('ai_prompt'), // AI generation prompt if used
   nailPositions: jsonb('nail_positions'), // coordinates and colors for each nail
   designMetadata: jsonb('design_metadata'), // All capture page settings for remix/edit
+  aiAnalysis: jsonb('ai_analysis'), // Cached AI analysis of the design
   isPublic: boolean('is_public').default(false),
   shareToken: varchar('share_token', { length: 100 }).unique(),
   allowCollaborativeEdit: boolean('allow_collaborative_edit').default(false),
@@ -556,6 +557,7 @@ export const savedDesigns = pgTable('saved_designs', {
   sourceType: varchar('source_type', { length: 50 }), // 'upload', 'share_extension', 'web'
   notes: text('notes'),
   tags: jsonb('tags'), // Array of tags for organization
+  aiAnalysis: jsonb('ai_analysis'), // Cached AI analysis of the design
   isFavorite: boolean('is_favorite').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
