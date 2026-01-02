@@ -16,6 +16,10 @@ import { toast } from "sonner"
 import { BottomNav } from "@/components/bottom-nav"
 import { DrawingCanvasKonva as DrawingCanvas } from "@/components/drawing-canvas-konva"
 import { Pencil } from "lucide-react"
+import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
+import { GenerationConfirmationDialog } from "@/components/generation-confirmation-dialog"
+import { CaptureOnboarding } from "@/components/capture-onboarding"
+import { useOnboarding } from "@/hooks/use-onboarding"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -48,6 +52,10 @@ type DesignTab = {
 export default function CapturePage() {
   const router = useRouter()
   const { credits, hasCredits, refresh: refreshCredits } = useCredits()
+  const { shouldShowOnboarding, completeOnboarding } = useOnboarding()
+  
+  const [onboardingPhase, setOnboardingPhase] = useState<'capture' | 'design' | 'visualize'>('capture')
+  const [onboardingStep, setOnboardingStep] = useState(0)
   
   // Check localStorage immediately for loaded design to prevent camera flash
   const getInitialCapturedImage = () => {
@@ -119,6 +127,9 @@ export default function CapturePage() {
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
   const [drawingImageUrl, setDrawingImageUrl] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(true) // Track if we're still initializing
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [pendingGenerationSettings, setPendingGenerationSettings] = useState<DesignSettings | null>(null)
+  const [savedImageBeforeReplace, setSavedImageBeforeReplace] = useState<string | null>(null) // Store image before replace
   
   // Tabs for multiple designs
   const [designTabs, setDesignTabs] = useState<DesignTab[]>([
@@ -130,7 +141,7 @@ export default function CapturePage() {
         nailLength: 'medium',
         nailShape: 'oval',
         baseColor: '#FF6B9D',
-        finish: 'glossy',
+        finish: 'cateye',
         texture: 'smooth',
         patternType: 'solid',
         styleVibe: 'elegant',
@@ -150,7 +161,7 @@ export default function CapturePage() {
     nailLength: 'medium',
     nailShape: 'oval',
     baseColor: '#FF6B9D',
-    finish: 'glossy',
+    finish: 'cateye',
     texture: 'smooth',
     patternType: 'solid',
     styleVibe: 'elegant',
@@ -158,29 +169,85 @@ export default function CapturePage() {
   })
 
   // Influence weights for Nail Editor
-  // designImage and baseColor are inversely linked (sum to 100)
+  // Drawing, designImage, and baseColor should always sum to 100
   const [influenceWeights, setInfluenceWeights] = useState({
+    nailEditor_drawing: 0,
     nailEditor_designImage: 0,
     nailEditor_baseColor: 100,
     nailEditor_finish: 100,
     nailEditor_texture: 100
   })
 
-  // Nail Editor influence handlers
+  // Nail Editor influence handlers with three-way balance
+  const handleNailEditorDrawingInfluence = (value: number) => {
+    const remaining = 100 - value
+    // Distribute remaining between designImage and baseColor
+    // If design images exist, prioritize them, otherwise use baseColor
+    if (selectedDesignImages.length > 0) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_drawing: value,
+        nailEditor_designImage: remaining,
+        nailEditor_baseColor: 0
+      }))
+    } else {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_drawing: value,
+        nailEditor_designImage: 0,
+        nailEditor_baseColor: remaining
+      }))
+    }
+  }
+
   const handleNailEditorDesignImageInfluence = (value: number) => {
-    setInfluenceWeights(prev => ({
-      ...prev,
-      nailEditor_designImage: value,
-      nailEditor_baseColor: 100 - value
-    }))
+    const remaining = 100 - value
+    // Distribute remaining between drawing and baseColor
+    // If drawing exists, prioritize it, otherwise use baseColor
+    if (drawingImageUrl) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_designImage: value,
+        nailEditor_drawing: remaining,
+        nailEditor_baseColor: 0
+      }))
+    } else {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_designImage: value,
+        nailEditor_drawing: 0,
+        nailEditor_baseColor: remaining
+      }))
+    }
   }
 
   const handleNailEditorBaseColorInfluence = (value: number) => {
-    setInfluenceWeights(prev => ({
-      ...prev,
-      nailEditor_baseColor: value,
-      nailEditor_designImage: 100 - value
-    }))
+    const remaining = 100 - value
+    // Distribute remaining between drawing and designImage
+    // Prioritize drawing if it exists, then designImage
+    if (drawingImageUrl) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_baseColor: value,
+        nailEditor_drawing: remaining,
+        nailEditor_designImage: 0
+      }))
+    } else if (selectedDesignImages.length > 0) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_baseColor: value,
+        nailEditor_designImage: remaining,
+        nailEditor_drawing: 0
+      }))
+    } else {
+      // If nothing else exists, keep baseColor at 100
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_baseColor: 100,
+        nailEditor_designImage: 0,
+        nailEditor_drawing: 0
+      }))
+    }
   }
   
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -197,6 +264,13 @@ export default function CapturePage() {
   useEffect(() => {
     // Don't sync during initial load - let the initialization logic handle it
     if (isInitializing) return
+    
+    // Don't sync if we're in auto-visualize mode - let the auto-visualize logic handle it
+    if (isAutoVisualizeRef.current) {
+      console.log('⏭️ Skipping tab sync - in auto-visualize mode')
+      isAutoVisualizeRef.current = false // Reset for next time
+      return
+    }
     
     if (activeTab) {
       console.log('🔄 Syncing to active tab:', activeTabId)
@@ -256,7 +330,7 @@ export default function CapturePage() {
         nailLength: 'medium',
         nailShape: 'oval',
         baseColor: '#FF6B9D',
-        finish: 'glossy',
+        finish: 'cateye',
         texture: 'smooth',
         patternType: 'solid',
         styleVibe: 'elegant',
@@ -298,6 +372,7 @@ export default function CapturePage() {
   const abortControllerRef = useRef<AbortController | null>(null)
   const hasLoadedDesignRef = useRef(false) // Track if we've loaded a design to prevent double-loading
   const isInitialLoadRef = useRef(true) // Track if we're in initial load to prevent premature saves
+  const isAutoVisualizeRef = useRef(false) // Track if we're in auto-visualize mode
 
   // Check for user session and existing tabs on mount
   useEffect(() => {
@@ -329,13 +404,96 @@ export default function CapturePage() {
       console.log('=== CAPTURE PAGE INIT DEBUG ===')
       const loadedMetadata = localStorage.getItem("loadedDesignMetadata")
       const loadedEditingImage = localStorage.getItem("currentEditingImage")
+      const loadedDesignImage = localStorage.getItem("loadedDesignImage")
+      const autoShowConfirm = localStorage.getItem("autoShowConfirmDialog")
       const loadedPreview = localStorage.getItem("generatedPreview")
       
       console.log('Checking localStorage:')
       console.log('- loadedMetadata:', loadedMetadata ? 'EXISTS' : 'NULL')
       console.log('- loadedEditingImage:', loadedEditingImage ? 'EXISTS' : 'NULL')
+      console.log('- loadedDesignImage:', loadedDesignImage ? 'EXISTS' : 'NULL')
+      console.log('- autoShowConfirm:', autoShowConfirm)
       console.log('- loadedPreview:', loadedPreview ? 'EXISTS' : 'NULL')
       console.log('- hasLoadedDesignRef:', hasLoadedDesignRef.current)
+      
+      // Handle auto-visualize from design detail pages
+      if (loadedDesignImage && autoShowConfirm === 'true' && !hasLoadedDesignRef.current) {
+        try {
+          hasLoadedDesignRef.current = true
+          isAutoVisualizeRef.current = true // Mark that we're in auto-visualize mode
+          
+          console.log('✅ Auto-loading design for visualization')
+          console.log('✅ Design image URL:', loadedDesignImage)
+          console.log('✅ Current activeTabId:', activeTabId)
+          
+          // Stop camera immediately
+          stopCamera()
+          
+          // First, update the tabs with the design image (only selectedDesignImages, not originalImage)
+          setDesignTabs(prevTabs => {
+            const updatedTabs = prevTabs.map(tab => 
+              tab.id === 'tab-initial-1' 
+                ? {
+                    ...tab,
+                    selectedDesignImages: [loadedDesignImage]
+                    // Keep originalImage unchanged - don't overwrite the hand reference photo
+                  }
+                : tab
+            )
+            console.log('✅ Updated tabs with design image')
+            console.log('✅ Tab 0 selectedDesignImages:', updatedTabs[0].selectedDesignImages)
+            console.log('✅ Tab 0 originalImage:', updatedTabs[0].originalImage ? 'EXISTS' : 'NULL')
+            return updatedTabs
+          })
+          
+          // Directly set the state as well (only selectedDesignImages, not capturedImage)
+          console.log('✅ Setting selectedDesignImages state to:', [loadedDesignImage])
+          setSelectedDesignImages([loadedDesignImage])
+          // Don't set capturedImage - keep the original hand reference photo
+          
+          // Set the design image influence to 100% and base color to 0%
+          console.log('✅ Setting influence weights: designImage=100, baseColor=0')
+          setInfluenceWeights({
+            nailEditor_drawing: 0,
+            nailEditor_designImage: 100,
+            nailEditor_baseColor: 0,
+            nailEditor_finish: 100,
+            nailEditor_texture: 100
+          })
+          
+          // Clear the flags
+          localStorage.removeItem('loadedDesignImage')
+          localStorage.removeItem('autoShowConfirmDialog')
+          localStorage.removeItem('loadedDesignMetadata')
+          
+          // Use a longer delay to ensure tab state is fully updated before allowing sync
+          setTimeout(() => {
+            console.log('✅ Finishing initialization')
+            setIsInitializing(false)
+            
+            // Open the upload drawer to show the design was uploaded
+            setIsUploadDrawerOpen(true)
+            
+            // Close the drawer and show confirmation dialog after user sees it
+            setTimeout(() => {
+              setIsUploadDrawerOpen(false)
+              
+              setTimeout(() => {
+                console.log('✅ Showing confirmation dialog')
+                setPendingGenerationSettings(designSettings)
+                setShowConfirmDialog(true)
+              }, 300)
+            }, 1500) // Show drawer for 1.5 seconds
+          }, 300)
+          
+          return
+        } catch (e) {
+          console.error('Error loading design for visualization:', e)
+          hasLoadedDesignRef.current = false
+          isAutoVisualizeRef.current = false
+          setIsInitializing(false)
+        }
+      }
       
       if (loadedMetadata && loadedEditingImage && !hasLoadedDesignRef.current) {
         try {
@@ -350,7 +508,16 @@ export default function CapturePage() {
             id: 'tab-edit-loaded',
             name: 'Edit',
             finalPreviews: loadedPreview ? [loadedPreview] : [],
-            designSettings: metadata.designSettings || designSettings,
+            designSettings: metadata.designSettings || {
+              nailLength: 'medium',
+              nailShape: 'oval',
+              baseColor: '#FF6B9D',
+              finish: 'cateye',
+              texture: 'smooth',
+              patternType: 'solid',
+              styleVibe: 'elegant',
+              accentColor: '#FFFFFF'
+            },
             selectedDesignImages: metadata.selectedDesignImages || [],
             drawingImageUrl: metadata.drawingImageUrl || null,
             aiPrompt: metadata.aiPrompt || '',
@@ -419,21 +586,38 @@ export default function CapturePage() {
       const savedTabs = localStorage.getItem("captureSession_designTabs")
       const savedActiveTabId = localStorage.getItem("captureSession_activeTabId")
       
-      if (savedTabs) {
+      // Skip session restoration if we're in auto-visualize mode
+      if (savedTabs && !hasLoadedDesignRef.current) {
         try {
           const tabs = JSON.parse(savedTabs)
+          
+          // MIGRATION: Update any tabs with 'glossy' finish to 'cateye'
+          const migratedTabs = tabs.map((tab: DesignTab) => {
+            if (tab.designSettings.finish === 'glossy') {
+              console.log('🔄 Migrating tab', tab.id, 'from glossy to cateye')
+              return {
+                ...tab,
+                designSettings: {
+                  ...tab.designSettings,
+                  finish: 'cateye'
+                }
+              }
+            }
+            return tab
+          })
+          
           // Check if any tab has content (original image or generated designs)
-          const hasContent = tabs.some((tab: DesignTab) => tab.originalImage || tab.finalPreviews.length > 0)
+          const hasContent = migratedTabs.some((tab: DesignTab) => tab.originalImage || tab.finalPreviews.length > 0)
           
           if (hasContent) {
-            setDesignTabs(tabs)
+            setDesignTabs(migratedTabs)
             if (savedActiveTabId) {
               setActiveTabId(savedActiveTabId)
             }
-            console.log('✅ Restored design tabs from session:', tabs)
+            console.log('✅ Restored design tabs from session:', migratedTabs)
             
             // Find the active tab and check if it needs camera
-            const activeTabToRestore = tabs.find((t: DesignTab) => t.id === savedActiveTabId) || tabs[0]
+            const activeTabToRestore = migratedTabs.find((t: DesignTab) => t.id === savedActiveTabId) || migratedTabs[0]
             
             // Restore the active tab's state immediately
             if (activeTabToRestore.originalImage) {
@@ -647,9 +831,13 @@ export default function CapturePage() {
               if (uploadResponse.ok) {
                 const { url } = await uploadResponse.json()
                 setCapturedImage(url)
+                // Clear saved image since user took a new photo
+                setSavedImageBeforeReplace(null)
               } else {
                 const dataUrl = canvas.toDataURL("image/jpeg")
                 setCapturedImage(dataUrl)
+                // Clear saved image since user took a new photo
+                setSavedImageBeforeReplace(null)
               }
             }
           }, 'image/jpeg', 0.9)
@@ -657,6 +845,8 @@ export default function CapturePage() {
           console.error('Photo upload error:', error)
           const dataUrl = canvas.toDataURL("image/jpeg")
           setCapturedImage(dataUrl)
+          // Clear saved image since user took a new photo
+          setSavedImageBeforeReplace(null)
         }
 
         stopCamera()
@@ -681,10 +871,14 @@ export default function CapturePage() {
         if (uploadResponse.ok) {
           const { url } = await uploadResponse.json()
           setCapturedImage(url)
+          // Clear saved image since user uploaded a new photo
+          setSavedImageBeforeReplace(null)
         } else {
           const reader = new FileReader()
           reader.onload = (e) => {
             setCapturedImage(e.target?.result as string)
+            // Clear saved image since user uploaded a new photo
+            setSavedImageBeforeReplace(null)
           }
           reader.readAsDataURL(file)
         }
@@ -693,6 +887,8 @@ export default function CapturePage() {
         const reader = new FileReader()
         reader.onload = (e) => {
           setCapturedImage(e.target?.result as string)
+          // Clear saved image since user uploaded a new photo
+          setSavedImageBeforeReplace(null)
         }
         reader.readAsDataURL(file)
       } finally {
@@ -711,6 +907,30 @@ export default function CapturePage() {
       .join(' ')
     
     return `Ultra-detailed, high-resolution nail art design applied ONLY inside a fingernail area. Nail length: ${settings.nailLength}, Nail shape: ${formattedShape}. Base color: ${settings.baseColor}. Finish: ${settings.finish}. Texture: ${settings.texture}. Design style: ${settings.patternType} pattern, ${settings.styleVibe} aesthetic. Accent color: ${settings.accentColor}. Highly realistic nail polish appearance: smooth polish, crisp clean edges, even color distribution, professional salon quality with maximum detail, subtle natural reflections. Design must: stay strictly within the nail surface, follow realistic nail curvature, respect nail boundaries, appear physically painted onto the nail with expert precision. Ultra-high resolution rendering, realistic lighting, natural skin reflection preserved, sharp details, vibrant colors with accurate saturation.`
+  }
+
+  const handleVisualizeClick = (settings: DesignSettings) => {
+    // Show confirmation dialog
+    setPendingGenerationSettings(settings)
+    setShowConfirmDialog(true)
+  }
+
+  const handleConfirmGeneration = () => {
+    setShowConfirmDialog(false)
+    if (pendingGenerationSettings) {
+      generateAIPreview(pendingGenerationSettings)
+      setPendingGenerationSettings(null)
+    }
+    
+    // Complete onboarding when user confirms generation (step 13, index 12)
+    if (shouldShowOnboarding && onboardingStep === 12) {
+      completeOnboarding()
+    }
+  }
+
+  const handleCancelGeneration = () => {
+    setShowConfirmDialog(false)
+    setPendingGenerationSettings(null)
   }
 
   const generateAIPreview = async (settings: DesignSettings) => {
@@ -751,6 +971,7 @@ export default function CapturePage() {
       
       // Build weights for Nail Editor
       const weights = {
+        drawing: influenceWeights.nailEditor_drawing,
         designImage: influenceWeights.nailEditor_designImage,
         stylePrompt: 0, // Not used in Nail Editor
         baseColor: influenceWeights.nailEditor_baseColor,
@@ -896,8 +1117,182 @@ export default function CapturePage() {
   useEffect(() => {
     if (capturedImage && !designMode) {
       setDesignMode('design')
+      setOnboardingPhase('design') // Update onboarding phase
     }
   }, [capturedImage, designMode])
+
+  // Update onboarding phase when user starts designing
+  useEffect(() => {
+    if (designSettings.baseColor !== '#FF6B9D' || designSettings.nailShape !== 'oval') {
+      setOnboardingPhase('visualize')
+    }
+  }, [designSettings])
+
+  // Auto-advance onboarding when photo is captured (step 1 -> step 2)
+  useEffect(() => {
+    console.log('🔍 Photo captured check:', { shouldShowOnboarding, onboardingStep, hasCapturedImage: !!capturedImage })
+    
+    if (shouldShowOnboarding && onboardingStep === 0 && capturedImage) {
+      // User captured a photo, advance to step 2 (open upload drawer)
+      console.log('✅ Advancing from step 1 to step 2 (open upload drawer)')
+      setTimeout(() => {
+        setOnboardingStep(1)
+      }, 1000) // Wait for transition to design view
+    }
+  }, [capturedImage, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when upload drawer opens (step 2 -> step 3)
+  useEffect(() => {
+    console.log('🔍 Drawer state changed:', { 
+      shouldShowOnboarding, 
+      onboardingStep, 
+      isUploadDrawerOpen,
+      willAdvance: shouldShowOnboarding && onboardingStep === 1 && isUploadDrawerOpen
+    })
+    
+    if (shouldShowOnboarding && onboardingStep === 1 && isUploadDrawerOpen) {
+      // User opened upload drawer, advance to step 3 (upload button step) after drawer animation completes
+      console.log('✅ Advancing from step 2 to step 3 (upload button)')
+      setTimeout(() => {
+        console.log('✅ Setting onboarding step to 2')
+        setOnboardingStep(2)
+      }, 1200) // Increased delay to ensure drawer is fully open and button is rendered
+    }
+  }, [isUploadDrawerOpen, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when design image is uploaded (step 3 -> step 4)
+  useEffect(() => {
+    console.log('🔍 Design images changed:', { shouldShowOnboarding, onboardingStep, selectedDesignImagesCount: selectedDesignImages.length })
+    
+    if (shouldShowOnboarding && onboardingStep === 2 && selectedDesignImages.length > 0) {
+      // User uploaded a design image, advance to step 4 (close drawer step) after showing success
+      console.log('✅ Advancing from step 3 to step 4 (close drawer)')
+      setTimeout(() => {
+        setOnboardingStep(3)
+      }, 1500) // Wait for success banner to be visible
+    }
+  }, [selectedDesignImages, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when upload drawer closes (step 4 -> step 5)
+  useEffect(() => {
+    console.log('🔍 Upload drawer closed check:', { shouldShowOnboarding, onboardingStep, isUploadDrawerOpen, hasDesignImages: selectedDesignImages.length > 0 })
+    
+    if (shouldShowOnboarding && onboardingStep === 3 && !isUploadDrawerOpen && selectedDesignImages.length > 0) {
+      // User closed the upload drawer after uploading, advance to step 5 (drawing canvas)
+      console.log('✅ Advancing from step 4 to step 5 (drawing canvas)')
+      setTimeout(() => {
+        setOnboardingStep(4)
+      }, 500) // Wait for drawer close animation
+    }
+  }, [isUploadDrawerOpen, shouldShowOnboarding, onboardingStep, selectedDesignImages])
+
+  // Auto-advance onboarding when drawing canvas opens (step 5 -> step 6)
+  useEffect(() => {
+    console.log('🔍 Drawing canvas opened check:', { shouldShowOnboarding, onboardingStep, showDrawingCanvas })
+    
+    if (shouldShowOnboarding && onboardingStep === 4 && showDrawingCanvas) {
+      // User opened drawing canvas, advance to step 6 (close canvas step) after a moment
+      console.log('✅ Advancing from step 5 to step 6 (close canvas) - canvas opened')
+      setTimeout(() => {
+        setOnboardingStep(5)
+      }, 1000) // Give them a moment to see the canvas
+    }
+  }, [showDrawingCanvas, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when drawing canvas is closed (step 6 -> step 7)
+  useEffect(() => {
+    console.log('🔍 Drawing canvas closed check:', { shouldShowOnboarding, onboardingStep, showDrawingCanvas })
+    
+    if (shouldShowOnboarding && onboardingStep === 5 && !showDrawingCanvas) {
+      // User closed drawing canvas, advance to step 7 (nail shape)
+      console.log('✅ Advancing from step 6 to step 7 (nail shape)')
+      setTimeout(() => {
+        setOnboardingStep(6)
+        // Auto-open the drawer so nail shape option is visible
+        setIsDrawerOpen(true)
+      }, 500)
+    }
+  }, [showDrawingCanvas, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when nail shape section opens (step 7 -> step 8)
+  useEffect(() => {
+    console.log('🔍 Nail shape section check:', { shouldShowOnboarding, onboardingStep, expandedSection })
+    
+    if (shouldShowOnboarding && onboardingStep === 6 && expandedSection === 'shape') {
+      // User opened nail shape section, advance to step 8 (select shape from slider)
+      console.log('✅ Advancing from step 7 to step 8 (nail shape slider)')
+      setTimeout(() => {
+        setOnboardingStep(7)
+      }, 500)
+    }
+  }, [expandedSection, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when nail shape is selected (step 8 -> step 9)
+  useEffect(() => {
+    console.log('🔍 Nail shape selection check:', { shouldShowOnboarding, onboardingStep, nailShape: designSettings.nailShape })
+    
+    if (shouldShowOnboarding && onboardingStep === 7) {
+      // User selected a nail shape (changed from default 'oval'), advance to next step
+      if (designSettings.nailShape !== 'oval') {
+        console.log('✅ Advancing from step 8 to step 9 (close design drawer) - nail shape selected')
+        setTimeout(() => {
+          setOnboardingStep(8)
+        }, 500)
+      }
+    }
+  }, [designSettings.nailShape, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when design drawer closes (step 9 -> step 10)
+  useEffect(() => {
+    console.log('🔍 Design drawer closed check:', { shouldShowOnboarding, onboardingStep, isDrawerOpen })
+    
+    if (shouldShowOnboarding && onboardingStep === 8 && !isDrawerOpen) {
+      // User closed the design drawer, advance to next step
+      console.log('✅ Advancing from step 9 to step 10 (replace photo)')
+      setTimeout(() => {
+        setOnboardingStep(9)
+      }, 500)
+    }
+  }, [isDrawerOpen, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when replace button is clicked and camera opens (step 10 -> step 11)
+  useEffect(() => {
+    console.log('🔍 Camera opened for replace check:', { shouldShowOnboarding, onboardingStep, capturedImage })
+    
+    if (shouldShowOnboarding && onboardingStep === 9 && !capturedImage) {
+      // User clicked replace and camera opened (capturedImage is null), advance to close camera step
+      console.log('✅ Advancing from step 10 to step 11 (close camera)')
+      setTimeout(() => {
+        setOnboardingStep(10)
+      }, 800)
+    }
+  }, [capturedImage, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when camera closes after replace (step 11 -> step 12)
+  useEffect(() => {
+    console.log('🔍 Camera closed after replace check:', { shouldShowOnboarding, onboardingStep, capturedImage })
+    
+    if (shouldShowOnboarding && onboardingStep === 10 && capturedImage) {
+      // User closed camera and has image again, advance to visualize step
+      console.log('✅ Advancing from step 11 to step 12 (visualize)')
+      setTimeout(() => {
+        setOnboardingStep(11)
+      }, 500)
+    }
+  }, [capturedImage, shouldShowOnboarding, onboardingStep])
+
+  // Auto-advance onboarding when confirmation dialog opens (step 12 -> step 13)
+  useEffect(() => {
+    console.log('🔍 Confirmation dialog check:', { shouldShowOnboarding, onboardingStep, showConfirmDialog })
+    
+    if (shouldShowOnboarding && onboardingStep === 11 && showConfirmDialog) {
+      // User clicked visualize and dialog opened, advance to final step
+      console.log('✅ Advancing from step 12 to step 13 (confirm generation)')
+      setTimeout(() => {
+        setOnboardingStep(12)
+      }, 500)
+    }
+  }, [showConfirmDialog, shouldShowOnboarding, onboardingStep])
 
   const generateAIDesigns = async () => {
     if (!aiPrompt.trim()) return
@@ -1216,6 +1611,11 @@ export default function CapturePage() {
   }
 
   const replaceHandPhoto = () => {
+    // Save the current image before clearing it
+    if (capturedImage) {
+      setSavedImageBeforeReplace(capturedImage)
+    }
+    
     // Clear the original image from ALL tabs but keep their designs
     setDesignTabs(tabs => tabs.map(tab => ({
       ...tab,
@@ -1229,13 +1629,64 @@ export default function CapturePage() {
     // Start camera for new hand photo
     startCamera()
   }
+  
+  const cancelReplaceHandPhoto = () => {
+    // Restore the saved image
+    if (savedImageBeforeReplace) {
+      setCapturedImage(savedImageBeforeReplace)
+      
+      // Restore to all tabs
+      setDesignTabs(tabs => tabs.map(tab => ({
+        ...tab,
+        originalImage: savedImageBeforeReplace
+      })))
+      
+      // Clear the saved image
+      setSavedImageBeforeReplace(null)
+      
+      // Stop camera
+      stopCamera()
+    }
+  }
 
   const handleDrawingComplete = (dataUrl: string) => {
     setDrawingImageUrl(dataUrl)
     setShowDrawingCanvas(false)
+    
+    // When a drawing is added, set it to 100% influence
+    setInfluenceWeights(prev => ({
+      ...prev,
+      nailEditor_drawing: 100,
+      nailEditor_designImage: 0,
+      nailEditor_baseColor: 0
+    }))
+    
     toast.success('Drawing saved!', {
-      description: 'Your drawing will guide the AI design generation',
+      description: 'Your drawing will guide the AI design generation at 100% influence',
     })
+  }
+
+  const handleRemoveDrawing = () => {
+    setDrawingImageUrl(null)
+    
+    // When drawing is removed, restore influence to design images or base color
+    if (selectedDesignImages.length > 0) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_drawing: 0,
+        nailEditor_designImage: 100,
+        nailEditor_baseColor: 0
+      }))
+    } else {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_drawing: 0,
+        nailEditor_designImage: 0,
+        nailEditor_baseColor: 100
+      }))
+    }
+    
+    toast.info('Drawing removed')
   }
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -1295,21 +1746,24 @@ export default function CapturePage() {
   if (capturedImage) {
     return (
       <div className="fixed inset-0 z-[100] bg-gradient-to-b from-[#F8F7F5] via-white to-white flex flex-col">
+        {/* Zero Credits Banner */}
+        <ZeroCreditsBanner credits={credits} />
+        
         {/* Elegant Header */}
-        <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-8 lg:px-12 pb-5 sm:pb-6 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
+        <div className="absolute top-0 left-0 right-0 pt-10 sm:pt-12 px-3 sm:px-6 lg:px-10 pb-3 sm:pb-4 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               {/* Left side - Delete button */}
               <button
                 onClick={changePhoto}
-                className="h-10 sm:h-11 w-10 sm:w-11 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white active:scale-[0.98] transition-all duration-500 flex items-center justify-center rounded-none"
+                className="h-8 sm:h-10 w-8 sm:w-10 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white active:scale-[0.98] transition-all duration-500 flex items-center justify-center rounded-none"
                 title="Delete this design and start over"
               >
-                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
+                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.5} />
               </button>
               
               {/* Center - Title */}
-              <h1 className="font-serif text-lg sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-tight absolute left-1/2 -translate-x-1/2">
+              <h1 className="font-serif text-base sm:text-xl lg:text-2xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-tight absolute left-1/2 -translate-x-1/2">
                 Design Your Nails
               </h1>
               
@@ -1320,12 +1774,12 @@ export default function CapturePage() {
             </div>
             
             {/* Elegant Tabs */}
-            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:justify-end scrollbar-hide">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:justify-end scrollbar-hide">
               {designTabs.map((tab) => (
-                <div key={tab.id} className="flex items-center gap-1.5 sm:gap-2">
+                <div key={tab.id} className="flex items-center gap-1 sm:gap-1.5">
                   <button
                     onClick={() => setActiveTabId(tab.id)}
-                    className={`h-9 sm:h-10 px-4 sm:px-5 font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase transition-all duration-500 flex items-center gap-2 whitespace-nowrap rounded-none ${
+                    className={`h-8 sm:h-9 px-3 sm:px-4 font-light text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all duration-500 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-none ${
                       activeTabId === tab.id
                         ? 'bg-[#1A1A1A] text-white shadow-sm'
                         : 'border border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] hover:border-[#8B7355]'
@@ -1335,12 +1789,12 @@ export default function CapturePage() {
                     {/* Show reference image indicator */}
                     {tab.selectedDesignImages && tab.selectedDesignImages.length > 0 && (
                       <span 
-                        className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm flex items-center gap-1 ${
+                        className={`text-[8px] sm:text-[9px] px-1 py-0.5 rounded-sm flex items-center gap-0.5 sm:gap-1 ${
                           activeTabId === tab.id ? 'bg-white/20' : 'bg-[#8B7355]/10 text-[#8B7355]'
                         }`}
                         title={`${tab.selectedDesignImages.length} reference image${tab.selectedDesignImages.length > 1 ? 's' : ''}`}
                       >
-                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                         </svg>
                         {tab.selectedDesignImages.length}
@@ -1349,19 +1803,19 @@ export default function CapturePage() {
                     {/* Show drawing indicator */}
                     {tab.drawingImageUrl && (
                       <span 
-                        className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm ${
+                        className={`text-[8px] sm:text-[9px] px-1 py-0.5 rounded-sm ${
                           activeTabId === tab.id ? 'bg-white/20' : 'bg-purple-100 text-purple-600'
                         }`}
                         title="Has drawing overlay"
                       >
-                        <Pencil className="w-2.5 h-2.5" />
+                        <Pencil className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
                       </span>
                     )}
                     {tab.isGenerating && (
-                      <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
+                      <Loader2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 animate-spin" />
                     )}
                     {!tab.isGenerating && tab.finalPreviews.length > 0 && (
-                      <span className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-sm ${
+                      <span className={`text-[8px] sm:text-[9px] px-1 py-0.5 rounded-sm ${
                         activeTabId === tab.id ? 'bg-white/20' : 'bg-[#F8F7F5]'
                       }`}>
                         {tab.finalPreviews.length}
@@ -1371,9 +1825,9 @@ export default function CapturePage() {
                   {designTabs.length > 1 && (
                     <button
                       onClick={() => removeTab(tab.id)}
-                      className="w-7 h-7 sm:w-8 sm:h-8 border border-[#E8E8E8] text-[#6B6B6B] hover:bg-[#F8F7F5] hover:text-[#1A1A1A] hover:border-[#8B7355] transition-all duration-500 flex items-center justify-center rounded-none"
+                      className="w-6 h-6 sm:w-7 sm:h-7 border border-[#E8E8E8] text-[#6B6B6B] hover:bg-[#F8F7F5] hover:text-[#1A1A1A] hover:border-[#8B7355] transition-all duration-500 flex items-center justify-center rounded-none"
                     >
-                      <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={1} />
+                      <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" strokeWidth={1} />
                     </button>
                   )}
                 </div>
@@ -1381,9 +1835,9 @@ export default function CapturePage() {
               {designTabs.length < 5 && (
                 <button
                   onClick={addNewTab}
-                  className="h-9 sm:h-10 px-4 sm:px-5 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[10px] sm:text-[11px] tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] transition-all duration-500 flex items-center gap-2 whitespace-nowrap rounded-none"
+                  className="h-8 sm:h-9 px-3 sm:px-4 border border-[#E8E8E8] text-[#1A1A1A] font-light text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] transition-all duration-500 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-none"
                 >
-                  <span className="text-base sm:text-lg leading-none">+</span>
+                  <span className="text-sm sm:text-base leading-none">+</span>
                   <span className="hidden sm:inline">New Design</span>
                   <span className="sm:hidden">New</span>
                 </button>
@@ -1456,6 +1910,7 @@ export default function CapturePage() {
                       e.stopPropagation()
                       setIsUploadDrawerOpen(!isUploadDrawerOpen)
                     }}
+                    data-onboarding="design-images-option"
                     className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full backdrop-blur-md border-2 flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 ${
                       isUploadDrawerOpen 
                         ? 'bg-[#8B7355] border-[#8B7355] text-white' 
@@ -1472,6 +1927,7 @@ export default function CapturePage() {
                       e.stopPropagation()
                       setShowDrawingCanvas(true)
                     }}
+                    data-onboarding="drawing-canvas-button"
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#8B7355] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
                     title="Draw on image"
                   >
@@ -1506,6 +1962,7 @@ export default function CapturePage() {
                       e.stopPropagation()
                       replaceHandPhoto()
                     }}
+                    data-onboarding="replace-photo-button"
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#E8E8E8] text-[#1A1A1A] flex items-center justify-center shadow-xl hover:scale-110 hover:border-[#8B7355] active:scale-95 transition-all duration-300"
                     title="Replace hand photo"
                   >
@@ -1530,8 +1987,9 @@ export default function CapturePage() {
           <div className="max-w-4xl mx-auto pointer-events-auto">
             {!isGenerating ? (
               <button 
-                onClick={() => generateAIPreview(designSettings)} 
+                onClick={() => handleVisualizeClick(designSettings)} 
                 disabled={!hasCredits(1)}
+                data-onboarding="visualize-button"
                 className="w-full h-12 sm:h-14 bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white font-light text-xs sm:text-sm tracking-[0.2em] uppercase hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl rounded-sm disabled:opacity-50 disabled:cursor-not-allowed border border-[#E8E8E8]/20 backdrop-blur-sm animate-shimmer"
                 style={{
                   backgroundSize: '200% 100%',
@@ -1609,13 +2067,17 @@ export default function CapturePage() {
             {/* Elegant Drag Handle */}
             <button
               onClick={() => setIsDrawerOpen(false)}
+              data-onboarding="close-design-drawer"
               className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355] cursor-pointer"
               aria-label="Close drawer"
             />
 
             <div className="w-full flex-1 flex flex-col overflow-hidden">
               {(designMode === 'design' || designMode === null) && (
-                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide">
+                <div 
+                  className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide"
+                  data-onboarding="design-parameters-drawer"
+                >
                   {/* Low Credits Warning */}
                   {credits !== null && credits <= 2 && credits > 0 && (
                     <div className="bg-gradient-to-r from-[#FFF9E6] to-[#FFF9E6]/50 border border-[#E8E8E8]/50 p-4 sm:p-5 text-sm rounded-sm shadow-sm animate-fade-in">
@@ -1664,26 +2126,66 @@ export default function CapturePage() {
 
 
 
-                  {/* Drawing Status */}
+                  {/* Drawing Status with Influence Control */}
                   {drawingImageUrl && (
-                    <div className="bg-gradient-to-r from-[#F0FFF4] to-[#F0FFF4]/50 border border-[#E8E8E8]/50 p-4 sm:p-5 text-sm rounded-sm shadow-sm animate-fade-in">
-                      <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 border border-[#E8E8E8] bg-white flex items-center justify-center flex-shrink-0 rounded-sm shadow-sm">
-                          <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-[#2D7A4F]" strokeWidth={1} />
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedSection(expandedSection === 'drawing' ? null : 'drawing')}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-border bg-white/80 backdrop-blur-sm hover:border-primary/50 hover:shadow-md active:scale-[0.98] transition-all"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-12 h-12 border-2 border-white bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center flex-shrink-0 rounded-xl shadow-sm">
+                            <Pencil className="w-5 h-5 text-green-600" strokeWidth={1.5} />
+                          </div>
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className="text-sm font-bold text-charcoal mb-0.5">Drawing</p>
+                            <p className="text-xs text-muted-foreground">Tap to adjust influence</p>
+                          </div>
+                          <span className="text-sm font-bold text-white bg-gradient-to-r from-green-500 to-green-600 px-3 py-1.5 rounded-full shadow-sm">{influenceWeights.nailEditor_drawing}%</span>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-[#1A1A1A] font-light tracking-[0.15em] uppercase mb-2 text-[10px] sm:text-xs">Drawing added</p>
-                          <p className="text-[#6B6B6B] text-xs sm:text-sm leading-relaxed font-light">
-                            Your drawing will guide the AI to create designs following your outline
-                          </p>
+                        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ml-2 ${expandedSection === 'drawing' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedSection === 'drawing' && (
+                        <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-3">
+                          {/* Drawing Preview */}
+                          <div className="relative aspect-square rounded-lg overflow-hidden max-w-[200px] mx-auto">
+                            <Image src={drawingImageUrl} alt="Your drawing" fill className="object-contain bg-white" />
+                          </div>
+                          
+                          {/* Influence Slider */}
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-xs font-medium text-muted-foreground">Drawing Influence</label>
+                            <span className="text-xs font-bold text-green-600">{influenceWeights.nailEditor_drawing}%</span>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute inset-0 h-2 rounded-full" style={{
+                              background: 'linear-gradient(to right, #e0e0e0 0%, #10b981 50%, #059669 100%)',
+                              top: '50%',
+                              transform: 'translateY(-50%)'
+                            }} />
+                            <Slider
+                              value={[influenceWeights.nailEditor_drawing]}
+                              onValueChange={(value) => handleNailEditorDrawingInfluence(value[0])}
+                              min={0}
+                              max={100}
+                              step={5}
+                              className="w-full relative z-10"
+                            />
+                          </div>
+                          <div className="text-[10px] text-muted-foreground space-y-1">
+                            {selectedDesignImages.length > 0 && (
+                              <p>Design Images: {influenceWeights.nailEditor_designImage}%</p>
+                            )}
+                            <p>Base Color: {influenceWeights.nailEditor_baseColor}%</p>
+                          </div>
+                          <button
+                            onClick={handleRemoveDrawing}
+                            className="w-full mt-2 text-xs text-red-600 hover:text-red-700 font-medium"
+                          >
+                            Remove Drawing
+                          </button>
                         </div>
-                        <button
-                          onClick={() => setDrawingImageUrl(null)}
-                          className="text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors duration-300 p-1"
-                        >
-                          <X className="w-5 h-5" strokeWidth={1} />
-                        </button>
-                      </div>
+                      )}
                     </div>
                   )}
 
@@ -1752,9 +2254,12 @@ export default function CapturePage() {
                               className="w-full relative z-10"
                             />
                           </div>
-                          <p className="text-[10px] text-muted-foreground">
-                            Base Color: {influenceWeights.nailEditor_baseColor}%
-                          </p>
+                          <div className="text-[10px] text-muted-foreground space-y-1">
+                            {drawingImageUrl && (
+                              <p>Drawing: {influenceWeights.nailEditor_drawing}%</p>
+                            )}
+                            <p>Base Color: {influenceWeights.nailEditor_baseColor}%</p>
+                          </div>
                           <button
                             onClick={() => setSelectedDesignImages([])}
                             className="w-full mt-2 text-xs text-red-600 hover:text-red-700 font-medium"
@@ -1766,7 +2271,7 @@ export default function CapturePage() {
                     </div>
                   )}
 
-                  <div className="border-t border-[#E8E8E8] pt-4">
+                  <div className="border-t border-[#E8E8E8] pt-4" data-onboarding="design-section">
                     <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-widest mb-4">Design Parameters</p>
 
                     {/* Nail Length - Redesigned */}
@@ -1823,6 +2328,7 @@ export default function CapturePage() {
                     <div className="mb-4">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'shape' ? null : 'shape')}
+                        data-onboarding="nail-shape-option"
                         className="w-full flex items-center justify-between p-4 rounded-lg border border-[#E8E8E8] bg-gradient-to-br from-white to-[#FEFEFE] hover:border-[#8B7355] hover:shadow-md transition-all duration-300 active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 flex-1">
@@ -1843,7 +2349,10 @@ export default function CapturePage() {
                           <div className="relative">
                             {/* Horizontal scrollable container */}
                             <div className="overflow-x-auto pb-2 scrollbar-hide -mx-1">
-                              <div className="flex gap-2 sm:gap-3 min-w-max px-1">
+                              <div 
+                                className="flex gap-2 sm:gap-3 min-w-max px-1"
+                                data-onboarding="nail-shape-slider"
+                              >
                                 {[
                                   { value: 'square', label: 'Square', image: '/SQUARE.png' },
                                   { value: 'squoval', label: 'Squoval', image: '/SQUARED OVAL SQUOVAL.png' },
@@ -1906,6 +2415,7 @@ export default function CapturePage() {
                     <div className="mb-4">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'color' ? null : 'color')}
+                        data-onboarding="base-color-option"
                         className="w-full flex items-center justify-between p-4 rounded-lg border border-[#E8E8E8] bg-gradient-to-br from-white to-[#FEFEFE] hover:border-[#8B7355] hover:shadow-md transition-all duration-300 active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 flex-1">
@@ -2026,6 +2536,7 @@ export default function CapturePage() {
                     <div className="mb-3">
                       <button
                         onClick={() => setExpandedSection(expandedSection === 'finish' ? null : 'finish')}
+                        data-onboarding="finish-option"
                         className="w-full flex items-center justify-between p-3 border border-[#E8E8E8] bg-white hover:border-[#8B7355] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3 flex-1">
@@ -2042,7 +2553,8 @@ export default function CapturePage() {
                               { value: 'matte', label: 'Matte', gradient: 'bg-pink-400' },
                               { value: 'satin', label: 'Satin', gradient: 'bg-gradient-to-b from-pink-300 to-pink-500' },
                               { value: 'metallic', label: 'Metallic', gradient: 'bg-gradient-to-r from-pink-300 via-pink-400 to-pink-300' },
-                              { value: 'chrome', label: 'Chrome', gradient: 'bg-gradient-to-br from-gray-300 via-pink-200 to-gray-300' }
+                              { value: 'chrome', label: 'Chrome', gradient: 'bg-gradient-to-br from-gray-300 via-pink-200 to-gray-300' },
+                              { value: 'cateye', label: 'Cat-Eye', gradient: 'bg-gradient-to-r from-pink-500 via-pink-300 to-pink-500' }
                             ].map((finish) => (
                               <button
                                 key={finish.value}
@@ -2136,17 +2648,38 @@ export default function CapturePage() {
             {/* Elegant Drag Handle */}
             <button
               onClick={() => setIsUploadDrawerOpen(false)}
+              data-onboarding="close-upload-drawer"
               className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355] cursor-pointer"
               aria-label="Close drawer"
             />
 
             <div className="w-full flex-1 flex flex-col overflow-hidden">
               <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide">
+                {/* Success Banner when design is uploaded */}
+                {selectedDesignImages.length > 0 && (
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 p-4 rounded-lg animate-in fade-in slide-in-from-top duration-500">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-medium text-green-900 mb-1">Design Uploaded Successfully!</h3>
+                        <p className="text-sm text-green-700 font-light">
+                          {selectedDesignImages.length} design{selectedDesignImages.length > 1 ? 's' : ''} ready to influence your nail art
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <h2 className="text-xl sm:text-2xl font-serif text-[#1A1A1A] mb-4">Upload Design Images</h2>
                 
                 {/* Upload Button */}
                 <button 
                   onClick={() => designUploadRef.current?.click()}
+                  data-onboarding="upload-design-button"
                   className="w-full h-32 border-2 border-dashed border-[#E8E8E8] text-[#1A1A1A] font-light text-sm tracking-[0.15em] uppercase hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex flex-col items-center justify-center gap-3 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isUploadingDesign || selectedDesignImages.length >= 3}
                 >
@@ -2236,12 +2769,30 @@ export default function CapturePage() {
         {/* Bottom Navigation */}
         <BottomNav onCenterAction={changePhoto} centerActionLabel="Capture" />
 
+        {/* Generation Confirmation Dialog */}
+        <GenerationConfirmationDialog
+          isOpen={showConfirmDialog}
+          onConfirm={handleConfirmGeneration}
+          onCancel={handleCancelGeneration}
+          credits={credits}
+        />
+
         {/* Drawing Canvas Modal */}
         {showDrawingCanvas && capturedImage && (
           <DrawingCanvas
             imageUrl={capturedImage}
             onSave={handleDrawingComplete}
             onClose={() => setShowDrawingCanvas(false)}
+          />
+        )}
+        
+        {/* Onboarding Tour */}
+        {shouldShowOnboarding && (
+          <CaptureOnboarding 
+            onComplete={completeOnboarding}
+            currentPhase={onboardingPhase}
+            currentStep={onboardingStep}
+            onStepChange={setOnboardingStep}
           />
         )}
       </div>
@@ -2274,8 +2825,8 @@ export default function CapturePage() {
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-[5] overflow-visible">
           <style jsx>{`
             @keyframes elegant-pulse {
-              0%, 100% { opacity: 0.4; transform: scale(1); }
-              50% { opacity: 0.7; transform: scale(1.02); }
+              0%, 100% { opacity: ${shouldShowOnboarding && onboardingStep === 0 ? '0.15' : '0.4'}; transform: scale(1); }
+              50% { opacity: ${shouldShowOnboarding && onboardingStep === 0 ? '0.25' : '0.7'}; transform: scale(1.02); }
             }
             .hand-outline {
               animation: elegant-pulse 3s ease-in-out infinite;
@@ -2338,7 +2889,15 @@ export default function CapturePage() {
         <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-6 pb-5 z-10 bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
             <button
-              onClick={() => router.back()}
+              onClick={() => {
+                // If we have a saved image (user is in replace mode), restore it
+                if (savedImageBeforeReplace) {
+                  cancelReplaceHandPhoto()
+                } else {
+                  router.back()
+                }
+              }}
+              data-onboarding="camera-close-button"
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-500 shadow-lg active:scale-95"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -2426,6 +2985,7 @@ export default function CapturePage() {
 
             <button
               onClick={capturePhoto}
+              data-onboarding="capture-button"
               className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all duration-500 active:scale-95 shadow-2xl hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]"
               style={{
                 background: 'linear-gradient(135deg, #ffffff 0%, #f8f7f5 100%)',
@@ -2448,6 +3008,16 @@ export default function CapturePage() {
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+      
+      {/* Onboarding Tour */}
+      {shouldShowOnboarding && (
+        <CaptureOnboarding 
+          onComplete={completeOnboarding}
+          currentPhase={onboardingPhase}
+          currentStep={onboardingStep}
+          onStepChange={setOnboardingStep}
+        />
+      )}
     </div>
   )
 }

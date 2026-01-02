@@ -53,12 +53,9 @@ export const IAP_PRODUCT_IDS = {
   CREDITS_5: 'com.ivory.app.credits5',   // $7.50 ($1.50/credit) - NO DOT
   CREDITS_10: 'com.ivory.app.credits10', // $15.00 ($1.50/credit) - NO DOT
   
-  // Booking Payments (dynamic pricing tiers)
-  BOOKING_TIER_1: 'com.ivory.app.booking.tier1', // $0-50
-  BOOKING_TIER_2: 'com.ivory.app.booking.tier2', // $51-100
-  BOOKING_TIER_3: 'com.ivory.app.booking.tier3', // $101-150
-  BOOKING_TIER_4: 'com.ivory.app.booking.tier4', // $151-200
-  BOOKING_TIER_5: 'com.ivory.app.booking.tier5', // $201+
+  // NOTE: Booking payments use Stripe (not IAP) because they are for real-world services
+  // Apple allows external payment processors for physical goods/services consumed outside the app
+  // See: https://developer.apple.com/app-store/review/guidelines/#payments
 };
 
 // Map product IDs to credit amounts (for auto-recharge)
@@ -161,15 +158,6 @@ class IAPManager {
 
   isNativePlatform(): boolean {
     return Capacitor.isNativePlatform();
-  }
-
-  // Get appropriate booking product ID based on total price
-  getBookingProductId(totalPrice: number): string {
-    if (totalPrice <= 50) return IAP_PRODUCT_IDS.BOOKING_TIER_1;
-    if (totalPrice <= 100) return IAP_PRODUCT_IDS.BOOKING_TIER_2;
-    if (totalPrice <= 150) return IAP_PRODUCT_IDS.BOOKING_TIER_3;
-    if (totalPrice <= 200) return IAP_PRODUCT_IDS.BOOKING_TIER_4;
-    return IAP_PRODUCT_IDS.BOOKING_TIER_5;
   }
 }
 

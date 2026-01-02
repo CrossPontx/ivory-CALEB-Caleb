@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Share2, Trash2, Send } from "lucide-react"
+import { ArrowLeft, Share2, Trash2, Send, Sparkles } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
+import { useCredits } from "@/hooks/use-credits"
 
 type NailLook = {
   id: string
@@ -17,6 +18,7 @@ type NailLook = {
 export default function LookDetailPage() {
   const router = useRouter()
   const params = useParams()
+  const { credits } = useCredits()
   const [look, setLook] = useState<NailLook | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -48,6 +50,22 @@ export default function LookDetailPage() {
 
     loadLook()
   }, [params.id])
+
+  const handleVisualize = () => {
+    if (!look) return
+    
+    // Store the design image URL and flag for auto-generation
+    localStorage.setItem('loadedDesignImage', look.imageUrl)
+    localStorage.setItem('autoShowConfirmDialog', 'true')
+    localStorage.setItem('loadedDesignMetadata', JSON.stringify({
+      source: 'ai-generated',
+      lookId: look.id,
+      title: look.title
+    }))
+    
+    // Navigate to capture page
+    router.push('/capture')
+  }
 
   const handleShare = () => {
     router.push(`/share/${params.id}`)
@@ -121,9 +139,19 @@ export default function LookDetailPage() {
         {/* Action Buttons - Always visible */}
         <div className={`space-y-3 sm:space-y-4 max-w-2xl mx-auto px-2 sm:px-0 transition-all duration-700 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <Button 
+            onClick={handleVisualize}
+            disabled={isLoading || !credits || credits < 1}
+            className="w-full bg-gradient-to-r from-[#1A1A1A] via-[#2D2D2D] to-[#1A1A1A] text-white hover:from-[#8B7355] hover:via-[#A0826D] hover:to-[#8B7355] transition-all duration-500 ease-out h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 animate-shimmer"
+            style={{ backgroundSize: '200% 100%' }}
+          >
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 animate-pulse" strokeWidth={1.5} />
+            Visualize (1 Credit)
+          </Button>
+
+          <Button 
             onClick={handleSendToTech}
             disabled={isLoading}
-            className="w-full bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-500 ease-out h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5"
+            className="w-full bg-transparent border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-500 ease-out h-12 sm:h-14 lg:h-16 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase rounded-none font-light active:scale-[0.98] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5"
           >
             <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
             Send to Nail Tech

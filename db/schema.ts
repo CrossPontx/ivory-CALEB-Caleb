@@ -533,3 +533,49 @@ export const generationJobsRelations = relations(generationJobs, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// Collections for organizing saved designs
+export const collections = pgTable('collections', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  isDefault: boolean('is_default').default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Saved designs from uploads or share extension
+export const savedDesigns = pgTable('saved_designs', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  collectionId: integer('collection_id').references(() => collections.id),
+  imageUrl: text('image_url').notNull(),
+  title: varchar('title', { length: 255 }),
+  sourceUrl: text('source_url'), // Original source (TikTok, IG, Pinterest, etc.)
+  sourceType: varchar('source_type', { length: 50 }), // 'upload', 'share_extension', 'web'
+  notes: text('notes'),
+  tags: jsonb('tags'), // Array of tags for organization
+  isFavorite: boolean('is_favorite').default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const collectionsRelations = relations(collections, ({ one, many }) => ({
+  user: one(users, {
+    fields: [collections.userId],
+    references: [users.id],
+  }),
+  savedDesigns: many(savedDesigns),
+}));
+
+export const savedDesignsRelations = relations(savedDesigns, ({ one }) => ({
+  user: one(users, {
+    fields: [savedDesigns.userId],
+    references: [users.id],
+  }),
+  collection: one(collections, {
+    fields: [savedDesigns.collectionId],
+    references: [collections.id],
+  }),
+}));

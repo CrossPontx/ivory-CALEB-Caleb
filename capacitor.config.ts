@@ -36,6 +36,19 @@ const config: CapacitorConfig = {
     },
     IAPPlugin: {
       // Apple In-App Purchase plugin for subscriptions and credits
+      // Auto-finish transactions after validation
+      autoFinish: false,
+      // Enable detailed logging for debugging
+      verboseLogging: true,
+      // Product IDs for validation
+      products: [
+        'com.ivory.credits.10',
+        'com.ivory.credits.25',
+        'com.ivory.credits.50',
+        'com.ivory.credits.100',
+        'com.ivory.subscription.monthly',
+        'com.ivory.subscription.yearly'
+      ]
     }
   }
 };

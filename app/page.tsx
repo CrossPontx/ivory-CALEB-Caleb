@@ -7,14 +7,11 @@ import LandingPage from "@/components/landing-page"
 
 export default function HomePage() {
   const router = useRouter()
+  // Check immediately if native (synchronous)
+  const isNativeApp = Capacitor.isNativePlatform()
   const [isChecking, setIsChecking] = useState(true)
-  const [isNativeApp, setIsNativeApp] = useState(false)
 
   useEffect(() => {
-    // Check if running in native Capacitor app
-    const isNative = Capacitor.isNativePlatform()
-    setIsNativeApp(isNative)
-
     const checkSession = async () => {
       try {
         const response = await fetch('/api/auth/session')
@@ -30,26 +27,32 @@ export default function HomePage() {
           } else {
             router.push('/user-type')
           }
-        } else if (isNative) {
+        } else if (isNativeApp) {
           // Native iOS app users skip landing page and go directly to auth
           router.push('/auth')
+        } else {
+          // Web user without session - show landing page
+          setIsChecking(false)
         }
       } catch (error) {
         console.error('Session check error:', error)
-      } finally {
-        setIsChecking(false)
+        if (isNativeApp) {
+          // On error in native app, still go to auth
+          router.push('/auth')
+        } else {
+          setIsChecking(false)
+        }
       }
     }
     
     checkSession()
-  }, [router])
+  }, [router, isNativeApp])
 
-  // Show loading state while checking session
-  if (isChecking) {
+  // For native app, never show landing page - keep blank screen during redirect
+  // For web, show loading until session check completes
+  if (isChecking || isNativeApp) {
     return (
-      <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center">
-        <div className="text-[#2C2C2C]">Loading...</div>
-      </div>
+      <div className="min-h-screen bg-[#000000]" />
     )
   }
 

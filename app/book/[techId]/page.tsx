@@ -188,16 +188,10 @@ export default function BookAppointmentPage() {
         return;
       }
 
-      // Check if running in Capacitor (mobile app) or web browser
-      const isNativeApp = typeof (window as any).Capacitor !== 'undefined';
-      
-      if (isNativeApp) {
-        // Use IAP for native mobile app
-        await handleIAPPayment(bookingData.booking);
-      } else {
-        // Use Stripe Checkout for web browser
-        await handleStripePayment(bookingData.booking);
-      }
+      // Always use Stripe for booking payments (real-world services)
+      // Apple allows external payment processors for physical goods/services
+      // consumed outside the app (App Store Review Guidelines 3.1.1)
+      await handleStripePayment(bookingData.booking);
     } catch (error) {
       console.error('Error creating booking:', error);
       alert('Failed to create booking');
@@ -238,55 +232,10 @@ export default function BookAppointmentPage() {
     }
   };
 
-  const handleIAPPayment = async (booking: any) => {
-    try {
-      const totalPrice = parseFloat(booking.totalPrice);
-      const productId = iapManager.getBookingProductId(totalPrice);
-
-      // Setup purchase listeners
-      iapManager.onPurchaseComplete(async (result) => {
-        try {
-          // Validate receipt with backend
-          const token = localStorage.getItem('token');
-          const response = await fetch('/api/iap/validate-booking-payment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              receipt: result.receipt,
-              productId: result.productId,
-              transactionId: result.transactionId,
-              bookingId: booking.id,
-            }),
-          });
-
-          if (response.ok) {
-            await iapManager.finishTransaction(result.transactionId);
-            router.push(`/bookings?payment=success&booking_id=${booking.id}`);
-          } else {
-            const error = await response.json();
-            alert(error.error || 'Payment validation failed');
-          }
-        } catch (error) {
-          console.error('Error validating IAP payment:', error);
-          alert('Payment validation failed');
-        }
-      });
-
-      iapManager.onPurchaseError((error) => {
-        console.error('IAP purchase error:', error);
-        alert(`Payment failed: ${error.errorMessage}`);
-      });
-
-      // Initiate purchase
-      await iapManager.purchase(productId);
-    } catch (error) {
-      console.error('Error initiating IAP payment:', error);
-      alert('Failed to initiate payment');
-    }
-  };
+  // NOTE: IAP booking payment handler removed
+  // Bookings now use Stripe exclusively (Apple-compliant for real-world services)
+  // See App Store Review Guidelines 3.1.1 - Physical goods and services consumed
+  // outside the app may use payment methods other than IAP
 
   if (!tech) {
     return (
