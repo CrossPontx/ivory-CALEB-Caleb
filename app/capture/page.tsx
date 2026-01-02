@@ -169,29 +169,85 @@ export default function CapturePage() {
   })
 
   // Influence weights for Nail Editor
-  // designImage and baseColor are inversely linked (sum to 100)
+  // Drawing, designImage, and baseColor should always sum to 100
   const [influenceWeights, setInfluenceWeights] = useState({
+    nailEditor_drawing: 0,
     nailEditor_designImage: 0,
     nailEditor_baseColor: 100,
     nailEditor_finish: 100,
     nailEditor_texture: 100
   })
 
-  // Nail Editor influence handlers
+  // Nail Editor influence handlers with three-way balance
+  const handleNailEditorDrawingInfluence = (value: number) => {
+    const remaining = 100 - value
+    // Distribute remaining between designImage and baseColor
+    // If design images exist, prioritize them, otherwise use baseColor
+    if (selectedDesignImages.length > 0) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_drawing: value,
+        nailEditor_designImage: remaining,
+        nailEditor_baseColor: 0
+      }))
+    } else {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_drawing: value,
+        nailEditor_designImage: 0,
+        nailEditor_baseColor: remaining
+      }))
+    }
+  }
+
   const handleNailEditorDesignImageInfluence = (value: number) => {
-    setInfluenceWeights(prev => ({
-      ...prev,
-      nailEditor_designImage: value,
-      nailEditor_baseColor: 100 - value
-    }))
+    const remaining = 100 - value
+    // Distribute remaining between drawing and baseColor
+    // If drawing exists, prioritize it, otherwise use baseColor
+    if (drawingImageUrl) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_designImage: value,
+        nailEditor_drawing: remaining,
+        nailEditor_baseColor: 0
+      }))
+    } else {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_designImage: value,
+        nailEditor_drawing: 0,
+        nailEditor_baseColor: remaining
+      }))
+    }
   }
 
   const handleNailEditorBaseColorInfluence = (value: number) => {
-    setInfluenceWeights(prev => ({
-      ...prev,
-      nailEditor_baseColor: value,
-      nailEditor_designImage: 100 - value
-    }))
+    const remaining = 100 - value
+    // Distribute remaining between drawing and designImage
+    // Prioritize drawing if it exists, then designImage
+    if (drawingImageUrl) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_baseColor: value,
+        nailEditor_drawing: remaining,
+        nailEditor_designImage: 0
+      }))
+    } else if (selectedDesignImages.length > 0) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_baseColor: value,
+        nailEditor_designImage: remaining,
+        nailEditor_drawing: 0
+      }))
+    } else {
+      // If nothing else exists, keep baseColor at 100
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_baseColor: 100,
+        nailEditor_designImage: 0,
+        nailEditor_drawing: 0
+      }))
+    }
   }
   
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -398,6 +454,7 @@ export default function CapturePage() {
           // Set the design image influence to 100% and base color to 0%
           console.log('✅ Setting influence weights: designImage=100, baseColor=0')
           setInfluenceWeights({
+            nailEditor_drawing: 0,
             nailEditor_designImage: 100,
             nailEditor_baseColor: 0,
             nailEditor_finish: 100,
@@ -914,6 +971,7 @@ export default function CapturePage() {
       
       // Build weights for Nail Editor
       const weights = {
+        drawing: influenceWeights.nailEditor_drawing,
         designImage: influenceWeights.nailEditor_designImage,
         stylePrompt: 0, // Not used in Nail Editor
         baseColor: influenceWeights.nailEditor_baseColor,
@@ -1595,10 +1653,10 @@ export default function CapturePage() {
     setDrawingImageUrl(dataUrl)
     setShowDrawingCanvas(false)
     
-    // When a drawing is added, set design images and base color influence to 0
-    // The drawing will be used at 100% influence
+    // When a drawing is added, set it to 100% influence
     setInfluenceWeights(prev => ({
       ...prev,
+      nailEditor_drawing: 100,
       nailEditor_designImage: 0,
       nailEditor_baseColor: 0
     }))
@@ -1611,10 +1669,18 @@ export default function CapturePage() {
   const handleRemoveDrawing = () => {
     setDrawingImageUrl(null)
     
-    // When drawing is removed, restore base color to 100% if no design images are present
-    if (selectedDesignImages.length === 0) {
+    // When drawing is removed, restore influence to design images or base color
+    if (selectedDesignImages.length > 0) {
       setInfluenceWeights(prev => ({
         ...prev,
+        nailEditor_drawing: 0,
+        nailEditor_designImage: 100,
+        nailEditor_baseColor: 0
+      }))
+    } else {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_drawing: 0,
         nailEditor_designImage: 0,
         nailEditor_baseColor: 100
       }))
@@ -2060,26 +2126,66 @@ export default function CapturePage() {
 
 
 
-                  {/* Drawing Status */}
+                  {/* Drawing Status with Influence Control */}
                   {drawingImageUrl && (
-                    <div className="bg-gradient-to-r from-[#F0FFF4] to-[#F0FFF4]/50 border border-[#E8E8E8]/50 p-4 sm:p-5 text-sm rounded-sm shadow-sm animate-fade-in">
-                      <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 border border-[#E8E8E8] bg-white flex items-center justify-center flex-shrink-0 rounded-sm shadow-sm">
-                          <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-[#2D7A4F]" strokeWidth={1} />
+                    <div className="mb-3">
+                      <button
+                        onClick={() => setExpandedSection(expandedSection === 'drawing' ? null : 'drawing')}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-border bg-white/80 backdrop-blur-sm hover:border-primary/50 hover:shadow-md active:scale-[0.98] transition-all"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-12 h-12 border-2 border-white bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center flex-shrink-0 rounded-xl shadow-sm">
+                            <Pencil className="w-5 h-5 text-green-600" strokeWidth={1.5} />
+                          </div>
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className="text-sm font-bold text-charcoal mb-0.5">Drawing</p>
+                            <p className="text-xs text-muted-foreground">Tap to adjust influence</p>
+                          </div>
+                          <span className="text-sm font-bold text-white bg-gradient-to-r from-green-500 to-green-600 px-3 py-1.5 rounded-full shadow-sm">{influenceWeights.nailEditor_drawing}%</span>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-[#1A1A1A] font-light tracking-[0.15em] uppercase mb-2 text-[10px] sm:text-xs">Drawing added</p>
-                          <p className="text-[#6B6B6B] text-xs sm:text-sm leading-relaxed font-light">
-                            Your drawing will guide the AI to create designs following your outline
-                          </p>
+                        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ml-2 ${expandedSection === 'drawing' ? 'rotate-180' : ''}`} />
+                      </button>
+                      {expandedSection === 'drawing' && (
+                        <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-3">
+                          {/* Drawing Preview */}
+                          <div className="relative aspect-square rounded-lg overflow-hidden max-w-[200px] mx-auto">
+                            <Image src={drawingImageUrl} alt="Your drawing" fill className="object-contain bg-white" />
+                          </div>
+                          
+                          {/* Influence Slider */}
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-xs font-medium text-muted-foreground">Drawing Influence</label>
+                            <span className="text-xs font-bold text-green-600">{influenceWeights.nailEditor_drawing}%</span>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute inset-0 h-2 rounded-full" style={{
+                              background: 'linear-gradient(to right, #e0e0e0 0%, #10b981 50%, #059669 100%)',
+                              top: '50%',
+                              transform: 'translateY(-50%)'
+                            }} />
+                            <Slider
+                              value={[influenceWeights.nailEditor_drawing]}
+                              onValueChange={(value) => handleNailEditorDrawingInfluence(value[0])}
+                              min={0}
+                              max={100}
+                              step={5}
+                              className="w-full relative z-10"
+                            />
+                          </div>
+                          <div className="text-[10px] text-muted-foreground space-y-1">
+                            {selectedDesignImages.length > 0 && (
+                              <p>Design Images: {influenceWeights.nailEditor_designImage}%</p>
+                            )}
+                            <p>Base Color: {influenceWeights.nailEditor_baseColor}%</p>
+                          </div>
+                          <button
+                            onClick={handleRemoveDrawing}
+                            className="w-full mt-2 text-xs text-red-600 hover:text-red-700 font-medium"
+                          >
+                            Remove Drawing
+                          </button>
                         </div>
-                        <button
-                          onClick={handleRemoveDrawing}
-                          className="text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors duration-300 p-1"
-                        >
-                          <X className="w-5 h-5" strokeWidth={1} />
-                        </button>
-                      </div>
+                      )}
                     </div>
                   )}
 
@@ -2148,9 +2254,12 @@ export default function CapturePage() {
                               className="w-full relative z-10"
                             />
                           </div>
-                          <p className="text-[10px] text-muted-foreground">
-                            Base Color: {influenceWeights.nailEditor_baseColor}%
-                          </p>
+                          <div className="text-[10px] text-muted-foreground space-y-1">
+                            {drawingImageUrl && (
+                              <p>Drawing: {influenceWeights.nailEditor_drawing}%</p>
+                            )}
+                            <p>Base Color: {influenceWeights.nailEditor_baseColor}%</p>
+                          </div>
                           <button
                             onClick={() => setSelectedDesignImages([])}
                             className="w-full mt-2 text-xs text-red-600 hover:text-red-700 font-medium"
