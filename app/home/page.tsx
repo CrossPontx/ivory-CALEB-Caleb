@@ -12,6 +12,7 @@ import { BottomNav } from "@/components/bottom-nav"
 import ContentModerationMenu from "@/components/content-moderation-menu"
 import { useIsAppleWatch, HideOnWatch, WatchButton, WatchGrid } from "@/components/watch-optimized-layout"
 import { BookingReviewDialog } from "@/components/booking-review-dialog"
+import { AnimatedTabs } from "@/components/animated-tabs"
 import { UploadDesignDialog } from "@/components/upload-design-dialog"
 import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
 
@@ -235,38 +236,15 @@ export default function HomePage() {
       {/* Tab Navigation */}
       <div className={`bg-white border-b border-[#E8E8E8] sticky ${isWatch ? 'top-8' : 'top-12 sm:top-14'} z-40`}>
         <div className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3' : 'px-4 sm:px-6'}`}>
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab('designs')}
-              className={`flex-1 py-3 sm:py-4 text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
-                activeTab === 'designs'
-                  ? 'border-[#1A1A1A] text-[#1A1A1A]'
-                  : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
-              }`}
-            >
-              Designs
-            </button>
-            <button
-              onClick={() => setActiveTab('search')}
-              className={`flex-1 py-3 sm:py-4 text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
-                activeTab === 'search'
-                  ? 'border-[#1A1A1A] text-[#1A1A1A]'
-                  : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
-              }`}
-            >
-              Find Tech
-            </button>
-            <button
-              onClick={() => setActiveTab('bookings')}
-              className={`flex-1 py-3 sm:py-4 text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] uppercase font-light transition-all duration-500 border-b-2 ${
-                activeTab === 'bookings'
-                  ? 'border-[#1A1A1A] text-[#1A1A1A]'
-                  : 'border-transparent text-[#6B6B6B] hover:text-[#8B7355]'
-              }`}
-            >
-              Bookings {myBookings.length > 0 && `(${myBookings.length})`}
-            </button>
-          </div>
+          <AnimatedTabs
+            tabs={[
+              { id: 'designs', label: 'Designs' },
+              { id: 'search', label: 'Find Tech' },
+              { id: 'bookings', label: 'Bookings', count: myBookings.length }
+            ]}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as 'designs' | 'search' | 'bookings')}
+          />
         </div>
       </div>
 
@@ -274,7 +252,7 @@ export default function HomePage() {
       <main className={`max-w-screen-xl mx-auto ${isWatch ? 'px-3 py-3 pb-20' : 'px-4 sm:px-6 py-4 sm:py-6 pb-24 sm:pb-28'}`}>
         {/* My Designs Tab */}
         {activeTab === 'designs' && (
-          <>
+          <div className="tab-content-enter page-container">
             {/* Credits/Subscription Banner - Hidden on Watch */}
             {showReferralBanner && !isWatch && (
               <div className={`mb-4 sm:mb-6 relative transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
@@ -533,12 +511,12 @@ export default function HomePage() {
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* Find Nail Tech Tab */}
         {activeTab === 'search' && (
-          <div className="space-y-8 sm:space-y-12 lg:space-y-16">
+          <div className="tab-content-enter page-container space-y-8 sm:space-y-12 lg:space-y-16">
             {/* Search Hero Section */}
             <div className="text-center space-y-3 sm:space-y-5">
               <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light">
@@ -700,7 +678,7 @@ export default function HomePage() {
 
         {/* My Bookings Tab */}
         {activeTab === 'bookings' && (
-          <div className="space-y-8 sm:space-y-12 lg:space-y-16">
+          <div className="tab-content-enter page-container space-y-8 sm:space-y-12 lg:space-y-16">
             {/* Bookings Hero */}
             <div className="text-center space-y-3 sm:space-y-5">
               <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light">
