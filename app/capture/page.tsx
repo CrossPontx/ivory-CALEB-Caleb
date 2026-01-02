@@ -126,6 +126,7 @@ export default function CapturePage() {
   const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null)
   const [showDrawingCanvas, setShowDrawingCanvas] = useState(false)
   const [drawingImageUrl, setDrawingImageUrl] = useState<string | null>(null)
+  const [compositeImageForEditing, setCompositeImageForEditing] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(true) // Track if we're still initializing
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [pendingGenerationSettings, setPendingGenerationSettings] = useState<DesignSettings | null>(null)
@@ -1650,6 +1651,7 @@ export default function CapturePage() {
   }
 
   const handleDrawingComplete = (dataUrl: string) => {
+    console.log('🎨 Drawing completed, saving to state')
     setDrawingImageUrl(dataUrl)
     setShowDrawingCanvas(false)
     
@@ -1687,6 +1689,120 @@ export default function CapturePage() {
     }
     
     toast.info('Drawing removed')
+  }
+
+  // Create a composite image of the captured image + drawing for editing
+  const createCompositeImageForEditing = async (): Promise<string> => {
+    if (!capturedImage) {
+      console.log('❌ No captured image')
+      return ''
+    }
+    
+    // If no drawing exists, just return the captured image
+    if (!drawingImageUrl) {
+      console.log('📸 No drawing to composite, using original image')
+      return capturedImage
+    }
+    
+    console.log('🎨 Creating composite image with drawing overlay')
+    console.log('📸 Captured image type:', capturedImage.substring(0, 30))
+    console.log('✏️ Drawing image type:', drawingImageUrl.substring(0, 30))
+    
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        console.error('❌ Failed to get canvas context')
+        reject(new Error('Failed to get canvas context'))
+        return
+      }
+      
+      // Proxy R2 URLs to avoid CORS issues
+      const getProxiedUrl = (url: string) => {
+        if (url.includes('r2.dev') || url.includes('r2.cloudflarestorage.com')) {
+          return `/api/proxy-image?url=${encodeURIComponent(url)}`
+        }
+        return url
+      }
+      
+      // Load the base image - use window.Image for browser compatibility
+      const baseImg = new window.Image()
+      baseImg.crossOrigin = 'anonymous'
+      
+      baseImg.onload = () => {
+        console.log('✅ Base image loaded:', baseImg.width, 'x', baseImg.height)
+        
+        // Set canvas size to match base image
+        canvas.width = baseImg.width
+        canvas.height = baseImg.height
+        
+        // Draw base image
+        ctx.drawImage(baseImg, 0, 0)
+        
+        // Load and draw the drawing overlay
+        const drawingImg = new window.Image()
+        drawingImg.crossOrigin = 'anonymous'
+        
+        drawingImg.onload = () => {
+          console.log('✅ Drawing image loaded:', drawingImg.width, 'x', drawingImg.height)
+          
+          // Draw the drawing overlay on top
+          ctx.drawImage(drawingImg, 0, 0, canvas.width, canvas.height)
+          
+          // Convert to data URL
+          try {
+            const compositeDataUrl = canvas.toDataURL('image/png')
+            console.log('✅ Composite image created, size:', compositeDataUrl.length)
+            resolve(compositeDataUrl)
+          } catch (e) {
+            console.error('❌ Failed to convert canvas to data URL:', e)
+            reject(e)
+          }
+        }
+        
+        drawingImg.onerror = (e) => {
+          console.error('❌ Failed to load drawing image:', e)
+          // Return just the base image if drawing fails to load
+          resolve(capturedImage)
+        }
+        
+        drawingImg.src = getProxiedUrl(drawingImageUrl)
+      }
+      
+      baseImg.onerror = (e) => {
+        console.error('❌ Failed to load base image:', e)
+        console.error('Base image src length:', capturedImage?.length)
+        console.error('Base image starts with:', capturedImage?.substring(0, 50))
+        reject(new Error('Failed to load base image'))
+      }
+      
+      // Set src after all handlers are attached, using proxy for R2 URLs
+      baseImg.src = getProxiedUrl(capturedImage)
+    })
+  }
+
+  // Handler to open drawing canvas with composite image
+  const handleOpenDrawingCanvas = async () => {
+    console.log('🎨 Opening drawing canvas...')
+    
+    // If there's no previous drawing, just use the captured image
+    if (!drawingImageUrl) {
+      console.log('📸 No previous drawing, using captured image directly')
+      setCompositeImageForEditing(capturedImage)
+      setShowDrawingCanvas(true)
+      return
+    }
+    
+    // Try to create composite, but fallback to captured image if it fails
+    try {
+      const composite = await createCompositeImageForEditing()
+      setCompositeImageForEditing(composite)
+      setShowDrawingCanvas(true)
+    } catch (error) {
+      console.error('Failed to create composite, using captured image:', error)
+      setCompositeImageForEditing(capturedImage)
+      setShowDrawingCanvas(true)
+    }
   }
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -1858,14 +1974,14 @@ export default function CapturePage() {
             {/* Original Image Card - Full Width */}
             <div className="relative overflow-hidden border border-[#E8E8E8]/50 group flex-1 bg-white shadow-sm hover:shadow-lg transition-all duration-700 rounded-sm animate-fade-in">
               <div
-                onClick={() => setShowDrawingCanvas(true)}
+                onClick={handleOpenDrawingCanvas}
                 className="relative bg-gradient-to-br from-[#F8F7F5] to-white h-full w-full cursor-pointer"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    setShowDrawingCanvas(true)
+                    handleOpenDrawingCanvas()
                   }
                 }}
                 title="Click to draw on image"
@@ -1925,7 +2041,7 @@ export default function CapturePage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      setShowDrawingCanvas(true)
+                      handleOpenDrawingCanvas()
                     }}
                     data-onboarding="drawing-canvas-button"
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#8B7355] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
@@ -2778,11 +2894,14 @@ export default function CapturePage() {
         />
 
         {/* Drawing Canvas Modal */}
-        {showDrawingCanvas && capturedImage && (
+        {showDrawingCanvas && compositeImageForEditing && (
           <DrawingCanvas
-            imageUrl={capturedImage}
+            imageUrl={compositeImageForEditing}
             onSave={handleDrawingComplete}
-            onClose={() => setShowDrawingCanvas(false)}
+            onClose={() => {
+              setShowDrawingCanvas(false)
+              setCompositeImageForEditing(null)
+            }}
           />
         )}
         
