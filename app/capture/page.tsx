@@ -1594,9 +1594,33 @@ export default function CapturePage() {
   const handleDrawingComplete = (dataUrl: string) => {
     setDrawingImageUrl(dataUrl)
     setShowDrawingCanvas(false)
+    
+    // When a drawing is added, set design images and base color influence to 0
+    // The drawing will be used at 100% influence
+    setInfluenceWeights(prev => ({
+      ...prev,
+      nailEditor_designImage: 0,
+      nailEditor_baseColor: 0
+    }))
+    
     toast.success('Drawing saved!', {
-      description: 'Your drawing will guide the AI design generation',
+      description: 'Your drawing will guide the AI design generation at 100% influence',
     })
+  }
+
+  const handleRemoveDrawing = () => {
+    setDrawingImageUrl(null)
+    
+    // When drawing is removed, restore base color to 100% if no design images are present
+    if (selectedDesignImages.length === 0) {
+      setInfluenceWeights(prev => ({
+        ...prev,
+        nailEditor_designImage: 0,
+        nailEditor_baseColor: 100
+      }))
+    }
+    
+    toast.info('Drawing removed')
   }
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -2050,7 +2074,7 @@ export default function CapturePage() {
                           </p>
                         </div>
                         <button
-                          onClick={() => setDrawingImageUrl(null)}
+                          onClick={handleRemoveDrawing}
                           className="text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors duration-300 p-1"
                         >
                           <X className="w-5 h-5" strokeWidth={1} />
