@@ -125,16 +125,22 @@ export async function POST(request: NextRequest) {
     // Only include base color if it has influence
     if (weights.baseColor > 0) {
       designParamsSection += `- Base Color: ${baseColorValue} (Weight: ${weights.baseColor}%)\n`
+    } else {
+      designParamsSection += `- Base Color: IGNORE - DO NOT apply any base color (Weight: 0%)\n`
     }
     
     // Only include finish if it has influence
     if (weights.finish > 0) {
       designParamsSection += `- Finish: ${finishValue} (Weight: ${weights.finish}%)\n`
+    } else {
+      designParamsSection += `- Finish: IGNORE - Use finish from reference/drawing only (Weight: 0%)\n`
     }
     
     // Only include texture if it has influence
     if (weights.texture > 0) {
       designParamsSection += `- Texture: ${textureValue} (Weight: ${weights.texture}%)\n`
+    } else {
+      designParamsSection += `- Texture: IGNORE - Use texture from reference/drawing only (Weight: 0%)\n`
     }
     
     // Build image inputs description
@@ -226,10 +232,23 @@ ${weights.designImage === 0 ? '- IGNORE the design images completely.' :
 ${drawingImageUrl ? '- COMBINE the reference designs WITH the user\'s drawing guide - use the drawing for placement and the references for style/colors' : ''}
 - DO NOT add any base color, background color, or additional elements not in the references
 - USE ONLY what you see in the reference design images - nothing more, nothing less
+- IGNORE any base color parameter - use ONLY colors from the reference images
+- IGNORE any finish parameter - use ONLY the finish shown in the reference images
+- IGNORE any texture parameter - use ONLY the texture shown in the reference images
 - This is a DIRECT COPY operation with proper orientation alignment, not an interpretation or inspiration` : 
   `- Use the design images as ${weights.designImage}% inspiration, blending with other parameters
 - IMPORTANT: Still align design orientation with each nail's direction at ${weights.designImage}% influence`}
 ` : '- No design images provided'}
+
+${drawingImageUrl && weights.designImage === 100 ? `
+DRAWING INFLUENCE AT 100%:
+- The drawing/outline is your ABSOLUTE GUIDE
+- DO NOT apply any base color - use ONLY what's shown in the drawing
+- DO NOT add background colors or fills unless shown in the drawing
+- The drawing shows the EXACT design to apply - nothing more, nothing less
+- IGNORE base color, finish, and texture parameters completely
+- Use ONLY the visual information from the drawing and any reference images
+` : ''}
 
 ${designParamsSection}
 
