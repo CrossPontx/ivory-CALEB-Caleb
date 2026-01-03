@@ -7,6 +7,7 @@ import { Heart, Loader2, Download, Share2, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Head from "next/head"
 import ContentModerationMenu from "@/components/content-moderation-menu"
+import { DesignAnalysisDisplay } from "@/components/design-analysis-display"
 import { toast } from "sonner"
 
 type Look = {
@@ -339,6 +340,14 @@ export default function SharedDesignPage() {
               <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" strokeWidth={1.5} />
               Save to My Designs
             </Button>
+          </div>
+
+          {/* Design Analysis */}
+          <div className="mb-8 sm:mb-10">
+            <DesignAnalysisDisplay 
+              imageUrl={look.imageUrl}
+              lookId={look.id}
+            />
           </div>
 
           {/* Sign Up CTA */}
