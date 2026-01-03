@@ -1362,10 +1362,10 @@ export default function CapturePage() {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
 
-    // Check if adding these files would exceed max (3 images)
-    if (selectedDesignImages.length + files.length > 3) {
-      toast.error('Maximum 3 design images', {
-        description: 'You can upload up to 3 reference images',
+    // Check if adding these files would exceed max (1 image)
+    if (selectedDesignImages.length + files.length > 1) {
+      toast.error('Maximum 1 design image', {
+        description: 'You can upload 1 reference image',
       })
       return
     }
@@ -2741,7 +2741,6 @@ export default function CapturePage() {
               ref={designUploadRef}
               type="file"
               accept="image/*"
-              multiple
               onChange={handleDesignUpload}
               className="hidden"
             />
@@ -2807,8 +2806,8 @@ export default function CapturePage() {
                   ) : (
                     <>
                       <Upload className="w-8 h-8 text-[#8B7355]" strokeWidth={1.5} />
-                      <span>Upload Design Images</span>
-                      <span className="text-xs opacity-70">({selectedDesignImages.length}/3)</span>
+                      <span>Upload Design Image</span>
+                      <span className="text-xs opacity-70">({selectedDesignImages.length}/1)</span>
                     </>
                   )}
                 </button>
@@ -2874,7 +2873,7 @@ export default function CapturePage() {
                 {selectedDesignImages.length === 0 && (
                   <div className="text-center py-8">
                     <p className="text-sm text-[#6B6B6B] font-light">No design images uploaded yet</p>
-                    <p className="text-xs text-[#6B6B6B] font-light mt-2">Upload up to 3 reference images to guide your design</p>
+                    <p className="text-xs text-[#6B6B6B] font-light mt-2">Upload a reference image to guide your design</p>
                   </div>
                 )}
               </div>
