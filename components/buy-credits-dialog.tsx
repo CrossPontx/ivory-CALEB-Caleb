@@ -230,10 +230,10 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
                       </span>
                       <span className="text-sm text-muted-foreground">USD</span>
                     </div>
-                    {pkg.savings && (
+                    {pkg.popular && (
                       <div className="inline-flex items-center gap-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-medium px-2 py-1 rounded">
                         <Check className="h-3 w-3" />
-                        Save {pkg.savings}
+                        Most Popular
                       </div>
                     )}
                   </div>
