@@ -42,6 +42,7 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
         const response = await fetch('/api/iap/validate-receipt', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Ensure cookies are sent
           body: JSON.stringify({
             receipt: result.receipt,
             productId: result.productId,

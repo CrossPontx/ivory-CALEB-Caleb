@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { db } from '@/db';
 import { users, creditTransactions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { PRODUCT_CREDITS, PRODUCT_TIERS } from '@/lib/iap';
+import { jwtVerify } from 'jose';
+
+const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-in-production');
 
 /**
  * Validate Apple IAP receipt and grant credits/subscription
@@ -18,17 +22,29 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get user from session
-    const userStr = request.headers.get('cookie')?.match(/ivoryUser=([^;]+)/)?.[1];
-    if (!userStr) {
+    // Get user from session token
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get('session')?.value;
+    
+    if (!sessionToken) {
       return NextResponse.json(
         { error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    const userData = JSON.parse(decodeURIComponent(userStr));
-    const userId = userData.id;
+    // Verify JWT token
+    let userId: number;
+    try {
+      const { payload } = await jwtVerify(sessionToken, secret);
+      userId = payload.userId as number;
+    } catch (error) {
+      console.error('Token verification error:', error);
+      return NextResponse.json(
+        { error: 'Invalid session' },
+        { status: 401 }
+      );
+    }
 
     // Validate receipt with Apple
     const isValid = await validateAppleReceipt(receipt, productId);
