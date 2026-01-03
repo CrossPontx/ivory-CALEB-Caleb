@@ -46,7 +46,13 @@ export function DesignAnalysisDisplay({ imageUrl, lookId, savedDesignId }: Props
 
         if (response.ok) {
           setAnalysis(data.analysis)
-          setIsTyping(true)
+          // Only show typing animation for newly generated analysis
+          if (!data.cached) {
+            setIsTyping(true)
+          } else {
+            // For cached analysis, show immediately
+            setDisplayedSummary(data.analysis.summary)
+          }
         } else {
           // Handle error responses
           setError(data.error || 'Unable to analyze this design')
