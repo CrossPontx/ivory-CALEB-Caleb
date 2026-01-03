@@ -313,15 +313,29 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
               )}
             </Button>
 
-            {!isCurrentPlan(plan.id) && userType === 'client' && (
-              <p className="text-xs text-center text-[#6B6B6B] font-light mt-4">
-                Buy additional credits anytime after subscribing
-              </p>
-            )}
-            {!isCurrentPlan(plan.id) && userType === 'tech' && 'freeBookings' in plan && (
-              <p className="text-xs text-center text-[#6B6B6B] font-light mt-4">
-                First {plan.freeBookings} bookings free, then subscription required
-              </p>
+            {!isCurrentPlan(plan.id) && (
+              <div className="mt-4 space-y-2">
+                {userType === 'client' && (
+                  <p className="text-xs text-center text-[#6B6B6B] font-light">
+                    Buy additional credits anytime after subscribing
+                  </p>
+                )}
+                {userType === 'tech' && 'freeBookings' in plan && (
+                  <p className="text-xs text-center text-[#6B6B6B] font-light">
+                    First {plan.freeBookings} bookings free, then subscription required
+                  </p>
+                )}
+                <p className="text-xs text-center text-[#6B6B6B] font-light">
+                  By subscribing, you agree to our{' '}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#8B7355]">
+                    Terms of Use
+                  </a>
+                  {' '}and{' '}
+                  <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#8B7355]">
+                    Privacy Policy
+                  </a>
+                </p>
+              </div>
             )}
           </div>
         ))}

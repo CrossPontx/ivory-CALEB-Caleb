@@ -272,11 +272,23 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
             ))}
           </div>
 
-          <p className="text-xs text-center text-muted-foreground">
-            {isNative 
-              ? 'Secure payment powered by Apple. Managed through iOS Settings.'
-              : 'Secure payment powered by Stripe. Your payment information is encrypted and secure.'}
-          </p>
+          <div className="space-y-2">
+            <p className="text-xs text-center text-muted-foreground">
+              {isNative 
+                ? 'Secure payment powered by Apple. Managed through iOS Settings.'
+                : 'Secure payment powered by Stripe. Your payment information is encrypted and secure.'}
+            </p>
+            <p className="text-xs text-center text-muted-foreground">
+              By purchasing, you agree to our{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+                Terms of Use
+              </a>
+              {' '}and{' '}
+              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+                Privacy Policy
+              </a>
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
