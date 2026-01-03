@@ -31,6 +31,12 @@ export default function BillingPage() {
   const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
+    // Log platform information for debugging
+    console.log('🔵 Billing page loaded');
+    console.log('🔵 Platform:', Capacitor.getPlatform());
+    console.log('🔵 Is native platform:', isNative);
+    console.log('🔵 User agent:', navigator.userAgent);
+    
     // Check for Stripe redirect parameters
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);

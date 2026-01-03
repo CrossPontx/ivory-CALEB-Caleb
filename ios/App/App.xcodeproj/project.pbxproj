@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		034EDB062EF20FF800BA022C /* ivory Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 034EDAFC2EF20FF700BA022C /* ivory Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		03A334C92F08D1C500684786 /* IAPPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A334C82F08D1C500684786 /* IAPPlugin.swift */; };
 		03A3CF4D2F00E7DA00EF5B32 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03A3CF4C2F00E7DA00EF5B32 /* StoreKit.framework */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
@@ -45,6 +46,7 @@
 
 /* Begin PBXFileReference section */
 		034EDAFC2EF20FF700BA022C /* ivory Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ivory Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		03A334C82F08D1C500684786 /* IAPPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPPlugin.swift; sourceTree = "<group>"; };
 		03A3CF4C2F00E7DA00EF5B32 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		03D852062EF0FFF10040F36B /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 			children = (
 				03D852062EF0FFF10040F36B /* App.entitlements */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
+				03A334C82F08D1C500684786 /* IAPPlugin.swift */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
@@ -251,6 +254,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				03A334C92F08D1C500684786 /* IAPPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

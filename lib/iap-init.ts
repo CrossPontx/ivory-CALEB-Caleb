@@ -6,31 +6,50 @@ import { iapManager } from './iap';
  * Initialize IAP and hide splash screen when ready
  * Call this in your root layout or app initialization
  */
-export async function initializeApp() {
-  try {
-    // Only initialize IAP on native platforms
-    if (Capacitor.isNativePlatform()) {
-      console.log('🔵 Initializing IAP...');
+export async function initializeApp(retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      // Only initialize IAP on native platforms
+      if (Capacitor.isNativePlatform()) {
+        console.log(`🔵 Initializing IAP (attempt ${attempt}/${retries})...`);
+        console.log(`🔵 Platform: ${Capacitor.getPlatform()}`);
+        
+        // Load IAP products
+        const products = await iapManager.loadProducts();
+        console.log(`✅ IAP initialized with ${products.length} products`);
+        
+        if (products.length === 0) {
+          throw new Error('No products loaded from App Store');
+        }
+        
+        // Log available products for debugging
+        products.forEach(product => {
+          console.log(`📦 ${product.productId}: ${product.title} - ${product.priceString}`);
+        });
+        
+        return; // Success - exit retry loop
+      } else {
+        console.log('ℹ️ Running on web - IAP not available');
+        return;
+      }
+    } catch (error) {
+      console.error(`❌ Failed to initialize IAP (attempt ${attempt}/${retries}):`, error);
       
-      // Load IAP products
-      const products = await iapManager.loadProducts();
-      console.log(`✅ IAP initialized with ${products.length} products`);
-      
-      // Log available products for debugging
-      products.forEach(product => {
-        console.log(`📦 ${product.productId}: ${product.title} - ${product.priceString}`);
-      });
-    } else {
-      console.log('ℹ️ Running on web - IAP not available');
+      if (attempt < retries) {
+        const waitTime = attempt * 1000; // 1s, 2s, 3s
+        console.log(`⏳ Retrying in ${waitTime / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      } else {
+        console.error('❌ All IAP initialization attempts failed');
+        console.error('❌ Users will see an error message when trying to subscribe');
+      }
     }
-  } catch (error) {
-    console.error('❌ Failed to initialize IAP:', error);
-  } finally {
-    // Always hide splash screen, even if IAP fails
-    if (Capacitor.isNativePlatform()) {
-      await SplashScreen.hide();
-      console.log('✅ Splash screen hidden');
-    }
+  }
+  
+  // Always hide splash screen, even if IAP fails
+  if (Capacitor.isNativePlatform()) {
+    await SplashScreen.hide();
+    console.log('✅ Splash screen hidden');
   }
 }
 

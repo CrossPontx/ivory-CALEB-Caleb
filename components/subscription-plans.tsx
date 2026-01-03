@@ -22,6 +22,8 @@ interface SubscriptionPlansProps {
 export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inactive', isNative = false, userType = 'client' }: SubscriptionPlansProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [iapProducts, setIapProducts] = useState<any[]>([]);
+  const [iapLoading, setIapLoading] = useState(false);
+  const [iapError, setIapError] = useState<string | null>(null);
   
   // Get plans based on user type
   const plans = userType === 'tech' ? getTechPlans() : getClientPlans();
@@ -35,11 +37,31 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
 
   const loadIAPProducts = async () => {
     try {
+      setIapLoading(true);
+      setIapError(null);
+      console.log('🔵 Loading IAP products...');
+      
       const products = await iapManager.loadProducts();
+      console.log(`✅ Loaded ${products.length} IAP products`);
+      
       setIapProducts(products);
+      
+      if (products.length === 0) {
+        const errorMsg = 'No subscription products available. Please check your internet connection and try again.';
+        setIapError(errorMsg);
+        console.error('❌', errorMsg);
+      } else {
+        products.forEach(p => {
+          console.log(`📦 ${p.productId}: ${p.title} - ${p.priceString}`);
+        });
+      }
     } catch (error) {
-      console.error('Failed to load IAP products:', error);
-      toast.error('Failed to load subscription options');
+      console.error('❌ Failed to load IAP products:', error);
+      const errorMsg = 'Failed to load subscription options. Please try again.';
+      setIapError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setIapLoading(false);
     }
   };
 
@@ -87,43 +109,63 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
   const handleSubscribeIAP = async (planId: string) => {
     try {
       setLoading(planId);
-      console.log('Starting IAP purchase for plan:', planId);
+      console.log('🔵 Starting IAP purchase for plan:', planId);
+      
+      // Check if IAP is available
+      if (!iapManager.isNativePlatform()) {
+        throw new Error('IAP is only available on iOS devices');
+      }
+      
+      // Check if products are loaded
+      if (iapProducts.length === 0) {
+        console.error('❌ No IAP products loaded');
+        toast.error('Subscription products not loaded. Please try reloading the app.');
+        setLoading(null);
+        return;
+      }
       
       // Map plan ID to IAP product ID
       const productId = planId === 'pro' 
         ? IAP_PRODUCT_IDS.PRO_MONTHLY 
         : IAP_PRODUCT_IDS.BUSINESS_MONTHLY;
 
-      console.log('Mapped to product ID:', productId);
-      console.log('Available IAP products:', iapProducts);
+      console.log('🔵 Mapped to product ID:', productId);
+      console.log('🔵 Available IAP products:', iapProducts.map(p => p.productId).join(', '));
 
       // Check if product is available
       const product = iapProducts.find(p => p.productId === productId);
       if (!product) {
-        console.error('Product not found in available products');
-        toast.error('This subscription is not available. Please try again later.');
+        console.error('❌ Product not found in available products');
+        console.error('❌ Looking for:', productId);
+        console.error('❌ Available:', iapProducts.map(p => p.productId));
+        toast.error('This subscription is not available. Please try reloading the app.');
         setLoading(null);
         return;
       }
 
-      console.log('Initiating purchase for product:', product);
+      console.log('✅ Product found:', product.title, '-', product.priceString);
+      console.log('🔵 Initiating purchase...');
+      
       await iapManager.purchase(productId);
-      console.log('Purchase initiated successfully');
+      console.log('✅ Purchase initiated successfully');
+      
       // Loading state will be cleared by purchase listener
     } catch (error) {
-      console.error('IAP purchase error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to start purchase');
+      console.error('❌ IAP purchase error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start purchase';
+      toast.error(errorMessage);
       setLoading(null);
     }
   };
 
   const handleSubscribe = async (planId: string) => {
-    console.log('handleSubscribe called with planId:', planId);
-    console.log('isNative:', isNative);
-    console.log('loading state:', loading);
+    console.log('🔵 handleSubscribe called with planId:', planId);
+    console.log('🔵 isNative:', isNative);
+    console.log('🔵 loading state:', loading);
+    console.log('🔵 iapProducts loaded:', iapProducts.length);
     
     if (isNative) {
-      console.log('Using IAP flow');
+      console.log('🔵 Using IAP flow');
       return handleSubscribeIAP(planId);
     }
     
@@ -171,6 +213,37 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
 
   return (
     <div className="space-y-6">
+      {/* IAP Loading State */}
+      {isNative && iapLoading && (
+        <div className="border border-[#E8E8E8] p-8 bg-white text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3 text-[#8B7355]" strokeWidth={1} />
+          <p className="text-sm text-[#6B6B6B] font-light">Loading subscription options...</p>
+        </div>
+      )}
+
+      {/* IAP Error State */}
+      {isNative && iapError && !iapLoading && (
+        <div className="border border-red-200 p-6 bg-red-50">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="w-12 h-12 border border-red-200 flex items-center justify-center flex-shrink-0 bg-white">
+              <Sparkles className="w-6 h-6 text-red-600" strokeWidth={1} />
+            </div>
+            <div className="flex-1">
+              <p className="font-serif text-base font-light text-red-900 mb-1">Unable to Load Subscriptions</p>
+              <p className="text-sm text-red-700 font-light">{iapError}</p>
+            </div>
+          </div>
+          <Button 
+            onClick={loadIAPProducts}
+            variant="outline"
+            size="sm"
+            className="w-full border-red-300 text-red-700 hover:bg-red-50"
+          >
+            Retry
+          </Button>
+        </div>
+      )}
+
       {/* Basic Tier */}
       <div className={`border ${isBasicPlan ? 'border-[#8B7355]' : 'border-[#E8E8E8]'} p-6 sm:p-8 bg-white`}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
@@ -272,21 +345,15 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
             </ul>
 
             <Button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Button clicked for plan:', plan.id);
-                console.log('Current loading state:', loading);
-                console.log('Is current plan:', isCurrentPlan(plan.id));
-                
-                if (!loading && !isCurrentPlan(plan.id)) {
-                  console.log('Calling handleSubscribe');
-                  handleSubscribe(plan.id);
-                } else {
-                  console.log('Button click ignored - loading or current plan');
-                }
+              onClick={() => {
+                console.log('🔵 Button clicked for plan:', plan.id);
+                handleSubscribe(plan.id);
               }}
-              disabled={loading !== null || isCurrentPlan(plan.id)}
+              disabled={
+                loading !== null || 
+                isCurrentPlan(plan.id) || 
+                (isNative && (iapLoading || iapProducts.length === 0))
+              }
               type="button"
               className={`w-full h-14 sm:h-12 font-light text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 touch-manipulation cursor-pointer ${
                 isCurrentPlan(plan.id)
