@@ -258,19 +258,19 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
         )}
       </button>
 
-      {/* Elegant Chat Window */}
+      {/* Elegant Chat Window - Mobile optimized */}
       {isOpen && (
-        <div className="fixed top-36 sm:top-40 right-4 sm:right-6 w-[90vw] sm:w-96 h-[70vh] sm:h-[500px] bg-white rounded-2xl shadow-2xl border border-[#E8E8E8] overflow-hidden flex flex-col animate-in slide-in-from-top-8 fade-in duration-500">
+        <div className="fixed inset-x-4 top-36 bottom-24 sm:top-40 sm:right-6 sm:left-auto sm:bottom-auto sm:w-96 sm:h-[500px] bg-white rounded-2xl shadow-2xl border border-[#E8E8E8] overflow-hidden flex flex-col animate-in slide-in-from-top-8 fade-in duration-500">
           {/* Header with subtle gradient animation */}
-          <div className="bg-gradient-to-r from-[#8B7355] via-[#6B5845] to-[#1A1A1A] bg-[length:200%_100%] animate-gradient px-6 py-4">
+          <div className="bg-gradient-to-r from-[#8B7355] via-[#6B5845] to-[#1A1A1A] bg-[length:200%_100%] animate-gradient px-4 py-3 sm:px-6 sm:py-4">
             <div className="animate-in fade-in slide-in-from-top-2 duration-700">
-              <h3 className="font-serif text-lg text-white font-light tracking-wide">Ivory's Choice</h3>
+              <h3 className="font-serif text-base sm:text-lg text-white font-light tracking-wide">Ivory's Choice</h3>
               <p className="text-xs text-white/80 font-light tracking-wide">We're here to help</p>
             </div>
           </div>
 
           {/* Messages with staggered animations */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-[#FAFAFA] to-[#F5F5F5]">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-[#FAFAFA] to-[#F5F5F5]">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -278,7 +278,7 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 transform transition-all duration-300 hover:scale-[1.02] ${
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 sm:px-4 sm:py-3 transform transition-all duration-300 hover:scale-[1.02] ${
                     message.role === 'user'
                       ? 'bg-gradient-to-br from-[#8B7355] to-[#6B5845] text-white shadow-lg shadow-[#8B7355]/20'
                       : 'bg-white text-[#1A1A1A] border border-[#E8E8E8] shadow-sm hover:shadow-md'
@@ -303,7 +303,7 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
           </div>
 
           {/* Input with smooth focus animations */}
-          <div className="p-4 bg-white border-t border-[#E8E8E8] backdrop-blur-sm">
+          <div className="p-3 sm:p-4 bg-white border-t border-[#E8E8E8] backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <input
                 ref={inputRef}
@@ -312,13 +312,13 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Type your message..."
-                className="flex-1 px-4 py-3 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl text-base font-light focus:outline-none focus:ring-2 focus:ring-[#8B7355] focus:border-transparent focus:bg-white transition-all duration-300 placeholder:text-gray-400"
+                className="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl text-base font-light focus:outline-none focus:ring-2 focus:ring-[#8B7355] focus:border-transparent focus:bg-white transition-all duration-300 placeholder:text-gray-400"
                 disabled={isLoading}
               />
               <button
                 onClick={sendMessage}
                 disabled={!inputValue.trim() || isLoading}
-                className="bg-gradient-to-br from-[#8B7355] to-[#6B5845] hover:from-[#1A1A1A] hover:to-[#2A2A2A] text-white p-3 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl touch-manipulation"
+                className="bg-gradient-to-br from-[#8B7355] to-[#6B5845] hover:from-[#1A1A1A] hover:to-[#2A2A2A] text-white p-2.5 sm:p-3 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl touch-manipulation"
                 aria-label="Send message"
               >
                 <svg className="w-5 h-5 transition-transform duration-300 hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
