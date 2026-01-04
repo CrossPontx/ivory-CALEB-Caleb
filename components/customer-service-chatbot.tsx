@@ -20,6 +20,22 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
   const [isOpen, setIsOpen] = useState(false)
   const [chatKey, setChatKey] = useState(0)
 
+  // Determine host URL based on environment
+  const getHostUrl = () => {
+    if (typeof window === 'undefined') return 'http://localhost:7860'
+    
+    // Check if we're in production (ivoryschoice.com)
+    if (window.location.hostname === 'www.ivoryschoice.com' || 
+        window.location.hostname === 'ivoryschoice.com') {
+      return 'https://www.ivoryschoice.com'
+    }
+    
+    // Fallback to localhost for development
+    return 'http://localhost:7860'
+  }
+
+  const hostUrl = getHostUrl()
+
   useEffect(() => {
     // Check if script is loaded
     if (typeof window !== 'undefined' && (window as any).LangflowChat) {
@@ -110,7 +126,7 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
                 key={chatKey}
                 window_title="Ivory's Choice Support"
                 flow_id="fb51d726-4af1-4101-8b7e-221884191359"
-                host_url="http://localhost:7860"
+                host_url={hostUrl}
                 chat_input_field="Message"
                 chat_trigger_style="display: none;"
               />
@@ -195,7 +211,7 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
               key={chatKey}
               window_title="Ivory's Choice Support"
               flow_id="fb51d726-4af1-4101-8b7e-221884191359"
-              host_url="http://localhost:7860"
+              host_url={hostUrl}
               chat_input_field="Message"
               chat_trigger_style="display: none;"
             />

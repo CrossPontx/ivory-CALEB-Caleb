@@ -52,13 +52,16 @@ The Ivory's Choice customer service chatbot is integrated using Langflow and app
 <langflow-chat
   window_title="Ivory's Choice Support"
   flow_id="fb51d726-4af1-4101-8b7e-221884191359"
-  host_url="http://localhost:7860"
+  host_url={hostUrl}
   chat_input_field="Message"
   chat_trigger_style="display: none;"
 />
 ```
 
-**Important**: Update `host_url` to your production Langflow server URL before deploying.
+**Host URL Logic:**
+- **Production** (ivoryschoice.com): Uses `https://www.ivoryschoice.com`
+- **Development** (localhost): Uses `http://localhost:7860`
+- Automatically detects environment based on `window.location.hostname`
 
 ## Knowledge Base
 
@@ -136,29 +139,55 @@ langflow-chat {
 
 ## Production Deployment
 
-### Before deploying:
+### Automatic Environment Detection
 
-1. **Update Langflow host URL:**
-   ```tsx
-   host_url="https://your-langflow-server.com"
-   ```
+The chatbot automatically detects the environment and uses the appropriate host URL:
 
-2. **Verify flow ID:**
-   ```tsx
-   flow_id="your-production-flow-id"
-   ```
+**Production (ivoryschoice.com):**
+```
+https://www.ivoryschoice.com
+```
 
-3. **Test on staging:**
-   - Verify chatbot loads
-   - Test conversations
-   - Check mobile responsiveness
-   - Verify knowledge base accuracy
+**Development (localhost):**
+```
+http://localhost:7860
+```
 
-4. **Monitor performance:**
-   - Response times
-   - User satisfaction
-   - Common questions
-   - Error rates
+### Setup Requirements:
+
+1. **Deploy Langflow on production server** at `https://www.ivoryschoice.com`
+2. **Ensure flow ID is correct** for production environment
+3. **Test on staging** before deploying to production
+4. **Verify CORS settings** allow requests from your domain
+
+### Environment Detection Logic:
+
+```typescript
+const getHostUrl = () => {
+  if (typeof window === 'undefined') return 'http://localhost:7860'
+  
+  // Check if we're in production
+  if (window.location.hostname === 'www.ivoryschoice.com' || 
+      window.location.hostname === 'ivoryschoice.com') {
+    return 'https://www.ivoryschoice.com'
+  }
+  
+  // Fallback to localhost for development
+  return 'http://localhost:7860'
+}
+```
+
+### Testing:
+
+1. **Local development:**
+   - Run Langflow on `http://localhost:7860`
+   - Test chatbot functionality
+   - Verify knowledge base responses
+
+2. **Production:**
+   - Deploy to ivoryschoice.com
+   - Chatbot automatically uses production URL
+   - Test all features in production environment
 
 ## Accessibility
 
