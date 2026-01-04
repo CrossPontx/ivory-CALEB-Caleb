@@ -205,7 +205,7 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type your message..."
-                  className="flex-1 px-4 py-3 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl text-sm font-light focus:outline-none focus:ring-2 focus:ring-[#8B7355] focus:border-transparent focus:bg-white transition-all duration-300 placeholder:text-gray-400"
+                  className="flex-1 px-4 py-3 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl text-base font-light focus:outline-none focus:ring-2 focus:ring-[#8B7355] focus:border-transparent focus:bg-white transition-all duration-300 placeholder:text-gray-400"
                   disabled={isLoading}
                 />
                 <button
@@ -312,7 +312,7 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Type your message..."
-                className="flex-1 px-4 py-3 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl text-sm font-light focus:outline-none focus:ring-2 focus:ring-[#8B7355] focus:border-transparent focus:bg-white transition-all duration-300 placeholder:text-gray-400"
+                className="flex-1 px-4 py-3 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl text-base font-light focus:outline-none focus:ring-2 focus:ring-[#8B7355] focus:border-transparent focus:bg-white transition-all duration-300 placeholder:text-gray-400"
                 disabled={isLoading}
               />
               <button

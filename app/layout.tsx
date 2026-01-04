@@ -42,8 +42,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
+  maximumScale: 1, // Prevent zoom on input focus
+  userScalable: false, // Disable pinch zoom to prevent auto-zoom
   viewportFit: "cover",
 }
 
