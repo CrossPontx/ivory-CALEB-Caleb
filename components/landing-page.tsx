@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import CustomerServiceChatbot from "@/components/customer-service-chatbot"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -405,6 +406,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Customer Service Chatbot */}
+      <CustomerServiceChatbot position="landing" />
 
     </div>
   )

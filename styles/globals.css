@@ -797,3 +797,30 @@ input[type="range"] {
   -webkit-tap-highlight-color: transparent;
   touch-action: pan-x;
 }
+
+
+/* Customer Service Chatbot Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Langflow Chat Custom Styling */
+langflow-chat {
+  --chat-primary-color: #8B7355;
+  --chat-secondary-color: #1A1A1A;
+  --chat-background: #FFFFFF;
+  --chat-text-color: #1A1A1A;
+  --chat-border-radius: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}

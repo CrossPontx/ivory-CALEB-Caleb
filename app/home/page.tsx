@@ -15,6 +15,7 @@ import { BookingReviewDialog } from "@/components/booking-review-dialog"
 import { AnimatedTabs } from "@/components/animated-tabs"
 import { UploadDesignDialog } from "@/components/upload-design-dialog"
 import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
+import CustomerServiceChatbot from "@/components/customer-service-chatbot"
 
 type NailLook = {
   id: string
@@ -848,6 +849,9 @@ export default function HomePage() {
 
       {/* Bottom Navigation */}
       <BottomNav onCenterAction={startNewDesign} centerActionLabel="Create" />
+
+      {/* Customer Service Chatbot */}
+      <CustomerServiceChatbot position="app" />
     </div>
   )
 }
