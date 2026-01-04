@@ -15,7 +15,7 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
 
   // Determine host URL based on environment
   const getHostUrl = () => {
-    if (typeof window === 'undefined') return 'http://localhost:3000'
+    if (typeof window === 'undefined') return 'http://localhost:7860'
     
     // Check if we're in production (ivoryschoice.com)
     if (window.location.hostname === 'www.ivoryschoice.com' || 
@@ -23,8 +23,8 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
       return 'https://www.ivoryschoice.com'
     }
     
-    // Fallback to localhost for development
-    return 'http://localhost:3000'
+    // Fallback to Langflow default port for development
+    return 'http://localhost:7860'
   }
 
   const hostUrl = getHostUrl()
@@ -115,19 +115,24 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
             </button>
             
             {isLoaded ? (
-              React.createElement('langflow-chat', {
-                key: chatKey,
-                window_title: "Ivory's Choice Support",
-                flow_id: "fb51d726-4af1-4101-8b7e-221884191359",
-                host_url: hostUrl,
-                chat_input_field: "Message",
-                chat_trigger_style: "display: none;"
-              })
+              <div className="h-full">
+                {React.createElement('langflow-chat', {
+                  key: chatKey,
+                  window_title: "Ivory's Choice Support",
+                  flow_id: "fb51d726-4af1-4101-8b7e-221884191359",
+                  host_url: hostUrl,
+                  chat_input_field: "Message",
+                  chat_trigger_style: "display: none;"
+                })}
+              </div>
             ) : (
               <div className="flex items-center justify-center h-full">
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-4 p-6">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B7355] mx-auto"></div>
                   <p className="text-sm text-[#6B6B6B] font-light">Loading chat...</p>
+                  <p className="text-xs text-[#999] mt-4">
+                    Make sure Langflow is running at {hostUrl}
+                  </p>
                 </div>
               </div>
             )}
@@ -200,19 +205,24 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
           </button>
           
           {isLoaded ? (
-            React.createElement('langflow-chat', {
-              key: chatKey,
-              window_title: "Ivory's Choice Support",
-              flow_id: "fb51d726-4af1-4101-8b7e-221884191359",
-              host_url: hostUrl,
-              chat_input_field: "Message",
-              chat_trigger_style: "display: none;"
-            })
+            <div className="h-full">
+              {React.createElement('langflow-chat', {
+                key: chatKey,
+                window_title: "Ivory's Choice Support",
+                flow_id: "fb51d726-4af1-4101-8b7e-221884191359",
+                host_url: hostUrl,
+                chat_input_field: "Message",
+                chat_trigger_style: "display: none;"
+              })}
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-4 p-6">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B7355] mx-auto"></div>
                 <p className="text-sm text-[#6B6B6B] font-light">Loading chat...</p>
+                <p className="text-xs text-[#999] mt-4">
+                  Make sure Langflow is running at {hostUrl}
+                </p>
               </div>
             </div>
           )}
