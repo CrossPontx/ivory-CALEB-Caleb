@@ -850,8 +850,8 @@ export default function HomePage() {
       {/* Bottom Navigation */}
       <BottomNav onCenterAction={startNewDesign} centerActionLabel="Create" />
 
-      {/* Customer Service Chatbot */}
-      <CustomerServiceChatbot position="app" />
+      {/* Customer Service Chatbot - Temporarily disabled while Langflow is installing */}
+      {/* <CustomerServiceChatbot position="app" /> */}
     </div>
   )
 }

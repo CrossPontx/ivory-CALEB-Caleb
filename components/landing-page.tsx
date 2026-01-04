@@ -407,8 +407,8 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Customer Service Chatbot */}
-      <CustomerServiceChatbot position="landing" />
+      {/* Customer Service Chatbot - Temporarily disabled while Langflow is installing */}
+      {/* <CustomerServiceChatbot position="landing" /> */}
 
     </div>
   )
