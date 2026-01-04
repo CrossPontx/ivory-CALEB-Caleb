@@ -5,14 +5,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     // Determine Langflow URL based on environment
-    // Note: Langflow seems to auto-increment port if 7861 is busy
-    const langflowUrl = process.env.NODE_ENV === 'production'
-      ? 'https://lashell-unfeverish-christoper.ngrok-free.dev'
-      : 'http://localhost:7862'  // Changed from 7861 to 7862
+    // Use environment variable if set, otherwise use defaults
+    const langflowUrl = process.env.LANGFLOW_URL || 
+      (process.env.NODE_ENV === 'production'
+        ? 'https://lashell-unfeverish-christoper.ngrok-free.dev'
+        : 'http://localhost:7862')
     
-    const flowId = '2f70d01a-9791-48b2-980a-03eca7244b46'
+    const flowId = process.env.LANGFLOW_FLOW_ID || '2f70d01a-9791-48b2-980a-03eca7244b46'
     
     console.log('Calling Langflow:', `${langflowUrl}/api/v1/run/${flowId}`)
+    console.log('Environment:', process.env.NODE_ENV)
     
     const response = await fetch(
       `${langflowUrl}/api/v1/run/${flowId}?stream=false`,
@@ -26,6 +28,8 @@ export async function POST(request: NextRequest) {
           output_type: 'chat',
           input_type: 'chat',
         }),
+        // Add timeout for production
+        signal: AbortSignal.timeout(30000), // 30 second timeout
       }
     )
 
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Langflow error:', errorText)
-      throw new Error(`Langflow API error: ${response.status}`)
+      throw new Error(`Langflow API error: ${response.status} - ${errorText}`)
     }
 
     const data = await response.json()
@@ -47,8 +51,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message })
   } catch (error) {
     console.error('Chatbot API error:', error)
+    
+    // Provide more helpful error messages
+    let errorMessage = 'Failed to get response from chatbot'
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. The chatbot service may be unavailable.'
+      } else if (error.message.includes('fetch')) {
+        errorMessage = 'Unable to connect to chatbot service. Please try again later.'
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to get response from chatbot', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: errorMessage, 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     )
   }
