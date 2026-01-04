@@ -9,4 +9,4 @@ echo "Server will be available at: http://localhost:7860"
 echo "Press Ctrl+C to stop the server"
 echo ""
 
-langflow run --port 7860 --host 0.0.0.0
+uvx langflow run --port 7860 --host 0.0.0.0
