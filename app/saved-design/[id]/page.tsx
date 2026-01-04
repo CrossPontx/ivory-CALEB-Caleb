@@ -69,9 +69,31 @@ export default function SavedDesignDetailPage() {
     alert('Send to Nail Tech feature coming soon!')
   }
 
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    alert('Share with Friends feature coming soon!')
+  const handleShare = async () => {
+    if (!design) return
+    
+    try {
+      // Create a shareable look from this saved design
+      const response = await fetch('/api/saved-designs/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          savedDesignId: design.id,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Navigate to the share page with the new look ID
+        router.push(`/share/${data.lookId}`)
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to create shareable link')
+      }
+    } catch (error) {
+      console.error('Error creating shareable link:', error)
+      alert('An error occurred while creating the shareable link')
+    }
   }
 
   const handleViewSource = () => {
