@@ -28,6 +28,7 @@ export default function BillingPage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive');
   const [credits, setCredits] = useState<number | null>(null);
   const [userType, setUserType] = useState<'client' | 'tech'>('client');
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
@@ -44,7 +45,19 @@ export default function BillingPage() {
       const canceled = urlParams.get('canceled');
       
       if (success === 'true') {
-        toast.success('Payment successful! Your credits will be added shortly.');
+        setShowSuccessBanner(true);
+        toast.success(
+          <div className="flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium">Subscription Activated!</p>
+              <p className="text-sm text-gray-600 mt-1">
+                Your Pro subscription is now active
+              </p>
+            </div>
+          </div>,
+          { duration: 5000 }
+        );
         // Clean up URL
         window.history.replaceState({}, '', '/billing');
       } else if (canceled === 'true') {
@@ -112,6 +125,39 @@ export default function BillingPage() {
       </header>
 
       <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32 space-y-8">
+        {/* Success Banner */}
+        {showSuccessBanner && (
+          <div className="border-2 border-green-600 p-6 sm:p-8 bg-green-50 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 border-2 border-green-600 flex items-center justify-center flex-shrink-0 bg-white rounded-full">
+                <Crown className="w-6 h-6 text-green-600" strokeWidth={2} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-serif text-xl sm:text-2xl font-light text-green-900 mb-2 tracking-tight">
+                  You're Now Subscribed! 🎉
+                </h3>
+                <p className="text-sm sm:text-base text-green-800 leading-relaxed font-light mb-4">
+                  Your {subscriptionTier === 'pro' ? 'Pro' : 'Business'} subscription is active. Monthly credits have been added to your account and all premium features are now unlocked!
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <Coins className="h-4 w-4" strokeWidth={1} />
+                    <span>Credits added</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <Sparkles className="h-4 w-4" strokeWidth={1} />
+                    <span>Premium features unlocked</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CreditCard className="h-4 w-4" strokeWidth={1} />
+                    <span>Buy more credits anytime</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Current Balance */}
         <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-[#F8F7F5]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">

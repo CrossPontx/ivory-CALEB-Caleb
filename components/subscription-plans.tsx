@@ -24,6 +24,7 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
   const [iapProducts, setIapProducts] = useState<any[]>([]);
   const [iapLoading, setIapLoading] = useState(false);
   const [iapError, setIapError] = useState<string | null>(null);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   
   // Get plans based on user type
   const plans = userType === 'tech' ? getTechPlans() : getClientPlans();
@@ -82,20 +83,38 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
 
         if (response.ok) {
           const data = await response.json();
-          toast.success(`Subscription activated! ${data.added} credits added.`);
+          
+          // Show success toast with subscription details
+          toast.success(
+            <div className="flex items-start gap-3">
+              <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Subscription Activated!</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {data.added} credits added to your account
+                </p>
+              </div>
+            </div>,
+            { duration: 5000 }
+          );
           
           // Finish the transaction
           await iapManager.finishTransaction(result.transactionId);
           
-          // Reload page to show new subscription
-          window.location.reload();
+          // Update local state to show subscribed status immediately
+          setLoading('success');
+          setShowSuccessBanner(true);
+          
+          // Wait a moment to show success state, then reload
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } else {
           throw new Error('Validation failed');
         }
       } catch (error) {
         console.error('Purchase validation error:', error);
         toast.error('Failed to activate subscription. Please contact support.');
-      } finally {
         setLoading(null);
       }
     });
@@ -195,6 +214,8 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
 
       if (url) {
         console.log('Redirecting to Stripe checkout...');
+        // Show loading state while redirecting
+        toast.loading('Redirecting to secure checkout...', { duration: 2000 });
         window.location.href = url;
       } else {
         throw new Error('No checkout URL returned');
@@ -214,6 +235,35 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
 
   return (
     <div className="space-y-6">
+      {/* Success Banner */}
+      {showSuccessBanner && (
+        <div className="border-2 border-green-600 p-6 sm:p-8 bg-green-50 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 border-2 border-green-600 flex items-center justify-center flex-shrink-0 bg-white rounded-full">
+              <Check className="w-6 h-6 text-green-600" strokeWidth={2} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-serif text-xl sm:text-2xl font-light text-green-900 mb-2 tracking-tight">
+                Welcome to Pro! 🎉
+              </h3>
+              <p className="text-sm sm:text-base text-green-800 leading-relaxed font-light mb-4">
+                Your subscription is now active. Credits have been added to your account and you can start creating amazing designs right away!
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-2 text-sm text-green-700">
+                  <Sparkles className="h-4 w-4" strokeWidth={1} />
+                  <span>Monthly credits added</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-green-700">
+                  <Check className="h-4 w-4" strokeWidth={1} />
+                  <span>Premium features unlocked</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* IAP Loading State */}
       {isNative && iapLoading && (
         <div className="border border-[#E8E8E8] p-8 bg-white text-center">
@@ -357,7 +407,9 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
               }
               type="button"
               className={`w-full h-14 sm:h-12 font-light text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 touch-manipulation cursor-pointer ${
-                isCurrentPlan(plan.id)
+                loading === 'success'
+                  ? 'bg-green-600 text-white cursor-default hover:bg-green-600'
+                  : isCurrentPlan(plan.id)
                   ? 'bg-green-600 text-white cursor-default hover:bg-green-600'
                   : 'bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 active:scale-[0.97] active:bg-[#1A1A1A]/80'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -366,7 +418,12 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
                 touchAction: 'manipulation',
               }}
             >
-              {loading === plan.id ? (
+              {loading === 'success' ? (
+                <>
+                  <Check className="h-5 w-5 animate-pulse" strokeWidth={2} />
+                  Subscribed!
+                </>
+              ) : loading === plan.id ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1} />
                   Processing...
