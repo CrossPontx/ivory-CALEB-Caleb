@@ -156,9 +156,20 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
           <div className="fixed bottom-28 right-6 w-[90vw] sm:w-96 h-[70vh] sm:h-[600px] bg-white rounded-2xl shadow-2xl border border-[#E8E8E8] overflow-hidden flex flex-col animate-in slide-in-from-bottom-8 fade-in duration-500">
             {/* Header with subtle gradient animation */}
             <div className="bg-gradient-to-r from-[#8B7355] via-[#6B5845] to-[#1A1A1A] bg-[length:200%_100%] animate-gradient px-6 py-4">
-              <div className="animate-in fade-in slide-in-from-top-2 duration-700">
-                <h3 className="font-serif text-lg text-white font-light tracking-wide">Ivory's Choice</h3>
-                <p className="text-xs text-white/80 font-light tracking-wide">We're here to help</p>
+              <div className="flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-700">
+                <div>
+                  <h3 className="font-serif text-lg text-white font-light tracking-wide">Ivory's Choice</h3>
+                  <p className="text-xs text-white/80 font-light tracking-wide">We're here to help</p>
+                </div>
+                <button
+                  onClick={toggleChat}
+                  className="text-white/80 hover:text-white transition-colors duration-200 p-2 hover:bg-white/10 rounded-full touch-manipulation"
+                  aria-label="Close chat"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -263,9 +274,20 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
         <div className="fixed inset-x-4 top-20 bottom-4 sm:top-40 sm:right-6 sm:left-auto sm:bottom-auto sm:w-96 sm:h-[500px] bg-white rounded-2xl shadow-2xl border border-[#E8E8E8] overflow-hidden flex flex-col animate-in slide-in-from-top-8 fade-in duration-500">
           {/* Header with subtle gradient animation */}
           <div className="bg-gradient-to-r from-[#8B7355] via-[#6B5845] to-[#1A1A1A] bg-[length:200%_100%] animate-gradient px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0">
-            <div className="animate-in fade-in slide-in-from-top-2 duration-700">
-              <h3 className="font-serif text-base sm:text-lg text-white font-light tracking-wide">Ivory's Choice</h3>
-              <p className="text-xs text-white/80 font-light tracking-wide">We're here to help</p>
+            <div className="flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-700">
+              <div>
+                <h3 className="font-serif text-base sm:text-lg text-white font-light tracking-wide">Ivory's Choice</h3>
+                <p className="text-xs text-white/80 font-light tracking-wide">We're here to help</p>
+              </div>
+              <button
+                onClick={toggleChat}
+                className="text-white/80 hover:text-white transition-colors duration-200 p-2 hover:bg-white/10 rounded-full touch-manipulation"
+                aria-label="Close chat"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
 
