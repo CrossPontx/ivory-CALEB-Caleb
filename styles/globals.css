@@ -815,6 +815,23 @@ input[type="range"] {
   animation: fade-in 0.3s ease-out;
 }
 
+/* Gradient animation for chatbot header */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: gradient 8s ease infinite;
+}
+
 /* Langflow Chat Custom Styling */
 langflow-chat {
   --chat-primary-color: #8B7355;
