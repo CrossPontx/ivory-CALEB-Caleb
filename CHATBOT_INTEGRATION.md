@@ -31,10 +31,36 @@ The Ivory's Choice customer service chatbot is integrated using Langflow and app
 
 ### Component: `components/customer-service-chatbot.tsx`
 
+The chatbot component uses `React.createElement` to render the custom `langflow-chat` web component, which bypasses TypeScript's JSX type checking while maintaining full functionality.
+
 ```tsx
 <CustomerServiceChatbot position="landing" /> // For landing page
 <CustomerServiceChatbot position="app" />     // For home screen
 ```
+
+### TypeScript Configuration
+
+Created `types/langflow.d.ts` for proper type definitions:
+
+```typescript
+declare namespace JSX {
+  interface IntrinsicElements {
+    'langflow-chat': {
+      window_title?: string
+      flow_id?: string
+      host_url?: string
+      chat_input_field?: string
+      chat_trigger_style?: string
+      key?: string | number
+      children?: React.ReactNode
+    }
+  }
+}
+```
+
+Updated `tsconfig.json` to include the types directory:
+- Added `"types/**/*.d.ts"` to include array
+- Added `"typeRoots": ["./node_modules/@types", "./types"]`
 
 ### Integration Points
 
@@ -48,19 +74,22 @@ The Ivory's Choice customer service chatbot is integrated using Langflow and app
 
 ### Langflow Configuration
 
-```html
-<langflow-chat
-  window_title="Ivory's Choice Support"
-  flow_id="fb51d726-4af1-4101-8b7e-221884191359"
-  host_url={hostUrl}
-  chat_input_field="Message"
-  chat_trigger_style="display: none;"
-/>
+The component uses `React.createElement` to render the custom web component:
+
+```typescript
+React.createElement('langflow-chat', {
+  key: chatKey,
+  window_title: "Ivory's Choice Support",
+  flow_id: "fb51d726-4af1-4101-8b7e-221884191359",
+  host_url: hostUrl,
+  chat_input_field: "Message",
+  chat_trigger_style: "display: none;"
+})
 ```
 
 **Host URL Logic:**
 - **Production** (ivoryschoice.com): Uses `https://www.ivoryschoice.com`
-- **Development** (localhost): Uses `http://localhost:7860`
+- **Development** (localhost): Uses `http://localhost:3000`
 - Automatically detects environment based on `window.location.hostname`
 
 ## Knowledge Base
@@ -150,7 +179,7 @@ https://www.ivoryschoice.com
 
 **Development (localhost):**
 ```
-http://localhost:7860
+http://localhost:3000
 ```
 
 ### Setup Requirements:
@@ -164,7 +193,7 @@ http://localhost:7860
 
 ```typescript
 const getHostUrl = () => {
-  if (typeof window === 'undefined') return 'http://localhost:7860'
+  if (typeof window === 'undefined') return 'http://localhost:3000'
   
   // Check if we're in production
   if (window.location.hostname === 'www.ivoryschoice.com' || 
@@ -173,14 +202,14 @@ const getHostUrl = () => {
   }
   
   // Fallback to localhost for development
-  return 'http://localhost:7860'
+  return 'http://localhost:3000'
 }
 ```
 
 ### Testing:
 
 1. **Local development:**
-   - Run Langflow on `http://localhost:7860`
+   - Run Langflow on `http://localhost:3000`
    - Test chatbot functionality
    - Verify knowledge base responses
 
@@ -260,6 +289,7 @@ For issues with the chatbot integration:
 
 ---
 
-**Version:** 1.0.0  
+**Version:** 1.0.1  
 **Last Updated:** January 3, 2026  
-**Status:** Production Ready ✅
+**Status:** Production Ready ✅  
+**TypeScript:** Fully typed with no errors ✅

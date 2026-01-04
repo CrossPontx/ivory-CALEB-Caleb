@@ -1,18 +1,11 @@
+/// <reference path="../types/langflow.d.ts" />
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import Script from "next/script"
 
 interface ChatbotProps {
   position?: "landing" | "app"
-}
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'langflow-chat': any
-    }
-  }
 }
 
 export default function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
@@ -22,7 +15,7 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
 
   // Determine host URL based on environment
   const getHostUrl = () => {
-    if (typeof window === 'undefined') return 'http://localhost:7860'
+    if (typeof window === 'undefined') return 'http://localhost:3000'
     
     // Check if we're in production (ivoryschoice.com)
     if (window.location.hostname === 'www.ivoryschoice.com' || 
@@ -31,7 +24,7 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
     }
     
     // Fallback to localhost for development
-    return 'http://localhost:7860'
+    return 'http://localhost:3000'
   }
 
   const hostUrl = getHostUrl()
@@ -122,14 +115,14 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
             </button>
             
             {isLoaded ? (
-              <langflow-chat
-                key={chatKey}
-                window_title="Ivory's Choice Support"
-                flow_id="fb51d726-4af1-4101-8b7e-221884191359"
-                host_url={hostUrl}
-                chat_input_field="Message"
-                chat_trigger_style="display: none;"
-              />
+              React.createElement('langflow-chat', {
+                key: chatKey,
+                window_title: "Ivory's Choice Support",
+                flow_id: "fb51d726-4af1-4101-8b7e-221884191359",
+                host_url: hostUrl,
+                chat_input_field: "Message",
+                chat_trigger_style: "display: none;"
+              })
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-4">
@@ -207,14 +200,14 @@ export default function CustomerServiceChatbot({ position = "app" }: ChatbotProp
           </button>
           
           {isLoaded ? (
-            <langflow-chat
-              key={chatKey}
-              window_title="Ivory's Choice Support"
-              flow_id="fb51d726-4af1-4101-8b7e-221884191359"
-              host_url={hostUrl}
-              chat_input_field="Message"
-              chat_trigger_style="display: none;"
-            />
+            React.createElement('langflow-chat', {
+              key: chatKey,
+              window_title: "Ivory's Choice Support",
+              flow_id: "fb51d726-4af1-4101-8b7e-221884191359",
+              host_url: hostUrl,
+              chat_input_field: "Message",
+              chat_trigger_style: "display: none;"
+            })
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center space-y-4">
