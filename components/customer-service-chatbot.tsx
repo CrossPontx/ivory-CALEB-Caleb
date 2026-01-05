@@ -116,7 +116,7 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
         {/* Elegant trigger button */}
         <button
           onClick={toggleChat}
-          className="group relative bg-red-600 hover:bg-red-700 text-white rounded-full w-16 h-16 sm:w-20 sm:h-20 shadow-2xl hover:shadow-red-600/30 transition-all duration-500 flex items-center justify-center hover:scale-110 active:scale-95 touch-manipulation"
+          className="group relative bg-red-900 hover:bg-red-950 text-white rounded-full w-16 h-16 sm:w-20 sm:h-20 shadow-2xl hover:shadow-red-900/30 transition-all duration-500 flex items-center justify-center hover:scale-110 active:scale-95 touch-manipulation"
           aria-label="Open customer service chat"
         >
           {!isOpen ? (
@@ -140,7 +140,7 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           )}
-          <span className="absolute inset-0 rounded-full bg-red-600 animate-ping opacity-20" />
+          <span className="absolute inset-0 rounded-full bg-red-900 animate-ping opacity-20" />
         </button>
 
         {/* Tooltip */}
@@ -243,7 +243,7 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
       {/* Compact trigger button */}
       <button
         onClick={toggleChat}
-        className="group relative bg-red-600 hover:bg-red-700 text-white rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg hover:shadow-xl hover:shadow-red-600/20 transition-all duration-300 flex items-center justify-center hover:scale-105 active:scale-95 touch-manipulation"
+        className="group relative bg-red-900 hover:bg-red-950 text-white rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all duration-300 flex items-center justify-center hover:scale-105 active:scale-95 touch-manipulation"
         aria-label="Open customer service chat"
       >
         {!isOpen ? (
