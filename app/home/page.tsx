@@ -742,7 +742,7 @@ export default function HomePage() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Clock className="h-3.5 w-3.5" strokeWidth={1.5} />
-                          {new Date(booking.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(booking.appointmentDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                         </div>
                       </div>
 

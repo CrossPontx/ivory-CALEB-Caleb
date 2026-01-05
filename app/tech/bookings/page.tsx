@@ -183,7 +183,7 @@ export default function TechBookingsPage() {
                       </div>
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#6B6B6B]" strokeWidth={1} />
-                        <span className="text-[#1A1A1A]">{new Date(booking.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-[#1A1A1A]">{new Date(booking.appointmentDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                       </div>
                     </div>
 
@@ -256,7 +256,7 @@ export default function TechBookingsPage() {
                       </div>
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#6B6B6B]" strokeWidth={1} />
-                        <span className="text-[#1A1A1A]">{new Date(booking.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-[#1A1A1A]">{new Date(booking.appointmentDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                       </div>
                     </div>
 

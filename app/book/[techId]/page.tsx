@@ -71,7 +71,10 @@ export default function BookAppointmentPage() {
     for (let hour = 9; hour <= 18; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
         if (hour === 18 && minute > 0) break;
-        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        // Convert to 12-hour format with AM/PM
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+        const timeStr = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
         times.push(timeStr);
       }
     }
@@ -165,8 +168,19 @@ export default function BookAppointmentPage() {
     setLoading(true);
     try {
       const appointmentDateTime = new Date(selectedDate);
-      const [hours, minutes] = selectedTime.split(':');
-      appointmentDateTime.setHours(parseInt(hours), parseInt(minutes));
+      // Parse 12-hour format time (e.g., "2:30 PM")
+      const timeMatch = selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (timeMatch) {
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const period = timeMatch[3].toUpperCase();
+        
+        // Convert to 24-hour format
+        if (period === 'PM' && hours !== 12) hours += 12;
+        if (period === 'AM' && hours === 12) hours = 0;
+        
+        appointmentDateTime.setHours(hours, minutes);
+      }
 
       const bookingResponse = await fetch('/api/bookings', {
         method: 'POST',

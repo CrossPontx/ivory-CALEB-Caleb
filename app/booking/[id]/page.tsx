@@ -190,7 +190,7 @@ export default function BookingDetailPage() {
                   <div>
                     <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-1 font-light">Time</p>
                     <p className="text-lg sm:text-xl font-light text-[#1A1A1A] tracking-wide">
-                      {new Date(booking.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(booking.appointmentDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                     </p>
                     {booking.duration && (
                       <p className="text-sm text-[#6B6B6B] font-light mt-1">
