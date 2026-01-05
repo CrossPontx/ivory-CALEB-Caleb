@@ -4,14 +4,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    // Determine Langflow URL based on environment
-    // Use environment variable if set, otherwise use defaults
-    const langflowUrl = process.env.LANGFLOW_URL || 
-      (process.env.NODE_ENV === 'production'
-        ? 'https://lashell-unfeverish-christoper.ngrok-free.dev'
-        : 'http://localhost:7862')
+    // Get Langflow configuration from environment variables
+    const langflowUrl = process.env.LANGFLOW_URL
+    const flowId = process.env.LANGFLOW_FLOW_ID
     
-    const flowId = process.env.LANGFLOW_FLOW_ID || '2f70d01a-9791-48b2-980a-03eca7244b46'
+    if (!langflowUrl || !flowId) {
+      throw new Error('Langflow configuration missing. Please set LANGFLOW_URL and LANGFLOW_FLOW_ID environment variables.')
+    }
     
     console.log('Calling Langflow:', `${langflowUrl}/api/v1/run/${flowId}`)
     console.log('Environment:', process.env.NODE_ENV)
