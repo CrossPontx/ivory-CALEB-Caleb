@@ -258,11 +258,21 @@ html {
   button, a[role="button"] {
     min-height: 48px;
   }
-  
-  /* Prevent iOS zoom on input focus by ensuring 16px minimum font-size */
+}
+
+/* CRITICAL: Prevent iOS zoom on input focus by ensuring 16px minimum font-size */
+/* This applies to ALL screen sizes on iOS to ensure professional behavior */
+@supports (-webkit-touch-callout: none) {
   input, 
   textarea, 
-  select {
+  select,
+  [data-slot="input"],
+  [data-slot="textarea"] {
+    font-size: 16px !important;
+  }
+  
+  /* Ensure select trigger also has 16px font */
+  [role="combobox"] {
     font-size: 16px !important;
   }
 }
