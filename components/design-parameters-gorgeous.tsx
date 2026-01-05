@@ -142,7 +142,7 @@ export function DesignParametersGorgeous({
                     { value: 'ballerina', label: 'Ballerina', image: '/BALLERINA.png' },
                     { value: 'edge', label: 'Edge', image: '/EDGE.png' },
                     { value: 'lipstick', label: 'Lipstick', image: '/LIPSTICK.png' },
-                    { value: 'flare', label: 'Flare', image: '/FLARE.png' },
+                    { value: 'flare', label: 'Flare Duck Nails', image: '/FLARE.png' },
                     { value: 'arrow-head', label: 'Arrow Head', image: '/ARROW HEAD.png' }
                   ].map((shape) => (
                     <button
