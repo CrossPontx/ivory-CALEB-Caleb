@@ -29,7 +29,7 @@ export async function createSession(userId: number) {
   const cookieStore = await cookies();
   cookieStore.set('session', token, {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     expires: expiresAt,
     path: '/',
@@ -43,6 +43,7 @@ export async function getSession() {
   const token = cookieStore.get('session')?.value;
 
   if (!token) {
+    console.log('⚠️ No session token found in cookies');
     return null;
   }
 
@@ -58,6 +59,7 @@ export async function getSession() {
       .where(eq(sessions.token, token));
 
     if (!session || new Date() > session.expiresAt) {
+      console.log('⚠️ Session expired or not found in database');
       await deleteSession();
       return null;
     }
@@ -69,6 +71,7 @@ export async function getSession() {
       .where(eq(users.id, userId));
 
     if (!user) {
+      console.log('⚠️ User not found for session');
       await deleteSession();
       return null;
     }
@@ -81,7 +84,7 @@ export async function getSession() {
       avatar: user.avatar,
     };
   } catch (error) {
-    console.error('Session verification error:', error);
+    console.error('❌ Session verification error:', error);
     await deleteSession();
     return null;
   }

@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
     if (!session) {
+      console.error('❌ No session found in pending-generations API')
+      console.error('Cookies:', request.cookies.getAll())
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
