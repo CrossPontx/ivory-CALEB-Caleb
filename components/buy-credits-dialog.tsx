@@ -27,15 +27,38 @@ interface BuyCreditsDialogProps {
 export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+  const [isDeveloper, setIsDeveloper] = useState(false);
   const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
+    // Check if user is developer
+    checkDeveloperStatus();
+    
     if (isNative && open) {
       setupIAPListeners();
     }
   }, [isNative, open]);
 
+  const checkDeveloperStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/session', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIsDeveloper(data.user?.username === 'simplyjosh56');
+      }
+    } catch (error) {
+      console.error('Failed to check developer status:', error);
+    }
+  };
+
   const setupIAPListeners = () => {
+    // Developer bypass - don't show IAP errors
+    if (isDeveloper) {
+      return;
+    }
+
     iapManager.onPurchaseComplete(async (result) => {
       try {
         // Validate with server
@@ -83,6 +106,27 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
     try {
       setLoading(packageId);
       
+      // Developer bypass - grant credits directly
+      if (isDeveloper) {
+        const response = await fetch('/api/dev/grant-credits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ credits }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          toast.success(`Developer bypass: ${credits} credits added!`);
+          setOpen(false);
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          throw new Error('Failed to grant credits');
+        }
+        setLoading(null);
+        return;
+      }
+      
       // Map credits to IAP product ID
       const productIdKey = `CREDITS_${credits}` as keyof typeof IAP_PRODUCT_IDS;
       const productId = IAP_PRODUCT_IDS[productIdKey];
@@ -95,7 +139,10 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
       // Loading state will be cleared by purchase listener
     } catch (error) {
       console.error('IAP purchase error:', error);
-      toast.error('Failed to start purchase');
+      // Don't show error toast for developer
+      if (!isDeveloper) {
+        toast.error('Failed to start purchase');
+      }
       setLoading(null);
     }
   };

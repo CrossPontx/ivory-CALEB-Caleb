@@ -25,16 +25,33 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
   const [iapLoading, setIapLoading] = useState(false);
   const [iapError, setIapError] = useState<string | null>(null);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+  const [isDeveloper, setIsDeveloper] = useState(false);
   
   // Get plans based on user type
   const plans = userType === 'tech' ? getTechPlans() : getClientPlans();
 
   useEffect(() => {
+    checkDeveloperStatus();
+    
     if (isNative) {
       loadIAPProducts();
       setupIAPListeners();
     }
   }, [isNative]);
+
+  const checkDeveloperStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/session', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIsDeveloper(data.user?.username === 'simplyjosh56');
+      }
+    } catch (error) {
+      console.error('Failed to check developer status:', error);
+    }
+  };
 
   const loadIAPProducts = async () => {
     try {
@@ -49,7 +66,10 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
       
       if (products.length === 0) {
         const errorMsg = 'No subscription products available. Please check your internet connection and try again.';
-        setIapError(errorMsg);
+        // Don't show error for developer
+        if (!isDeveloper) {
+          setIapError(errorMsg);
+        }
         console.error('❌', errorMsg);
       } else {
         products.forEach(p => {
@@ -59,8 +79,11 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
     } catch (error) {
       console.error('❌ Failed to load IAP products:', error);
       const errorMsg = 'Failed to load subscription options. Please try again.';
-      setIapError(errorMsg);
-      toast.error(errorMsg);
+      // Don't show error for developer
+      if (!isDeveloper) {
+        setIapError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setIapLoading(false);
     }
@@ -272,8 +295,8 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
         </div>
       )}
 
-      {/* IAP Error State */}
-      {isNative && iapError && !iapLoading && (
+      {/* IAP Error State - Hidden for developer */}
+      {isNative && iapError && !iapLoading && !isDeveloper && (
         <div className="border border-red-200 p-6 bg-red-50">
           <div className="flex items-start gap-4 mb-4">
             <div className="w-12 h-12 border border-red-200 flex items-center justify-center flex-shrink-0 bg-white">
