@@ -11,8 +11,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         os_log("🟢 AppDelegate: Application did finish launching", log: logger, type: .info)
-        os_log("🔵 AppDelegate: Capacitor will auto-discover plugins using CAPBridgedPlugin protocol", log: logger, type: .info)
+        os_log("🔵 AppDelegate: Registering custom plugins", log: logger, type: .info)
         return true
+    }
+    
+    override func capacitorDidLoad() {
+        os_log("🟢 AppDelegate: capacitorDidLoad() - Registering IAPPlugin", log: logger, type: .info)
+        bridge?.registerPluginInstance(IAPPlugin())
+        os_log("✅ AppDelegate: IAPPlugin registered successfully", log: logger, type: .info)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
