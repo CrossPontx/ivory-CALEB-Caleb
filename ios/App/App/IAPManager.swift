@@ -154,7 +154,10 @@ extension IAPManager: SKProductsRequestDelegate {
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         os_log("✅ Products received: %d", log: logger, type: .info, response.products.count)
         
-        self.products = response.products
+        // Update products on main thread to avoid SwiftUI warnings
+        DispatchQueue.main.async {
+            self.products = response.products
+        }
         
         let productsData = response.products.map { product -> [String: Any] in
             let formatter = NumberFormatter()
