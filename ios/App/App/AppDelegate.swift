@@ -1,53 +1,61 @@
 import UIKit
-import Capacitor
 import os.log
 
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    var window: UIWindow?
+class AppDelegate: NSObject, UIApplicationDelegate {
     private let logger = OSLog(subsystem: "com.ivory.app", category: "AppDelegate")
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        os_log("🟢 AppDelegate: Application did finish launching", log: logger, type: .info)
-        os_log("🔵 AppDelegate: IAPPlugin will be auto-registered via CAPBridgedPlugin protocol", log: logger, type: .info)
+        os_log("🟢 AppDelegate: Application did finish launching (Native SwiftUI)", log: logger, type: .info)
+        
+        // Initialize managers
+        _ = IAPManager.shared
+        _ = WatchConnectivityManager.shared
+        
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        // App moving to inactive state
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        // App entered background
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+        // App entering foreground
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        // App became active
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        // App terminating
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        // Called when the app was launched with a url. Feel free to add additional processing here,
-        // but if you want the App API to support tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+        // Handle URL schemes (OAuth, Universal Links, etc.)
+        os_log("🔵 Opening URL: %@", log: logger, type: .info, url.absoluteString)
+        
+        // Handle Apple Sign In callback
+        if url.scheme == "com.ivory.app" {
+            // Process auth callback
+            return true
+        }
+        
+        return false
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        // Called when the app was launched with an activity, including Universal Links.
-        // Feel free to add additional processing here, but if you want the App API to support
-        // tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        // Handle Universal Links
+        if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+           let url = userActivity.webpageURL {
+            os_log("🔵 Universal Link: %@", log: logger, type: .info, url.absoluteString)
+            // Handle universal link
+            return true
+        }
+        
+        return false
     }
-
 }

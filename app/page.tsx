@@ -7,8 +7,8 @@ import LandingPage from "@/components/landing-page"
 
 export default function HomePage() {
   const router = useRouter()
-  // Check immediately if native (synchronous)
-  const isNativeApp = Capacitor.isNativePlatform()
+  // Check immediately if native (synchronous) - supports both Capacitor and native bridge
+  const isNativeApp = Capacitor.isNativePlatform() || (typeof window !== 'undefined' && !!(window as any).NativeBridge)
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
