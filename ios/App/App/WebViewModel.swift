@@ -23,7 +23,7 @@ class WebViewModel: ObservableObject {
     
     func loadWebApp() {
         // Always load from production URL
-        if let url = URL(string: "https://ivory-blond.vercel.app") {
+        if let url = URL(string: "https://www.ivoryschoice.com") {
             let request = URLRequest(url: url)
             webView?.load(request)
         }
