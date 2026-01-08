@@ -29,7 +29,8 @@ export default function BillingPage() {
   const [credits, setCredits] = useState<number | null>(null);
   const [userType, setUserType] = useState<'client' | 'tech'>('client');
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
-  const isNative = Capacitor.isNativePlatform();
+  // Check for both Capacitor and native bridge
+  const isNative = Capacitor.isNativePlatform() || (typeof window !== 'undefined' && !!(window as any).NativeBridge);
 
   useEffect(() => {
     // Log platform information for debugging
