@@ -31,12 +31,16 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
   const plans = userType === 'tech' ? getTechPlans() : getClientPlans();
 
   useEffect(() => {
-    checkDeveloperStatus();
+    const init = async () => {
+      await checkDeveloperStatus();
+      
+      if (isNative) {
+        loadIAPProducts();
+        setupIAPListeners();
+      }
+    };
     
-    if (isNative) {
-      loadIAPProducts();
-      setupIAPListeners();
-    }
+    init();
   }, [isNative]);
 
   const checkDeveloperStatus = async () => {
@@ -85,6 +89,7 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
         toast.error(errorMsg);
       }
     } finally {
+      console.log('🔵 Setting iapLoading to false');
       setIapLoading(false);
     }
   };
