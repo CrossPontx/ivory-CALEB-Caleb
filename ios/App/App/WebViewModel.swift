@@ -221,7 +221,9 @@ class WebViewModel: ObservableObject {
     // MARK: - JavaScript Execution
     
     func callJavaScript(_ script: String, completion: ((Any?, Error?) -> Void)? = nil) {
-        webView?.evaluateJavaScript(script, completionHandler: completion)
+        DispatchQueue.main.async { [weak self] in
+            self?.webView?.evaluateJavaScript(script, completionHandler: completion)
+        }
     }
     
     func resolveCallback(callbackId: Any, result: [String: Any]? = nil, error: String? = nil) {
