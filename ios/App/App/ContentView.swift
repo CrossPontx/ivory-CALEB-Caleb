@@ -16,7 +16,6 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             WebView(viewModel: webViewModel)
-                .ignoresSafeArea()
             
             // Loading indicator
             if webViewModel.isLoading {

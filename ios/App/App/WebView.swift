@@ -31,7 +31,7 @@ struct WebView: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         webView.uiDelegate = context.coordinator
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.contentInsetAdjustmentBehavior = .automatic
         webView.isOpaque = false
         webView.backgroundColor = .white
         
@@ -70,6 +70,47 @@ struct WebView: UIViewRepresentable {
                 self.parent.viewModel.isLoading = false
             }
             parent.viewModel.injectBridge()
+            
+            // Inject safe area information and CSS
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                let safeAreaInsets = window.safeAreaInsets
+                let safeAreaScript = """
+                window.iosSafeArea = {
+                    top: \(safeAreaInsets.top),
+                    bottom: \(safeAreaInsets.bottom),
+                    left: \(safeAreaInsets.left),
+                    right: \(safeAreaInsets.right)
+                };
+                
+                // Add CSS for safe area handling
+                const style = document.createElement('style');
+                style.textContent = `
+                    :root {
+                        --safe-area-inset-top: \(safeAreaInsets.top)px;
+                        --safe-area-inset-bottom: \(safeAreaInsets.bottom)px;
+                        --safe-area-inset-left: \(safeAreaInsets.left)px;
+                        --safe-area-inset-right: \(safeAreaInsets.right)px;
+                    }
+                    
+                    /* Fix for camera page positioning */
+                    body.ios-native {
+                        padding-top: var(--safe-area-inset-top);
+                        padding-bottom: var(--safe-area-inset-bottom);
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Add iOS native class to body
+                document.body.classList.add('ios-native');
+                
+                // Dispatch event to notify web app about safe areas
+                window.dispatchEvent(new CustomEvent('iosSafeAreaUpdated', {
+                    detail: window.iosSafeArea
+                }));
+                """
+                webView.evaluateJavaScript(safeAreaScript)
+            }
         }
         
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
