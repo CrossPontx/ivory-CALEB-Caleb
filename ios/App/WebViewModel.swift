@@ -22,19 +22,11 @@ class WebViewModel: ObservableObject {
     // MARK: - Web App Loading
     
     func loadWebApp() {
-        #if DEBUG
-        // Development: Load from local server or production
-        if let url = URL(string: "http://localhost:3000") {
+        // Always load from production URL
+        if let url = URL(string: "https://www.ivoryschoice.com") {
             let request = URLRequest(url: url)
             webView?.load(request)
         }
-        #else
-        // Production: Load from bundled files or remote URL
-        if let url = URL(string: "https://ivory-blond.vercel.app") {
-            let request = URLRequest(url: url)
-            webView?.load(request)
-        }
-        #endif
     }
     
     // MARK: - JavaScript Bridge
@@ -42,6 +34,12 @@ class WebViewModel: ObservableObject {
     func injectBridge() {
         let bridgeScript = """
         window.NativeBridge = {
+            _callbackCounter: 0,
+            
+            _generateCallbackId: function() {
+                return 'cb_' + Date.now() + '_' + (++this._callbackCounter);
+            },
+            
             call: function(action, data) {
                 window.webkit.messageHandlers.nativeHandler.postMessage({
                     action: action,
@@ -53,8 +51,9 @@ class WebViewModel: ObservableObject {
             getProducts: function(productIds) {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
+                    console.log('🔵 JS: getProducts callbackId:', callbackId);
                     
                     this.call('getProducts', { productIds, callbackId });
                 });
@@ -63,8 +62,9 @@ class WebViewModel: ObservableObject {
             purchase: function(productId) {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
+                    console.log('🔵 JS: purchase callbackId:', callbackId);
                     
                     this.call('purchase', { productId, callbackId });
                 });
@@ -73,8 +73,9 @@ class WebViewModel: ObservableObject {
             restorePurchases: function() {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
+                    console.log('🔵 JS: restorePurchases callbackId:', callbackId);
                     
                     this.call('restorePurchases', { callbackId });
                 });
@@ -83,8 +84,9 @@ class WebViewModel: ObservableObject {
             finishTransaction: function(transactionId) {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
+                    console.log('🔵 JS: finishTransaction callbackId:', callbackId);
                     
                     this.call('finishTransaction', { transactionId, callbackId });
                 });
@@ -98,7 +100,7 @@ class WebViewModel: ObservableObject {
             isWatchReachable: function() {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
                     
                     this.call('isWatchReachable', { callbackId });
@@ -109,7 +111,7 @@ class WebViewModel: ObservableObject {
             takePicture: function(options) {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
                     
                     this.call('takePicture', { options, callbackId });
@@ -120,7 +122,7 @@ class WebViewModel: ObservableObject {
             share: function(options) {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
                     
                     this.call('share', { options, callbackId });
@@ -136,7 +138,7 @@ class WebViewModel: ObservableObject {
             getDeviceInfo: function() {
                 return new Promise((resolve, reject) => {
                     window._nativeCallbacks = window._nativeCallbacks || {};
-                    const callbackId = Date.now() + Math.random();
+                    const callbackId = this._generateCallbackId();
                     window._nativeCallbacks[callbackId] = { resolve, reject };
                     
                     this.call('getDeviceInfo', { callbackId });
@@ -146,13 +148,19 @@ class WebViewModel: ObservableObject {
         
         // Helper to resolve callbacks from native
         window.resolveNativeCallback = function(callbackId, result, error) {
+            console.log('🔵 JS: resolveNativeCallback called with:', callbackId);
+            console.log('🔵 JS: Available callbacks:', Object.keys(window._nativeCallbacks || {}));
+            
             if (window._nativeCallbacks && window._nativeCallbacks[callbackId]) {
+                console.log('✅ JS: Found callback, resolving...');
                 if (error) {
                     window._nativeCallbacks[callbackId].reject(error);
                 } else {
                     window._nativeCallbacks[callbackId].resolve(result);
                 }
                 delete window._nativeCallbacks[callbackId];
+            } else {
+                console.log('❌ JS: Callback not found for id:', callbackId);
             }
         };
         
@@ -229,7 +237,9 @@ class WebViewModel: ObservableObject {
     // MARK: - JavaScript Execution
     
     func callJavaScript(_ script: String, completion: ((Any?, Error?) -> Void)? = nil) {
-        webView?.evaluateJavaScript(script, completionHandler: completion)
+        DispatchQueue.main.async { [weak self] in
+            self?.webView?.evaluateJavaScript(script, completionHandler: completion)
+        }
     }
     
     func resolveCallback(callbackId: Any, result: [String: Any]? = nil, error: String? = nil) {
@@ -237,8 +247,30 @@ class WebViewModel: ObservableObject {
         let resultString = resultJSON != nil ? String(data: resultJSON!, encoding: .utf8) ?? "null" : "null"
         let errorString = error != nil ? "'\(error!)'" : "null"
         
-        let script = "window.resolveNativeCallback(\(callbackId), \(resultString), \(errorString));"
-        callJavaScript(script)
+        // Handle callback ID - now using string-based IDs like "cb_1234567890_1"
+        let callbackIdForJS: String
+        if let stringId = callbackId as? String {
+            callbackIdForJS = "'\(stringId)'"
+        } else if let doubleId = callbackId as? Double {
+            // Legacy support for numeric IDs
+            callbackIdForJS = String(format: "%.10f", doubleId)
+        } else if let numId = callbackId as? NSNumber {
+            callbackIdForJS = String(format: "%.10f", numId.doubleValue)
+        } else {
+            callbackIdForJS = "'\(callbackId)'"
+        }
+        
+        let script = "window.resolveNativeCallback(\(callbackIdForJS), \(resultString), \(errorString));"
+        print("🔵 Resolving callback: \(callbackIdForJS)")
+        print("🔵 Script: \(script.prefix(200))...")
+        
+        callJavaScript(script) { result, error in
+            if let error = error {
+                print("❌ JavaScript execution error: \(error)")
+            } else {
+                print("✅ JavaScript executed successfully")
+            }
+        }
     }
     
     func notifyWeb(event: String, data: [String: Any]) {

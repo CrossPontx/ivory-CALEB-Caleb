@@ -9,6 +9,12 @@ import Foundation
 import StoreKit
 import os.log
 
+// Keys for objc_setAssociatedObject - must be stable pointers
+private var callbackIdKey: UInt8 = 0
+private var viewModelKey: UInt8 = 1
+private var restoreCallbackIdKey: UInt8 = 2
+private var restoreViewModelKey: UInt8 = 3
+
 class IAPManager: NSObject, ObservableObject {
     static let shared = IAPManager()
     
@@ -49,6 +55,8 @@ class IAPManager: NSObject, ObservableObject {
         }
         
         os_log("🔵 Requesting products: %@", log: logger, type: .info, productIds.joined(separator: ", "))
+        os_log("🔵 CallbackId received: %@", log: logger, type: .info, String(describing: callbackId))
+        os_log("🔵 ViewModel received: %@", log: logger, type: .info, viewModel != nil ? "yes" : "no")
         
         if !SKPaymentQueue.canMakePayments() {
             os_log("❌ Cannot make payments", log: logger, type: .error)
@@ -60,9 +68,9 @@ class IAPManager: NSObject, ObservableObject {
         request.delegate = self
         productsRequest = request
         
-        // Store callback for later
-        objc_setAssociatedObject(request, "callbackId", callbackId, .OBJC_ASSOCIATION_RETAIN)
-        objc_setAssociatedObject(request, "viewModel", viewModel, .OBJC_ASSOCIATION_RETAIN)
+        // Store callback for later using proper pointer keys
+        objc_setAssociatedObject(request, &callbackIdKey, callbackId, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(request, &viewModelKey, viewModel, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         
         request.start()
     }
@@ -91,12 +99,10 @@ class IAPManager: NSObject, ObservableObject {
         
         os_log("🔵 Purchasing: %@", log: logger, type: .info, productId)
         
+        // Store viewModel for transaction callbacks
+        self.webViewModel = viewModel
+        
         let payment = SKPayment(product: product)
-        
-        // Store callback for transaction
-        objc_setAssociatedObject(payment, "callbackId", callbackId, .OBJC_ASSOCIATION_RETAIN)
-        objc_setAssociatedObject(payment, "viewModel", viewModel, .OBJC_ASSOCIATION_RETAIN)
-        
         SKPaymentQueue.default().add(payment)
     }
     
@@ -110,9 +116,10 @@ class IAPManager: NSObject, ObservableObject {
         
         os_log("🔵 Restoring purchases", log: logger, type: .info)
         
-        // Store callback
-        objc_setAssociatedObject(SKPaymentQueue.default(), "restoreCallbackId", callbackId, .OBJC_ASSOCIATION_RETAIN)
-        objc_setAssociatedObject(SKPaymentQueue.default(), "restoreViewModel", viewModel, .OBJC_ASSOCIATION_RETAIN)
+        // Store callback and viewModel
+        self.webViewModel = viewModel
+        objc_setAssociatedObject(SKPaymentQueue.default(), &restoreCallbackIdKey, callbackId, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(SKPaymentQueue.default(), &restoreViewModelKey, viewModel, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         
         SKPaymentQueue.default().restoreCompletedTransactions()
     }
@@ -154,8 +161,6 @@ extension IAPManager: SKProductsRequestDelegate {
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         os_log("✅ Products received: %d", log: logger, type: .info, response.products.count)
         
-        self.products = response.products
-        
         let productsData = response.products.map { product -> [String: Any] in
             let formatter = NumberFormatter()
             formatter.numberStyle = .currency
@@ -171,21 +176,44 @@ extension IAPManager: SKProductsRequestDelegate {
             ]
         }
         
-        if let callbackId = objc_getAssociatedObject(request, "callbackId"),
-           let viewModel = objc_getAssociatedObject(request, "viewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, result: [
-                "products": productsData,
-                "invalidProductIds": response.invalidProductIdentifiers
-            ])
+        let invalidIds = response.invalidProductIdentifiers
+        let receivedProducts = response.products
+        let callbackId = objc_getAssociatedObject(request, &callbackIdKey)
+        let viewModel = objc_getAssociatedObject(request, &viewModelKey) as? WebViewModel
+        
+        os_log("🔵 Retrieved CallbackId: %@", log: logger, type: .info, String(describing: callbackId))
+        os_log("🔵 Retrieved ViewModel: %@", log: logger, type: .info, viewModel != nil ? "yes" : "no")
+        
+        // Dispatch everything to main thread to avoid SwiftUI warnings
+        DispatchQueue.main.async {
+            self.products = receivedProducts
+            
+            if let callbackId = callbackId, let viewModel = viewModel {
+                os_log("🔵 Calling resolveCallback with products data", log: self.logger, type: .info)
+                viewModel.resolveCallback(callbackId: callbackId, result: [
+                    "products": productsData,
+                    "invalidProductIds": invalidIds
+                ])
+            } else {
+                os_log("❌ Missing callbackId or viewModel - callbackId: %@, viewModel: %@", 
+                       log: self.logger, type: .error,
+                       callbackId != nil ? "present" : "nil",
+                       viewModel != nil ? "present" : "nil")
+            }
         }
     }
     
     func request(_ request: SKRequest, didFailWithError error: Error) {
         os_log("❌ Products request failed: %@", log: logger, type: .error, error.localizedDescription)
         
-        if let callbackId = objc_getAssociatedObject(request, "callbackId"),
-           let viewModel = objc_getAssociatedObject(request, "viewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, error: error.localizedDescription)
+        let errorMsg = error.localizedDescription
+        let callbackId = objc_getAssociatedObject(request, &callbackIdKey)
+        let viewModel = objc_getAssociatedObject(request, &viewModelKey) as? WebViewModel
+        
+        DispatchQueue.main.async {
+            if let callbackId = callbackId, let viewModel = viewModel {
+                viewModel.resolveCallback(callbackId: callbackId, error: errorMsg)
+            }
         }
     }
 }
@@ -224,8 +252,10 @@ extension IAPManager: SKPaymentTransactionObserver {
                 "transactionDate": transaction.transactionDate?.timeIntervalSince1970 ?? 0
             ]
             
-            // Notify web app
-            webViewModel?.notifyWeb(event: "purchaseCompleted", data: data)
+            // Notify web app on main thread
+            DispatchQueue.main.async {
+                self.webViewModel?.notifyWeb(event: "purchaseCompleted", data: data)
+            }
         }
     }
     
@@ -242,7 +272,9 @@ extension IAPManager: SKPaymentTransactionObserver {
             "errorMessage": errorMessage
         ]
         
-        webViewModel?.notifyWeb(event: "purchaseFailed", data: data)
+        DispatchQueue.main.async {
+            self.webViewModel?.notifyWeb(event: "purchaseFailed", data: data)
+        }
         
         SKPaymentQueue.default().finishTransaction(transaction)
     }
@@ -260,7 +292,9 @@ extension IAPManager: SKPaymentTransactionObserver {
                 "receipt": receiptString
             ]
             
-            webViewModel?.notifyWeb(event: "purchaseRestored", data: data)
+            DispatchQueue.main.async {
+                self.webViewModel?.notifyWeb(event: "purchaseRestored", data: data)
+            }
         }
         
         SKPaymentQueue.default().finishTransaction(transaction)
@@ -269,18 +303,27 @@ extension IAPManager: SKPaymentTransactionObserver {
     func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         os_log("✅ Restore completed", log: logger, type: .info)
         
-        if let callbackId = objc_getAssociatedObject(queue, "restoreCallbackId"),
-           let viewModel = objc_getAssociatedObject(queue, "restoreViewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, result: ["success": true])
+        let callbackId = objc_getAssociatedObject(queue, &restoreCallbackIdKey)
+        let viewModel = objc_getAssociatedObject(queue, &restoreViewModelKey) as? WebViewModel
+        
+        DispatchQueue.main.async {
+            if let callbackId = callbackId, let viewModel = viewModel {
+                viewModel.resolveCallback(callbackId: callbackId, result: ["success": true])
+            }
         }
     }
     
     func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         os_log("❌ Restore failed: %@", log: logger, type: .error, error.localizedDescription)
         
-        if let callbackId = objc_getAssociatedObject(queue, "restoreCallbackId"),
-           let viewModel = objc_getAssociatedObject(queue, "restoreViewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, error: error.localizedDescription)
+        let errorMsg = error.localizedDescription
+        let callbackId = objc_getAssociatedObject(queue, &restoreCallbackIdKey)
+        let viewModel = objc_getAssociatedObject(queue, &restoreViewModelKey) as? WebViewModel
+        
+        DispatchQueue.main.async {
+            if let callbackId = callbackId, let viewModel = viewModel {
+                viewModel.resolveCallback(callbackId: callbackId, error: errorMsg)
+            }
         }
     }
 }
