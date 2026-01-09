@@ -1,4 +1,5 @@
 import UIKit
+import UserNotifications
 import os.log
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -10,8 +11,24 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Initialize managers
         _ = IAPManager.shared
         _ = WatchConnectivityManager.shared
+        _ = NotificationManager.shared
+        
+        // Request notification permissions
+        NotificationManager.shared.requestAuthorization { granted in
+            os_log("📱 Notification permission: %@", log: self.logger, type: .info, granted ? "granted" : "denied")
+        }
         
         return true
+    }
+    
+    // MARK: - Push Notification Registration
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        NotificationManager.shared.setDeviceToken(deviceToken)
+    }
+    
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationManager.shared.handleRegistrationError(error)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { WatchBridgeInitializer } from "@/components/watch-bridge-initializer"
 import { BackgroundGenerationMonitor } from "@/components/background-generation-monitor"
 import { IAPInitializer } from "@/components/iap-initializer"
+import { NotificationToastProvider } from "@/components/notification-toast"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -55,11 +56,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased touch-manipulation`}>
-        <IAPInitializer />
-        <WatchBridgeInitializer />
-        <BackgroundGenerationMonitor />
-        {children}
-        <Toaster />
+        <NotificationToastProvider>
+          <IAPInitializer />
+          <WatchBridgeInitializer />
+          <BackgroundGenerationMonitor />
+          {children}
+          <Toaster />
+        </NotificationToastProvider>
         <Analytics />
       </body>
     </html>

@@ -29,6 +29,14 @@ interface NativeBridge {
   share: (options: ShareOptions) => Promise<{ completed: boolean }>;
   hapticImpact: (style?: 'light' | 'medium' | 'heavy' | 'soft' | 'rigid') => void;
   getDeviceInfo: () => Promise<DeviceInfo>;
+  // Notification functions
+  requestNotificationPermission: () => Promise<{ granted: boolean }>;
+  getNotificationPermissionStatus: () => Promise<{ authorized: boolean }>;
+  scheduleLocalNotification: (options: LocalNotificationOptions) => Promise<{ success: boolean; identifier: string }>;
+  cancelNotification: (identifier: string) => Promise<{ success: boolean }>;
+  setBadgeCount: (count: number) => Promise<{ success: boolean }>;
+  clearBadge: () => Promise<{ success: boolean }>;
+  getDeviceToken: () => Promise<{ token: string }>;
   onEvent?: (event: string, data: any) => void;
 }
 
@@ -79,6 +87,14 @@ interface DeviceInfo {
   screenHeight: number;
   appVersion: string;
   appBuild: string;
+}
+
+interface LocalNotificationOptions {
+  title: string;
+  body: string;
+  identifier?: string;
+  delay?: number;
+  userInfo?: Record<string, any>;
 }
 
 /**
@@ -239,4 +255,103 @@ export function removeEventListener(event: string, callback: EventCallback): voi
  * - purchaseFailed: { productId, errorCode, errorMessage }
  * - purchaseRestored: { transactionId, productId, receipt }
  * - watchMessage: { ...data from watch }
+ * - notificationReceived: { title, body, data }
+ * - navigateTo: { path }
  */
+
+/**
+ * Notification Functions
+ */
+export async function requestNotificationPermission(): Promise<{ granted: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    // Fallback to Web Notification API
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      return { granted: permission === 'granted' };
+    }
+    return { granted: false };
+  }
+  return bridge.requestNotificationPermission();
+}
+
+export async function getNotificationPermissionStatus(): Promise<{ authorized: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    if ('Notification' in window) {
+      return { authorized: Notification.permission === 'granted' };
+    }
+    return { authorized: false };
+  }
+  return bridge.getNotificationPermissionStatus();
+}
+
+export async function scheduleLocalNotification(options: LocalNotificationOptions): Promise<{ success: boolean; identifier: string }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    // Fallback to Web Notification API
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const identifier = options.identifier || `notif-${Date.now()}`;
+      if (options.delay && options.delay > 0) {
+        setTimeout(() => {
+          new Notification(options.title, { body: options.body });
+        }, options.delay * 1000);
+      } else {
+        new Notification(options.title, { body: options.body });
+      }
+      return { success: true, identifier };
+    }
+    return { success: false, identifier: '' };
+  }
+  return bridge.scheduleLocalNotification(options);
+}
+
+export async function cancelNotification(identifier: string): Promise<{ success: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    return { success: false };
+  }
+  return bridge.cancelNotification(identifier);
+}
+
+export async function setBadgeCount(count: number): Promise<{ success: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    // Try navigator.setAppBadge for PWA
+    if ('setAppBadge' in navigator) {
+      try {
+        await (navigator as any).setAppBadge(count);
+        return { success: true };
+      } catch {
+        return { success: false };
+      }
+    }
+    return { success: false };
+  }
+  return bridge.setBadgeCount(count);
+}
+
+export async function clearBadge(): Promise<{ success: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    if ('clearAppBadge' in navigator) {
+      try {
+        await (navigator as any).clearAppBadge();
+        return { success: true };
+      } catch {
+        return { success: false };
+      }
+    }
+    return { success: false };
+  }
+  return bridge.clearBadge();
+}
+
+export async function getDeviceToken(): Promise<string | null> {
+  const bridge = getNativeBridge();
+  if (!bridge) return null;
+  const result = await bridge.getDeviceToken();
+  return result.token || null;
+}
+
+export { LocalNotificationOptions };
