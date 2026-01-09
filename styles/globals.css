@@ -181,7 +181,7 @@ html, body {
   
   /* Additional padding for native iOS to prevent header being too high */
   .ios-native .pt-safe-extra {
-    padding-top: calc(env(safe-area-inset-top) + 8px);
+    padding-top: calc(env(safe-area-inset-top) + 40px);
   }
 }
 
