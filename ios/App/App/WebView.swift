@@ -60,16 +60,22 @@ struct WebView: UIViewRepresentable {
         // MARK: - Navigation Delegate
         
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            parent.viewModel.isLoading = true
+            DispatchQueue.main.async {
+                self.parent.viewModel.isLoading = true
+            }
         }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            parent.viewModel.isLoading = false
+            DispatchQueue.main.async {
+                self.parent.viewModel.isLoading = false
+            }
             parent.viewModel.injectBridge()
         }
         
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            parent.viewModel.isLoading = false
+            DispatchQueue.main.async {
+                self.parent.viewModel.isLoading = false
+            }
             print("❌ WebView navigation failed: \(error.localizedDescription)")
         }
         
