@@ -96,7 +96,7 @@ export default function UserTypePage() {
               <p className="text-sm sm:text-base lg:text-lg text-[#6B6B6B] mb-5 sm:mb-6 lg:mb-8 font-light leading-[1.7] tracking-wide px-2">
                 Receive client designs, curate your portfolio, and showcase your exceptional work
               </p>
-              <Button className="w-full h-12 sm:h-14 lg:h-16 border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-700 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]">
+              <Button className="w-full h-12 sm:h-14 lg:h-16 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-700 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]">
                 Begin Journey
               </Button>
             </div>
