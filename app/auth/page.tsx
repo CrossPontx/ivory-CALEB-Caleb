@@ -29,31 +29,6 @@ const styles = `
     0%, 100% { opacity: 0.05; transform: scale(1); }
     50% { opacity: 0.08; transform: scale(1.05); }
   }
-  
-  @keyframes slide-up-fade {
-    0% { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes slide-down-fade {
-    0% { opacity: 0; transform: translateY(-20px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes scale-in {
-    0% { opacity: 0; transform: scale(0.95); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  
-  @keyframes border-dance {
-    0%, 100% { border-color: rgba(232, 232, 232, 1); }
-    50% { border-color: rgba(139, 115, 85, 0.3); }
-  }
-  
-  @keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
 
   .animate-float-gentle {
     animation: float-gentle 6s ease-in-out infinite;
@@ -68,33 +43,6 @@ const styles = `
   .animate-glow-pulse {
     animation: glow-pulse 4s ease-in-out infinite;
   }
-  
-  .animate-slide-up-fade {
-    animation: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  
-  .animate-slide-down-fade {
-    animation: slide-down-fade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  
-  .animate-scale-in {
-    animation: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  
-  .animate-border-dance {
-    animation: border-dance 3s ease-in-out infinite;
-  }
-  
-  .animate-gradient-shift {
-    background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
-  }
-  
-  .delay-100 { animation-delay: 0.1s; }
-  .delay-200 { animation-delay: 0.2s; }
-  .delay-300 { animation-delay: 0.3s; }
-  .delay-400 { animation-delay: 0.4s; }
-  .delay-500 { animation-delay: 0.5s; }
   
   .input-focus-glow {
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -369,7 +317,7 @@ function AuthPageContent() {
   const isNative = Capacitor.isNativePlatform() || isNativeIOS();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-[#FAFAF8] to-[#F5F5F3] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden animate-gradient-shift">
+    <div className="min-h-screen bg-gradient-to-br from-white via-[#FAFAF8] to-[#F5F5F3] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Elegant Background Pattern with subtle animation */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none animate-shimmer-subtle">
         <div className="absolute inset-0" style={{
@@ -380,13 +328,13 @@ function AuthPageContent() {
 
       {/* Floating orbs for depth */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-[#8B7355] rounded-full opacity-[0.03] blur-3xl animate-glow-pulse" />
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-[#8B7355] rounded-full opacity-[0.04] blur-3xl animate-glow-pulse delay-200" />
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-[#8B7355] rounded-full opacity-[0.04] blur-3xl animate-glow-pulse" />
 
       {/* Back to Home Link - Only show on web, not in native iOS app */}
       {!isNative && (
         <button 
           onClick={() => router.push('/')}
-          className="fixed top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-[#1A1A1A] hover:text-[#8B7355] transition-all duration-500 z-50 touch-manipulation group animate-slide-down-fade"
+          className="fixed top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-[#1A1A1A] hover:text-[#8B7355] transition-all duration-500 z-50 touch-manipulation group"
         >
           <div className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-[#E8E8E8] group-hover:border-[#8B7355] group-hover:shadow-lg transition-all duration-500 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-300">
@@ -399,7 +347,7 @@ function AuthPageContent() {
         </button>
       )}
 
-      <div className="w-full max-w-md relative z-10 animate-scale-in">
+      <div className="w-full max-w-md relative z-10">
         {/* Main Card with Enhanced Shadow */}
         <div className="bg-white border border-[#E8E8E8] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.08)] transition-all duration-700 p-6 sm:p-8 md:p-10 relative overflow-hidden rounded-2xl">
           {/* Subtle Top Accent with shimmer */}
@@ -407,7 +355,7 @@ function AuthPageContent() {
           
           {/* Header Section */}
           <div className="text-center mb-8 sm:mb-10">
-            <div className="flex justify-center items-center gap-3 mb-5 animate-slide-up-fade">
+            <div className="flex justify-center items-center gap-3 mb-5">
               <div className="relative animate-float-gentle">
                 <div className="absolute inset-0 bg-[#8B7355] opacity-10 blur-xl rounded-full animate-glow-pulse" />
                 <Image 
@@ -424,12 +372,12 @@ function AuthPageContent() {
               </h1>
             </div>
             
-            <p className="text-xs sm:text-sm tracking-widest uppercase text-[#6B6B6B] font-light mb-5 animate-slide-up-fade delay-100">
+            <p className="text-xs sm:text-sm tracking-widest uppercase text-[#6B6B6B] font-light mb-5">
               {referralCode ? "✨ Exclusive Invitation" : isSignUp ? "Begin Your Journey" : "Welcome Back"}
             </p>
             
             {/* Enhanced Account Toggle */}
-            <div className="inline-flex items-center gap-2 px-5 py-3 border border-[#E8E8E8] bg-gradient-to-br from-[#FAFAF8] to-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-500 animate-slide-up-fade delay-200 hover:scale-[1.02]">
+            <div className="inline-flex items-center gap-2 px-5 py-3 border border-[#E8E8E8] bg-gradient-to-br from-[#FAFAF8] to-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-500 hover:scale-[1.02]">
               <span className="text-xs tracking-wide text-[#6B6B6B] font-light">
                 {isSignUp ? "Already have an account?" : "New to Ivory's Choice?"}
               </span>
@@ -443,18 +391,18 @@ function AuthPageContent() {
             </div>
             
             {referralCode && (
-              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#8B7355]/10 to-[#8B7355]/5 border border-[#8B7355]/20 rounded-lg animate-slide-up-fade delay-300 hover:scale-[1.02] transition-transform duration-300">
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#8B7355]/10 to-[#8B7355]/5 border border-[#8B7355]/20 rounded-lg hover:scale-[1.02] transition-transform duration-300">
                 <svg className="w-4 h-4 text-[#8B7355] animate-float-gentle" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                <p className="text-xs text-[#8B7355] font-medium">5 complimentary credits included</p>
+                <p className="text-xs text-[#8B7355] font-medium">2 complimentary credits included</p>
               </div>
             )}
           </div>
 
           {/* Form Section */}
           <form onSubmit={handleAuth} className="space-y-5 sm:space-y-6">
-            <div className="space-y-2 animate-slide-up-fade delay-300">
+            <div className="space-y-2">
               <label className="block text-[11px] tracking-widest uppercase text-[#6B6B6B] mb-2.5 font-medium">Username</label>
               <Input
                 type="text"
@@ -467,7 +415,7 @@ function AuthPageContent() {
             </div>
             
             {isSignUp && (
-              <div className="space-y-2 animate-slide-up-fade delay-400">
+              <div className="space-y-2">
                 <label className="block text-[11px] tracking-widest uppercase text-[#6B6B6B] mb-2.5 font-medium">Email</label>
                 <Input
                   type="email"
@@ -480,7 +428,7 @@ function AuthPageContent() {
               </div>
             )}
             
-            <div className="relative space-y-2 animate-slide-up-fade delay-500">
+            <div className="relative space-y-2">
               <label className="block text-[11px] tracking-widest uppercase text-[#6B6B6B] mb-2.5 font-medium">Password</label>
               <div className="relative">
                 <Input
@@ -512,7 +460,7 @@ function AuthPageContent() {
             </div>
 
             {isSignUp && (
-              <div className="border border-[#E8E8E8] bg-gradient-to-br from-[#FAFAF8] to-white p-5 sm:p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-500 animate-slide-up-fade delay-500">
+              <div className="border border-[#E8E8E8] bg-gradient-to-br from-[#FAFAF8] to-white p-5 sm:p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-500">
                 <label 
                   htmlFor="terms-checkbox" 
                   className="flex items-start gap-4 cursor-pointer group"
@@ -574,14 +522,14 @@ function AuthPageContent() {
 
             <Button 
               type="submit" 
-              className="w-full h-12 sm:h-14 bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] text-white hover:from-[#8B7355] hover:to-[#9B8365] text-xs tracking-widest uppercase rounded-lg font-medium mt-7 touch-manipulation shadow-lg button-hover-lift animate-slide-up-fade delay-500"
+              className="w-full h-12 sm:h-14 bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] text-white hover:from-[#8B7355] hover:to-[#9B8365] text-xs tracking-widest uppercase rounded-lg font-medium mt-7 touch-manipulation shadow-lg button-hover-lift"
             >
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
 
           {!isSignUp && (
-            <div className="mt-6 text-center animate-slide-up-fade delay-500">
+            <div className="mt-6 text-center">
               <button 
                 type="button" 
                 onClick={() => router.push('/forgot-password')} 
@@ -593,7 +541,7 @@ function AuthPageContent() {
           )}
 
           {/* Footer Links */}
-          <div className="mt-8 pt-6 border-t border-[#E8E8E8] text-center animate-slide-up-fade delay-500">
+          <div className="mt-8 pt-6 border-t border-[#E8E8E8] text-center">
             <div className="flex items-center justify-center gap-4 text-xs tracking-wider text-[#6B6B6B] font-light">
               <button 
                 type="button"

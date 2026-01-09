@@ -350,7 +350,7 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
         <ul className="space-y-4">
           <li className="flex items-start gap-3 text-sm sm:text-base font-light text-[#1A1A1A]">
             <Check className="h-5 w-5 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={1} />
-            <span>5 credits on signup</span>
+            <span>2 credits on signup</span>
           </li>
           {userType === 'tech' && (
             <li className="flex items-start gap-3 text-sm sm:text-base font-light text-[#1A1A1A]">

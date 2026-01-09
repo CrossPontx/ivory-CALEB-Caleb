@@ -152,7 +152,7 @@ export function ReferralCard() {
       <div className="border-t border-[#E8E8E8] pt-6 space-y-2">
         <p className="text-xs text-[#6B6B6B] font-light flex items-start gap-2">
           <span className="text-[#8B7355]">•</span>
-          <span>New users get 5 free credits when they sign up</span>
+          <span>New users get 2 free credits when they sign up</span>
         </p>
         <p className="text-xs text-[#6B6B6B] font-light flex items-start gap-2">
           <span className="text-[#8B7355]">•</span>

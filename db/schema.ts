@@ -17,7 +17,7 @@ export const users: any = pgTable('users', {
   authProvider: authProviderEnum('auth_provider').default('email').notNull(),
   userType: userTypeEnum('user_type').notNull(),
   avatar: text('avatar'),
-  credits: integer('credits').default(5).notNull(), // Free credits on signup
+  credits: integer('credits').default(2).notNull(), // Free credits on signup
   referralCode: varchar('referral_code', { length: 50 }).unique(), // User's unique referral code
   referredBy: integer('referred_by').references((): any => users.id), // Who referred this user
   // Subscription fields

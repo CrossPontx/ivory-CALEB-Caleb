@@ -231,7 +231,7 @@ export default function LandingPage() {
                 <div className="space-y-4 sm:space-y-5 text-base font-light">
                   <div className="flex items-start gap-4">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2.5 flex-shrink-0" />
-                    <span className="text-[#6B6B6B] leading-[1.7] tracking-wide">5 credits on signup</span>
+                    <span className="text-[#6B6B6B] leading-[1.7] tracking-wide">2 credits on signup</span>
                   </div>
                   <div className="flex items-start gap-4">
                     <div className="w-1 h-1 bg-[#1A1A1A] mt-2.5 flex-shrink-0" />
