@@ -1900,7 +1900,7 @@ export default function CapturePage() {
         
         {/* Elegant Header */}
         <div className={`absolute top-0 left-0 right-0 px-3 sm:px-6 lg:px-10 pb-3 sm:pb-4 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500 ${isNative() ? 'pt-safe-extra' : 'pt-safe'}`}>
-          <div className={`max-w-7xl mx-auto ${isNative() ? 'pt-6' : 'pt-2'}`}>
+          <div className={`max-w-7xl mx-auto ${isNative() ? 'pt-12' : 'pt-2'}`}>
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               {/* Left side - Back button */}
               <button

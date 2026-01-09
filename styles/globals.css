@@ -181,8 +181,13 @@ html, body {
   
   /* Additional padding for native iOS to prevent header being too high */
   .ios-native .pt-safe-extra {
-    padding-top: calc(env(safe-area-inset-top) + 40px);
+    padding-top: calc(env(safe-area-inset-top) + 80px);
   }
+}
+
+/* Fallback for native iOS if safe area isn't working */
+.ios-native .pt-safe-extra {
+  padding-top: 120px; /* Fixed padding as fallback */
 }
 
 /* Luxury Animations */
