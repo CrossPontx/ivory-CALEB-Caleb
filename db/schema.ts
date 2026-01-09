@@ -146,6 +146,7 @@ export const looks = pgTable('looks', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').references(() => users.id).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'), // Keep this to preserve existing data
   imageUrl: text('image_url').notNull(),
   originalImageUrl: text('original_image_url'), // original hand photo
   aiPrompt: text('ai_prompt'), // AI generation prompt if used
