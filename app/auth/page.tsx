@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Capacitor } from "@capacitor/core"
 import { Browser } from "@capacitor/browser"
 import { Haptics, ImpactStyle } from "@capacitor/haptics"
+import { isNativeIOS } from "@/lib/native-bridge"
 // import { signInWithAppleNative } from "@/lib/native-apple-auth" // Temporarily disabled - waiting for Capacitor 8 compatible version
 
 // Keyframes for elegant animations
@@ -365,7 +366,7 @@ function AuthPageContent() {
     )
   }
 
-  const isNative = Capacitor.isNativePlatform();
+  const isNative = Capacitor.isNativePlatform() || isNativeIOS();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-[#FAFAF8] to-[#F5F5F3] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden animate-gradient-shift">
