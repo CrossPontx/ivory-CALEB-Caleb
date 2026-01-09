@@ -398,6 +398,7 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
     references: [looks.id],
   }),
   designBreakdowns: many(designBreakdowns),
+  messages: many(bookingMessages),
 }));
 
 export const designBreakdownsRelations = relations(designBreakdowns, ({ one }) => ({
@@ -607,6 +608,30 @@ export const designRequestMessagesRelations = relations(designRequestMessages, (
   }),
   sender: one(users, {
     fields: [designRequestMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+// Messages for booking conversations between client and tech
+export const bookingMessages = pgTable('booking_messages', {
+  id: serial('id').primaryKey(),
+  bookingId: integer('booking_id').references(() => bookings.id).notNull(),
+  senderId: integer('sender_id').references(() => users.id).notNull(),
+  senderType: varchar('sender_type', { length: 20 }).notNull(), // 'client' or 'tech'
+  messageType: varchar('message_type', { length: 20 }).default('text').notNull(), // 'text', 'image', 'file'
+  content: text('content').notNull(),
+  fileName: varchar('file_name', { length: 255 }),
+  isRead: boolean('is_read').default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const bookingMessagesRelations = relations(bookingMessages, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [bookingMessages.bookingId],
+    references: [bookings.id],
+  }),
+  sender: one(users, {
+    fields: [bookingMessages.senderId],
     references: [users.id],
   }),
 }));
