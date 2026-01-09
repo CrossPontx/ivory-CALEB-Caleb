@@ -4,57 +4,47 @@
 On native iOS, the close button in the bottom drawers (design parameters and upload drawer) was positioned too high and overlapping with the iPhone's notch/status bar area, making it untappable.
 
 ## Root Cause
-The close button containers were using standard padding (`py-4`) without accounting for the iPhone's safe area and notch on native iOS. The initial fix with `pt-safe-extra` wasn't providing enough padding.
+The bottom drawers were using `fixed inset-0` which positions them from the very top of the screen, causing the close buttons to overlap with the iPhone notch area on native iOS.
 
 ## Solution Implemented
-Created a new CSS class `pt-safe-drawer` with increased padding specifically for drawer close buttons on native iOS:
+Applied top padding to the entire drawer containers on native iOS using the `pt-safe-drawer` CSS class:
 
 ### Changes Made
-1. **Design Parameters Drawer**: Added `pt-safe-drawer` class on native iOS
-2. **Upload Drawer**: Added `pt-safe-drawer` class on native iOS
-3. **New CSS Class**: Created `pt-safe-drawer` with extra padding for drawer close buttons
+1. **Design Parameters Drawer Container**: Added `pt-safe-drawer` class to the entire drawer
+2. **Upload Drawer Container**: Added `pt-safe-drawer` class to the entire drawer
+3. **Removed Redundant Padding**: Removed individual close button padding since entire drawer now has padding
 
-### CSS Classes Used
-**New `pt-safe-drawer` class provides:**
+### CSS Class Used
+**`pt-safe-drawer` class provides:**
 - `padding-top: calc(env(safe-area-inset-top) + 160px)` - Dynamic safe area + extra padding
 - `padding-top: 200px` - Fallback fixed padding for native iOS
-
-**Previous `pt-safe-extra` class (still used elsewhere):**
-- `padding-top: calc(env(safe-area-inset-top) + 100px)` - Dynamic safe area + standard padding
-- `padding-top: 140px` - Fallback fixed padding for native iOS
 
 ### Code Changes
 ```tsx
 // Before
-<div className="flex items-center justify-center py-4">
+<div className="fixed inset-0 bg-white z-40 ...">
 
 // After  
-<div className={`flex items-center justify-center py-4 ${isNativeIOS() ? 'pt-safe-drawer' : ''}`}>
+<div className={`fixed inset-0 bg-white z-40 ... ${isNativeIOS() ? 'pt-safe-drawer' : ''}`}>
 ```
 
-### CSS Added
-```css
-/* Extra padding for drawer close buttons on native iOS */
-.ios-native .pt-safe-drawer {
-  padding-top: calc(env(safe-area-inset-top) + 160px);
-}
-
-/* Fallback for drawer close buttons on native iOS */
-.ios-native .pt-safe-drawer {
-  padding-top: 200px; /* Extra padding for drawer close buttons */
-}
-```
+### Technical Approach
+Instead of adding padding only to the close button containers, the padding is now applied to the entire drawer containers. This ensures:
+- The entire drawer content starts below the iPhone notch
+- Close buttons are positioned in a tappable area
+- All drawer content respects the safe area
+- Consistent spacing throughout the drawer
 
 ## Result
-- ✅ Close buttons now positioned well below the iPhone notch
-- ✅ Buttons are fully tappable without interference from status bar
-- ✅ Increased padding from 140px to 200px fallback (60px additional)
-- ✅ Maintains proper spacing on web and other platforms
-- ✅ Uses dedicated CSS class for drawer-specific positioning
+- ✅ Entire drawer positioned below iPhone notch on native iOS
+- ✅ Close buttons fully tappable without interference from status bar
+- ✅ All drawer content properly positioned within safe area
+- ✅ Maintains normal appearance on web and other platforms
+- ✅ More robust solution that affects entire drawer layout
 
 ## Files Modified
-- `app/capture/page.tsx` - Updated both drawer close buttons to use `pt-safe-drawer`
-- `styles/globals.css` - Added new `pt-safe-drawer` CSS class with increased padding
+- `app/capture/page.tsx` - Added `pt-safe-drawer` to both drawer containers, removed individual button padding
+- `styles/globals.css` - Uses existing `pt-safe-drawer` CSS class with 200px fallback padding
 
 ## Testing
-The close buttons in both bottom drawers should now appear significantly lower on native iOS, providing ample space below the iPhone notch and ensuring they are fully tappable.
+Both bottom drawers should now appear with their entire content positioned below the iPhone notch on native iOS, ensuring the close buttons and all other content are fully accessible and tappable.
