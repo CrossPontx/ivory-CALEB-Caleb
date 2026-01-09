@@ -1868,7 +1868,7 @@ export default function CapturePage() {
         
         {/* Elegant Header */}
         <div className="absolute top-0 left-0 right-0 pt-safe px-3 sm:px-6 lg:px-10 pb-3 sm:pb-4 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
-          <div className="max-w-7xl mx-auto pt-3">
+          <div className="max-w-7xl mx-auto pt-2">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               {/* Left side - Back button */}
               <button
@@ -1967,10 +1967,9 @@ export default function CapturePage() {
 
         {/* Elegant Image Preview Section - Side by Side */}
         <div 
-          className="pt-32 sm:pt-36 lg:pt-40 pb-24 sm:pb-28 px-4 sm:px-8 lg:px-12 overflow-y-auto transition-all duration-700" 
+          className="pt-28 sm:pt-32 lg:pt-36 pb-32 sm:pb-36 px-4 sm:px-8 lg:px-12 overflow-y-auto transition-all duration-700" 
           style={{ 
-            height: '100vh',
-            paddingBottom: '140px' // Space for button bar + bottom nav
+            height: '100vh'
           }}
         >
           <div className="max-w-4xl mx-auto h-full flex flex-col gap-4">
@@ -2104,7 +2103,7 @@ export default function CapturePage() {
         </div>
 
         {/* Fixed Visualize Button Bar - At Bottom Above Nav */}
-        <div className="fixed left-0 right-0 bottom-20 z-30 px-3 pb-3 bg-gradient-to-t from-white via-white to-transparent pt-6 pointer-events-none">
+        <div className="fixed left-0 right-0 bottom-20 z-30 px-3 pb-4 bg-gradient-to-t from-white via-white to-transparent pt-6 pointer-events-none">
           <div className="max-w-4xl mx-auto pointer-events-auto">
             {!isGenerating ? (
               <button 
