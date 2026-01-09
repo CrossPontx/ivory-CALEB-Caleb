@@ -132,18 +132,7 @@ export default function AccountSecurityPage() {
           </form>
         </div>
 
-        <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-white">
-          <h2 className="font-serif text-xl font-light text-[#1A1A1A] tracking-tight mb-3">Two-Factor Authentication</h2>
-          <p className="text-sm text-[#6B6B6B] font-light mb-6">
-            Add an extra layer of security to your account
-          </p>
-          <button
-            disabled
-            className="w-full h-12 border border-[#E8E8E8] text-[#6B6B6B] font-light text-sm tracking-wider uppercase cursor-not-allowed"
-          >
-            Enable 2FA (Coming Soon)
-          </button>
-        </div>
+
       </main>
 
       {/* Bottom Navigation */}
