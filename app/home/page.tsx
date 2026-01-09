@@ -703,7 +703,7 @@ export default function HomePage() {
         {/* My Bookings Tab */}
         {activeTab === 'bookings' && (
           <div className="tab-content-enter page-container space-y-8 sm:space-y-12 lg:space-y-16">
-            {/* Potential Upcoming Appointments (Design Requests) */}
+            {/* Pending Appointments (Design Requests) */}
             {designRequests.length > 0 && (
               <div>
                 <div className="text-center space-y-3 sm:space-y-5 mb-6 sm:mb-8">
@@ -711,7 +711,7 @@ export default function HomePage() {
                     In Discussion
                   </p>
                   <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
-                    Potential Upcoming Appointments
+                    Pending Appointments
                   </h2>
                   <p className="text-xs sm:text-sm text-[#6B6B6B] font-light max-w-lg mx-auto">
                     Designs you've sent to nail techs. Continue the conversation to schedule your appointment.
