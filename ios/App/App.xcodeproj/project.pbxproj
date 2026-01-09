@@ -8,18 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		034EDB062EF20FF800BA022C /* ivory Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 034EDAFC2EF20FF700BA022C /* ivory Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		0378E48A2F1066D100F5DF8C /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0378E4862F1066D100F5DF8C /* ShareManager.swift */; };
-		0378E48D2F1066D100F5DF8C /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0378E4832F1066D100F5DF8C /* HapticsManager.swift */; };
 		0378E48E2F1066D100F5DF8C /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0378E4842F1066D100F5DF8C /* IAPManager.swift */; };
-		0378E4902F1066D100F5DF8C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0378E4812F1066D100F5DF8C /* ContentView.swift */; };
-		0378E4932F1066D100F5DF8C /* IvoryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0378E4852F1066D100F5DF8C /* IvoryApp.swift */; };
+		037B97362F10B6C5005FF62D /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B97302F10B6C5005FF62D /* NotificationManager.swift */; };
+		037B97372F10B6C5005FF62D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B972C2F10B6C5005FF62D /* ContentView.swift */; };
+		037B97382F10B6C5005FF62D /* DeviceInfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B972D2F10B6C5005FF62D /* DeviceInfoManager.swift */; };
+		037B97392F10B6C5005FF62D /* WebViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B97352F10B6C5005FF62D /* WebViewModel.swift */; };
+		037B973A2F10B6C5005FF62D /* NotificationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B97312F10B6C5005FF62D /* NotificationPlugin.swift */; };
+		037B973B2F10B6C5005FF62D /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B97332F10B6C5005FF62D /* WatchConnectivityManager.swift */; };
+		037B973C2F10B6C5005FF62D /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B97322F10B6C5005FF62D /* ShareManager.swift */; };
+		037B973D2F10B6C5005FF62D /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B972E2F10B6C5005FF62D /* HapticsManager.swift */; };
+		037B973E2F10B6C5005FF62D /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B97342F10B6C5005FF62D /* WebView.swift */; };
+		037B973F2F10B6C5005FF62D /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B972B2F10B6C5005FF62D /* CameraManager.swift */; };
+		037B97402F10B6C5005FF62D /* IvoryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B972F2F10B6C5005FF62D /* IvoryApp.swift */; };
 		03A334C92F08D1C500684786 /* IAPPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A334C82F08D1C500684786 /* IAPPlugin.swift */; };
 		03A3CF4D2F00E7DA00EF5B32 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03A3CF4C2F00E7DA00EF5B32 /* StoreKit.framework */; };
-		03A58B7F2F1069D300DCE088 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A58B7E2F1069D300DCE088 /* WebView.swift */; };
-		03DA09ED2F10B4FB000406F6 /* DeviceInfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DA09EC2F10B4FB000406F6 /* DeviceInfoManager.swift */; };
-		03DA09F12F10B583000406F6 /* WebViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DA09F02F10B583000406F6 /* WebViewModel.swift */; };
-		03DA09F32F10B5A2000406F6 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DA09F22F10B5A2000406F6 /* WatchConnectivityManager.swift */; };
-		03DA09F52F10B5BA000406F6 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03DA09F42F10B5BA000406F6 /* CameraManager.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
@@ -56,19 +58,21 @@
 
 /* Begin PBXFileReference section */
 		034EDAFC2EF20FF700BA022C /* ivory Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ivory Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0378E4812F1066D100F5DF8C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		0378E4832F1066D100F5DF8C /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsManager.swift; sourceTree = "<group>"; };
 		0378E4842F1066D100F5DF8C /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
-		0378E4852F1066D100F5DF8C /* IvoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IvoryApp.swift; sourceTree = "<group>"; };
-		0378E4862F1066D100F5DF8C /* ShareManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
+		037B972B2F10B6C5005FF62D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		037B972C2F10B6C5005FF62D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		037B972D2F10B6C5005FF62D /* DeviceInfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoManager.swift; sourceTree = "<group>"; };
+		037B972E2F10B6C5005FF62D /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsManager.swift; sourceTree = "<group>"; };
+		037B972F2F10B6C5005FF62D /* IvoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IvoryApp.swift; sourceTree = "<group>"; };
+		037B97302F10B6C5005FF62D /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		037B97312F10B6C5005FF62D /* NotificationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPlugin.swift; sourceTree = "<group>"; };
+		037B97322F10B6C5005FF62D /* ShareManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
+		037B97332F10B6C5005FF62D /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
+		037B97342F10B6C5005FF62D /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		037B97352F10B6C5005FF62D /* WebViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewModel.swift; sourceTree = "<group>"; };
 		03A334C82F08D1C500684786 /* IAPPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPPlugin.swift; sourceTree = "<group>"; };
 		03A3CF4C2F00E7DA00EF5B32 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		03A58B7E2F1069D300DCE088 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		03D852062EF0FFF10040F36B /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
-		03DA09EC2F10B4FB000406F6 /* DeviceInfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoManager.swift; sourceTree = "<group>"; };
-		03DA09F02F10B583000406F6 /* WebViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewModel.swift; sourceTree = "<group>"; };
-		03DA09F22F10B5A2000406F6 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
-		03DA09F42F10B5BA000406F6 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -116,16 +120,18 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
-				03DA09F42F10B5BA000406F6 /* CameraManager.swift */,
-				0378E4812F1066D100F5DF8C /* ContentView.swift */,
-				03DA09EC2F10B4FB000406F6 /* DeviceInfoManager.swift */,
-				0378E4832F1066D100F5DF8C /* HapticsManager.swift */,
+				037B972B2F10B6C5005FF62D /* CameraManager.swift */,
+				037B972C2F10B6C5005FF62D /* ContentView.swift */,
+				037B972D2F10B6C5005FF62D /* DeviceInfoManager.swift */,
+				037B972E2F10B6C5005FF62D /* HapticsManager.swift */,
+				037B972F2F10B6C5005FF62D /* IvoryApp.swift */,
+				037B97302F10B6C5005FF62D /* NotificationManager.swift */,
+				037B97312F10B6C5005FF62D /* NotificationPlugin.swift */,
+				037B97322F10B6C5005FF62D /* ShareManager.swift */,
+				037B97332F10B6C5005FF62D /* WatchConnectivityManager.swift */,
+				037B97342F10B6C5005FF62D /* WebView.swift */,
+				037B97352F10B6C5005FF62D /* WebViewModel.swift */,
 				0378E4842F1066D100F5DF8C /* IAPManager.swift */,
-				0378E4852F1066D100F5DF8C /* IvoryApp.swift */,
-				0378E4862F1066D100F5DF8C /* ShareManager.swift */,
-				03DA09F22F10B5A2000406F6 /* WatchConnectivityManager.swift */,
-				03A58B7E2F1069D300DCE088 /* WebView.swift */,
-				03DA09F02F10B583000406F6 /* WebViewModel.swift */,
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				034EDAFD2EF20FF700BA022C /* ivory Watch App */,
@@ -283,18 +289,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				03DA09F12F10B583000406F6 /* WebViewModel.swift in Sources */,
-				03DA09F52F10B5BA000406F6 /* CameraManager.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				03A334C92F08D1C500684786 /* IAPPlugin.swift in Sources */,
-				0378E48A2F1066D100F5DF8C /* ShareManager.swift in Sources */,
-				03DA09ED2F10B4FB000406F6 /* DeviceInfoManager.swift in Sources */,
-				0378E48D2F1066D100F5DF8C /* HapticsManager.swift in Sources */,
-				03DA09F32F10B5A2000406F6 /* WatchConnectivityManager.swift in Sources */,
+				037B97362F10B6C5005FF62D /* NotificationManager.swift in Sources */,
+				037B97372F10B6C5005FF62D /* ContentView.swift in Sources */,
+				037B97382F10B6C5005FF62D /* DeviceInfoManager.swift in Sources */,
+				037B97392F10B6C5005FF62D /* WebViewModel.swift in Sources */,
+				037B973A2F10B6C5005FF62D /* NotificationPlugin.swift in Sources */,
+				037B973B2F10B6C5005FF62D /* WatchConnectivityManager.swift in Sources */,
+				037B973C2F10B6C5005FF62D /* ShareManager.swift in Sources */,
+				037B973D2F10B6C5005FF62D /* HapticsManager.swift in Sources */,
+				037B973E2F10B6C5005FF62D /* WebView.swift in Sources */,
+				037B973F2F10B6C5005FF62D /* CameraManager.swift in Sources */,
+				037B97402F10B6C5005FF62D /* IvoryApp.swift in Sources */,
 				0378E48E2F1066D100F5DF8C /* IAPManager.swift in Sources */,
-				0378E4902F1066D100F5DF8C /* ContentView.swift in Sources */,
-				03A58B7F2F1069D300DCE088 /* WebView.swift in Sources */,
-				0378E4932F1066D100F5DF8C /* IvoryApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

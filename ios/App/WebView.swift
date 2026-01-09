@@ -77,14 +77,6 @@ struct WebView: UIViewRepresentable {
                 self.parent.viewModel.isLoading = false
             }
             print("❌ WebView navigation failed: \(error.localizedDescription)")
-            
-            // Try to reload after a delay if it's a network error
-            if (error as NSError).code == NSURLErrorCannotConnectToHost {
-                print("🔄 Retrying connection to localhost in 2 seconds...")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    self.parent.viewModel.loadWebApp()
-                }
-            }
         }
         
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {

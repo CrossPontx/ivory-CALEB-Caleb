@@ -23,17 +23,10 @@ class WebViewModel: ObservableObject {
     // MARK: - Web App Loading
     
     func loadWebApp() {
-        // Load from localhost during development, production URL for release
-        #if DEBUG
-        let urlString = "http://localhost:3000"
-        #else
-        let urlString = "https://www.ivoryschoice.com"
-        #endif
-        
-        if let url = URL(string: urlString) {
+        // Always load from production URL
+        if let url = URL(string: "https://www.ivoryschoice.com") {
             let request = URLRequest(url: url)
             webView?.load(request)
-            print("🔵 Loading web app from: \(urlString)")
         }
     }
     
