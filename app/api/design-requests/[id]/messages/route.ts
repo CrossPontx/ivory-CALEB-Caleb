@@ -6,10 +6,11 @@ import { eq, asc } from 'drizzle-orm';
 // GET messages for a design request
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const designRequestId = parseInt(params.id);
+    const { id } = await params;
+    const designRequestId = parseInt(id);
     
     if (isNaN(designRequestId)) {
       return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 });
@@ -38,10 +39,11 @@ export async function GET(
 // POST a new message
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const designRequestId = parseInt(params.id);
+    const { id } = await params;
+    const designRequestId = parseInt(id);
     
     if (isNaN(designRequestId)) {
       return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 });

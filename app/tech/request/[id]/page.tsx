@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -8,6 +8,13 @@ import { ArrowLeft, Send, Paperclip, Image as ImageIcon, FileText, Sparkles, Che
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { toast } from "sonner"
+
+// Native haptic feedback
+const triggerHaptic = (style: 'light' | 'medium' | 'success' = 'light') => {
+  if (typeof window !== 'undefined' && (window as any).webkit?.messageHandlers?.haptics) {
+    (window as any).webkit.messageHandlers.haptics.postMessage({ style })
+  }
+}
 
 type DesignRequest = {
   id: string
@@ -45,9 +52,9 @@ export default function TechRequestDetailPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
@@ -193,6 +200,7 @@ export default function TechRequestDetailPage() {
     if (!newMessage.trim() || !request || !currentUserId) return
     
     setSendingMessage(true)
+    triggerHaptic('light')
     
     try {
       // Save message to database
@@ -296,6 +304,7 @@ export default function TechRequestDetailPage() {
 
   const handleApprove = async () => {
     if (!request || !currentUserId) return
+    triggerHaptic('success')
     
     try {
       const response = await fetch('/api/design-requests', {
@@ -374,24 +383,27 @@ export default function TechRequestDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F7F5] flex flex-col">
-      {/* Header - Mobile Optimized */}
-      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-50 pt-safe">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+    <div className="min-h-screen min-h-[100dvh] bg-[#F8F7F5] flex flex-col">
+      {/* Header - iOS Native Style */}
+      <header className="bg-white/95 backdrop-blur-xl border-b border-[#E8E8E8]/80 sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.back()}
-                className="h-10 w-10 p-0 hover:bg-[#F8F7F5] rounded-none flex-shrink-0 active:scale-95 transition-transform"
+                onClick={() => {
+                  triggerHaptic('light')
+                  router.back()
+                }}
+                className="h-11 w-11 p-0 hover:bg-[#F8F7F5] rounded-full flex-shrink-0 active:scale-90 transition-all duration-150"
               >
-                <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+                <ArrowLeft className="w-5 h-5 text-[#8B7355]" strokeWidth={2} />
               </Button>
               <div className="min-w-0 flex-1">
-                <h1 className="font-serif text-base sm:text-lg font-light text-[#1A1A1A] truncate">{request.clientName}</h1>
-                <p className="text-[9px] sm:text-[10px] text-[#6B6B6B] font-light tracking-wide">
-                  {request.status === "approved" ? "✓ Approved" : "Active conversation"}
+                <h1 className="font-semibold text-[15px] sm:text-base text-[#1A1A1A] truncate">{request.clientName}</h1>
+                <p className="text-[11px] sm:text-xs text-[#6B6B6B] font-normal">
+                  {request.status === "approved" ? "✓ Approved" : "Active"}
                 </p>
               </div>
             </div>
@@ -400,35 +412,37 @@ export default function TechRequestDetailPage() {
               <Button
                 onClick={handleApprove}
                 size="sm"
-                className="h-9 sm:h-10 px-3 sm:px-4 bg-[#1A1A1A] hover:bg-[#8B7355] text-white text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.15em] uppercase font-light rounded-none flex-shrink-0 active:scale-95 transition-transform touch-manipulation"
+                className="h-9 px-4 bg-[#34C759] hover:bg-[#30B350] text-white text-[13px] font-medium rounded-full flex-shrink-0 active:scale-95 transition-all duration-150 touch-manipulation shadow-sm"
               >
-                <Check className="w-3.5 h-3.5 mr-1 sm:mr-1.5" strokeWidth={1.5} />
-                <span className="hidden xs:inline">Approve</span>
-                <span className="xs:hidden">OK</span>
+                <Check className="w-4 h-4 mr-1.5" strokeWidth={2} />
+                Approve
               </Button>
             )}
           </div>
         </div>
       </header>
 
-      {/* AI Guide Button - Mobile Optimized */}
+      {/* AI Guide Button - iOS Style */}
       {!showGuidance && (
-        <div className="bg-white/80 backdrop-blur-sm border-b border-[#E8E8E8]">
-          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-[#E8E8E8]/60">
+          <div className="max-w-3xl mx-auto px-4 py-2">
             <button
-              onClick={generateImplementationGuidance}
+              onClick={() => {
+                triggerHaptic('light')
+                generateImplementationGuidance()
+              }}
               disabled={loadingGuidance}
-              className="flex items-center gap-2 text-[10px] sm:text-[11px] text-[#8B7355] font-light tracking-wide hover:text-[#1A1A1A] transition-colors active:scale-95 touch-manipulation min-h-[36px]"
+              className="flex items-center gap-2 text-[13px] text-[#8B7355] font-medium hover:text-[#1A1A1A] transition-colors active:scale-95 touch-manipulation min-h-[40px]"
             >
               {loadingGuidance ? (
                 <>
-                  <div className="w-3 h-3 border border-[#8B7355] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-[#8B7355] border-t-transparent rounded-full animate-spin"></div>
                   <span>Analyzing design...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3.5 h-3.5" strokeWidth={1.5} />
-                  <span>Get AI implementation tips</span>
+                  <Sparkles className="w-4 h-4" strokeWidth={2} />
+                  <span>Get AI tips</span>
                 </>
               )}
             </button>
@@ -436,132 +450,131 @@ export default function TechRequestDetailPage() {
         </div>
       )}
 
-      {/* AI Guidance Panel - Mobile Optimized with expand */}
+      {/* AI Guidance Panel - iOS Card Style */}
       {showGuidance && implementationGuidance && (
-        <div className="bg-white/90 backdrop-blur-sm border-b border-[#E8E8E8]">
-          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3">
-            <div className="flex items-start justify-between gap-2 sm:gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                  <Sparkles className="w-3 h-3 text-[#8B7355]" strokeWidth={1.5} />
-                  <span className="text-[9px] sm:text-[10px] text-[#8B7355] font-light tracking-wide uppercase">AI Tips</span>
+        <div className="bg-gradient-to-b from-[#F5F0EB] to-[#F8F7F5] border-b border-[#E8E8E8]/60">
+          <div className="max-w-3xl mx-auto px-4 py-3">
+            <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-[#E8E8E8]/50">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#8B7355] to-[#A08060] flex items-center justify-center">
+                      <Sparkles className="w-3.5 h-3.5 text-white" strokeWidth={2} />
+                    </div>
+                    <span className="text-[13px] text-[#8B7355] font-semibold">AI Tips</span>
+                  </div>
+                  <p className={`text-[14px] text-[#3C3C43] font-normal leading-[1.4] ${showFullGuidance ? '' : 'line-clamp-3'}`}>
+                    {implementationGuidance}
+                  </p>
+                  {implementationGuidance.length > 120 && (
+                    <button 
+                      onClick={() => {
+                        triggerHaptic('light')
+                        setShowFullGuidance(!showFullGuidance)
+                      }}
+                      className="text-[13px] text-[#8B7355] font-medium mt-2 flex items-center gap-1 active:opacity-70 touch-manipulation"
+                    >
+                      {showFullGuidance ? 'Show less' : 'Show more'}
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showFullGuidance ? 'rotate-180' : ''}`} strokeWidth={2} />
+                    </button>
+                  )}
                 </div>
-                <p className={`text-[11px] sm:text-xs text-[#6B6B6B] font-light leading-relaxed ${showFullGuidance ? '' : 'line-clamp-2'}`}>
-                  {implementationGuidance}
-                </p>
-                {implementationGuidance.length > 100 && (
-                  <button 
-                    onClick={() => setShowFullGuidance(!showFullGuidance)}
-                    className="text-[10px] text-[#8B7355] font-light mt-1.5 flex items-center gap-1 active:scale-95 touch-manipulation"
-                  >
-                    {showFullGuidance ? 'Show less' : 'Show more'}
-                    <ChevronDown className={`w-3 h-3 transition-transform ${showFullGuidance ? 'rotate-180' : ''}`} strokeWidth={1.5} />
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    triggerHaptic('light')
+                    setShowGuidance(false)
+                  }}
+                  className="p-2 -mr-1 -mt-1 hover:bg-[#F8F7F5] rounded-full active:scale-90 transition-all duration-150 touch-manipulation"
+                >
+                  <X className="w-5 h-5 text-[#8E8E93]" strokeWidth={2} />
+                </button>
               </div>
-              <button
-                onClick={() => setShowGuidance(false)}
-                className="p-1.5 hover:bg-[#F8F7F5] rounded-none active:scale-95 touch-manipulation"
-              >
-                <X className="w-4 h-4 text-[#6B6B6B]" strokeWidth={1.5} />
-              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Messages Area - Mobile Optimized */}
-      <div className="flex-1 overflow-y-auto pb-36 sm:pb-32">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-3 sm:space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === "tech" ? "justify-end" : "justify-start"}`}
-            >
-              <div className={`max-w-[88%] sm:max-w-[85%] ${message.sender === "tech" ? "items-end" : "items-start"}`}>
-                {message.type === "design" && (
-                  <div className="mb-1">
-                    <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-white border border-[#E8E8E8] overflow-hidden">
-                      <Image
-                        src={message.content}
-                        alt="Design"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, 320px"
-                      />
-                    </div>
-                    <p className="text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1.5 tracking-wide">
-                      {formatTime(message.timestamp)}
-                    </p>
-                  </div>
+      {/* Messages Area - iMessage Style */}
+      <div className="flex-1 overflow-y-auto overscroll-contain pb-[calc(80px+env(safe-area-inset-bottom))] sm:pb-32">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-1">
+          {messages.map((message, index) => {
+            const showTimestamp = index === 0 || 
+              (new Date(message.timestamp).getTime() - new Date(messages[index - 1].timestamp).getTime()) > 300000
+            
+            return (
+              <div key={message.id}>
+                {showTimestamp && (
+                  <p className="text-[11px] text-[#8E8E93] font-normal text-center py-2 sm:py-3">
+                    {formatTime(message.timestamp)}
+                  </p>
                 )}
-                
-                {message.type === "text" && (
-                  <div>
-                    <div className={`px-3.5 sm:px-4 py-2.5 sm:py-3 ${
-                      message.sender === "tech" 
-                        ? "bg-[#1A1A1A] text-white" 
-                        : "bg-white border border-[#E8E8E8] text-[#1A1A1A]"
-                    }`}>
-                      <p className="text-[13px] sm:text-sm font-light leading-relaxed">{message.content}</p>
-                    </div>
-                    <p className={`text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1 sm:mt-1.5 tracking-wide ${
-                      message.sender === "tech" ? "text-right" : ""
-                    }`}>
-                      {formatTime(message.timestamp)}
-                    </p>
+                <div className={`flex ${message.sender === "tech" ? "justify-end" : "justify-start"} mb-0.5`}>
+                  <div className={`max-w-[80%] sm:max-w-[75%]`}>
+                    {message.type === "design" && (
+                      <div className="relative w-52 h-52 sm:w-60 sm:h-60 md:w-72 md:h-72 rounded-2xl overflow-hidden shadow-sm">
+                        <Image
+                          src={message.content}
+                          alt="Design"
+                          fill
+                          className="object-cover"
+                          unoptimized
+                          sizes="(max-width: 640px) 208px, (max-width: 768px) 240px, 288px"
+                        />
+                      </div>
+                    )}
+                    
+                    {message.type === "text" && (
+                      <div className={`px-4 py-2.5 ${
+                        message.sender === "tech" 
+                          ? "bg-[#8B7355] text-white rounded-[20px] rounded-br-[6px]" 
+                          : "bg-[#E9E9EB] text-[#1A1A1A] rounded-[20px] rounded-bl-[6px]"
+                      }`}>
+                        <p className="text-[15px] sm:text-[16px] font-normal leading-[1.35]">{message.content}</p>
+                      </div>
+                    )}
+                    
+                    {message.type === "image" && (
+                      <div className={`relative w-44 h-44 sm:w-52 sm:h-52 rounded-2xl overflow-hidden shadow-sm ${
+                        message.sender === "tech" ? "rounded-br-[6px]" : "rounded-bl-[6px]"
+                      }`}>
+                        <Image
+                          src={message.content}
+                          alt="Shared image"
+                          fill
+                          className="object-cover"
+                          unoptimized
+                          sizes="(max-width: 640px) 176px, 208px"
+                        />
+                      </div>
+                    )}
+                    
+                    {message.type === "file" && (
+                      <div className={`flex items-center gap-3 px-4 py-3 ${
+                        message.sender === "tech" 
+                          ? "bg-[#8B7355] text-white rounded-[20px] rounded-br-[6px]" 
+                          : "bg-[#E9E9EB] text-[#1A1A1A] rounded-[20px] rounded-bl-[6px]"
+                      }`}>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          message.sender === "tech" ? "bg-white/20" : "bg-[#8B7355]/10"
+                        }`}>
+                          <FileText className="w-5 h-5" strokeWidth={1.5} />
+                        </div>
+                        <span className="text-[14px] font-normal truncate max-w-[160px] sm:max-w-[200px]">{message.fileName}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                
-                {message.type === "image" && (
-                  <div>
-                    <div className="relative w-40 h-40 sm:w-48 sm:h-48 bg-white border border-[#E8E8E8] overflow-hidden">
-                      <Image
-                        src={message.content}
-                        alt="Shared image"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        sizes="(max-width: 640px) 160px, 192px"
-                      />
-                    </div>
-                    <p className={`text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1 sm:mt-1.5 tracking-wide ${
-                      message.sender === "tech" ? "text-right" : ""
-                    }`}>
-                      {formatTime(message.timestamp)}
-                    </p>
-                  </div>
-                )}
-                
-                {message.type === "file" && (
-                  <div>
-                    <div className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 ${
-                      message.sender === "tech" 
-                        ? "bg-[#1A1A1A] text-white" 
-                        : "bg-white border border-[#E8E8E8] text-[#1A1A1A]"
-                    }`}>
-                      <FileText className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" strokeWidth={1.5} />
-                      <span className="text-[13px] sm:text-sm font-light truncate max-w-[180px] sm:max-w-none">{message.fileName}</span>
-                    </div>
-                    <p className={`text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1 sm:mt-1.5 tracking-wide ${
-                      message.sender === "tech" ? "text-right" : ""
-                    }`}>
-                      {formatTime(message.timestamp)}
-                    </p>
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Input Area - Mobile Optimized with larger touch targets */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E8E8] pb-safe z-40">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
-          <div className="flex items-end gap-2 sm:gap-2.5">
+      {/* Input Area - iOS Native Style */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-[#E8E8E8]/80 pb-[env(safe-area-inset-bottom)] z-40">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2">
+          <div className="flex items-end gap-2">
             <input
               type="file"
               ref={fileInputRef}
@@ -572,10 +585,13 @@ export default function TechRequestDetailPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="h-11 w-11 sm:h-10 sm:w-10 p-0 hover:bg-[#F8F7F5] rounded-none flex-shrink-0 active:scale-95 transition-transform touch-manipulation"
+              onClick={() => {
+                triggerHaptic('light')
+                fileInputRef.current?.click()
+              }}
+              className="h-10 w-10 p-0 hover:bg-[#F8F7F5] rounded-full flex-shrink-0 active:scale-90 transition-all duration-150 touch-manipulation"
             >
-              <Paperclip className="w-5 h-5 text-[#6B6B6B]" strokeWidth={1.5} />
+              <Paperclip className="w-5 h-5 text-[#8B7355]" strokeWidth={2} />
             </Button>
             
             <div className="flex-1 relative">
@@ -588,8 +604,9 @@ export default function TechRequestDetailPage() {
                     handleSendMessage()
                   }
                 }}
-                placeholder="Type a message..."
-                className="min-h-[44px] max-h-28 sm:max-h-32 py-3 px-3.5 sm:px-4 resize-none border-[#E8E8E8] focus:border-[#8B7355] rounded-none text-[14px] sm:text-sm font-light"
+                placeholder="Message"
+                className="min-h-[40px] max-h-[120px] py-2.5 px-4 resize-none border-[#E8E8E8] focus:border-[#8B7355] rounded-[20px] text-[16px] font-normal bg-[#F8F7F5] placeholder:text-[#8E8E93]"
+                style={{ fontSize: '16px' }} // Prevents iOS zoom
                 rows={1}
               />
             </div>
@@ -597,12 +614,12 @@ export default function TechRequestDetailPage() {
             <Button
               onClick={handleSendMessage}
               disabled={!newMessage.trim() || sendingMessage}
-              className="h-11 w-11 sm:h-10 sm:w-10 p-0 bg-[#1A1A1A] hover:bg-[#8B7355] text-white rounded-none flex-shrink-0 disabled:opacity-40 active:scale-95 transition-transform touch-manipulation"
+              className="h-10 w-10 p-0 bg-[#8B7355] hover:bg-[#7A6548] text-white rounded-full flex-shrink-0 disabled:opacity-40 active:scale-90 transition-all duration-150 touch-manipulation shadow-sm"
             >
               {sendingMessage ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Send className="w-4 h-4 sm:w-4 sm:h-4" strokeWidth={1.5} />
+                <Send className="w-4 h-4 ml-0.5" strokeWidth={2} />
               )}
             </Button>
           </div>
