@@ -20,6 +20,7 @@ import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
 import { GenerationConfirmationDialog } from "@/components/generation-confirmation-dialog"
 import { CaptureOnboarding } from "@/components/capture-onboarding"
 import { useOnboarding } from "@/hooks/use-onboarding"
+import { isNative } from "@/lib/native-bridge"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -1974,17 +1975,17 @@ export default function CapturePage() {
             {/* Original Image Card - Full Width */}
             <div className="relative overflow-hidden border border-[#E8E8E8]/50 group flex-1 bg-white shadow-sm hover:shadow-lg transition-all duration-700 rounded-sm animate-fade-in">
               <div
-                onClick={handleOpenDrawingCanvas}
-                className="relative bg-gradient-to-br from-[#F8F7F5] to-white h-full w-full cursor-pointer"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
+                onClick={!isNative() ? handleOpenDrawingCanvas : undefined}
+                className={`relative bg-gradient-to-br from-[#F8F7F5] to-white h-full w-full ${!isNative() ? 'cursor-pointer' : ''}`}
+                role={!isNative() ? "button" : undefined}
+                tabIndex={!isNative() ? 0 : undefined}
+                onKeyDown={!isNative() ? (e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
                     handleOpenDrawingCanvas()
                   }
-                }}
-                title="Click to draw on image"
+                } : undefined}
+                title={!isNative() ? "Click to draw on image" : undefined}
               >
                 {/* Show loading GIF when generating, otherwise show original image */}
                 {isGenerating ? (
@@ -2037,18 +2038,20 @@ export default function CapturePage() {
                     <Upload className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
                   </button>
 
-                  {/* Draw Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleOpenDrawingCanvas()
-                    }}
-                    data-onboarding="drawing-canvas-button"
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#8B7355] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
-                    title="Draw on image"
-                  >
-                    <Pencil className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355] group-hover:text-[#2D7A4F]" strokeWidth={2} />
-                  </button>
+                  {/* Draw Button - Hidden on native iOS */}
+                  {!isNative() && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleOpenDrawingCanvas()
+                      }}
+                      data-onboarding="drawing-canvas-button"
+                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/90 backdrop-blur-md border-2 border-[#8B7355] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
+                      title="Draw on image"
+                    >
+                      <Pencil className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355] group-hover:text-[#2D7A4F]" strokeWidth={2} />
+                    </button>
+                  )}
 
                   {/* Settings/Parameters Button */}
                   <button
@@ -2892,8 +2895,8 @@ export default function CapturePage() {
           credits={credits}
         />
 
-        {/* Drawing Canvas Modal */}
-        {showDrawingCanvas && compositeImageForEditing && (
+        {/* Drawing Canvas Modal - Hidden on native iOS */}
+        {!isNative() && showDrawingCanvas && compositeImageForEditing && (
           <DrawingCanvas
             imageUrl={compositeImageForEditing}
             onSave={handleDrawingComplete}

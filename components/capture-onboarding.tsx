@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { X } from "lucide-react"
+import { isNative } from "@/lib/native-bridge"
 
 type OnboardingStep = {
   id: string
@@ -46,22 +47,25 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     position: 'bottom',
     action: 'Tap to close'
   },
-  {
-    id: 'drawing-canvas',
-    title: 'Drawing Canvas',
-    description: 'Draw directly on your nails to guide the AI design',
-    targetElement: 'drawing-canvas-button',
-    position: 'left',
-    action: 'Tap to open drawing tool'
-  },
-  {
-    id: 'close-drawing-canvas',
-    title: 'Close Drawing Canvas',
-    description: 'Tap the X button to close the drawing canvas and continue',
-    targetElement: 'close-drawing-canvas',
-    position: 'bottom',
-    action: 'Tap X to close'
-  },
+  // Drawing canvas steps - only show on web
+  ...(!isNative() ? [
+    {
+      id: 'drawing-canvas',
+      title: 'Drawing Canvas',
+      description: 'Draw directly on your nails to guide the AI design',
+      targetElement: 'drawing-canvas-button',
+      position: 'left' as const,
+      action: 'Tap to open drawing tool'
+    },
+    {
+      id: 'close-drawing-canvas',
+      title: 'Close Drawing Canvas',
+      description: 'Tap the X button to close the drawing canvas and continue',
+      targetElement: 'close-drawing-canvas',
+      position: 'bottom' as const,
+      action: 'Tap X to close'
+    }
+  ] as OnboardingStep[] : []),
   {
     id: 'nail-shape',
     title: 'Choose Nail Shape',
