@@ -2,12 +2,11 @@
 
 import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Plus, User, Calendar, Settings, Bell } from 'lucide-react'
+import { Home, Plus, User, Calendar, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsAppleWatch } from './watch-optimized-layout'
 import { haptics } from '@/lib/haptics'
 import { AnimatedNavButton } from './animated-nav-button'
-import { NotificationCenter } from './notification-center'
 
 interface BottomNavProps {
   onCenterAction?: () => void
@@ -21,16 +20,14 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path)
 
-  // Check if user is a tech and get user ID
+  // Check if user is a tech
   const [userType, setUserType] = React.useState<'client' | 'tech'>('client')
-  const [userId, setUserId] = React.useState<number | undefined>()
   
   React.useEffect(() => {
     const userStr = localStorage.getItem('ivoryUser')
     if (userStr) {
       const user = JSON.parse(userStr)
       setUserType(user.userType || 'client')
-      setUserId(user.id)
     }
   }, [])
 
@@ -82,9 +79,6 @@ export function BottomNav({ onCenterAction, centerActionLabel = 'Create' }: Bott
           >
             <Plus className="w-6 h-6 text-white" strokeWidth={1.5} />
           </button>
-
-          {/* Notifications */}
-          <NotificationCenter userId={userId} />
 
           {/* Profile navigation item */}
           <AnimatedNavButton
