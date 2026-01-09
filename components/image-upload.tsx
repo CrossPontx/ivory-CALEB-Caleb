@@ -20,7 +20,7 @@ export function ImageUpload({
   onUpload,
   onRemove,
   images = [],
-  maxImages = 10,
+  maxImages,
   className,
   buttonText = "Upload Photos",
   multiple = true,
@@ -33,8 +33,8 @@ export function ImageUpload({
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
 
-    // Check if adding these files would exceed max
-    if (images.length + files.length > maxImages) {
+    // Check if adding these files would exceed max (only if maxImages is set)
+    if (maxImages && images.length + files.length > maxImages) {
       alert(`You can only upload up to ${maxImages} images`)
       return
     }
@@ -49,12 +49,6 @@ export function ImageUpload({
         // Validate file type
         if (!file.type.startsWith('image/')) {
           alert(`${file.name} is not an image file`)
-          continue
-        }
-
-        // Validate file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          alert(`${file.name} is too large. Max size is 10MB`)
           continue
         }
 
@@ -148,7 +142,7 @@ export function ImageUpload({
     }
   }
 
-  const canUploadMore = images.length < maxImages
+  const canUploadMore = !maxImages || images.length < maxImages
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -186,7 +180,7 @@ export function ImageUpload({
             </Button>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {images.length}/{maxImages} images • Max 10MB per image
+            {images.length} images uploaded
           </p>
         </div>
       )}

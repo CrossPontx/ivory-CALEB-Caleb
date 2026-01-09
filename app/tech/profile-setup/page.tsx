@@ -119,7 +119,8 @@ export default function TechProfileSetupPage() {
         // If API not deployed yet, store locally as fallback
         if (response.status === 404) {
           console.warn("API not deployed yet, storing locally")
-          setPortfolioImages([...portfolioImages, url])
+          // Use functional update to avoid stale state when uploading multiple images
+          setPortfolioImages(prev => [...prev, url])
           toast({
             title: "Image uploaded (temporary)",
             description: "Image saved locally. Will sync to database when API is ready.",
@@ -129,7 +130,8 @@ export default function TechProfileSetupPage() {
         throw new Error("Failed to save image")
       }
 
-      setPortfolioImages([...portfolioImages, url])
+      // Use functional update to avoid stale state when uploading multiple images
+      setPortfolioImages(prev => [...prev, url])
       toast({
         title: "Image uploaded",
         description: "Your portfolio image has been added successfully",
@@ -137,7 +139,8 @@ export default function TechProfileSetupPage() {
     } catch (error: any) {
       console.error("Error saving image:", error)
       // Fallback: still show the image locally
-      setPortfolioImages([...portfolioImages, url])
+      // Use functional update to avoid stale state when uploading multiple images
+      setPortfolioImages(prev => [...prev, url])
       toast({
         title: "Image uploaded (local only)",
         description: "Image saved locally. Database sync pending deployment.",
@@ -487,7 +490,6 @@ export default function TechProfileSetupPage() {
               onUpload={handleImageUpload}
               onRemove={handleImageRemove}
               images={portfolioImages}
-              maxImages={20}
               buttonText="Select Images"
               multiple={true}
             />
