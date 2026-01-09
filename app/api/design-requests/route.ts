@@ -37,6 +37,15 @@ export async function GET(request: Request) {
               id: true,
               username: true,
               email: true,
+            },
+            with: {
+              techProfile: {
+                columns: {
+                  id: true,
+                  businessName: true,
+                  location: true,
+                }
+              }
             }
           },
           look: true,

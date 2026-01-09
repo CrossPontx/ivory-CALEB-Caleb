@@ -127,9 +127,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { techProfileId, serviceId, lookId, appointmentDate, clientNotes } = body;
 
-    // Validate required fields
-    if (!techProfileId || !serviceId || !appointmentDate || !lookId) {
-      return NextResponse.json({ error: 'Missing required fields. A design must be selected.' }, { status: 400 });
+    // Validate required fields (lookId is optional)
+    if (!techProfileId || !serviceId || !appointmentDate) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Get service details for duration and price
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate prices
     const servicePrice = parseFloat(service.price || '0');
-    const serviceFee = servicePrice * 0.125; // 12.5% service fee
+    const serviceFee = servicePrice * 0.15; // 15% convenience fee
     const totalPrice = servicePrice + serviceFee;
 
     // Create booking
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
       clientId: session.userId,
       techProfileId,
       serviceId,
-      lookId: lookId,
+      lookId: lookId || null,
       appointmentDate: appointmentStart,
       duration: service.duration || 60,
       servicePrice: servicePrice.toFixed(2),

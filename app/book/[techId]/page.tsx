@@ -1,21 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, Clock, DollarSign, Calendar as CalendarIcon, CheckCircle2, Loader2, Sparkles, Upload } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, Loader2, Sparkles, ChevronDown, ChevronUp, ImagePlus, X, MapPin, Star, Info } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import Image from 'next/image';
-import { iapManager } from '@/lib/iap';
+import { toast } from 'sonner';
+
+const CONVENIENCE_FEE_PERCENT = 0.15; // 15% convenience fee
+
+// Native haptic feedback
+const triggerHaptic = (style: 'light' | 'medium' | 'success' = 'light') => {
+  if (typeof window !== 'undefined' && (window as any).webkit?.messageHandlers?.haptics) {
+    (window as any).webkit.messageHandlers.haptics.postMessage({ style })
+  }
+}
 
 export default function BookAppointmentPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const techId = params.techId as string;
+  const preselectedLookId = searchParams.get('lookId');
 
   const [tech, setTech] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
@@ -27,13 +35,23 @@ export default function BookAppointmentPage() {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [clientNotes, setClientNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showDesignPicker, setShowDesignPicker] = useState(false);
 
   useEffect(() => {
     fetchTechDetails();
     fetchMyDesigns();
   }, [techId]);
+
+  useEffect(() => {
+    // Pre-select design if lookId is in URL
+    if (preselectedLookId && myDesigns.length > 0) {
+      const found = myDesigns.find(d => d.id.toString() === preselectedLookId);
+      if (found) {
+        setSelectedDesign(preselectedLookId);
+      }
+    }
+  }, [preselectedLookId, myDesigns]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -59,10 +77,38 @@ export default function BookAppointmentPage() {
       const response = await fetch('/api/looks?my=true');
       const data = await response.json();
       if (response.ok) {
-        setMyDesigns(data.looks || []);
+        setMyDesigns(data.looks || data || []);
       }
     } catch (error) {
       console.error('Error fetching designs:', error);
+    }
+  };
+
+  const handleDeleteDesign = async (designId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!confirm('Delete this design? This cannot be undone.')) return;
+    
+    triggerHaptic('medium');
+    
+    try {
+      const response = await fetch(`/api/looks/${designId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        setMyDesigns(prev => prev.filter(d => d.id.toString() !== designId));
+        if (selectedDesign === designId) {
+          setSelectedDesign('');
+        }
+        toast.success('Design deleted');
+        triggerHaptic('success');
+      } else {
+        toast.error('Failed to delete design');
+      }
+    } catch (error) {
+      console.error('Error deleting design:', error);
+      toast.error('Failed to delete design');
     }
   };
 
@@ -71,7 +117,6 @@ export default function BookAppointmentPage() {
     for (let hour = 9; hour <= 18; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
         if (hour === 18 && minute > 0) break;
-        // Convert to 12-hour format with AM/PM
         const period = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
         const timeStr = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
@@ -96,6 +141,8 @@ export default function BookAppointmentPage() {
     }
 
     setUploadingImage(true);
+    triggerHaptic('light');
+    
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -105,50 +152,35 @@ export default function BookAppointmentPage() {
         body: formData,
       });
 
-      if (!uploadResponse.ok) {
-        throw new Error('Upload failed');
-      }
+      if (!uploadResponse.ok) throw new Error('Upload failed');
 
       const uploadData = await uploadResponse.json();
-      
-      // Get user ID from localStorage
       const userStr = localStorage.getItem('ivoryUser');
-      if (!userStr) {
-        throw new Error('User session not found');
-      }
+      if (!userStr) throw new Error('User session not found');
       const user = JSON.parse(userStr);
       
       const lookResponse = await fetch('/api/looks', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
-          title: `Uploaded Design - ${new Date().toLocaleDateString()}`,
+          title: `Uploaded Design`,
           imageUrl: uploadData.url,
           isPublic: false,
         }),
       });
 
-      if (!lookResponse.ok) {
-        const errorData = await lookResponse.json();
-        throw new Error(errorData.error || 'Failed to save design');
-      }
+      if (!lookResponse.ok) throw new Error('Failed to save design');
 
       const lookData = await lookResponse.json();
-      
-      console.log('Look created successfully:', lookData);
-      
       setUploadedImage(uploadData.url);
       setSelectedDesign(lookData.id.toString());
       setMyDesigns([lookData, ...myDesigns]);
-      
-      alert('Design uploaded successfully!');
+      setShowDesignPicker(false);
+      triggerHaptic('success');
     } catch (error) {
       console.error('Error uploading image:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image. Please try again.';
-      alert(errorMessage);
+      alert('Failed to upload image');
     } finally {
       setUploadingImage(false);
     }
@@ -160,39 +192,29 @@ export default function BookAppointmentPage() {
       return;
     }
 
-    if (!selectedDesign && !uploadedImage) {
-      alert('Please select or upload a design for your appointment');
-      return;
-    }
-
     setLoading(true);
+    triggerHaptic('medium');
+    
     try {
       const appointmentDateTime = new Date(selectedDate);
-      // Parse 12-hour format time (e.g., "2:30 PM")
       const timeMatch = selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
       if (timeMatch) {
         let hours = parseInt(timeMatch[1]);
         const minutes = parseInt(timeMatch[2]);
         const period = timeMatch[3].toUpperCase();
-        
-        // Convert to 24-hour format
         if (period === 'PM' && hours !== 12) hours += 12;
         if (period === 'AM' && hours === 12) hours = 0;
-        
         appointmentDateTime.setHours(hours, minutes);
       }
 
       const bookingResponse = await fetch('/api/bookings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           techProfileId: parseInt(techId),
           serviceId: parseInt(selectedService),
-          lookId: parseInt(selectedDesign),
+          lookId: selectedDesign ? parseInt(selectedDesign) : null,
           appointmentDate: appointmentDateTime.toISOString(),
-          clientNotes,
         }),
       });
 
@@ -202,9 +224,6 @@ export default function BookAppointmentPage() {
         return;
       }
 
-      // Always use Stripe for booking payments (real-world services)
-      // Apple allows external payment processors for physical goods/services
-      // consumed outside the app (App Store Review Guidelines 3.1.1)
       await handleStripePayment(bookingData.booking);
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -223,9 +242,7 @@ export default function BookAppointmentPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          bookingId: booking.id,
-        }),
+        body: JSON.stringify({ bookingId: booking.id }),
       });
 
       if (!response.ok) {
@@ -235,8 +252,7 @@ export default function BookAppointmentPage() {
       }
 
       const data = await response.json();
-      
-      // Redirect to Stripe Checkout
+      triggerHaptic('success');
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -246,390 +262,386 @@ export default function BookAppointmentPage() {
     }
   };
 
-  // NOTE: IAP booking payment handler removed
-  // Bookings now use Stripe exclusively (Apple-compliant for real-world services)
-  // See App Store Review Guidelines 3.1.1 - Physical goods and services consumed
-  // outside the app may use payment methods other than IAP
+  const selectedServiceData = services.find(s => s.id.toString() === selectedService);
+  const selectedDesignData = myDesigns.find(d => d.id.toString() === selectedDesign);
 
   if (!tech) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen min-h-[100dvh] bg-[#F8F7F5] flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Loading...</p>
+          <div className="w-10 h-10 border-2 border-[#8B7355] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] font-light">Loading</p>
         </div>
       </div>
     );
   }
 
-  const selectedServiceData = services.find(s => s.id.toString() === selectedService);
-
   return (
-    <div className="min-h-screen bg-white pb-32 lg:pb-28">
-      {/* Elegant Header */}
-      <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-50 backdrop-blur-md bg-white/98">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 py-4 sm:py-6 lg:py-8">
-          <button 
-            onClick={() => router.back()} 
-            className="flex items-center gap-2 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light group mb-4 sm:mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-500" strokeWidth={1.5} />
-            Back
-          </button>
-          <div className="flex items-center justify-between gap-3">
+    <div className="min-h-screen min-h-[100dvh] bg-[#F8F7F5] pb-40 lg:pb-28">
+      {/* Header - iOS Native Style */}
+      <header className="bg-white/95 backdrop-blur-xl border-b border-[#E8E8E8]/80 sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                triggerHaptic('light');
+                router.back();
+              }} 
+              className="h-10 w-10 flex items-center justify-center hover:bg-[#F8F7F5] rounded-full active:scale-90 transition-all duration-150"
+            >
+              <ArrowLeft className="h-5 w-5 text-[#8B7355]" strokeWidth={2} />
+            </button>
             <div className="flex-1 min-w-0">
-              <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-2 sm:mb-3">
-                Book Your Appointment
-              </h1>
-              <p className="text-sm sm:text-base text-[#6B6B6B] font-light tracking-wide truncate">
-                Reserve your session with {tech.businessName || tech.user?.username}
-              </p>
+              <h1 className="font-semibold text-[15px] text-[#1A1A1A]">Book Appointment</h1>
+              <p className="text-[12px] text-[#6B6B6B] truncate">{tech.businessName || tech.user?.username}</p>
             </div>
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-[#8B7355] flex-shrink-0" strokeWidth={1.5} />
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 py-8 sm:py-12 lg:py-16 xl:py-20">
-        <div className="grid lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
-          {/* Left Column - Form */}
-          <div className="lg:col-span-2 space-y-12 sm:space-y-16 lg:space-y-20">
-            
-            {/* Service Selection */}
-            <div>
-              <div className="mb-6 sm:mb-8 lg:mb-10">
-                <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Step 1</p>
-                <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em]">
-                  Select Service
-                </h2>
+      {/* Tech Info Card */}
+      <div className="max-w-2xl mx-auto px-4 py-4">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#E8E8E8]/50">
+          <div className="flex items-center gap-3">
+            {tech.portfolioImages?.[0] ? (
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+                <Image
+                  src={tech.portfolioImages[0].imageUrl}
+                  alt={tech.businessName || 'Tech'}
+                  fill
+                  className="object-cover"
+                />
               </div>
-              <RadioGroup value={selectedService} onValueChange={setSelectedService}>
-                <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-                  {services.map((service) => (
-                    <label
-                      key={service.id}
-                      htmlFor={`service-${service.id}`}
-                      className={`block border p-6 sm:p-8 lg:p-10 cursor-pointer transition-all duration-700 group ${
-                        selectedService === service.id.toString()
-                          ? 'border-[#8B7355] bg-[#FAFAF8] shadow-xl shadow-[#8B7355]/5'
-                          : 'border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-xl hover:shadow-[#8B7355]/5'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4 sm:gap-5">
-                        <RadioGroupItem value={service.id.toString()} id={`service-${service.id}`} className="mt-1 sm:mt-1.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col gap-4 sm:gap-6">
-                            <div className="flex-1">
-                              <h3 className="text-lg sm:text-xl lg:text-2xl font-serif font-light text-[#1A1A1A] tracking-tight mb-2 sm:mb-3">
-                                {service.name}
-                              </h3>
-                              <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                                {service.description}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between sm:justify-start gap-4 sm:gap-8 pt-3 border-t border-[#E8E8E8]">
-                              <div className="flex items-center gap-1.5">
-                                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-[#8B7355]" strokeWidth={1.5} />
-                                <span className="text-xl sm:text-2xl lg:text-3xl font-serif font-light text-[#1A1A1A]">{service.price}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm sm:text-base text-[#6B6B6B] font-light">
-                                <Clock className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.5} />
-                                <span>{service.duration} min</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Design Selection */}
-            <div>
-              <div className="mb-6 sm:mb-8 lg:mb-10">
-                <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Step 2</p>
-                <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-3 sm:mb-4">
-                  Select Design
-                  <span className="text-red-500 ml-2">*</span>
-                </h2>
-                <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                  Choose a design you want the tech to recreate (required)
-                </p>
+            ) : (
+              <div className="w-14 h-14 rounded-xl bg-[#F8F7F5] flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-6 h-6 text-[#8B7355]" strokeWidth={1.5} />
               </div>
-
-              {/* Upload Option */}
-              <div className="mb-6 sm:mb-8 p-8 sm:p-10 border-2 border-dashed border-[#8B7355]/30 bg-[#FAFAF8] hover:border-[#8B7355] transition-all duration-700">
-                <label htmlFor="design-upload" className="cursor-pointer block">
-                  <div className="flex flex-col items-center gap-4 sm:gap-5">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white border border-[#E8E8E8] flex items-center justify-center">
-                      {uploadingImage ? (
-                        <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 text-[#8B7355] animate-spin" strokeWidth={1.5} />
-                      ) : (
-                        <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-[#8B7355]" strokeWidth={1} />
-                      )}
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm sm:text-base font-light text-[#1A1A1A] mb-1.5 sm:mb-2 tracking-wide">
-                        {uploadingImage ? 'Uploading...' : 'Upload Your Design'}
-                      </p>
-                      <p className="text-xs sm:text-sm text-[#6B6B6B] font-light tracking-wide">
-                        PNG, JPG up to 5MB
-                      </p>
-                    </div>
-                  </div>
-                  <input
-                    id="design-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* Design Gallery */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-                {myDesigns.map((design) => (
-                  <button
-                    key={design.id}
-                    onClick={() => {
-                      setSelectedDesign(design.id.toString());
-                      setUploadedImage('');
-                    }}
-                    className={`border-2 p-4 sm:p-5 transition-all duration-700 group ${
-                      selectedDesign === design.id.toString()
-                        ? 'border-[#8B7355] bg-[#FAFAF8] shadow-xl shadow-[#8B7355]/5'
-                        : 'border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-xl hover:shadow-[#8B7355]/5'
-                    }`}
-                  >
-                    <div className="relative aspect-square overflow-hidden mb-3 sm:mb-4">
-                      <Image
-                        src={design.imageUrl}
-                        alt={design.title}
-                        fill
-                        className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      />
-                      {selectedDesign === design.id.toString() && (
-                        <div className="absolute inset-0 bg-[#8B7355]/20 flex items-center justify-center">
-                          <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-[#8B7355]" strokeWidth={1.5} />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-xs sm:text-sm text-[#1A1A1A] font-light truncate tracking-wide">{design.title}</p>
-                  </button>
-                ))}
-              </div>
-
-              {myDesigns.length === 0 && !uploadedImage && (
-                <div className="text-center py-12 sm:py-16 border border-[#E8E8E8] mt-4 sm:mt-6">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 border border-[#E8E8E8] flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-[#E8E8E8]" strokeWidth={1} />
-                  </div>
-                  <p className="text-sm sm:text-base text-[#6B6B6B] font-light tracking-wide px-4">
-                    No saved designs yet. Upload an image or create one in the app.
-                  </p>
+            )}
+            <div className="flex-1 min-w-0">
+              <h2 className="font-medium text-[15px] text-[#1A1A1A] truncate">
+                {tech.businessName || tech.user?.username}
+              </h2>
+              {tech.location && (
+                <div className="flex items-center gap-1 text-[12px] text-[#6B6B6B]">
+                  <MapPin className="w-3 h-3" strokeWidth={2} />
+                  <span className="truncate">{tech.location}</span>
                 </div>
               )}
-            </div>
-
-            {/* Date & Time Selection */}
-            <div>
-              <div className="mb-6 sm:mb-8 lg:mb-10">
-                <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Step 3</p>
-                <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em]">
-                  Select Date & Time
-                </h2>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Star className="w-3 h-3 fill-[#8B7355] text-[#8B7355]" />
+                <span className="text-[12px] text-[#1A1A1A] font-medium">{tech.rating || '5.0'}</span>
+                <span className="text-[12px] text-[#6B6B6B]">({tech.totalReviews || 0} reviews)</span>
               </div>
-              <div className="border border-[#E8E8E8] p-6 sm:p-8 lg:p-10 space-y-6 sm:space-y-8 bg-[#FAFAF8]">
-                <div>
-                  <Label className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] mb-4 sm:mb-5 block font-light">
-                    Date
-                  </Label>
-                  <div className="flex justify-center">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      disabled={(date) => date < new Date()}
-                      className="rounded-md border-0 scale-90 sm:scale-100 origin-center"
-                    />
-                  </div>
-                </div>
-
-                {selectedDate && (
-                  <div>
-                    <Label className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] mb-4 sm:mb-5 block font-light">
-                      Time
-                    </Label>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
-                      {availableTimes.map((time) => (
-                        <button
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          className={`py-3 sm:py-4 text-xs sm:text-sm font-light transition-all duration-700 ${
-                            selectedTime === time
-                              ? 'bg-[#1A1A1A] text-white'
-                              : 'border border-[#E8E8E8] bg-white text-[#1A1A1A] hover:border-[#8B7355]'
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div>
-              <div className="mb-6 sm:mb-8 lg:mb-10">
-                <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Step 4</p>
-                <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-3 sm:mb-4">
-                  Additional Notes
-                </h2>
-                <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                  Any special requests or information for the nail tech
-                </p>
-              </div>
-              <Textarea
-                placeholder="E.g., allergies, preferred colors, modifications to the design..."
-                value={clientNotes}
-                onChange={(e) => setClientNotes(e.target.value)}
-                rows={5}
-                className="border-[#E8E8E8] focus:border-[#8B7355] font-light text-sm sm:text-base p-4 sm:p-6"
-              />
-            </div>
-          </div>
-
-          {/* Right Column - Summary (Sticky on desktop, fixed on mobile) */}
-          <div className="lg:col-span-1">
-            {/* Desktop Sticky Summary */}
-            <div className="hidden lg:block lg:sticky lg:top-32">
-              <div className="border border-[#E8E8E8] p-8 sm:p-10 bg-[#FAFAF8]">
-                <h3 className="text-[11px] tracking-[0.25em] uppercase text-[#8B7355] mb-8 font-light">
-                  Booking Summary
-                </h3>
-                
-                <div className="space-y-6 mb-8">
-                  {selectedServiceData && (
-                    <>
-                      <div className="pb-6 border-b border-[#E8E8E8]">
-                        <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 font-light">Service</p>
-                        <p className="text-lg font-light text-[#1A1A1A] tracking-wide">{selectedServiceData.name}</p>
-                      </div>
-                      <div className="pb-6 border-b border-[#E8E8E8]">
-                        <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 font-light">Duration</p>
-                        <p className="text-lg font-light text-[#1A1A1A] tracking-wide">{selectedServiceData.duration} minutes</p>
-                      </div>
-                    </>
-                  )}
-                  
-                  {selectedDate && selectedTime && (
-                    <div className="pb-6 border-b border-[#E8E8E8]">
-                      <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 font-light">Date & Time</p>
-                      <p className="text-base font-light text-[#1A1A1A] tracking-wide">
-                        {selectedDate.toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })}
-                      </p>
-                      <p className="text-base font-light text-[#1A1A1A] mt-2 tracking-wide">{selectedTime}</p>
-                    </div>
-                  )}
-
-                  {selectedServiceData && (
-                    <div className="space-y-4 pt-2">
-                      <div className="flex justify-between text-base">
-                        <span className="text-[#6B6B6B] font-light tracking-wide">Service Price</span>
-                        <span className="font-light text-[#1A1A1A]">
-                          ${parseFloat(selectedServiceData.price).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-base">
-                        <span className="text-[#6B6B6B] font-light tracking-wide">Service Fee (12.5%)</span>
-                        <span className="font-light text-[#1A1A1A]">
-                          ${(parseFloat(selectedServiceData.price) * 0.125).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-xl pt-4 border-t border-[#E8E8E8]">
-                        <span className="font-serif font-light text-[#1A1A1A]">Total</span>
-                        <span className="font-serif font-light text-[#1A1A1A]">
-                          ${(parseFloat(selectedServiceData.price) * 1.125).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedDesign && (
-                    <div className="pb-6 border-b border-[#E8E8E8]">
-                      <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 font-light">Selected Design</p>
-                      <div className="flex items-center gap-3">
-                        <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" strokeWidth={1.5} />
-                        <p className="text-base font-light text-[#1A1A1A] tracking-wide">Design attached</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <Button
-                  onClick={handleBooking}
-                  disabled={loading || !selectedService || !selectedDate || !selectedTime || !selectedDesign}
-                  className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-14 text-[11px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
-                >
-                  {loading ? 'Processing...' : 'Continue to Payment'}
-                </Button>
-                
-                {!selectedDesign && (
-                  <p className="text-sm text-center text-red-500 mt-4 font-light tracking-wide">
-                    Please select or upload a design to continue
-                  </p>
-                )}
-                
-                <p className="text-sm text-center text-[#6B6B6B] mt-6 font-light leading-[1.7] tracking-wide">
-                  Secure payment via {typeof (window as any).Capacitor !== 'undefined' ? 'Apple In-App Purchase' : 'Stripe'}. Your booking will be confirmed after payment.
-                </p>
-              </div>
-            </div>
-
-            {/* Mobile Fixed Bottom Summary */}
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E8E8E8] p-4 backdrop-blur-md bg-white/98 safe-bottom">
-              <div className="flex items-center justify-between gap-4 mb-3">
-                {selectedServiceData && (
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[#6B6B6B] font-light tracking-wide truncate">{selectedServiceData.name}</p>
-                    <p className="text-lg font-serif font-light text-[#1A1A1A]">
-                      ${(parseFloat(selectedServiceData.price) * 1.125).toFixed(2)}
-                    </p>
-                  </div>
-                )}
-                <Button
-                  onClick={handleBooking}
-                  disabled={loading || !selectedService || !selectedDate || !selectedTime || !selectedDesign}
-                  className="bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-12 px-8 text-[10px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                >
-                  {loading ? 'Processing...' : 'Book Now'}
-                </Button>
-              </div>
-              {!selectedDesign && (
-                <p className="text-xs text-center text-red-500 font-light tracking-wide">
-                  Please select a design to continue
-                </p>
-              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav onCenterAction={() => router.push('/capture')} centerActionLabel="Create" />
+      {/* Main Content */}
+      <div className="max-w-2xl mx-auto px-4 space-y-4">
+        
+        {/* Service Selection */}
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E8E8]/50">
+          <div className="px-4 py-3 border-b border-[#E8E8E8]/50">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-[#8B7355] text-white text-[11px] font-medium flex items-center justify-center">1</div>
+              <span className="text-[13px] font-medium text-[#1A1A1A]">Select Service</span>
+            </div>
+          </div>
+          <div className="p-2">
+            {services.map((service) => (
+              <button
+                key={service.id}
+                onClick={() => {
+                  triggerHaptic('light');
+                  setSelectedService(service.id.toString());
+                }}
+                className={`w-full p-3 rounded-xl text-left transition-all duration-200 ${
+                  selectedService === service.id.toString()
+                    ? 'bg-[#8B7355]/10 border-2 border-[#8B7355]'
+                    : 'hover:bg-[#F8F7F5] border-2 border-transparent'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[14px] font-medium text-[#1A1A1A] mb-0.5">{service.name}</h3>
+                    {service.description && (
+                      <p className="text-[12px] text-[#6B6B6B] line-clamp-2">{service.description}</p>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[16px] font-semibold text-[#1A1A1A]">${service.price}</p>
+                    <div className="flex items-center gap-1 text-[11px] text-[#6B6B6B]">
+                      <Clock className="w-3 h-3" strokeWidth={2} />
+                      <span>{service.duration}min</span>
+                    </div>
+                  </div>
+                </div>
+                {selectedService === service.id.toString() && (
+                  <div className="mt-2 flex items-center gap-1.5 text-[#8B7355]">
+                    <CheckCircle2 className="w-4 h-4" strokeWidth={2} />
+                    <span className="text-[11px] font-medium">Selected</span>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Date & Time Selection */}
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E8E8]/50">
+          <div className="px-4 py-3 border-b border-[#E8E8E8]/50">
+            <div className="flex items-center gap-2">
+              <div className={`w-6 h-6 rounded-full text-[11px] font-medium flex items-center justify-center ${
+                selectedService ? 'bg-[#8B7355] text-white' : 'bg-[#E8E8E8] text-[#6B6B6B]'
+              }`}>2</div>
+              <span className="text-[13px] font-medium text-[#1A1A1A]">Date & Time</span>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="flex justify-center mb-4">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  triggerHaptic('light');
+                  setSelectedDate(date);
+                  setSelectedTime('');
+                }}
+                disabled={(date) => date < new Date()}
+                className="rounded-xl border-0"
+              />
+            </div>
+
+            {selectedDate && (
+              <div className="pt-4 border-t border-[#E8E8E8]/50">
+                <p className="text-[11px] tracking-[0.15em] uppercase text-[#6B6B6B] mb-3 font-medium">Available Times</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {availableTimes.map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setSelectedTime(time);
+                      }}
+                      className={`py-2.5 text-[12px] font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                        selectedTime === time
+                          ? 'bg-[#8B7355] text-white shadow-md'
+                          : 'bg-[#F8F7F5] text-[#1A1A1A] hover:bg-[#E8E8E8]'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Design Selection - Optional & Collapsible */}
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E8E8]/50">
+          <button
+            onClick={() => {
+              triggerHaptic('light');
+              setShowDesignPicker(!showDesignPicker);
+            }}
+            className="w-full px-4 py-3 flex items-center justify-between hover:bg-[#F8F7F5]/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-[#E8E8E8] text-[#6B6B6B] text-[11px] font-medium flex items-center justify-center">
+                <ImagePlus className="w-3.5 h-3.5" strokeWidth={2} />
+              </div>
+              <div className="text-left">
+                <span className="text-[13px] font-medium text-[#1A1A1A]">Add Design Reference</span>
+                <span className="text-[11px] text-[#6B6B6B] ml-1.5">(Optional)</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedDesignData && (
+                <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                  <Image src={selectedDesignData.imageUrl} alt="" fill className="object-cover" />
+                </div>
+              )}
+              {showDesignPicker ? (
+                <ChevronUp className="w-5 h-5 text-[#6B6B6B]" strokeWidth={2} />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-[#6B6B6B]" strokeWidth={2} />
+              )}
+            </div>
+          </button>
+          
+          {showDesignPicker && (
+            <div className="px-4 pb-4 border-t border-[#E8E8E8]/50">
+              <p className="text-[12px] text-[#6B6B6B] py-3">
+                Share a design you'd like recreated or use as inspiration
+              </p>
+              
+              {/* Selected Design Preview */}
+              {selectedDesignData && (
+                <div className="mb-3 p-3 bg-[#F8F7F5] rounded-xl flex items-center gap-3">
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                    <Image src={selectedDesignData.imageUrl} alt="" fill className="object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium text-[#1A1A1A] truncate">{selectedDesignData.title || 'Selected Design'}</p>
+                    <p className="text-[11px] text-[#34C759] flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" strokeWidth={2} />
+                      Attached to booking
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerHaptic('light');
+                      setSelectedDesign('');
+                    }}
+                    className="p-2 hover:bg-white rounded-full transition-colors"
+                  >
+                    <X className="w-4 h-4 text-[#6B6B6B]" strokeWidth={2} />
+                  </button>
+                </div>
+              )}
+
+              {/* Upload Button */}
+              <label className="block mb-3">
+                <div className="p-4 border-2 border-dashed border-[#E8E8E8] rounded-xl text-center cursor-pointer hover:border-[#8B7355] hover:bg-[#8B7355]/5 transition-all duration-200">
+                  {uploadingImage ? (
+                    <Loader2 className="w-6 h-6 text-[#8B7355] animate-spin mx-auto" />
+                  ) : (
+                    <>
+                      <ImagePlus className="w-6 h-6 text-[#8B7355] mx-auto mb-1" strokeWidth={1.5} />
+                      <p className="text-[12px] text-[#6B6B6B]">Upload from camera roll</p>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="hidden"
+                />
+              </label>
+
+              {/* Design Gallery */}
+              {myDesigns.length > 0 && (
+                <>
+                  <p className="text-[11px] tracking-[0.15em] uppercase text-[#6B6B6B] mb-2 font-medium">Your Designs</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {myDesigns.slice(0, 8).map((design) => (
+                      <div key={design.id} className="relative group">
+                        <button
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setSelectedDesign(design.id.toString());
+                          }}
+                          className={`relative aspect-square rounded-lg overflow-hidden transition-all duration-200 w-full ${
+                            selectedDesign === design.id.toString()
+                              ? 'ring-2 ring-[#8B7355] ring-offset-2'
+                              : 'hover:opacity-80'
+                          }`}
+                        >
+                          <Image src={design.imageUrl} alt="" fill className="object-cover" />
+                          {selectedDesign === design.id.toString() && (
+                            <div className="absolute inset-0 bg-[#8B7355]/30 flex items-center justify-center">
+                              <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2} />
+                            </div>
+                          )}
+                        </button>
+                        {/* Delete button - shows on hover/touch */}
+                        <button
+                          onClick={(e) => handleDeleteDesign(design.id.toString(), e)}
+                          className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md active:scale-90 z-10"
+                        >
+                          <X className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Fixed Bottom - Booking Summary */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E8E8E8] pb-[env(safe-area-inset-bottom)]">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          {/* Price Breakdown */}
+          {selectedServiceData && (
+            <div className="mb-3 pb-3 border-b border-[#E8E8E8]/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[13px] font-medium text-[#1A1A1A]">{selectedServiceData.name}</p>
+                <p className="text-[13px] text-[#1A1A1A]">${parseFloat(selectedServiceData.price).toFixed(2)}</p>
+              </div>
+              
+              {/* Fee breakdown */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[12px] text-[#6B6B6B]">Convenience fee (15%)</p>
+                  <div className="group relative">
+                    <Info className="w-3.5 h-3.5 text-[#8B7355] cursor-help" strokeWidth={2} />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#1A1A1A] text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                      This fee helps us maintain the platform, provide customer support, and ensure secure payments.
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1A1A1A]" />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[12px] text-[#6B6B6B]">
+                  ${(parseFloat(selectedServiceData.price) * CONVENIENCE_FEE_PERCENT).toFixed(2)}
+                </p>
+              </div>
+              
+              {/* Total */}
+              <div className="flex items-center justify-between pt-2 border-t border-dashed border-[#E8E8E8]">
+                <p className="text-[14px] font-semibold text-[#1A1A1A]">Total</p>
+                <p className="text-[18px] font-semibold text-[#1A1A1A]">
+                  ${(parseFloat(selectedServiceData.price) * (1 + CONVENIENCE_FEE_PERCENT)).toFixed(2)}
+                </p>
+              </div>
+              
+              {/* Date/Time/Design info */}
+              <div className="flex items-center gap-2 text-[11px] text-[#6B6B6B] mt-2">
+                {selectedDate && (
+                  <span>{selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                )}
+                {selectedTime && (
+                  <>
+                    <span>•</span>
+                    <span>{selectedTime}</span>
+                  </>
+                )}
+                {selectedDesignData && (
+                  <>
+                    <span>•</span>
+                    <span className="text-[#8B7355]">Design attached</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <Button
+            onClick={handleBooking}
+            disabled={loading || !selectedService || !selectedDate || !selectedTime}
+            className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-12 text-[13px] font-medium rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              'Continue to Payment'
+            )}
+          </Button>
+          
+          <p className="text-[10px] text-center text-[#6B6B6B] mt-2">
+            Secure payment via Stripe • Booking confirmed after payment
+          </p>
+        </div>
+      </div>
+
+      <BottomNav />
     </div>
   );
 }

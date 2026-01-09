@@ -77,7 +77,7 @@ export default function ClientRequestDetailPage() {
           if (foundRequest) {
             const reqData: DesignRequest = {
               id: foundRequest.id.toString(),
-              techName: foundRequest.tech?.username || `Tech ${foundRequest.techId}`,
+              techName: foundRequest.tech?.techProfile?.businessName || foundRequest.tech?.username || `Tech ${foundRequest.techId}`,
               techId: foundRequest.techId,
               techProfileId: foundRequest.tech?.techProfile?.id,
               designImage: foundRequest.look?.imageUrl || "/placeholder.svg",
@@ -351,14 +351,26 @@ export default function ClientRequestDetailPage() {
             
             {/* Schedule Appointment Button */}
             <Button
-              onClick={() => {
+              onClick={async () => {
                 triggerHaptic('medium')
-                // Navigate to booking page with the tech and design pre-selected
+                // Navigate to booking page with the tech profile
                 if (request.techProfileId) {
                   router.push(`/book/${request.techProfileId}?lookId=${request.lookId}`)
                 } else {
-                  // If no tech profile, try to find it
-                  router.push(`/tech/${request.techId}`)
+                  // If no tech profile ID in request, try to find it by user ID
+                  try {
+                    const res = await fetch(`/api/tech/by-user/${request.techId}`)
+                    if (res.ok) {
+                      const data = await res.json()
+                      if (data.techProfileId) {
+                        router.push(`/book/${data.techProfileId}?lookId=${request.lookId}`)
+                        return
+                      }
+                    }
+                  } catch (e) {
+                    console.error('Error finding tech profile:', e)
+                  }
+                  toast.error('Could not find tech profile for booking')
                 }
               }}
               size="sm"
