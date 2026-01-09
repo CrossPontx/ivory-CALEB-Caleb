@@ -154,11 +154,6 @@ extension IAPManager: SKProductsRequestDelegate {
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         os_log("✅ Products received: %d", log: logger, type: .info, response.products.count)
         
-        // Update products on main thread to avoid SwiftUI warnings
-        DispatchQueue.main.async {
-            self.products = response.products
-        }
-        
         let productsData = response.products.map { product -> [String: Any] in
             let formatter = NumberFormatter()
             formatter.numberStyle = .currency
@@ -174,21 +169,35 @@ extension IAPManager: SKProductsRequestDelegate {
             ]
         }
         
-        if let callbackId = objc_getAssociatedObject(request, "callbackId"),
-           let viewModel = objc_getAssociatedObject(request, "viewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, result: [
-                "products": productsData,
-                "invalidProductIds": response.invalidProductIdentifiers
-            ])
+        let invalidIds = response.invalidProductIdentifiers
+        let receivedProducts = response.products
+        let callbackId = objc_getAssociatedObject(request, "callbackId")
+        let viewModel = objc_getAssociatedObject(request, "viewModel") as? WebViewModel
+        
+        // Dispatch everything to main thread to avoid SwiftUI warnings
+        DispatchQueue.main.async {
+            self.products = receivedProducts
+            
+            if let callbackId = callbackId, let viewModel = viewModel {
+                viewModel.resolveCallback(callbackId: callbackId, result: [
+                    "products": productsData,
+                    "invalidProductIds": invalidIds
+                ])
+            }
         }
     }
     
     func request(_ request: SKRequest, didFailWithError error: Error) {
         os_log("❌ Products request failed: %@", log: logger, type: .error, error.localizedDescription)
         
-        if let callbackId = objc_getAssociatedObject(request, "callbackId"),
-           let viewModel = objc_getAssociatedObject(request, "viewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, error: error.localizedDescription)
+        let errorMsg = error.localizedDescription
+        let callbackId = objc_getAssociatedObject(request, "callbackId")
+        let viewModel = objc_getAssociatedObject(request, "viewModel") as? WebViewModel
+        
+        DispatchQueue.main.async {
+            if let callbackId = callbackId, let viewModel = viewModel {
+                viewModel.resolveCallback(callbackId: callbackId, error: errorMsg)
+            }
         }
     }
 }
@@ -227,8 +236,10 @@ extension IAPManager: SKPaymentTransactionObserver {
                 "transactionDate": transaction.transactionDate?.timeIntervalSince1970 ?? 0
             ]
             
-            // Notify web app
-            webViewModel?.notifyWeb(event: "purchaseCompleted", data: data)
+            // Notify web app on main thread
+            DispatchQueue.main.async {
+                self.webViewModel?.notifyWeb(event: "purchaseCompleted", data: data)
+            }
         }
     }
     
@@ -245,7 +256,9 @@ extension IAPManager: SKPaymentTransactionObserver {
             "errorMessage": errorMessage
         ]
         
-        webViewModel?.notifyWeb(event: "purchaseFailed", data: data)
+        DispatchQueue.main.async {
+            self.webViewModel?.notifyWeb(event: "purchaseFailed", data: data)
+        }
         
         SKPaymentQueue.default().finishTransaction(transaction)
     }
@@ -263,7 +276,9 @@ extension IAPManager: SKPaymentTransactionObserver {
                 "receipt": receiptString
             ]
             
-            webViewModel?.notifyWeb(event: "purchaseRestored", data: data)
+            DispatchQueue.main.async {
+                self.webViewModel?.notifyWeb(event: "purchaseRestored", data: data)
+            }
         }
         
         SKPaymentQueue.default().finishTransaction(transaction)
@@ -272,18 +287,27 @@ extension IAPManager: SKPaymentTransactionObserver {
     func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         os_log("✅ Restore completed", log: logger, type: .info)
         
-        if let callbackId = objc_getAssociatedObject(queue, "restoreCallbackId"),
-           let viewModel = objc_getAssociatedObject(queue, "restoreViewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, result: ["success": true])
+        let callbackId = objc_getAssociatedObject(queue, "restoreCallbackId")
+        let viewModel = objc_getAssociatedObject(queue, "restoreViewModel") as? WebViewModel
+        
+        DispatchQueue.main.async {
+            if let callbackId = callbackId, let viewModel = viewModel {
+                viewModel.resolveCallback(callbackId: callbackId, result: ["success": true])
+            }
         }
     }
     
     func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         os_log("❌ Restore failed: %@", log: logger, type: .error, error.localizedDescription)
         
-        if let callbackId = objc_getAssociatedObject(queue, "restoreCallbackId"),
-           let viewModel = objc_getAssociatedObject(queue, "restoreViewModel") as? WebViewModel {
-            viewModel.resolveCallback(callbackId: callbackId, error: error.localizedDescription)
+        let errorMsg = error.localizedDescription
+        let callbackId = objc_getAssociatedObject(queue, "restoreCallbackId")
+        let viewModel = objc_getAssociatedObject(queue, "restoreViewModel") as? WebViewModel
+        
+        DispatchQueue.main.async {
+            if let callbackId = callbackId, let viewModel = viewModel {
+                viewModel.resolveCallback(callbackId: callbackId, error: errorMsg)
+            }
         }
     }
 }
