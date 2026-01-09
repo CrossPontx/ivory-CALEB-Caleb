@@ -586,3 +586,26 @@ export const savedDesignsRelations = relations(savedDesigns, ({ one }) => ({
     references: [collections.id],
   }),
 }));
+
+// Messages for design request conversations
+export const designRequestMessages = pgTable('design_request_messages', {
+  id: serial('id').primaryKey(),
+  designRequestId: integer('design_request_id').references(() => designRequests.id).notNull(),
+  senderId: integer('sender_id').references(() => users.id).notNull(),
+  senderType: varchar('sender_type', { length: 20 }).notNull(), // 'client' or 'tech'
+  messageType: varchar('message_type', { length: 20 }).default('text').notNull(), // 'text', 'image', 'file', 'design'
+  content: text('content').notNull(),
+  fileName: varchar('file_name', { length: 255 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const designRequestMessagesRelations = relations(designRequestMessages, ({ one }) => ({
+  designRequest: one(designRequests, {
+    fields: [designRequestMessages.designRequestId],
+    references: [designRequests.id],
+  }),
+  sender: one(users, {
+    fields: [designRequestMessages.senderId],
+    references: [users.id],
+  }),
+}));

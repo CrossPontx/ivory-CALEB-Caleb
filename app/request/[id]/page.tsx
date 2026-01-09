@@ -4,15 +4,15 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Send, Paperclip, Image as ImageIcon, FileText, Sparkles, Check, X, ChevronDown } from "lucide-react"
+import { ArrowLeft, Send, Paperclip, FileText, Check, Clock, CheckCircle2 } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { toast } from "sonner"
 
 type DesignRequest = {
   id: string
-  clientName: string
-  clientId: number
+  techName: string
+  techId: number
   designImage: string
   message: string
   status: "pending" | "approved" | "modified"
@@ -29,7 +29,7 @@ type Message = {
   timestamp: Date
 }
 
-export default function TechRequestDetailPage() {
+export default function ClientRequestDetailPage() {
   const router = useRouter()
   const params = useParams()
   const [request, setRequest] = useState<DesignRequest | null>(null)
@@ -37,10 +37,6 @@ export default function TechRequestDetailPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [sendingMessage, setSendingMessage] = useState(false)
-  const [implementationGuidance, setImplementationGuidance] = useState<string>("")
-  const [loadingGuidance, setLoadingGuidance] = useState(false)
-  const [showGuidance, setShowGuidance] = useState(false)
-  const [showFullGuidance, setShowFullGuidance] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -65,16 +61,16 @@ export default function TechRequestDetailPage() {
         const user = JSON.parse(userStr)
         setCurrentUserId(user.id)
         
-        const requestsRes = await fetch(`/api/design-requests?techId=${user.id}`)
+        const requestsRes = await fetch(`/api/design-requests?clientId=${user.id}`)
         if (requestsRes.ok) {
           const data = await requestsRes.json()
           const foundRequest = data.find((req: any) => req.id.toString() === params.id)
           
           if (foundRequest) {
-            const reqData = {
+            const reqData: DesignRequest = {
               id: foundRequest.id.toString(),
-              clientName: foundRequest.client?.username || `Client ${foundRequest.clientId}`,
-              clientId: foundRequest.clientId,
+              techName: foundRequest.tech?.username || `Tech ${foundRequest.techId}`,
+              techId: foundRequest.techId,
               designImage: foundRequest.look?.imageUrl || "/placeholder.svg",
               message: foundRequest.clientMessage || "",
               status: foundRequest.status,
@@ -142,7 +138,6 @@ export default function TechRequestDetailPage() {
       }
     } catch (error) {
       console.error('Error loading messages:', error)
-      // Fall back to just the initial messages
       const initialMessages: Message[] = [
         {
           id: "design-1",
@@ -165,43 +160,18 @@ export default function TechRequestDetailPage() {
     }
   }
 
-  const generateImplementationGuidance = async () => {
-    if (!request?.designImage) return
-    
-    setLoadingGuidance(true)
-    
-    try {
-      const response = await fetch('/api/analyze-design-for-tech', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl: request.designImage }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setImplementationGuidance(data.guidance)
-        setShowGuidance(true)
-      }
-    } catch (error) {
-      console.error('Error generating guidance:', error)
-    } finally {
-      setLoadingGuidance(false)
-    }
-  }
-
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !request || !currentUserId) return
     
     setSendingMessage(true)
     
     try {
-      // Save message to database
       const response = await fetch(`/api/design-requests/${request.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           senderId: currentUserId,
-          senderType: 'tech',
+          senderType: 'client',
           messageType: 'text',
           content: newMessage.trim(),
         }),
@@ -212,7 +182,7 @@ export default function TechRequestDetailPage() {
         
         const message: Message = {
           id: savedMessage.id.toString(),
-          sender: "tech",
+          sender: "client",
           type: "text",
           content: newMessage.trim(),
           timestamp: new Date(savedMessage.createdAt),
@@ -238,7 +208,6 @@ export default function TechRequestDetailPage() {
     const isImage = file.type.startsWith('image/')
     
     try {
-      // Upload file first
       const formData = new FormData()
       formData.append('file', file)
       
@@ -254,13 +223,12 @@ export default function TechRequestDetailPage() {
       
       const { url } = await uploadRes.json()
       
-      // Save message to database
       const response = await fetch(`/api/design-requests/${request.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           senderId: currentUserId,
-          senderType: 'tech',
+          senderType: 'client',
           messageType: isImage ? 'image' : 'file',
           content: url,
           fileName: file.name,
@@ -272,7 +240,7 @@ export default function TechRequestDetailPage() {
         
         const message: Message = {
           id: savedMessage.id.toString(),
-          sender: "tech",
+          sender: "client",
           type: isImage ? "image" : "file",
           content: url,
           fileName: file.name,
@@ -288,60 +256,34 @@ export default function TechRequestDetailPage() {
       toast.error('Failed to upload file')
     }
     
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }
 
-  const handleApprove = async () => {
-    if (!request || !currentUserId) return
-    
-    try {
-      const response = await fetch('/api/design-requests', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: request.id, status: 'approved' }),
-      })
-
-      if (response.ok) {
-        setRequest({ ...request, status: "approved" })
-        
-        // Save approval message to database
-        const approvalContent = "✓ Design approved! Looking forward to bringing this to life."
-        const msgResponse = await fetch(`/api/design-requests/${request.id}/messages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            senderId: currentUserId,
-            senderType: 'tech',
-            messageType: 'text',
-            content: approvalContent,
-          }),
-        })
-
-        if (msgResponse.ok) {
-          const savedMessage = await msgResponse.json()
-          const message: Message = {
-            id: savedMessage.id.toString(),
-            sender: "tech",
-            type: "text",
-            content: approvalContent,
-            timestamp: new Date(savedMessage.createdAt),
-          }
-          setMessages(prev => [...prev, message])
-        }
-        
-        toast.success('Design approved!')
-      }
-    } catch (error) {
-      console.error('Error approving request:', error)
-      toast.error('Failed to approve design')
-    }
-  }
-
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  }
+
+  const getStatusBadge = () => {
+    switch (request?.status) {
+      case 'approved':
+        return (
+          <div className="flex items-center gap-1.5 text-green-600">
+            <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+            <span className="text-[9px] sm:text-[10px] font-light tracking-wide">Approved</span>
+          </div>
+        )
+      case 'pending':
+        return (
+          <div className="flex items-center gap-1.5 text-[#8B7355]">
+            <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
+            <span className="text-[9px] sm:text-[10px] font-light tracking-wide">Pending</span>
+          </div>
+        )
+      default:
+        return null
+    }
   }
 
   if (loading) {
@@ -363,10 +305,10 @@ export default function TechRequestDetailPage() {
         <div className="text-center max-w-sm">
           <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-5 sm:mb-6 tracking-[-0.01em]">Request Not Found</h2>
           <Button 
-            onClick={() => router.push('/tech/dashboard')} 
+            onClick={() => router.push('/home')} 
             className="h-11 sm:h-12 px-6 sm:px-8 bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-500 text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.25em] uppercase font-light rounded-none active:scale-95 touch-manipulation"
           >
-            Back to Dashboard
+            Back to Home
           </Button>
         </div>
       </div>
@@ -375,7 +317,7 @@ export default function TechRequestDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F7F5] flex flex-col">
-      {/* Header - Mobile Optimized */}
+      {/* Header */}
       <header className="bg-white border-b border-[#E8E8E8] sticky top-0 z-50 pt-safe">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-2">
@@ -389,96 +331,23 @@ export default function TechRequestDetailPage() {
                 <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
               </Button>
               <div className="min-w-0 flex-1">
-                <h1 className="font-serif text-base sm:text-lg font-light text-[#1A1A1A] truncate">{request.clientName}</h1>
-                <p className="text-[9px] sm:text-[10px] text-[#6B6B6B] font-light tracking-wide">
-                  {request.status === "approved" ? "✓ Approved" : "Active conversation"}
-                </p>
+                <h1 className="font-serif text-base sm:text-lg font-light text-[#1A1A1A] truncate">{request.techName}</h1>
+                {getStatusBadge()}
               </div>
             </div>
-            
-            {request.status === "pending" && (
-              <Button
-                onClick={handleApprove}
-                size="sm"
-                className="h-9 sm:h-10 px-3 sm:px-4 bg-[#1A1A1A] hover:bg-[#8B7355] text-white text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.15em] uppercase font-light rounded-none flex-shrink-0 active:scale-95 transition-transform touch-manipulation"
-              >
-                <Check className="w-3.5 h-3.5 mr-1 sm:mr-1.5" strokeWidth={1.5} />
-                <span className="hidden xs:inline">Approve</span>
-                <span className="xs:hidden">OK</span>
-              </Button>
-            )}
           </div>
         </div>
       </header>
 
-      {/* AI Guide Button - Mobile Optimized */}
-      {!showGuidance && (
-        <div className="bg-white/80 backdrop-blur-sm border-b border-[#E8E8E8]">
-          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
-            <button
-              onClick={generateImplementationGuidance}
-              disabled={loadingGuidance}
-              className="flex items-center gap-2 text-[10px] sm:text-[11px] text-[#8B7355] font-light tracking-wide hover:text-[#1A1A1A] transition-colors active:scale-95 touch-manipulation min-h-[36px]"
-            >
-              {loadingGuidance ? (
-                <>
-                  <div className="w-3 h-3 border border-[#8B7355] border-t-transparent rounded-full animate-spin"></div>
-                  <span>Analyzing design...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" strokeWidth={1.5} />
-                  <span>Get AI implementation tips</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* AI Guidance Panel - Mobile Optimized with expand */}
-      {showGuidance && implementationGuidance && (
-        <div className="bg-white/90 backdrop-blur-sm border-b border-[#E8E8E8]">
-          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3">
-            <div className="flex items-start justify-between gap-2 sm:gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                  <Sparkles className="w-3 h-3 text-[#8B7355]" strokeWidth={1.5} />
-                  <span className="text-[9px] sm:text-[10px] text-[#8B7355] font-light tracking-wide uppercase">AI Tips</span>
-                </div>
-                <p className={`text-[11px] sm:text-xs text-[#6B6B6B] font-light leading-relaxed ${showFullGuidance ? '' : 'line-clamp-2'}`}>
-                  {implementationGuidance}
-                </p>
-                {implementationGuidance.length > 100 && (
-                  <button 
-                    onClick={() => setShowFullGuidance(!showFullGuidance)}
-                    className="text-[10px] text-[#8B7355] font-light mt-1.5 flex items-center gap-1 active:scale-95 touch-manipulation"
-                  >
-                    {showFullGuidance ? 'Show less' : 'Show more'}
-                    <ChevronDown className={`w-3 h-3 transition-transform ${showFullGuidance ? 'rotate-180' : ''}`} strokeWidth={1.5} />
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={() => setShowGuidance(false)}
-                className="p-1.5 hover:bg-[#F8F7F5] rounded-none active:scale-95 touch-manipulation"
-              >
-                <X className="w-4 h-4 text-[#6B6B6B]" strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Messages Area - Mobile Optimized */}
+      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto pb-36 sm:pb-32">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-3 sm:space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.sender === "tech" ? "justify-end" : "justify-start"}`}
+              className={`flex ${message.sender === "client" ? "justify-end" : "justify-start"}`}
             >
-              <div className={`max-w-[88%] sm:max-w-[85%] ${message.sender === "tech" ? "items-end" : "items-start"}`}>
+              <div className={`max-w-[88%] sm:max-w-[85%] ${message.sender === "client" ? "items-end" : "items-start"}`}>
                 {message.type === "design" && (
                   <div className="mb-1">
                     <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-white border border-[#E8E8E8] overflow-hidden">
@@ -491,7 +360,7 @@ export default function TechRequestDetailPage() {
                         sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, 320px"
                       />
                     </div>
-                    <p className="text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1.5 tracking-wide">
+                    <p className={`text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1.5 tracking-wide ${message.sender === "client" ? "text-right" : ""}`}>
                       {formatTime(message.timestamp)}
                     </p>
                   </div>
@@ -500,14 +369,14 @@ export default function TechRequestDetailPage() {
                 {message.type === "text" && (
                   <div>
                     <div className={`px-3.5 sm:px-4 py-2.5 sm:py-3 ${
-                      message.sender === "tech" 
+                      message.sender === "client" 
                         ? "bg-[#1A1A1A] text-white" 
                         : "bg-white border border-[#E8E8E8] text-[#1A1A1A]"
                     }`}>
                       <p className="text-[13px] sm:text-sm font-light leading-relaxed">{message.content}</p>
                     </div>
                     <p className={`text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1 sm:mt-1.5 tracking-wide ${
-                      message.sender === "tech" ? "text-right" : ""
+                      message.sender === "client" ? "text-right" : ""
                     }`}>
                       {formatTime(message.timestamp)}
                     </p>
@@ -527,7 +396,7 @@ export default function TechRequestDetailPage() {
                       />
                     </div>
                     <p className={`text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1 sm:mt-1.5 tracking-wide ${
-                      message.sender === "tech" ? "text-right" : ""
+                      message.sender === "client" ? "text-right" : ""
                     }`}>
                       {formatTime(message.timestamp)}
                     </p>
@@ -537,7 +406,7 @@ export default function TechRequestDetailPage() {
                 {message.type === "file" && (
                   <div>
                     <div className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 ${
-                      message.sender === "tech" 
+                      message.sender === "client" 
                         ? "bg-[#1A1A1A] text-white" 
                         : "bg-white border border-[#E8E8E8] text-[#1A1A1A]"
                     }`}>
@@ -545,7 +414,7 @@ export default function TechRequestDetailPage() {
                       <span className="text-[13px] sm:text-sm font-light truncate max-w-[180px] sm:max-w-none">{message.fileName}</span>
                     </div>
                     <p className={`text-[9px] sm:text-[10px] text-[#6B6B6B] font-light mt-1 sm:mt-1.5 tracking-wide ${
-                      message.sender === "tech" ? "text-right" : ""
+                      message.sender === "client" ? "text-right" : ""
                     }`}>
                       {formatTime(message.timestamp)}
                     </p>
@@ -558,7 +427,7 @@ export default function TechRequestDetailPage() {
         </div>
       </div>
 
-      {/* Input Area - Mobile Optimized with larger touch targets */}
+      {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E8E8] pb-safe z-40">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
           <div className="flex items-end gap-2 sm:gap-2.5">
@@ -602,7 +471,7 @@ export default function TechRequestDetailPage() {
               {sendingMessage ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Send className="w-4 h-4 sm:w-4 sm:h-4" strokeWidth={1.5} />
+                <Send className="w-4 h-4" strokeWidth={1.5} />
               )}
             </Button>
           </div>
