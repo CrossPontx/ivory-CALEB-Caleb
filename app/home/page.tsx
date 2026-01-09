@@ -45,6 +45,7 @@ export default function HomePage() {
   const [techs, setTechs] = useState<any[]>([])
   const [myBookings, setMyBookings] = useState<any[]>([])
   const [searchLoading, setSearchLoading] = useState(false)
+  const [designRequests, setDesignRequests] = useState<any[]>([])
   const isWatch = useIsAppleWatch()
 
   useEffect(() => {
@@ -118,6 +119,9 @@ export default function HomePage() {
 
         // Load bookings
         fetchMyBookings(user.id)
+        
+        // Load design requests (potential appointments)
+        fetchDesignRequests(user.id)
 
         // Check for payment status in URL
         const urlParams = new URLSearchParams(window.location.search)
@@ -176,6 +180,25 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error('Error fetching bookings:', error)
+    }
+  }
+
+  const fetchDesignRequests = async (userIdParam?: number) => {
+    try {
+      const userStr = localStorage.getItem('ivoryUser')
+      if (!userStr) return
+      
+      const user = JSON.parse(userStr)
+      const id = userIdParam || user.id
+      
+      const response = await fetch(`/api/design-requests?clientId=${id}`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        setDesignRequests(data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching design requests:', error)
     }
   }
 
@@ -680,18 +703,97 @@ export default function HomePage() {
         {/* My Bookings Tab */}
         {activeTab === 'bookings' && (
           <div className="tab-content-enter page-container space-y-8 sm:space-y-12 lg:space-y-16">
-            {/* Bookings Hero */}
-            <div className="text-center space-y-3 sm:space-y-5">
-              <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light">
-                Your Appointments
-              </p>
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
-                Upcoming & Past Bookings
-              </h2>
-            </div>
+            {/* Potential Upcoming Appointments (Design Requests) */}
+            {designRequests.length > 0 && (
+              <div>
+                <div className="text-center space-y-3 sm:space-y-5 mb-6 sm:mb-8">
+                  <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light">
+                    In Discussion
+                  </p>
+                  <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
+                    Potential Upcoming Appointments
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#6B6B6B] font-light max-w-lg mx-auto">
+                    Designs you've sent to nail techs. Continue the conversation to schedule your appointment.
+                  </p>
+                </div>
 
-            {/* Bookings List */}
-            {myBookings.length === 0 ? (
+                <div className="grid gap-4 sm:gap-6 max-w-4xl mx-auto mb-12">
+                  {designRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="border border-[#E8E8E8] hover:border-[#8B7355] transition-all duration-700 hover:shadow-xl hover:shadow-[#8B7355]/5 cursor-pointer bg-white"
+                      onClick={() => router.push(`/request/${request.id}`)}
+                    >
+                      <div className="p-4 sm:p-6 space-y-4">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <h3 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-1 tracking-tight">
+                              {request.tech?.username || 'Nail Tech'}
+                            </h3>
+                            <p className="text-xs text-[#6B6B6B] font-light tracking-wide">
+                              Sent {new Date(request.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </p>
+                          </div>
+                          <Badge className={`${
+                            request.status === 'approved' ? 'bg-green-500' : 
+                            request.status === 'pending' ? 'bg-[#FF9500]' : 
+                            'bg-[#8E8E93]'
+                          } text-white text-[9px] tracking-[0.15em] uppercase font-light`}>
+                            {request.status === 'approved' ? 'Ready to Book' : request.status}
+                          </Badge>
+                        </div>
+
+                        {/* Design Preview */}
+                        {request.look && (
+                          <div className="flex items-center gap-4 p-3 bg-[#F8F7F5] rounded-lg">
+                            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                              <Image
+                                src={request.look.imageUrl}
+                                alt={request.look.title || 'Design'}
+                                fill
+                                className="object-cover"
+                                sizes="80px"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-[#1A1A1A] truncate">{request.look.title || 'Your Design'}</p>
+                              {request.clientMessage && (
+                                <p className="text-xs text-[#6B6B6B] font-light mt-1 line-clamp-2">{request.clientMessage}</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Action hint */}
+                        <div className="flex items-center justify-between pt-3 border-t border-[#E8E8E8]">
+                          <div className="flex items-center gap-2 text-xs text-[#8B7355] font-medium">
+                            <Send className="w-3.5 h-3.5" strokeWidth={2} />
+                            <span>Tap to view conversation</span>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-[#8B7355]" strokeWidth={1.5} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Confirmed Bookings */}
+            <div>
+              <div className="text-center space-y-3 sm:space-y-5 mb-6 sm:mb-8">
+                <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light">
+                  Your Appointments
+                </p>
+                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] leading-[1.1]">
+                  {myBookings.length > 0 ? 'Upcoming & Past Bookings' : 'No Bookings Yet'}
+                </h2>
+              </div>
+
+              {/* Bookings List */}
+              {myBookings.length === 0 ? (
               <div className="text-center py-16 sm:py-24 lg:py-32">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-8 border border-[#E8E8E8] flex items-center justify-center">
                   <Calendar className="w-10 h-10 sm:w-12 sm:h-12 text-[#E8E8E8]" strokeWidth={1} />
@@ -843,6 +945,7 @@ export default function HomePage() {
                 ))}
               </div>
             )}
+            </div>
           </div>
         )}
       </main>

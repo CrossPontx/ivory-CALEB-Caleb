@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Send, Paperclip, Image as ImageIcon, FileText, Sparkles, Check, X, ChevronDown } from "lucide-react"
+import { ArrowLeft, Send, Paperclip, FileText, Sparkles, Check, X, ChevronDown, CalendarPlus } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { toast } from "sonner"
@@ -416,6 +416,23 @@ export default function TechRequestDetailPage() {
               >
                 <Check className="w-4 h-4 mr-1.5" strokeWidth={2} />
                 Approve
+              </Button>
+            )}
+            
+            {/* Propose Appointment Button - shown when approved */}
+            {request.status === "approved" && (
+              <Button
+                onClick={() => {
+                  triggerHaptic('medium')
+                  // Send a message suggesting to book
+                  const bookingMessage = "I'd love to bring this design to life! Would you like to schedule an appointment? You can book directly through my profile."
+                  setNewMessage(bookingMessage)
+                }}
+                size="sm"
+                className="h-9 px-3 bg-[#007AFF] hover:bg-[#0066DD] text-white text-[11px] sm:text-[12px] font-medium rounded-full flex-shrink-0 active:scale-95 transition-all duration-150 touch-manipulation shadow-sm"
+              >
+                <CalendarPlus className="w-4 h-4 mr-1" strokeWidth={2} />
+                <span className="hidden sm:inline">Propose</span>
               </Button>
             )}
           </div>

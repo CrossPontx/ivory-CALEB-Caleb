@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Send, Paperclip, FileText, Check, Clock, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, Send, Paperclip, FileText, Check, Clock, CheckCircle2, Calendar, CalendarPlus } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { toast } from "sonner"
@@ -20,6 +20,7 @@ type DesignRequest = {
   id: string
   techName: string
   techId: number
+  techProfileId?: number
   designImage: string
   message: string
   status: "pending" | "approved" | "modified"
@@ -78,6 +79,7 @@ export default function ClientRequestDetailPage() {
               id: foundRequest.id.toString(),
               techName: foundRequest.tech?.username || `Tech ${foundRequest.techId}`,
               techId: foundRequest.techId,
+              techProfileId: foundRequest.tech?.techProfile?.id,
               designImage: foundRequest.look?.imageUrl || "/placeholder.svg",
               message: foundRequest.clientMessage || "",
               status: foundRequest.status,
@@ -346,6 +348,26 @@ export default function ClientRequestDetailPage() {
                 {getStatusBadge()}
               </div>
             </div>
+            
+            {/* Schedule Appointment Button */}
+            <Button
+              onClick={() => {
+                triggerHaptic('medium')
+                // Navigate to booking page with the tech and design pre-selected
+                if (request.techProfileId) {
+                  router.push(`/book/${request.techProfileId}?lookId=${request.lookId}`)
+                } else {
+                  // If no tech profile, try to find it
+                  router.push(`/tech/${request.techId}`)
+                }
+              }}
+              size="sm"
+              className="h-9 px-3 bg-[#34C759] hover:bg-[#30B350] text-white text-[11px] sm:text-[12px] font-medium rounded-full flex-shrink-0 active:scale-95 transition-all duration-150 touch-manipulation shadow-sm"
+            >
+              <CalendarPlus className="w-4 h-4 mr-1.5" strokeWidth={2} />
+              <span className="hidden sm:inline">Schedule</span>
+              <span className="sm:hidden">Book</span>
+            </Button>
           </div>
         </div>
       </header>
