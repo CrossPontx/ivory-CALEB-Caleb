@@ -1867,16 +1867,18 @@ export default function CapturePage() {
         <ZeroCreditsBanner credits={credits} />
         
         {/* Elegant Header */}
-        <div className="absolute top-0 left-0 right-0 pt-10 sm:pt-12 px-3 sm:px-6 lg:px-10 pb-3 sm:pb-4 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
-          <div className="max-w-7xl mx-auto">
+        <div className="absolute top-0 left-0 right-0 pt-safe px-3 sm:px-6 lg:px-10 pb-3 sm:pb-4 z-10 bg-white/95 backdrop-blur-md border-b border-[#E8E8E8]/50 transition-all duration-500">
+          <div className="max-w-7xl mx-auto pt-3">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              {/* Left side - Delete button */}
+              {/* Left side - Back button */}
               <button
-                onClick={changePhoto}
-                className="h-8 sm:h-10 w-8 sm:w-10 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white active:scale-[0.98] transition-all duration-500 flex items-center justify-center rounded-none"
-                title="Delete this design and start over"
+                onClick={() => router.back()}
+                className="h-8 sm:h-10 w-8 sm:w-10 border border-[#E8E8E8] text-[#1A1A1A] hover:bg-[#F8F7F5] hover:border-[#8B7355] active:scale-[0.98] transition-all duration-500 flex items-center justify-center rounded-none"
+                title="Go back"
               >
-                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.5} />
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
               </button>
               
               {/* Center - Title */}
@@ -1965,7 +1967,7 @@ export default function CapturePage() {
 
         {/* Elegant Image Preview Section - Side by Side */}
         <div 
-          className="pt-36 sm:pt-40 lg:pt-44 pb-24 sm:pb-28 px-4 sm:px-8 lg:px-12 overflow-y-auto transition-all duration-700" 
+          className="pt-32 sm:pt-36 lg:pt-40 pb-24 sm:pb-28 px-4 sm:px-8 lg:px-12 overflow-y-auto transition-all duration-700" 
           style={{ 
             height: '100vh',
             paddingBottom: '140px' // Space for button bar + bottom nav
@@ -2183,13 +2185,20 @@ export default function CapturePage() {
           }}
         >
           <div className="max-w-4xl mx-auto h-full flex flex-col">
-            {/* Elegant Drag Handle */}
-            <button
-              onClick={() => setIsDrawerOpen(false)}
-              data-onboarding="close-design-drawer"
-              className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355] cursor-pointer"
-              aria-label="Close drawer"
-            />
+            {/* Clear Close Button */}
+            <div className="flex items-center justify-center py-4">
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                data-onboarding="close-design-drawer"
+                className="flex items-center gap-2 px-4 py-2 bg-[#F8F7F5] hover:bg-[#E8E8E8] border border-[#E8E8E8] text-[#1A1A1A] rounded-full transition-all duration-300 active:scale-95"
+                aria-label="Close drawer"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                <span className="text-xs font-light tracking-wider uppercase">Close</span>
+              </button>
+            </div>
 
             <div className="w-full flex-1 flex flex-col overflow-hidden">
               {(designMode === 'design' || designMode === null) && (
@@ -2763,13 +2772,20 @@ export default function CapturePage() {
           }}
         >
           <div className="max-w-4xl mx-auto h-full flex flex-col">
-            {/* Elegant Drag Handle */}
-            <button
-              onClick={() => setIsUploadDrawerOpen(false)}
-              data-onboarding="close-upload-drawer"
-              className="h-1.5 w-20 bg-[#E8E8E8] rounded-full mx-auto my-4 flex-shrink-0 transition-all duration-300 hover:bg-[#8B7355] cursor-pointer"
-              aria-label="Close drawer"
-            />
+            {/* Clear Close Button */}
+            <div className="flex items-center justify-center py-4">
+              <button
+                onClick={() => setIsUploadDrawerOpen(false)}
+                data-onboarding="close-upload-drawer"
+                className="flex items-center gap-2 px-4 py-2 bg-[#F8F7F5] hover:bg-[#E8E8E8] border border-[#E8E8E8] text-[#1A1A1A] rounded-full transition-all duration-300 active:scale-95"
+                aria-label="Close drawer"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                <span className="text-xs font-light tracking-wider uppercase">Close</span>
+              </button>
+            </div>
 
             <div className="w-full flex-1 flex flex-col overflow-hidden">
               <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain flex-1 scrollbar-hide">
@@ -3007,8 +3023,8 @@ export default function CapturePage() {
         )}
 
         {/* Elegant Top Bar */}
-        <div className="absolute top-0 left-0 right-0 pt-12 sm:pt-14 px-4 sm:px-6 pb-5 z-10 bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-4">
+        <div className="absolute top-0 left-0 right-0 pt-safe px-4 sm:px-6 pb-5 z-10 bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-4 pt-3">
             <button
               onClick={() => {
                 // If we have a saved image (user is in replace mode), restore it
@@ -3019,10 +3035,10 @@ export default function CapturePage() {
                 }
               }}
               data-onboarding="camera-close-button"
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-500 shadow-lg active:scale-95"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-all duration-500 shadow-lg active:scale-95"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
