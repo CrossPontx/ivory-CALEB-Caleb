@@ -2008,19 +2008,19 @@ export default function CapturePage() {
             {/* Original Image Card - Full Width */}
             <div className="relative overflow-hidden border border-[#E8E8E8]/50 group flex-1 bg-white shadow-sm hover:shadow-lg transition-all duration-700 rounded-sm animate-fade-in">
               <div
-                onClick={handleOpenDrawingCanvas}
-                className="relative bg-gradient-to-br from-[#F8F7F5] to-white h-full w-full cursor-pointer"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
+                onClick={!isNative() ? handleOpenDrawingCanvas : undefined}
+                className={`relative bg-gradient-to-br from-[#F8F7F5] to-white h-full w-full ${!isNative() ? 'cursor-pointer' : ''}`}
+                role={!isNative() ? "button" : undefined}
+                tabIndex={!isNative() ? 0 : undefined}
+                onKeyDown={!isNative() ? (e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
                     handleOpenDrawingCanvas()
                   }
-                }}
-                title="Click to draw on image"
+                } : undefined}
+                title={!isNative() ? "Click to draw on image" : undefined}
               >
-                {/* Show loading GIF when generating, otherwise show original image */}
+                {/* Show loading GIF when generating, empty state when no image, otherwise show original image */}
                 {isGenerating ? (
                   <>
                     <Image 
@@ -2038,8 +2038,21 @@ export default function CapturePage() {
                       </div>
                     </div>
                   </>
-                ) : (
+                ) : capturedImage ? (
                   <Image src={capturedImage} alt="Original" fill className="object-contain p-2 sm:p-4 md:p-6 transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none" />
+                ) : (
+                  /* Empty state - no image captured yet */
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-[#6B6B6B] p-8">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-16 h-16 rounded-full bg-[#F8F7F5] border-2 border-[#E8E8E8] flex items-center justify-center">
+                        <Camera className="w-8 h-8 text-[#8B7355]" strokeWidth={1.5} />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-light text-[#1A1A1A] mb-2">Tap camera icon to upload</p>
+                        <p className="text-sm text-[#6B6B6B] font-light">your first hand photo</p>
+                      </div>
+                    </div>
+                  </div>
                 )}
                 
                 {/* Drawing Overlay - Only for current tab (hide during generation) */}
