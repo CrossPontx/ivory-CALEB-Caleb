@@ -356,7 +356,7 @@ export default function CapturePage() {
       // Only start camera if there's no original image available
       setTimeout(() => {
         startCamera()
-      }, 100)
+      }, 200)
     }
   }
   
@@ -639,7 +639,7 @@ export default function CapturePage() {
             // Only start camera if the active tab has no content (no image AND no designs)
             if (!activeTabToRestore.originalImage && activeTabToRestore.finalPreviews.length === 0) {
               console.log('⚠️ Active tab has no content, starting camera')
-              setTimeout(() => startCamera(), 100)
+              setTimeout(() => startCamera(), 200)
             } else {
               console.log('✅ Active tab has content, NOT starting camera')
             }
@@ -697,6 +697,9 @@ export default function CapturePage() {
 
   const startCamera = async () => {
     try {
+      // Clean up any existing stream first
+      stopCamera()
+      
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert("Camera is not supported on this device or browser.")
@@ -718,6 +721,9 @@ export default function CapturePage() {
           console.log('Permission API not fully supported:', permError)
         }
       }
+
+      // Add a small delay to ensure cleanup is complete
+      await new Promise(resolve => setTimeout(resolve, 100))
 
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode } 
@@ -760,6 +766,13 @@ export default function CapturePage() {
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
+    }
+    
+    // Clear video element source
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+      videoRef.current.pause()
     }
   }
 
