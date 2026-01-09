@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Check, MessageCircle, Plus, Sparkles, Clock, CheckCircle2, Coins, Calendar, User } from "lucide-react"
+import { Check, MessageCircle, Plus, Sparkles, Clock, CheckCircle2, Coins, Calendar, User, Eye } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { CreditsDisplay } from "@/components/credits-display"
@@ -211,19 +211,93 @@ export default function TechDashboardPage() {
               .map((request) => (
                 <Card 
                   key={request.id} 
-                  className="group overflow-hidden border border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-2xl hover:shadow-[#8B7355]/5 transition-all duration-700 bg-white cursor-pointer rounded-none"
-                  onClick={() => router.push(`/tech/request/${request.id}`)}
+                  className="group overflow-hidden border border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-2xl hover:shadow-[#8B7355]/5 transition-all duration-700 bg-white rounded-none"
                 >
                   <CardContent className="p-0">
-                    <div className="flex gap-0 flex-col sm:flex-row">
-                      <div className="w-full sm:w-64 md:w-72 lg:w-80 h-64 sm:h-auto relative flex-shrink-0 bg-gradient-to-br from-[#F8F7F5] to-white">
+                    {/* Mobile Layout - Stacked */}
+                    <div className="sm:hidden">
+                      <div 
+                        className="relative aspect-square w-full bg-gradient-to-br from-[#F8F7F5] to-white cursor-pointer"
+                        onClick={() => router.push(`/tech/request/${request.id}`)}
+                      >
                         <Image
                           src={request.designImage || "/placeholder.svg"}
                           alt="Client design"
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-1000"
+                          className="object-cover"
                           unoptimized
                         />
+                        <div className="absolute top-3 left-3">
+                          <Badge className="bg-[#8B7355] text-white border-0 shadow-lg text-[9px] tracking-[0.15em] uppercase font-light px-2.5 py-1">
+                            New
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="p-5">
+                        <div className="text-center mb-4">
+                          <h3 className="font-serif text-xl font-light text-[#1A1A1A] mb-1.5 tracking-[-0.01em]">
+                            {request.clientName}
+                          </h3>
+                          <div className="flex items-center justify-center gap-1.5 text-xs text-[#6B6B6B] font-light">
+                            <Clock className="w-3 h-3" strokeWidth={1} />
+                            <span>
+                              {new Date(request.date).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          </div>
+                        </div>
+
+                        {request.message && (
+                          <div className="mb-5 p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
+                            <p className="text-xs text-[#6B6B6B] leading-relaxed line-clamp-2 font-light text-center">
+                              {request.message}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Centered Buttons */}
+                        <div className="flex flex-col gap-2.5">
+                          <div className="flex gap-2 justify-center">
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleApprove(request.id)} 
+                              className="flex-1 max-w-[140px] h-11 text-[10px] tracking-[0.15em] uppercase font-light bg-[#1A1A1A] hover:bg-[#8B7355] text-white rounded-none"
+                            >
+                              <Check className="w-3.5 h-3.5 mr-1.5" strokeWidth={1.5} />
+                              Approve
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => router.push(`/tech/request/${request.id}`)}
+                              className="flex-1 max-w-[140px] h-11 text-[10px] tracking-[0.15em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white rounded-none"
+                            >
+                              <Eye className="w-3.5 h-3.5 mr-1.5" strokeWidth={1.5} />
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desktop Layout - Side by Side */}
+                    <div className="hidden sm:flex gap-0">
+                      <div 
+                        className="w-64 md:w-72 lg:w-80 h-auto relative flex-shrink-0 bg-gradient-to-br from-[#F8F7F5] to-white cursor-pointer"
+                        onClick={() => router.push(`/tech/request/${request.id}`)}
+                      >
+                        <div className="aspect-square relative">
+                          <Image
+                            src={request.designImage || "/placeholder.svg"}
+                            alt="Client design"
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-1000"
+                            unoptimized
+                          />
+                        </div>
                         <div className="absolute top-3 right-3">
                           <Badge className="bg-[#8B7355] text-white border-0 shadow-lg text-[9px] tracking-[0.15em] uppercase font-light px-2.5 py-1">
                             New
@@ -231,12 +305,12 @@ export default function TechDashboardPage() {
                         </div>
                       </div>
 
-                      <div className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
-                        <div className="mb-4 sm:mb-5">
-                          <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] mb-2 tracking-[-0.01em]">
+                      <div className="flex-1 min-w-0 p-6 lg:p-8">
+                        <div className="mb-5">
+                          <h3 className="font-serif text-2xl lg:text-3xl font-light text-[#1A1A1A] mb-2 tracking-[-0.01em]">
                             {request.clientName}
                           </h3>
-                          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#6B6B6B] font-light">
+                          <div className="flex items-center gap-1.5 text-sm text-[#6B6B6B] font-light">
                             <Clock className="w-3.5 h-3.5" strokeWidth={1} />
                             <span>
                               {new Date(request.date).toLocaleDateString("en-US", {
@@ -249,21 +323,18 @@ export default function TechDashboardPage() {
                         </div>
 
                         {request.message && (
-                          <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-[#F8F7F5] border border-[#E8E8E8] rounded-none">
-                            <p className="text-xs sm:text-sm text-[#6B6B6B] leading-relaxed line-clamp-3 font-light tracking-wide">
+                          <div className="mb-6 p-4 bg-[#F8F7F5] border border-[#E8E8E8]">
+                            <p className="text-sm text-[#6B6B6B] leading-relaxed line-clamp-3 font-light tracking-wide">
                               {request.message}
                             </p>
                           </div>
                         )}
 
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-3">
                           <Button 
                             size="sm" 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleApprove(request.id)
-                            }} 
-                            className="h-10 sm:h-11 px-4 sm:px-6 text-[9px] sm:text-[10px] tracking-[0.2em] uppercase font-light bg-[#1A1A1A] hover:bg-[#8B7355] text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
+                            onClick={() => handleApprove(request.id)} 
+                            className="h-11 px-6 text-[10px] tracking-[0.2em] uppercase font-light bg-[#1A1A1A] hover:bg-[#8B7355] text-white rounded-none"
                           >
                             <Check className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
                             Approve
@@ -271,15 +342,11 @@ export default function TechDashboardPage() {
                           <Button 
                             size="sm" 
                             variant="outline" 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleRequestModification(request.id)
-                            }} 
-                            className="h-10 sm:h-11 px-3 sm:px-5 text-[9px] sm:text-[10px] tracking-[0.2em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
+                            onClick={() => router.push(`/tech/request/${request.id}`)}
+                            className="h-11 px-5 text-[10px] tracking-[0.2em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white rounded-none"
                           >
-                            <MessageCircle className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
-                            <span className="hidden sm:inline">Changes</span>
-                            <span className="sm:hidden">Edit</span>
+                            <Eye className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
+                            View
                           </Button>
                         </div>
                       </div>
