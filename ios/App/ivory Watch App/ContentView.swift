@@ -382,14 +382,14 @@ class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDelegate {
     
     // MARK: - WCSessionDelegate
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        DispatchQueue.main.async {
-            self.isReachable = session.isReachable
+        DispatchQueue.main.async { [weak self] in
+            self?.isReachable = session.isReachable
         }
     }
     
     func sessionReachabilityDidChange(_ session: WCSession) {
-        DispatchQueue.main.async {
-            self.isReachable = session.isReachable
+        DispatchQueue.main.async { [weak self] in
+            self?.isReachable = session.isReachable
         }
     }
     
