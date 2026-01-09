@@ -8,6 +8,7 @@
 import Foundation
 import WebKit
 import Combine
+import UserNotifications
 
 class WebViewModel: ObservableObject {
     @Published var isLoading = false
