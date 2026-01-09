@@ -178,6 +178,11 @@ html, body {
   .pr-safe {
     padding-right: env(safe-area-inset-right);
   }
+  
+  /* Additional padding for native iOS to prevent header being too high */
+  .ios-native .pt-safe-extra {
+    padding-top: calc(env(safe-area-inset-top) + 8px);
+  }
 }
 
 /* Luxury Animations */
