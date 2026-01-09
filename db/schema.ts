@@ -32,6 +32,11 @@ export const users: any = pgTable('users', {
   autoRechargeAmount: integer('auto_recharge_amount').default(5), // 5 or 10 credits
   resetPasswordToken: varchar('reset_password_token', { length: 255 }),
   resetPasswordExpires: timestamp('reset_password_expires'),
+  // Permissions
+  cameraPermissionGranted: boolean('camera_permission_granted').default(false),
+  photosPermissionGranted: boolean('photos_permission_granted').default(false),
+  notificationsPermissionGranted: boolean('notifications_permission_granted').default(false),
+  permissionsRequestedAt: timestamp('permissions_requested_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

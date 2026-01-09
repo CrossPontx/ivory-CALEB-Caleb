@@ -37,6 +37,11 @@ interface NativeBridge {
   setBadgeCount: (count: number) => Promise<{ success: boolean }>;
   clearBadge: () => Promise<{ success: boolean }>;
   getDeviceToken: () => Promise<{ token: string }>;
+  // Permission functions
+  requestCameraPermission: () => Promise<{ granted: boolean }>;
+  getCameraPermissionStatus: () => Promise<{ authorized: boolean }>;
+  requestPhotosPermission: () => Promise<{ granted: boolean }>;
+  getPhotosPermissionStatus: () => Promise<{ authorized: boolean }>;
   onEvent?: (event: string, data: any) => void;
 }
 
@@ -354,4 +359,58 @@ export async function getDeviceToken(): Promise<string | null> {
   return result.token || null;
 }
 
-export { LocalNotificationOptions };
+/**
+ * Camera Permission Functions
+ */
+export async function requestCameraPermission(): Promise<{ granted: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    // Fallback to web camera API
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop()); // Stop the stream immediately
+      return { granted: true };
+    } catch (error) {
+      return { granted: false };
+    }
+  }
+  return bridge.requestCameraPermission();
+}
+
+export async function getCameraPermissionStatus(): Promise<{ authorized: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    // Check if camera is available in web
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasCamera = devices.some(device => device.kind === 'videoinput');
+      return { authorized: hasCamera };
+    } catch {
+      return { authorized: false };
+    }
+  }
+  return bridge.getCameraPermissionStatus();
+}
+
+/**
+ * Photos Permission Functions
+ */
+export async function requestPhotosPermission(): Promise<{ granted: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    // Web doesn't need explicit photo library permission
+    return { granted: true };
+  }
+  return bridge.requestPhotosPermission();
+}
+
+export async function getPhotosPermissionStatus(): Promise<{ authorized: boolean }> {
+  const bridge = getNativeBridge();
+  if (!bridge) {
+    // Web doesn't need explicit photo library permission
+    return { authorized: true };
+  }
+  return bridge.getPhotosPermissionStatus();
+}
+
+export type { LocalNotificationOptions };

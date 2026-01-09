@@ -143,6 +143,118 @@ class WebViewModel: ObservableObject {
                     
                     this.call('getDeviceInfo', { callbackId });
                 });
+            },
+            
+            // Permission Methods
+            requestCameraPermission: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('requestCameraPermission', { callbackId });
+                });
+            },
+            
+            getCameraPermissionStatus: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('getCameraPermissionStatus', { callbackId });
+                });
+            },
+            
+            requestPhotosPermission: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('requestPhotosPermission', { callbackId });
+                });
+            },
+            
+            getPhotosPermissionStatus: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('getPhotosPermissionStatus', { callbackId });
+                });
+            },
+            
+            // Notification Methods
+            requestNotificationPermission: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('requestNotificationPermission', { callbackId });
+                });
+            },
+            
+            getNotificationPermissionStatus: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('getNotificationPermissionStatus', { callbackId });
+                });
+            },
+            
+            scheduleLocalNotification: function(options) {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('scheduleLocalNotification', { options, callbackId });
+                });
+            },
+            
+            cancelNotification: function(identifier) {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('cancelNotification', { identifier, callbackId });
+                });
+            },
+            
+            setBadgeCount: function(count) {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('setBadgeCount', { count, callbackId });
+                });
+            },
+            
+            clearBadge: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('clearBadge', { callbackId });
+                });
+            },
+            
+            getDeviceToken: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('getDeviceToken', { callbackId });
+                });
             }
         };
         
@@ -210,6 +322,22 @@ class WebViewModel: ObservableObject {
             CameraManager.shared.takePicture(data: data, viewModel: self)
         }
         
+        messageHandlers["requestCameraPermission"] = { [weak self] data in
+            CameraManager.shared.requestCameraPermission(data: data, viewModel: self)
+        }
+        
+        messageHandlers["getCameraPermissionStatus"] = { [weak self] data in
+            CameraManager.shared.getCameraPermissionStatus(data: data, viewModel: self)
+        }
+        
+        messageHandlers["requestPhotosPermission"] = { [weak self] data in
+            CameraManager.shared.requestPhotosPermission(data: data, viewModel: self)
+        }
+        
+        messageHandlers["getPhotosPermissionStatus"] = { [weak self] data in
+            CameraManager.shared.getPhotosPermissionStatus(data: data, viewModel: self)
+        }
+        
         // Share handlers
         messageHandlers["share"] = { [weak self] data in
             ShareManager.shared.share(data: data, viewModel: self)
@@ -223,6 +351,35 @@ class WebViewModel: ObservableObject {
         // Device info handlers
         messageHandlers["getDeviceInfo"] = { [weak self] data in
             DeviceInfoManager.shared.getInfo(data: data, viewModel: self)
+        }
+        
+        // Notification handlers
+        messageHandlers["requestNotificationPermission"] = { [weak self] data in
+            NotificationManager.shared.requestNotificationPermission(data: data, viewModel: self)
+        }
+        
+        messageHandlers["getNotificationPermissionStatus"] = { [weak self] data in
+            NotificationManager.shared.getNotificationPermissionStatus(data: data, viewModel: self)
+        }
+        
+        messageHandlers["scheduleLocalNotification"] = { [weak self] data in
+            NotificationManager.shared.scheduleLocalNotification(data: data, viewModel: self)
+        }
+        
+        messageHandlers["cancelNotification"] = { [weak self] data in
+            NotificationManager.shared.cancelNotification(data: data, viewModel: self)
+        }
+        
+        messageHandlers["setBadgeCount"] = { [weak self] data in
+            NotificationManager.shared.setBadgeCount(data: data, viewModel: self)
+        }
+        
+        messageHandlers["clearBadge"] = { [weak self] data in
+            NotificationManager.shared.clearBadge(data: data, viewModel: self)
+        }
+        
+        messageHandlers["getDeviceToken"] = { [weak self] data in
+            NotificationManager.shared.getDeviceToken(data: data, viewModel: self)
         }
     }
     

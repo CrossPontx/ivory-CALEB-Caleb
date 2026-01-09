@@ -21,6 +21,100 @@ class NotificationManager: NSObject, ObservableObject {
     
     // MARK: - Authorization
     
+    func requestNotificationPermission(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for notification permission", log: logger, type: .error)
+            return
+        }
+        
+        requestAuthorization { granted in
+            viewModel?.resolveCallback(callbackId: callbackId, result: ["granted": granted])
+        }
+    }
+    
+    func getNotificationPermissionStatus(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for notification permission status", log: logger, type: .error)
+            return
+        }
+        
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            let authorized = settings.authorizationStatus == .authorized
+            DispatchQueue.main.async {
+                viewModel?.resolveCallback(callbackId: callbackId, result: ["authorized": authorized])
+            }
+        }
+    }
+    
+    func scheduleLocalNotification(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"],
+              let options = data["options"] as? [String: Any],
+              let title = options["title"] as? String,
+              let body = options["body"] as? String else {
+            os_log("❌ Invalid data for schedule notification", log: logger, type: .error)
+            return
+        }
+        
+        let identifier = options["identifier"] as? String ?? "notif-\(Date().timeIntervalSince1970)"
+        let delay = options["delay"] as? TimeInterval ?? 0
+        let userInfo = options["userInfo"] as? [String: Any] ?? [:]
+        
+        scheduleLocalNotification(
+            title: title,
+            body: body,
+            identifier: identifier,
+            delay: delay,
+            userInfo: userInfo
+        )
+        
+        viewModel?.resolveCallback(callbackId: callbackId, result: [
+            "success": true,
+            "identifier": identifier
+        ])
+    }
+    
+    func cancelNotification(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"],
+              let identifier = data["identifier"] as? String else {
+            os_log("❌ Invalid data for cancel notification", log: logger, type: .error)
+            return
+        }
+        
+        cancelNotification(identifier: identifier)
+        viewModel?.resolveCallback(callbackId: callbackId, result: ["success": true])
+    }
+    
+    func setBadgeCount(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"],
+              let count = data["count"] as? Int else {
+            os_log("❌ Invalid data for set badge count", log: logger, type: .error)
+            return
+        }
+        
+        setBadgeCount(count)
+        viewModel?.resolveCallback(callbackId: callbackId, result: ["success": true])
+    }
+    
+    func clearBadge(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for clear badge", log: logger, type: .error)
+            return
+        }
+        
+        clearBadge()
+        viewModel?.resolveCallback(callbackId: callbackId, result: ["success": true])
+    }
+    
+    func getDeviceToken(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for get device token", log: logger, type: .error)
+            return
+        }
+        
+        let token = deviceToken ?? ""
+        viewModel?.resolveCallback(callbackId: callbackId, result: ["token": token])
+    }
+    
     func requestAuthorization(completion: @escaping (Bool) -> Void) {
         os_log("📱 Requesting notification authorization", log: logger, type: .info)
         

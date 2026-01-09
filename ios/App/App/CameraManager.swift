@@ -7,6 +7,8 @@
 
 import Foundation
 import UIKit
+import AVFoundation
+import Photos
 import os.log
 
 class CameraManager: NSObject, ObservableObject {
@@ -14,6 +16,63 @@ class CameraManager: NSObject, ObservableObject {
     
     private var currentCallback: ((String?, String?) -> Void)?
     private let logger = OSLog(subsystem: "com.ivory.app", category: "Camera")
+    
+    // MARK: - Permission Methods
+    
+    func requestCameraPermission(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for camera permission", log: logger, type: .error)
+            return
+        }
+        
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            DispatchQueue.main.async {
+                os_log("📷 Camera permission %@", log: self.logger, type: .info, granted ? "granted" : "denied")
+                viewModel?.resolveCallback(callbackId: callbackId, result: ["granted": granted])
+            }
+        }
+    }
+    
+    func getCameraPermissionStatus(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for camera permission status", log: logger, type: .error)
+            return
+        }
+        
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        let authorized = status == .authorized
+        
+        os_log("📷 Camera permission status: %@", log: logger, type: .info, authorized ? "authorized" : "not authorized")
+        viewModel?.resolveCallback(callbackId: callbackId, result: ["authorized": authorized])
+    }
+    
+    func requestPhotosPermission(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for photos permission", log: logger, type: .error)
+            return
+        }
+        
+        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+            DispatchQueue.main.async {
+                let granted = status == .authorized || status == .limited
+                os_log("📸 Photos permission %@", log: self.logger, type: .info, granted ? "granted" : "denied")
+                viewModel?.resolveCallback(callbackId: callbackId, result: ["granted": granted])
+            }
+        }
+    }
+    
+    func getPhotosPermissionStatus(data: [String: Any], viewModel: WebViewModel?) {
+        guard let callbackId = data["callbackId"] else {
+            os_log("❌ No callbackId provided for photos permission status", log: logger, type: .error)
+            return
+        }
+        
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        let authorized = status == .authorized || status == .limited
+        
+        os_log("📸 Photos permission status: %@", log: logger, type: .info, authorized ? "authorized" : "not authorized")
+        viewModel?.resolveCallback(callbackId: callbackId, result: ["authorized": authorized])
+    }
     
     func takePicture(data: [String: Any], viewModel: WebViewModel?) {
         guard let callbackId = data["callbackId"] else {

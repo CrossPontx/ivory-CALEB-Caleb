@@ -20,21 +20,30 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
-  // Verify session token
+  // Verify session token and extract user info
   let isAuthenticated = false;
+  let userId: string | null = null;
+  
   if (sessionToken) {
     try {
-      await jwtVerify(sessionToken, secret);
+      const { payload } = await jwtVerify(sessionToken, secret);
       isAuthenticated = true;
+      userId = payload.userId as string;
     } catch (error) {
       // Token is invalid or expired
       isAuthenticated = false;
     }
   }
 
+  // Create response with user ID header for API routes
+  const response = NextResponse.next();
+  if (userId && pathname.startsWith('/api/')) {
+    response.headers.set('x-user-id', userId);
+  }
+
   // Allow public routes without authentication
   if (isPublicRoute) {
-    return NextResponse.next();
+    return response;
   }
 
   // Redirect to landing page if accessing protected route without authentication
@@ -52,7 +61,7 @@ export async function middleware(request: NextRequest) {
   // Allow landing page (/) for both authenticated and unauthenticated users
   // This ensures users can browse the landing page freely per Apple Guideline 5.1.1
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
