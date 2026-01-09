@@ -93,10 +93,9 @@ struct WebView: UIViewRepresentable {
                         --safe-area-inset-right: \(safeAreaInsets.right)px;
                     }
                     
-                    /* Fix for camera page positioning */
+                    /* Don't add body padding - let CSS handle it with pt-safe class */
                     body.ios-native {
-                        padding-top: var(--safe-area-inset-top);
-                        padding-bottom: var(--safe-area-inset-bottom);
+                        /* Remove padding to prevent double safe area */
                     }
                 `;
                 document.head.appendChild(style);
