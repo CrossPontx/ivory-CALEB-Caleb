@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { ArrowLeft, Clock, CheckCircle2, Loader2, Sparkles, ChevronDown, ChevronUp, ImagePlus, X, MapPin, Star, Info } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, Loader2, Sparkles, MapPin, Star, Info } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import Image from 'next/image';
-import { toast } from 'sonner';
 
 const CONVENIENCE_FEE_PERCENT = 0.15; // 15% convenience fee
 
@@ -21,37 +20,19 @@ const triggerHaptic = (style: 'light' | 'medium' | 'success' = 'light') => {
 export default function BookAppointmentPage() {
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
   const techId = params.techId as string;
-  const preselectedLookId = searchParams.get('lookId');
 
   const [tech, setTech] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
-  const [myDesigns, setMyDesigns] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<string>('');
-  const [selectedDesign, setSelectedDesign] = useState<string>('');
-  const [uploadedImage, setUploadedImage] = useState<string>('');
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showDesignPicker, setShowDesignPicker] = useState(false);
 
   useEffect(() => {
     fetchTechDetails();
-    fetchMyDesigns();
   }, [techId]);
-
-  useEffect(() => {
-    // Pre-select design if lookId is in URL
-    if (preselectedLookId && myDesigns.length > 0) {
-      const found = myDesigns.find(d => d.id.toString() === preselectedLookId);
-      if (found) {
-        setSelectedDesign(preselectedLookId);
-      }
-    }
-  }, [preselectedLookId, myDesigns]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -72,46 +53,6 @@ export default function BookAppointmentPage() {
     }
   };
 
-  const fetchMyDesigns = async () => {
-    try {
-      const response = await fetch('/api/looks?my=true');
-      const data = await response.json();
-      if (response.ok) {
-        setMyDesigns(data.looks || data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching designs:', error);
-    }
-  };
-
-  const handleDeleteDesign = async (designId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (!confirm('Delete this design? This cannot be undone.')) return;
-    
-    triggerHaptic('medium');
-    
-    try {
-      const response = await fetch(`/api/looks/${designId}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        setMyDesigns(prev => prev.filter(d => d.id.toString() !== designId));
-        if (selectedDesign === designId) {
-          setSelectedDesign('');
-        }
-        toast.success('Design deleted');
-        triggerHaptic('success');
-      } else {
-        toast.error('Failed to delete design');
-      }
-    } catch (error) {
-      console.error('Error deleting design:', error);
-      toast.error('Failed to delete design');
-    }
-  };
-
   const generateAvailableTimes = () => {
     const times: string[] = [];
     for (let hour = 9; hour <= 18; hour++) {
@@ -124,66 +65,6 @@ export default function BookAppointmentPage() {
       }
     }
     setAvailableTimes(times);
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be less than 5MB');
-      return;
-    }
-
-    setUploadingImage(true);
-    triggerHaptic('light');
-    
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!uploadResponse.ok) throw new Error('Upload failed');
-
-      const uploadData = await uploadResponse.json();
-      const userStr = localStorage.getItem('ivoryUser');
-      if (!userStr) throw new Error('User session not found');
-      const user = JSON.parse(userStr);
-      
-      const lookResponse = await fetch('/api/looks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          title: `Uploaded Design`,
-          imageUrl: uploadData.url,
-          isPublic: false,
-        }),
-      });
-
-      if (!lookResponse.ok) throw new Error('Failed to save design');
-
-      const lookData = await lookResponse.json();
-      setUploadedImage(uploadData.url);
-      setSelectedDesign(lookData.id.toString());
-      setMyDesigns([lookData, ...myDesigns]);
-      setShowDesignPicker(false);
-      triggerHaptic('success');
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Failed to upload image');
-    } finally {
-      setUploadingImage(false);
-    }
   };
 
   const handleBooking = async () => {
@@ -213,7 +94,6 @@ export default function BookAppointmentPage() {
         body: JSON.stringify({
           techProfileId: parseInt(techId),
           serviceId: parseInt(selectedService),
-          lookId: selectedDesign ? parseInt(selectedDesign) : null,
           appointmentDate: appointmentDateTime.toISOString(),
         }),
       });
@@ -263,7 +143,6 @@ export default function BookAppointmentPage() {
   };
 
   const selectedServiceData = services.find(s => s.id.toString() === selectedService);
-  const selectedDesignData = myDesigns.find(d => d.id.toString() === selectedDesign);
 
   if (!tech) {
     return (
@@ -438,132 +317,6 @@ export default function BookAppointmentPage() {
             )}
           </div>
         </div>
-
-        {/* Design Selection - Optional & Collapsible */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8E8E8]/50">
-          <button
-            onClick={() => {
-              triggerHaptic('light');
-              setShowDesignPicker(!showDesignPicker);
-            }}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-[#F8F7F5]/50 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#E8E8E8] text-[#6B6B6B] text-[11px] font-medium flex items-center justify-center">
-                <ImagePlus className="w-3.5 h-3.5" strokeWidth={2} />
-              </div>
-              <div className="text-left">
-                <span className="text-[13px] font-medium text-[#1A1A1A]">Add Design Reference</span>
-                <span className="text-[11px] text-[#6B6B6B] ml-1.5">(Optional)</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {selectedDesignData && (
-                <div className="relative w-8 h-8 rounded-lg overflow-hidden">
-                  <Image src={selectedDesignData.imageUrl} alt="" fill className="object-cover" />
-                </div>
-              )}
-              {showDesignPicker ? (
-                <ChevronUp className="w-5 h-5 text-[#6B6B6B]" strokeWidth={2} />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-[#6B6B6B]" strokeWidth={2} />
-              )}
-            </div>
-          </button>
-          
-          {showDesignPicker && (
-            <div className="px-4 pb-4 border-t border-[#E8E8E8]/50">
-              <p className="text-[12px] text-[#6B6B6B] py-3">
-                Share a design you'd like recreated or use as inspiration
-              </p>
-              
-              {/* Selected Design Preview */}
-              {selectedDesignData && (
-                <div className="mb-3 p-3 bg-[#F8F7F5] rounded-xl flex items-center gap-3">
-                  <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                    <Image src={selectedDesignData.imageUrl} alt="" fill className="object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[#1A1A1A] truncate">{selectedDesignData.title || 'Selected Design'}</p>
-                    <p className="text-[11px] text-[#34C759] flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" strokeWidth={2} />
-                      Attached to booking
-                    </p>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      triggerHaptic('light');
-                      setSelectedDesign('');
-                    }}
-                    className="p-2 hover:bg-white rounded-full transition-colors"
-                  >
-                    <X className="w-4 h-4 text-[#6B6B6B]" strokeWidth={2} />
-                  </button>
-                </div>
-              )}
-
-              {/* Upload Button */}
-              <label className="block mb-3">
-                <div className="p-4 border-2 border-dashed border-[#E8E8E8] rounded-xl text-center cursor-pointer hover:border-[#8B7355] hover:bg-[#8B7355]/5 transition-all duration-200">
-                  {uploadingImage ? (
-                    <Loader2 className="w-6 h-6 text-[#8B7355] animate-spin mx-auto" />
-                  ) : (
-                    <>
-                      <ImagePlus className="w-6 h-6 text-[#8B7355] mx-auto mb-1" strokeWidth={1.5} />
-                      <p className="text-[12px] text-[#6B6B6B]">Upload from camera roll</p>
-                    </>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                  className="hidden"
-                />
-              </label>
-
-              {/* Design Gallery */}
-              {myDesigns.length > 0 && (
-                <>
-                  <p className="text-[11px] tracking-[0.15em] uppercase text-[#6B6B6B] mb-2 font-medium">Your Designs</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {myDesigns.slice(0, 8).map((design) => (
-                      <div key={design.id} className="relative group">
-                        <button
-                          onClick={() => {
-                            triggerHaptic('light');
-                            setSelectedDesign(design.id.toString());
-                          }}
-                          className={`relative aspect-square rounded-lg overflow-hidden transition-all duration-200 w-full ${
-                            selectedDesign === design.id.toString()
-                              ? 'ring-2 ring-[#8B7355] ring-offset-2'
-                              : 'hover:opacity-80'
-                          }`}
-                        >
-                          <Image src={design.imageUrl} alt="" fill className="object-cover" />
-                          {selectedDesign === design.id.toString() && (
-                            <div className="absolute inset-0 bg-[#8B7355]/30 flex items-center justify-center">
-                              <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2} />
-                            </div>
-                          )}
-                        </button>
-                        {/* Delete button - shows on hover/touch */}
-                        <button
-                          onClick={(e) => handleDeleteDesign(design.id.toString(), e)}
-                          className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md active:scale-90 z-10"
-                        >
-                          <X className="w-3.5 h-3.5" strokeWidth={2.5} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Fixed Bottom - Booking Summary */}
@@ -602,7 +355,7 @@ export default function BookAppointmentPage() {
                 </p>
               </div>
               
-              {/* Date/Time/Design info */}
+              {/* Date/Time info */}
               <div className="flex items-center gap-2 text-[11px] text-[#6B6B6B] mt-2">
                 {selectedDate && (
                   <span>{selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
@@ -611,12 +364,6 @@ export default function BookAppointmentPage() {
                   <>
                     <span>•</span>
                     <span>{selectedTime}</span>
-                  </>
-                )}
-                {selectedDesignData && (
-                  <>
-                    <span>•</span>
-                    <span className="text-[#8B7355]">Design attached</span>
                   </>
                 )}
               </div>
