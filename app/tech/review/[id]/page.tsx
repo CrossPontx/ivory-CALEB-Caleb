@@ -5,9 +5,8 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Send, Sparkles, Check, Plus, X, Edit2 } from "lucide-react"
+import { ArrowLeft, Send, Sparkles, Check, Plus, X, Edit2, Clock, MessageSquare } from "lucide-react"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 
@@ -138,10 +137,12 @@ export default function TechReviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F7F5] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border border-[#8B7355] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-[11px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">Loading...</p>
+          <div className="w-20 h-20 border border-[#E8E8E8] bg-white flex items-center justify-center mx-auto mb-8">
+            <div className="w-8 h-8 border border-[#8B7355] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-[11px] text-[#6B6B6B] font-light tracking-[0.25em] uppercase">Loading Design</p>
         </div>
       </div>
     )
@@ -149,12 +150,18 @@ export default function TechReviewPage() {
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center p-6 sm:p-8">
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] mb-8 tracking-[-0.01em]">Request Not Found</h2>
+      <div className="min-h-screen bg-[#F8F7F5] flex items-center justify-center">
+        <div className="text-center p-8 sm:p-12 max-w-md mx-auto">
+          <div className="w-24 h-24 border border-[#E8E8E8] bg-white flex items-center justify-center mx-auto mb-10">
+            <MessageSquare className="w-10 h-10 text-[#8B7355]" strokeWidth={1} />
+          </div>
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] mb-6 tracking-[-0.01em]">Request Not Found</h2>
+          <p className="text-base text-[#6B6B6B] font-light mb-10 leading-[1.7] tracking-wide">
+            This design request may have been removed or doesn't exist.
+          </p>
           <Button 
             onClick={() => router.push('/tech/dashboard')} 
-            className="h-12 sm:h-14 px-8 sm:px-12 bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 text-[11px] tracking-[0.25em] uppercase rounded-none font-light"
+            className="h-14 px-12 bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
           >
             Back to Dashboard
           </Button>
@@ -164,104 +171,122 @@ export default function TechReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8F7F5]">
       {/* Elegant Header */}
       <header className="bg-white/98 backdrop-blur-md border-b border-[#E8E8E8] sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3 sm:gap-4">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-5 sm:py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4 sm:gap-5">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => router.back()}
-              className="hover:bg-[#F8F7F5] transition-colors duration-500"
+              className="w-10 h-10 hover:bg-[#F8F7F5] transition-all duration-500 rounded-none"
             >
-              <ArrowLeft className="w-5 h-5 text-[#1A1A1A]" />
+              <ArrowLeft className="w-5 h-5 text-[#1A1A1A]" strokeWidth={1.5} />
             </Button>
-            <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-tight">Review Design</h1>
+            <div>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-[#8B7355] font-light mb-1">Review</p>
+              <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-[-0.01em]">Client Design</h1>
+            </div>
           </div>
-          <div className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light hidden sm:block">
-            Request #{request.id}
+          <div className="hidden sm:block text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light px-4 py-2 border border-[#E8E8E8] bg-white">
+            #{request.id}
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
+      <main className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-10 sm:py-16 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-10 sm:gap-14 lg:gap-20">
           
           {/* Left Column - Design Image */}
-          <div className="space-y-6 sm:space-y-8">
-            <div>
-              <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">Client Design</p>
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-2">
+          <div className="space-y-8 sm:space-y-10">
+            {/* Client Info Card */}
+            <div className="bg-white p-6 sm:p-8 lg:p-10 border border-[#E8E8E8]">
+              <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] mb-5 font-light">Client</p>
+              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-4 leading-[1.1]">
                 {request.clientName}
               </h2>
-              <p className="text-sm sm:text-base text-[#6B6B6B] font-light tracking-wide">
-                {new Date(request.date).toLocaleDateString('en-US', { 
-                  month: 'long', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
-              </p>
+              <div className="flex items-center gap-2 text-sm text-[#6B6B6B] font-light tracking-wide">
+                <Clock className="w-4 h-4" strokeWidth={1} />
+                <span>
+                  {new Date(request.date).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })}
+                </span>
+              </div>
             </div>
 
             {/* Design Image */}
             <div className="relative group">
-              <div className="relative aspect-square bg-[#F8F7F5] border border-[#E8E8E8] overflow-hidden">
+              <div className="relative aspect-square bg-white border border-[#E8E8E8] overflow-hidden">
                 <Image
                   src={request.designImage || "/placeholder.svg"}
                   alt="Client design"
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-1000 group-hover:scale-105"
                   unoptimized
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               </div>
             </div>
 
             {/* Client Message */}
             {request.message && (
-              <div className="bg-[#F8F7F5] p-6 sm:p-8 border border-[#E8E8E8]">
-                <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Client Notes</p>
-                <p className="text-base sm:text-lg text-[#1A1A1A] font-light leading-[1.7] tracking-wide">
-                  {request.message}
+              <div className="bg-white p-6 sm:p-8 lg:p-10 border border-[#E8E8E8]">
+                <div className="flex items-center gap-3 mb-5">
+                  <MessageSquare className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
+                  <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] font-light">Client Notes</p>
+                </div>
+                <p className="text-base sm:text-lg text-[#1A1A1A] font-light leading-[1.8] tracking-wide">
+                  "{request.message}"
                 </p>
               </div>
             )}
           </div>
 
           {/* Right Column - Feedback & Add-ons */}
-          <div className="space-y-6 sm:space-y-8 lg:space-y-10">
+          <div className="space-y-8 sm:space-y-10">
             
             {/* Feedback Section */}
-            <div>
-              <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-4 sm:mb-6 font-light">Your Feedback</p>
-              <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] mb-6 sm:mb-8 tracking-[-0.01em]">
+            <div className="bg-white p-6 sm:p-8 lg:p-10 border border-[#E8E8E8]">
+              <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] mb-5 font-light">Your Response</p>
+              <h3 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-6 tracking-[-0.01em]">
                 Share Your Thoughts
               </h3>
+              <p className="text-sm text-[#6B6B6B] font-light mb-6 leading-[1.7] tracking-wide">
+                Provide feedback, suggest modifications, or confirm the design is ready to go.
+              </p>
               <Textarea
-                placeholder="Suggest modifications, confirm feasibility, or approve the design as-is..."
+                placeholder="Your professional feedback..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={6}
-                className="w-full border-[#E8E8E8] focus:border-[#8B7355] transition-colors duration-500 text-base font-light leading-[1.7] tracking-wide resize-none"
+                className="w-full border-[#E8E8E8] focus:border-[#8B7355] focus:ring-0 transition-colors duration-500 text-base font-light leading-[1.8] tracking-wide resize-none rounded-none bg-[#F8F7F5]"
               />
             </div>
 
             {/* Add-ons Section */}
-            <div className="bg-[#F8F7F5] p-6 sm:p-8 lg:p-10 border border-[#E8E8E8]">
-              <div className="flex items-center gap-3 mb-6 sm:mb-8">
-                <Sparkles className="w-5 h-5 text-[#8B7355]" />
-                <h3 className="text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] font-light">Offer Add-ons</h3>
+            <div className="bg-white p-6 sm:p-8 lg:p-10 border border-[#E8E8E8]">
+              <div className="flex items-center gap-3 mb-8">
+                <Sparkles className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
+                <p className="text-[10px] tracking-[0.35em] uppercase text-[#8B7355] font-light">Optional Add-ons</p>
               </div>
               
+              <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-6 tracking-[-0.01em]">
+                Suggest Enhancements
+              </h3>
+              
               {/* Existing Add-ons */}
-              <div className="space-y-4 sm:space-y-5 mb-6">
+              <div className="space-y-4 mb-8">
                 {addOns.map((addon) => (
                   <div
                     key={addon.id}
                     className={`w-full flex items-center justify-between p-4 sm:p-5 border transition-all duration-500 group ${
                       addon.selected 
-                        ? 'border-[#8B7355] bg-white shadow-lg shadow-[#8B7355]/10' 
+                        ? 'border-[#8B7355] bg-[#F8F7F5]' 
                         : 'border-[#E8E8E8] bg-white hover:border-[#8B7355]/50'
                     }`}
                   >
@@ -274,7 +299,7 @@ export default function TechReviewPage() {
                             : 'border-[#E8E8E8] group-hover:border-[#8B7355]'
                         }`}
                       >
-                        {addon.selected && <Check className="w-3.5 h-3.5 text-white" />}
+                        {addon.selected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={2} />}
                       </button>
                       <span className="text-sm sm:text-base text-[#1A1A1A] font-light tracking-wide">
                         {addon.label}
@@ -293,29 +318,29 @@ export default function TechReviewPage() {
                               if (e.key === 'Enter') saveEditedPrice(addon.id)
                               if (e.key === 'Escape') setEditingAddonId(null)
                             }}
-                            className="w-20 h-8 text-sm border-[#8B7355] focus:border-[#8B7355]"
+                            className="w-20 h-9 text-sm border-[#8B7355] focus:border-[#8B7355] rounded-none"
                             autoFocus
                           />
                           <Button
                             size="sm"
                             onClick={() => saveEditedPrice(addon.id)}
-                            className="h-8 px-2 bg-[#8B7355] hover:bg-[#1A1A1A] text-white"
+                            className="h-9 px-3 bg-[#8B7355] hover:bg-[#1A1A1A] text-white rounded-none"
                           >
                             <Check className="w-3.5 h-3.5" />
                           </Button>
                         </div>
                       ) : (
                         <>
-                          <span className="text-sm sm:text-base text-[#8B7355] font-light">
+                          <span className="text-sm sm:text-base text-[#8B7355] font-light tracking-wide">
                             +${addon.price}
                           </span>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => startEditingPrice(addon.id, addon.price)}
-                            className="h-8 w-8 p-0 hover:bg-[#8B7355]/10"
+                            className="h-9 w-9 p-0 hover:bg-[#F8F7F5] rounded-none"
                           >
-                            <Edit2 className="w-3.5 h-3.5 text-[#8B7355]" />
+                            <Edit2 className="w-3.5 h-3.5 text-[#6B6B6B]" strokeWidth={1.5} />
                           </Button>
                         </>
                       )}
@@ -323,9 +348,9 @@ export default function TechReviewPage() {
                         size="sm"
                         variant="ghost"
                         onClick={() => removeAddon(addon.id)}
-                        className="h-8 w-8 p-0 hover:bg-red-50"
+                        className="h-9 w-9 p-0 hover:bg-red-50 rounded-none"
                       >
-                        <X className="w-3.5 h-3.5 text-red-500" />
+                        <X className="w-3.5 h-3.5 text-red-400" strokeWidth={1.5} />
                       </Button>
                     </div>
                   </div>
@@ -333,8 +358,8 @@ export default function TechReviewPage() {
               </div>
 
               {/* Add New Addon */}
-              <div className="border-t border-[#E8E8E8] pt-6">
-                <p className="text-xs text-[#6B6B6B] font-light tracking-wide mb-4">Add New Add-on</p>
+              <div className="border-t border-[#E8E8E8] pt-8">
+                <p className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light mb-5">Create Custom Add-on</p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Input
                     type="text"
@@ -344,20 +369,20 @@ export default function TechReviewPage() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') addNewAddon()
                     }}
-                    className="flex-1 border-[#E8E8E8] focus:border-[#8B7355] h-11"
+                    className="flex-1 border-[#E8E8E8] focus:border-[#8B7355] h-12 rounded-none bg-[#F8F7F5] font-light"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <div className="relative flex-shrink-0">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B]">$</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B6B6B] font-light">$</span>
                       <Input
                         type="number"
-                        placeholder="Price"
+                        placeholder="0"
                         value={newAddonPrice}
                         onChange={(e) => setNewAddonPrice(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') addNewAddon()
                         }}
-                        className="w-24 pl-7 border-[#E8E8E8] focus:border-[#8B7355] h-11"
+                        className="w-24 pl-8 border-[#E8E8E8] focus:border-[#8B7355] h-12 rounded-none bg-[#F8F7F5] font-light"
                         min="0"
                         step="0.01"
                       />
@@ -365,9 +390,9 @@ export default function TechReviewPage() {
                     <Button
                       onClick={addNewAddon}
                       disabled={!newAddonLabel.trim() || !newAddonPrice.trim()}
-                      className="h-11 px-4 bg-[#8B7355] hover:bg-[#1A1A1A] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-12 px-5 bg-[#1A1A1A] hover:bg-[#8B7355] text-white disabled:opacity-40 disabled:cursor-not-allowed rounded-none transition-all duration-500 text-[10px] tracking-[0.2em] uppercase font-light"
                     >
-                      <Plus className="w-4 h-4 mr-2" />
+                      <Plus className="w-4 h-4 mr-2" strokeWidth={1.5} />
                       Add
                     </Button>
                   </div>
@@ -375,26 +400,26 @@ export default function TechReviewPage() {
               </div>
               
               {totalAddOns > 0 && (
-                <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-[#E8E8E8]">
+                <div className="mt-8 pt-8 border-t border-[#E8E8E8]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Total Add-ons</span>
-                    <span className="text-xl sm:text-2xl font-light text-[#8B7355]">${totalAddOns}</span>
+                    <span className="text-[10px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Total Add-ons</span>
+                    <span className="font-serif text-3xl font-light text-[#8B7355]">${totalAddOns}</span>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-4 pt-4 sm:pt-6">
+            <div className="space-y-5">
               <Button 
                 size="lg" 
                 onClick={handleSend}
-                className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 h-14 sm:h-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full bg-[#1A1A1A] hover:bg-[#8B7355] text-white transition-all duration-700 h-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.01] active:scale-[0.99]"
               >
-                <Send className="w-4 h-4 mr-3" />
+                <Send className="w-4 h-4 mr-3" strokeWidth={1.5} />
                 Send Feedback
               </Button>
-              <p className="text-xs sm:text-sm text-center text-[#6B6B6B] font-light tracking-wide">
+              <p className="text-xs text-center text-[#6B6B6B] font-light tracking-wide leading-relaxed">
                 Your feedback will be sent to the client for review
               </p>
             </div>

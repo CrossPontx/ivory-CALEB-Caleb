@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Check, DollarSign, MessageCircle, Plus, Sparkles, Clock, CheckCircle2, Coins, Calendar, User } from "lucide-react"
+import { Check, MessageCircle, Plus, Sparkles, Clock, CheckCircle2, Coins, Calendar, User } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { CreditsDisplay } from "@/components/credits-display"
@@ -280,19 +280,6 @@ export default function TechDashboardPage() {
                             <MessageCircle className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
                             <span className="hidden sm:inline">Changes</span>
                             <span className="sm:hidden">Edit</span>
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              router.push(`/tech/review/${request.id}`)
-                            }}
-                            className="h-10 sm:h-11 px-3 sm:px-5 text-[9px] sm:text-[10px] tracking-[0.2em] uppercase font-light border-[#E8E8E8] hover:border-[#8B7355] hover:bg-[#8B7355] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-700 rounded-none"
-                          >
-                            <DollarSign className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
-                            <span className="hidden sm:inline">Add-ons</span>
-                            <span className="sm:hidden">$</span>
                           </Button>
                         </div>
                       </div>
