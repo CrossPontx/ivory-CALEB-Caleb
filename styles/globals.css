@@ -183,11 +183,21 @@ html, body {
   .ios-native .pt-safe-extra {
     padding-top: calc(env(safe-area-inset-top) + 100px);
   }
+  
+  /* Extra padding for drawer close buttons on native iOS */
+  .ios-native .pt-safe-drawer {
+    padding-top: calc(env(safe-area-inset-top) + 160px);
+  }
 }
 
 /* Fallback for native iOS if safe area isn't working */
 .ios-native .pt-safe-extra {
   padding-top: 140px; /* Fixed padding as fallback */
+}
+
+/* Fallback for drawer close buttons on native iOS */
+.ios-native .pt-safe-drawer {
+  padding-top: 200px; /* Extra padding for drawer close buttons */
 }
 
 /* Luxury Animations */

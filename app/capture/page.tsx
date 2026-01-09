@@ -2309,7 +2309,7 @@ export default function CapturePage() {
         >
           <div className="max-w-4xl mx-auto h-full flex flex-col">
             {/* Clear Close Button */}
-            <div className={`flex items-center justify-center py-4 ${isNativeIOS() ? 'pt-safe-extra' : ''}`}>
+            <div className={`flex items-center justify-center py-4 ${isNativeIOS() ? 'pt-safe-drawer' : ''}`}>
               <button
                 onClick={() => setIsDrawerOpen(false)}
                 data-onboarding="close-design-drawer"
@@ -2896,7 +2896,7 @@ export default function CapturePage() {
         >
           <div className="max-w-4xl mx-auto h-full flex flex-col">
             {/* Clear Close Button */}
-            <div className={`flex items-center justify-center py-4 ${isNativeIOS() ? 'pt-safe-extra' : ''}`}>
+            <div className={`flex items-center justify-center py-4 ${isNativeIOS() ? 'pt-safe-drawer' : ''}`}>
               <button
                 onClick={() => setIsUploadDrawerOpen(false)}
                 data-onboarding="close-upload-drawer"
