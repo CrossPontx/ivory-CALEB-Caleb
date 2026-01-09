@@ -12,6 +12,7 @@ import { BottomNav } from "@/components/bottom-nav"
 import { CreditsDisplay } from "@/components/credits-display"
 import { BuyCreditsDialog } from "@/components/buy-credits-dialog"
 import { AnimatedTabs } from "@/components/animated-tabs"
+import CustomerServiceChatbot from "@/components/customer-service-chatbot"
 
 type ClientRequest = {
   id: string
@@ -578,6 +579,9 @@ export default function TechDashboardPage() {
       </main>
 
       <BottomNav onCenterAction={() => router.push("/capture")} centerActionLabel="Create" />
+      
+      {/* Customer Service Chatbot */}
+      <CustomerServiceChatbot position="app" />
     </div>
   )
 }

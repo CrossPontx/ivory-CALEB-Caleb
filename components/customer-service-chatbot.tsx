@@ -237,9 +237,9 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
     )
   }
 
-  // App version - top right corner
+  // App version - bottom right corner
   return (
-    <div className="fixed top-20 sm:top-24 right-4 sm:right-6 z-40">
+    <div className="fixed bottom-6 right-6 z-40 mb-16 lg:mb-0">
       {/* Compact trigger button */}
       <button
         onClick={toggleChat}
@@ -269,9 +269,17 @@ function CustomerServiceChatbot({ position = "app" }: ChatbotProps) {
         )}
       </button>
 
+      {/* Tooltip */}
+      {!isOpen && (
+        <div className="absolute bottom-full right-0 mb-3 px-3 py-2 bg-[#1A1A1A] text-white text-xs font-light tracking-wide rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none transform group-hover:translate-y-0 translate-y-1">
+          Need help?
+          <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[#1A1A1A]" />
+        </div>
+      )}
+
       {/* Elegant Chat Window - Mobile optimized with keyboard handling */}
       {isOpen && (
-        <div className="fixed inset-x-4 top-20 bottom-4 sm:top-40 sm:right-6 sm:left-auto sm:bottom-auto sm:w-96 sm:h-[500px] bg-white rounded-2xl shadow-2xl border border-[#E8E8E8] overflow-hidden flex flex-col animate-in slide-in-from-top-8 fade-in duration-500">
+        <div className="fixed bottom-20 right-6 w-[90vw] sm:w-96 h-[70vh] sm:h-[500px] max-h-[600px] bg-white rounded-2xl shadow-2xl border border-[#E8E8E8] overflow-hidden flex flex-col animate-in slide-in-from-bottom-8 fade-in duration-500 mb-16 lg:mb-0">
           {/* Header with subtle gradient animation */}
           <div className="bg-gradient-to-r from-[#8B7355] via-[#6B5845] to-[#1A1A1A] bg-[length:200%_100%] animate-gradient px-4 py-3 sm:px-6 sm:py-4 flex-shrink-0">
             <div className="flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-700">
