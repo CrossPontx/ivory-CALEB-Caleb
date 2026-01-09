@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, LogOut, Settings, Plus, Camera, Upload, Loader2, Shield, Bell, Lock, Trash2, HelpCircle, UserX, Coins, CreditCard, History, Crown, ChevronRight } from "lucide-react"
+import { ArrowLeft, LogOut, Plus, Camera, Upload, Loader2, Shield, Bell, Lock, Trash2, HelpCircle, UserX, Coins, CreditCard, ChevronRight, Settings } from "lucide-react"
 import Image from "next/image"
 import { useToast } from "@/components/ui/use-toast"
 import { BottomNav } from "@/components/bottom-nav"
@@ -46,7 +46,6 @@ export default function ProfilePage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState('inactive')
   const [transactions, setTransactions] = useState<CreditTransaction[]>([])
   const [loading, setLoading] = useState(true)
-  const [showSettings, setShowSettings] = useState(false)
   const profileImageInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -271,24 +270,7 @@ export default function ProfilePage() {
               Profile
             </h1>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 text-xs sm:text-sm font-light tracking-wide ${
-                showSettings ? 'text-[#8B7355] bg-[#F8F7F5]' : 'text-[#1A1A1A]'
-              }`}
-            >
-              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1} />
-              <span className="hidden sm:inline">Settings</span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[#1A1A1A] hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 text-xs sm:text-sm font-light tracking-wide"
-            >
-              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1} />
-              <span className="hidden sm:inline">Log Out</span>
-            </button>
-          </div>
+
         </div>
       </header>
 
@@ -512,9 +494,8 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Settings Section - Collapsible */}
-        {showSettings && (
-          <div className="border border-[#E8E8E8] p-5 sm:p-10 lg:p-12 mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-all duration-700 animate-in fade-in slide-in-from-top-4">
+        {/* Settings Section - Always visible */}
+        <div className="border border-[#E8E8E8] p-5 sm:p-10 lg:p-12 mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-all duration-700">
             <h3 className="font-serif text-xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-5 sm:mb-8">
               Settings
             </h3>
@@ -646,7 +627,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Danger Zone */}
-          <div>
+          <div className="mb-5 sm:mb-8">
             <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-red-600 mb-3 sm:mb-4 font-light">Danger Zone</p>
             <button
               onClick={() => router.push('/settings/delete-account')}
@@ -661,8 +642,23 @@ export default function ProfilePage() {
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 group-hover:text-red-700 transition-colors" strokeWidth={1} />
             </button>
           </div>
+
+          {/* Log Out */}
+          <div>
+            <button
+              onClick={handleLogout}
+              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3 sm:gap-4">
+                <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                <div className="text-left">
+                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Log Out</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+            </button>
+          </div>
         </div>
-        )}
       </main>
 
       {/* Bottom Navigation */}

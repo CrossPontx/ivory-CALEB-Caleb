@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Shield, Bell, Lock, Trash2, HelpCircle, UserX, CreditCard, ChevronRight, Coins, Wallet } from 'lucide-react';
+import { ArrowLeft, Shield, Bell, Lock, Trash2, HelpCircle, UserX, CreditCard, ChevronRight, Coins, Wallet, LogOut } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import { StripeConnectWallet } from '@/components/stripe-connect-wallet';
 
@@ -52,6 +52,20 @@ export default function TechSettingsPage() {
 
     loadUserData();
   }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+      localStorage.removeItem("ivoryUser");
+      router.push("/");
+    } catch (error) {
+      console.error('Logout failed:', error);
+      localStorage.removeItem("ivoryUser");
+      router.push("/");
+    }
+  };
 
   // Show loading state while checking user type
   if (loading) {
@@ -198,7 +212,7 @@ export default function TechSettingsPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="mt-6 mb-6">
+        <div className="mt-6">
           <p className="px-4 pb-2 text-[10px] tracking-[0.25em] uppercase text-red-600 font-light">Danger Zone</p>
           <div className="bg-white">
             <SettingItem
@@ -207,6 +221,17 @@ export default function TechSettingsPage() {
               subtitle="Permanently delete your account and all data"
               onClick={() => router.push('/settings/delete-account')}
               variant="danger"
+            />
+          </div>
+        </div>
+
+        {/* Log Out */}
+        <div className="mt-6 mb-6">
+          <div className="bg-white">
+            <SettingItem
+              icon={LogOut}
+              title="Log Out"
+              onClick={handleLogout}
             />
           </div>
         </div>
