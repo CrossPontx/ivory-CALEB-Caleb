@@ -20,7 +20,7 @@ import { ZeroCreditsBanner } from "@/components/zero-credits-banner"
 import { GenerationConfirmationDialog } from "@/components/generation-confirmation-dialog"
 import { CaptureOnboarding } from "@/components/capture-onboarding"
 import { useOnboarding } from "@/hooks/use-onboarding"
-import { isNative } from "@/lib/native-bridge"
+import { isNative, isNativeIOS, takePicture } from "@/lib/native-bridge"
 
 type DesignMode = 'design' | 'ai-design' | null
 
@@ -714,6 +714,13 @@ export default function CapturePage() {
 
   const startCamera = async () => {
     try {
+      // On native iOS, we don't need to start a camera stream
+      // The native camera will be triggered when user taps capture
+      if (isNativeIOS()) {
+        console.log('Native iOS detected - camera will be triggered on capture')
+        return
+      }
+      
       // Only clean up if we actually have an existing stream
       if (streamRef.current) {
         console.log('Cleaning up existing camera stream before starting new one')
@@ -832,6 +839,28 @@ export default function CapturePage() {
   }, [facingMode])
 
   const capturePhoto = async () => {
+    // On native iOS, use native camera
+    if (isNativeIOS()) {
+      try {
+        console.log('Using native iOS camera')
+        const result = await takePicture({ source: 'camera', allowEditing: false })
+        
+        if (result?.dataUrl) {
+          setCapturedImage(result.dataUrl)
+          // Clear saved image since user took a new photo
+          setSavedImageBeforeReplace(null)
+          console.log('Native camera photo captured successfully')
+        }
+      } catch (error) {
+        console.error('Native camera error:', error)
+        if (error !== 'User cancelled') {
+          alert('Unable to access camera. Please check permissions in Settings.')
+        }
+      }
+      return
+    }
+    
+    // Web camera implementation
     if (videoRef.current) {
       const canvas = document.createElement("canvas")
       canvas.width = videoRef.current.videoWidth
@@ -889,6 +918,28 @@ export default function CapturePage() {
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // On native iOS, use native photo picker
+    if (isNativeIOS()) {
+      try {
+        console.log('Using native iOS photo picker')
+        const result = await takePicture({ source: 'photos', allowEditing: false })
+        
+        if (result?.dataUrl) {
+          setCapturedImage(result.dataUrl)
+          // Clear saved image since user uploaded a new photo
+          setSavedImageBeforeReplace(null)
+          console.log('Native photo picker image selected successfully')
+        }
+      } catch (error) {
+        console.error('Native photo picker error:', error)
+        if (error !== 'User cancelled') {
+          alert('Unable to access photo library. Please check permissions in Settings.')
+        }
+      }
+      return
+    }
+    
+    // Web file upload implementation
     const file = e.target.files?.[0]
     if (file) {
       setIsUploadingImage(true)
@@ -1644,7 +1695,35 @@ export default function CapturePage() {
     startCamera()
   }
 
-  const replaceHandPhoto = () => {
+  const replaceHandPhoto = async () => {
+    // On native iOS, use native camera directly
+    if (isNativeIOS()) {
+      try {
+        console.log('Using native iOS camera for replace')
+        const result = await takePicture({ source: 'camera', allowEditing: false })
+        
+        if (result?.dataUrl) {
+          // Update the original image in ALL tabs
+          setDesignTabs(tabs => tabs.map(tab => ({
+            ...tab,
+            originalImage: result.dataUrl
+          })))
+          
+          setCapturedImage(result.dataUrl)
+          // Clear saved image since user took a new photo
+          setSavedImageBeforeReplace(null)
+          console.log('Native camera photo replaced successfully')
+        }
+      } catch (error) {
+        console.error('Native camera replace error:', error)
+        if (error !== 'User cancelled') {
+          alert('Unable to access camera. Please check permissions in Settings.')
+        }
+      }
+      return
+    }
+    
+    // Web camera implementation
     // Save the current image before clearing it
     if (capturedImage) {
       setSavedImageBeforeReplace(capturedImage)
@@ -2984,23 +3063,37 @@ export default function CapturePage() {
     <div className="fixed inset-0 z-[100] bg-gradient-to-b from-[#1A1A1A] via-black to-[#1A1A1A]">
       <div
         className="relative w-full h-full"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={!isNativeIOS() ? handleTouchStart : undefined}
+        onTouchMove={!isNativeIOS() ? handleTouchMove : undefined}
+        onTouchEnd={!isNativeIOS() ? handleTouchEnd : undefined}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-full object-cover transition-all duration-500"
-          style={{
-            transform: `${facingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)'} scale(${zoom})`,
-            filter: 'brightness(1.08) contrast(1.08) saturate(1.15)',
-            opacity: isFlipping ? 0 : 1,
-            transition: 'transform 0.3s ease-out, opacity 0.5s ease-out',
-          }}
-        />
+        {/* Video element - hidden on native iOS */}
+        {!isNativeIOS() && (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover transition-all duration-500"
+            style={{
+              transform: `${facingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)'} scale(${zoom})`,
+              filter: 'brightness(1.08) contrast(1.08) saturate(1.15)',
+              opacity: isFlipping ? 0 : 1,
+              transition: 'transform 0.3s ease-out, opacity 0.5s ease-out',
+            }}
+          />
+        )}
+
+        {/* Native iOS camera placeholder */}
+        {isNativeIOS() && (
+          <div className="w-full h-full bg-gradient-to-b from-[#2A2A2A] via-[#1A1A1A] to-[#2A2A2A] flex items-center justify-center">
+            <div className="text-center">
+              <Camera className="w-16 h-16 text-white/60 mx-auto mb-4" strokeWidth={1} />
+              <p className="text-white/80 text-lg font-light tracking-[0.2em] uppercase mb-2">Native Camera</p>
+              <p className="text-white/60 text-sm font-light">Tap capture button to take photo</p>
+            </div>
+          </div>
+        )}
 
         {/* Hand Reference Overlay */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-[5] overflow-visible">
@@ -3101,15 +3194,15 @@ export default function CapturePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                 </svg>
                 <p className="text-white text-xs sm:text-sm font-light tracking-[0.15em] uppercase">
-                  Take a photo of your hand with good lighting
+                  {isNativeIOS() ? 'Tap capture button to take a photo' : 'Take a photo of your hand with good lighting'}
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Elegant Zoom Indicator */}
-        {showZoomIndicator && zoom > 1 && (
+        {/* Elegant Zoom Indicator - hidden on native iOS */}
+        {!isNativeIOS() && showZoomIndicator && zoom > 1 && (
           <div className="absolute top-28 sm:top-32 left-1/2 transform -translate-x-1/2 z-10 transition-all duration-500 animate-fade-in">
             <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-5 py-2.5 rounded-full flex items-center space-x-3 shadow-2xl">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -3122,20 +3215,22 @@ export default function CapturePage() {
 
         {/* Elegant Right Side Controls */}
         <div className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 z-10 flex flex-col gap-4 animate-fade-in-delayed">
-          {/* Flip Camera Button */}
-          <button
-            onClick={flipCamera}
-            disabled={isFlipping}
-            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full backdrop-blur-md border flex flex-col items-center justify-center transition-all duration-500 active:scale-95 ${
-              facingMode === "environment"
-                ? "bg-white/95 border-white/50 text-[#1A1A1A] shadow-2xl"
-                : "bg-white/10 border-white/20 hover:bg-white/20 text-white shadow-xl"
-            } ${isFlipping ? "opacity-50" : ""}`}
-          >
-            <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
+          {/* Flip Camera Button - hidden on native iOS */}
+          {!isNativeIOS() && (
+            <button
+              onClick={flipCamera}
+              disabled={isFlipping}
+              className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full backdrop-blur-md border flex flex-col items-center justify-center transition-all duration-500 active:scale-95 ${
+                facingMode === "environment"
+                  ? "bg-white/95 border-white/50 text-[#1A1A1A] shadow-2xl"
+                  : "bg-white/10 border-white/20 hover:bg-white/20 text-white shadow-xl"
+              } ${isFlipping ? "opacity-50" : ""}`}
+            >
+              <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          )}
 
           {/* Hand Reference Toggle - Right Arrow */}
           <button
@@ -3152,7 +3247,15 @@ export default function CapturePage() {
         <div className="absolute bottom-0 left-0 right-0 pb-8 sm:pb-10 pt-8 px-6 z-10 bg-gradient-to-t from-black/60 via-black/30 to-transparent backdrop-blur-sm">
           <div className="flex items-center justify-between max-w-md mx-auto">
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                if (isNativeIOS()) {
+                  // Use native photo picker on iOS
+                  handleFileUpload({} as React.ChangeEvent<HTMLInputElement>)
+                } else {
+                  // Use web file input on other platforms
+                  fileInputRef.current?.click()
+                }
+              }}
               className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-500 shadow-xl flex items-center justify-center active:scale-95"
             >
               <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
