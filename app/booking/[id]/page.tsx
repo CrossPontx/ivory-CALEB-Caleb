@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Calendar, Clock, MapPin, DollarSign, Sparkles, CheckCircle, XCircle, Star, Phone, Mail, Send, Paperclip, FileText, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { ArrowLeft, Calendar, Clock, MapPin, DollarSign, Sparkles, CheckCircle, XCircle, Star, Phone, Mail, Send, Paperclip, FileText, MessageCircle, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import { BottomNav } from '@/components/bottom-nav';
 import { BookingReviewDialog } from '@/components/booking-review-dialog';
 import { toast } from 'sonner';
@@ -43,6 +44,9 @@ export default function BookingDetailPage() {
   const [newMessage, setNewMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
   const [showChat, setShowChat] = useState(true);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -241,6 +245,75 @@ export default function BookingDetailPage() {
     }
   };
 
+  const handleCancelBooking = async () => {
+    setCancelling(true);
+    try {
+      triggerHaptic('medium');
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          status: 'cancelled',
+          cancellationReason: cancellationReason || 'No reason provided',
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        if (data.noShowFeeCharged) {
+          toast.success(`Booking cancelled. Late cancellation fee of $${data.noShowFeeAmount} applied.`);
+        } else {
+          toast.success('Booking cancelled successfully');
+        }
+        triggerHaptic('success');
+        setShowCancelDialog(false);
+        setCancellationReason('');
+        fetchBookingDetails();
+      } else {
+        toast.error(data.error || 'Failed to cancel booking');
+      }
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast.error('Failed to cancel booking');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  // Calculate if cancellation would incur a fee
+  const getCancellationFeeInfo = () => {
+    if (!booking || booking.paymentStatus !== 'paid') return null;
+    
+    const appointmentDate = new Date(booking.appointmentDate);
+    const now = new Date();
+    const hoursUntilAppointment = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const cancellationWindow = booking.techProfile?.cancellationWindowHours || 24;
+    const noShowFeeEnabled = booking.techProfile?.noShowFeeEnabled;
+    const noShowFeePercent = booking.techProfile?.noShowFeePercent || 50;
+    
+    if (hoursUntilAppointment < cancellationWindow && noShowFeeEnabled) {
+      const feeAmount = (parseFloat(booking.servicePrice) * noShowFeePercent) / 100;
+      return {
+        willChargeFee: true,
+        feeAmount: feeAmount.toFixed(2),
+        feePercent: noShowFeePercent,
+        hoursRemaining: Math.max(0, Math.floor(hoursUntilAppointment)),
+        cancellationWindow,
+      };
+    }
+    
+    return {
+      willChargeFee: false,
+      hoursRemaining: Math.floor(hoursUntilAppointment),
+      cancellationWindow,
+    };
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-[#34C759]';
@@ -401,6 +474,21 @@ export default function BookingDetailPage() {
               />
             </div>
           )}
+          
+          {/* Client Cancel Button */}
+          {isClient && (booking.status === 'pending' || booking.status === 'confirmed') && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                triggerHaptic('light');
+                setShowCancelDialog(true);
+              }}
+              className="w-full mt-4 border-[#FF3B30]/30 text-[#FF3B30] hover:bg-[#FF3B30]/10 h-10 text-[12px] font-medium rounded-full"
+            >
+              <XCircle className="w-4 h-4 mr-2" strokeWidth={2} />
+              Cancel Booking
+            </Button>
+          )}
         </div>
       </div>
 
@@ -559,6 +647,69 @@ export default function BookingDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Cancel Booking Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif font-light flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-[#FF3B30]" strokeWidth={2} />
+              Cancel Booking
+            </DialogTitle>
+            <DialogDescription>
+              {(() => {
+                const feeInfo = getCancellationFeeInfo();
+                if (feeInfo?.willChargeFee) {
+                  return (
+                    <div className="space-y-2">
+                      <p className="text-[#FF3B30] font-medium">
+                        Late cancellation fee applies
+                      </p>
+                      <p>
+                        You are cancelling less than {feeInfo.cancellationWindow} hours before your appointment. 
+                        A {feeInfo.feePercent}% fee (${feeInfo.feeAmount}) will be charged.
+                      </p>
+                    </div>
+                  );
+                }
+                return 'Are you sure you want to cancel this booking? The nail tech will be notified.';
+              })()}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <label className="text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 block font-light">
+              Reason (optional)
+            </label>
+            <textarea
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              placeholder="Let them know why you're cancelling..."
+              className="w-full h-24 px-3 py-2 text-sm border border-[#E8E8E8] rounded-lg resize-none focus:border-[#8B7355] focus:outline-none"
+            />
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCancelDialog(false);
+                setCancellationReason('');
+              }}
+              className="flex-1"
+            >
+              Keep Booking
+            </Button>
+            <Button
+              onClick={handleCancelBooking}
+              disabled={cancelling}
+              className="flex-1 bg-[#FF3B30] hover:bg-[#E5352B] text-white"
+            >
+              {cancelling ? 'Cancelling...' : 'Cancel Booking'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <BottomNav />
     </div>

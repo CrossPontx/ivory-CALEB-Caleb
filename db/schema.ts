@@ -54,6 +54,10 @@ export const techProfiles = pgTable('tech_profiles', {
   website: varchar('website', { length: 255 }),
   instagramHandle: varchar('instagram_handle', { length: 100 }),
   isVerified: boolean('is_verified').default(false),
+  // No-show fee settings (optional)
+  noShowFeeEnabled: boolean('no_show_fee_enabled').default(false),
+  noShowFeePercent: integer('no_show_fee_percent').default(50), // Percentage of service price charged for no-shows
+  cancellationWindowHours: integer('cancellation_window_hours').default(24), // Hours before appointment for free cancellation
   // Stripe Connect for payouts
   stripeConnectAccountId: varchar('stripe_connect_account_id', { length: 255 }),
   stripeAccountStatus: varchar('stripe_account_status', { length: 50 }).default('not_setup'), // not_setup, pending, active, restricted
@@ -122,6 +126,9 @@ export const bookings = pgTable('bookings', {
   cancelledAt: timestamp('cancelled_at'),
   refundedAt: timestamp('refunded_at'),
   refundAmount: decimal('refund_amount', { precision: 10, scale: 2 }),
+  // No-show fee tracking
+  noShowFeeCharged: boolean('no_show_fee_charged').default(false),
+  noShowFeeAmount: decimal('no_show_fee_amount', { precision: 10, scale: 2 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

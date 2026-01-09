@@ -28,6 +28,8 @@ export default function BookAppointmentPage() {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [techAvailability, setTechAvailability] = useState<any[]>([]);
+  const [techTimeOff, setTechTimeOff] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -35,10 +37,10 @@ export default function BookAppointmentPage() {
   }, [techId]);
 
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && tech) {
       generateAvailableTimes();
     }
-  }, [selectedDate]);
+  }, [selectedDate, techAvailability, techTimeOff]);
 
   const fetchTechDetails = async () => {
     try {
@@ -47,6 +49,14 @@ export default function BookAppointmentPage() {
       if (response.ok) {
         setTech(data.tech);
         setServices(data.tech.services || []);
+        
+        // Fetch availability
+        const availRes = await fetch(`/api/tech/availability?techProfileId=${techId}`);
+        if (availRes.ok) {
+          const availData = await availRes.json();
+          setTechAvailability(availData.availability || []);
+          setTechTimeOff(availData.timeOff || []);
+        }
       }
     } catch (error) {
       console.error('Error fetching tech:', error);
@@ -54,10 +64,59 @@ export default function BookAppointmentPage() {
   };
 
   const generateAvailableTimes = () => {
+    if (!selectedDate) return;
+    
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayOfWeek = dayNames[selectedDate.getDay()];
+    
+    // Check if date is in time off period
+    const isTimeOff = techTimeOff.some(period => {
+      const start = new Date(period.startDate);
+      const end = new Date(period.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      const checkDate = new Date(selectedDate);
+      checkDate.setHours(12, 0, 0, 0);
+      return checkDate >= start && checkDate <= end;
+    });
+    
+    if (isTimeOff) {
+      setAvailableTimes([]);
+      return;
+    }
+    
+    // Find availability for this day
+    const dayAvailability = techAvailability.find(a => a.dayOfWeek === dayOfWeek && a.isActive);
+    
+    if (!dayAvailability) {
+      // Fall back to default hours if no availability set
+      const times: string[] = [];
+      for (let hour = 9; hour <= 18; hour++) {
+        for (let minute = 0; minute < 60; minute += 30) {
+          if (hour === 18 && minute > 0) break;
+          const period = hour >= 12 ? 'PM' : 'AM';
+          const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+          const timeStr = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+          times.push(timeStr);
+        }
+      }
+      setAvailableTimes(times);
+      return;
+    }
+    
+    // Generate times based on tech's availability
     const times: string[] = [];
-    for (let hour = 9; hour <= 18; hour++) {
+    const [startHour, startMin] = dayAvailability.startTime.split(':').map(Number);
+    const [endHour, endMin] = dayAvailability.endTime.split(':').map(Number);
+    
+    for (let hour = startHour; hour <= endHour; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
-        if (hour === 18 && minute > 0) break;
+        // Skip times before start
+        if (hour === startHour && minute < startMin) continue;
+        // Skip times after end
+        if (hour === endHour && minute > endMin) continue;
+        if (hour > endHour) break;
+        
         const period = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
         const timeStr = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
@@ -65,6 +124,36 @@ export default function BookAppointmentPage() {
       }
     }
     setAvailableTimes(times);
+  };
+
+  // Check if a date is available (not time off and has availability)
+  const isDateAvailable = (date: Date) => {
+    // Check if in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date < today) return false;
+    
+    // Check if in time off period
+    const isTimeOff = techTimeOff.some(period => {
+      const start = new Date(period.startDate);
+      const end = new Date(period.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      const checkDate = new Date(date);
+      checkDate.setHours(12, 0, 0, 0);
+      return checkDate >= start && checkDate <= end;
+    });
+    
+    if (isTimeOff) return false;
+    
+    // Check if tech works this day
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayOfWeek = dayNames[date.getDay()];
+    
+    // If no availability set, assume all days available
+    if (techAvailability.length === 0) return true;
+    
+    return techAvailability.some(a => a.dayOfWeek === dayOfWeek && a.isActive);
   };
 
   const handleBooking = async () => {
@@ -287,7 +376,7 @@ export default function BookAppointmentPage() {
                   setSelectedDate(date);
                   setSelectedTime('');
                 }}
-                disabled={(date) => date < new Date()}
+                disabled={(date) => !isDateAvailable(date)}
                 className="rounded-xl border-0"
               />
             </div>
@@ -295,24 +384,31 @@ export default function BookAppointmentPage() {
             {selectedDate && (
               <div className="pt-4 border-t border-[#E8E8E8]/50">
                 <p className="text-[11px] tracking-[0.15em] uppercase text-[#6B6B6B] mb-3 font-medium">Available Times</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {availableTimes.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setSelectedTime(time);
-                      }}
-                      className={`py-2.5 text-[12px] font-medium rounded-lg transition-all duration-200 active:scale-95 ${
-                        selectedTime === time
-                          ? 'bg-[#8B7355] text-white shadow-md'
-                          : 'bg-[#F8F7F5] text-[#1A1A1A] hover:bg-[#E8E8E8]'
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
+                {availableTimes.length === 0 ? (
+                  <div className="text-center py-6 bg-[#F8F7F5] rounded-xl">
+                    <p className="text-[13px] text-[#6B6B6B]">No available times on this date</p>
+                    <p className="text-[11px] text-[#8E8E93] mt-1">Please select another date</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-4 gap-2">
+                    {availableTimes.map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => {
+                          triggerHaptic('light');
+                          setSelectedTime(time);
+                        }}
+                        className={`py-2.5 text-[12px] font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                          selectedTime === time
+                            ? 'bg-[#8B7355] text-white shadow-md'
+                            : 'bg-[#F8F7F5] text-[#1A1A1A] hover:bg-[#E8E8E8]'
+                        }`}
+                      >
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

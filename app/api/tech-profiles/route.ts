@@ -42,7 +42,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, businessName, location, bio, phoneNumber, website, instagramHandle } = body;
+    const { 
+      userId, 
+      businessName, 
+      location, 
+      bio, 
+      phoneNumber, 
+      website, 
+      instagramHandle,
+      noShowFeeEnabled,
+      noShowFeePercent,
+      cancellationWindowHours,
+    } = body;
 
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
@@ -66,6 +77,9 @@ export async function POST(request: Request) {
           phoneNumber,
           website,
           instagramHandle,
+          noShowFeeEnabled: noShowFeeEnabled ?? existing[0].noShowFeeEnabled,
+          noShowFeePercent: noShowFeePercent ?? existing[0].noShowFeePercent,
+          cancellationWindowHours: cancellationWindowHours ?? existing[0].cancellationWindowHours,
           updatedAt: new Date(),
         })
         .where(eq(techProfiles.userId, parseInt(userId)))
@@ -85,6 +99,9 @@ export async function POST(request: Request) {
         phoneNumber,
         website,
         instagramHandle,
+        noShowFeeEnabled: noShowFeeEnabled ?? false,
+        noShowFeePercent: noShowFeePercent ?? 50,
+        cancellationWindowHours: cancellationWindowHours ?? 24,
       })
       .returning();
 

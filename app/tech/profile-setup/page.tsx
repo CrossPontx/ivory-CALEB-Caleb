@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { ImageUpload } from "@/components/image-upload"
 import { GoogleMapsSearch } from "@/components/google-maps-search"
-import { ArrowLeft, Plus, X, Loader2 } from "lucide-react"
+import { ArrowLeft, Plus, X, Loader2, Info } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 
 type Service = {
@@ -33,6 +33,11 @@ export default function TechProfileSetupPage() {
     { id: "1", name: "Full Set", price: "60", duration: "90", description: "Complete acrylic or gel nail set" },
     { id: "2", name: "Gel Manicure", price: "45", duration: "60", description: "Gel polish application with nail care" },
   ])
+  
+  // No-show fee settings
+  const [noShowFeeEnabled, setNoShowFeeEnabled] = useState(false)
+  const [noShowFeePercent, setNoShowFeePercent] = useState("50")
+  const [cancellationWindowHours, setCancellationWindowHours] = useState("24")
 
   // Load existing profile data
   useEffect(() => {
@@ -55,6 +60,9 @@ export default function TechProfileSetupPage() {
             setBusinessName(profile.businessName || "")
             setBio(profile.bio || "")
             setLocation(profile.location || "")
+            setNoShowFeeEnabled(profile.noShowFeeEnabled || false)
+            setNoShowFeePercent(profile.noShowFeePercent?.toString() || "50")
+            setCancellationWindowHours(profile.cancellationWindowHours?.toString() || "24")
           }
         }
 
@@ -199,6 +207,9 @@ export default function TechProfileSetupPage() {
           businessName,
           bio,
           location,
+          noShowFeeEnabled,
+          noShowFeePercent: parseInt(noShowFeePercent) || 50,
+          cancellationWindowHours: parseInt(cancellationWindowHours) || 24,
         }),
       })
 
@@ -493,6 +504,93 @@ export default function TechProfileSetupPage() {
               buttonText="Select Images"
               multiple={true}
             />
+          </div>
+
+          {/* Cancellation & No-Show Policy */}
+          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10">
+            <div className="mb-6 sm:mb-8 lg:mb-10">
+              <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Section IV</p>
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-2 leading-[1.1]">
+                Cancellation Policy
+              </h2>
+              <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">Protect your time with optional no-show fees</p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Enable No-Show Fee */}
+              <div className="flex items-start justify-between gap-4 p-4 sm:p-5 bg-[#F8F7F5] border border-[#E8E8E8]">
+                <div className="flex-1">
+                  <h3 className="text-sm sm:text-base font-medium text-[#1A1A1A] mb-1">Enable No-Show Fee</h3>
+                  <p className="text-xs sm:text-sm text-[#6B6B6B] font-light leading-relaxed">
+                    Charge clients a percentage of the service price if they don't show up or cancel too late
+                  </p>
+                </div>
+                <Switch
+                  checked={noShowFeeEnabled}
+                  onCheckedChange={setNoShowFeeEnabled}
+                />
+              </div>
+
+              {noShowFeeEnabled && (
+                <div className="space-y-5 pl-0 sm:pl-4 border-l-0 sm:border-l-2 border-[#8B7355]/20">
+                  {/* Fee Percentage */}
+                  <div>
+                    <label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-2 sm:mb-3 font-light">
+                      No-Show Fee Percentage
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        type="number"
+                        min="10"
+                        max="100"
+                        value={noShowFeePercent}
+                        onChange={(e) => setNoShowFeePercent(e.target.value)}
+                        className="w-24 h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light text-center"
+                      />
+                      <span className="text-sm text-[#6B6B6B]">% of service price</span>
+                    </div>
+                    <p className="text-xs text-[#6B6B6B] mt-2 font-light">
+                      Common values: 25%, 50%, or 100%
+                    </p>
+                  </div>
+
+                  {/* Cancellation Window */}
+                  <div>
+                    <label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-2 sm:mb-3 font-light">
+                      Free Cancellation Window
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="72"
+                        value={cancellationWindowHours}
+                        onChange={(e) => setCancellationWindowHours(e.target.value)}
+                        className="w-24 h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light text-center"
+                      />
+                      <span className="text-sm text-[#6B6B6B]">hours before appointment</span>
+                    </div>
+                    <p className="text-xs text-[#6B6B6B] mt-2 font-light">
+                      Clients can cancel for free if they do so at least this many hours before their appointment
+                    </p>
+                  </div>
+
+                  {/* Preview */}
+                  <div className="p-4 bg-white border border-[#E8E8E8] rounded-none">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 text-[#8B7355] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <div>
+                        <p className="text-sm font-medium text-[#1A1A1A] mb-1">Policy Preview</p>
+                        <p className="text-xs text-[#6B6B6B] leading-relaxed">
+                          Clients who cancel less than {cancellationWindowHours} hours before their appointment 
+                          or don't show up will be charged {noShowFeePercent}% of the service price.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Save Button - Mobile Bottom */}
