@@ -494,157 +494,177 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Settings Section - Always visible */}
-        <div className="border border-[#E8E8E8] p-5 sm:p-10 lg:p-12 mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-all duration-700">
-            <h3 className="font-serif text-xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-5 sm:mb-8">
-              Settings
-            </h3>
+        {/* Settings Section - Only visible for clients (techs have separate Settings tab) */}
+        {userType === "client" && (
+          <div className="border border-[#E8E8E8] p-5 sm:p-10 lg:p-12 mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-all duration-700">
+              <h3 className="font-serif text-xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-5 sm:mb-8">
+                Settings
+              </h3>
 
-            {/* Auto-Recharge Settings - At the top */}
+              {/* Auto-Recharge Settings - At the top */}
+              <div className="mb-5 sm:mb-8">
+                <AutoRechargeSettings />
+              </div>
+
+            {/* Privacy & Security */}
             <div className="mb-5 sm:mb-8">
-              <AutoRechargeSettings />
+              <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Privacy & Security</p>
+              <div className="space-y-1.5 sm:space-y-2">
+                <button
+                  onClick={() => router.push('/settings/privacy')}
+                  className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                    <div className="text-left">
+                      <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Privacy & Data</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+                </button>
+
+                <button
+                  onClick={() => router.push('/settings/account')}
+                  className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                    <div className="text-left">
+                      <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Account Security</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+                </button>
+
+                <button
+                  onClick={() => router.push('/settings/blocked-users')}
+                  className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <UserX className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                    <div className="text-left">
+                      <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Blocked Users</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+                </button>
+              </div>
             </div>
 
-          {/* Privacy & Security */}
-          <div className="mb-5 sm:mb-8">
-            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Privacy & Security</p>
-            <div className="space-y-1.5 sm:space-y-2">
+            {/* Billing & Subscription */}
+            <div className="mb-5 sm:mb-8">
+              <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Billing & Subscription</p>
               <button
-                onClick={() => router.push('/settings/privacy')}
+                onClick={() => router.push('/billing')}
                 className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                   <div className="text-left">
-                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Privacy & Data</p>
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Manage Subscription</p>
+                    <p className="text-[10px] sm:text-xs text-[#6B6B6B] font-light">
+                      {subscriptionTier !== 'free' && subscriptionStatus === 'active' 
+                        ? `${subscriptionTier === 'pro' ? 'Pro' : 'Business'} Plan` 
+                        : 'Basic Plan'}
+                    </p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
               </button>
+            </div>
 
+            {/* Credits */}
+            <div className="mb-5 sm:mb-8">
+              <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Credits</p>
               <button
-                onClick={() => router.push('/settings/account')}
+                onClick={() => router.push('/settings/credits')}
                 className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                   <div className="text-left">
-                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Account Security</p>
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Credits & Referrals</p>
+                    <p className="text-[10px] sm:text-xs text-[#6B6B6B] font-light">
+                      {credits !== null ? `${credits} credits available` : 'Loading...'}
+                    </p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
               </button>
+            </div>
 
+            {/* Preferences */}
+            <div className="mb-5 sm:mb-8">
+              <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Preferences</p>
               <button
-                onClick={() => router.push('/settings/blocked-users')}
+                onClick={() => router.push('/settings/notifications')}
                 className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <UserX className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                  <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
                   <div className="text-left">
-                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Blocked Users</p>
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Notifications</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+              </button>
+            </div>
+
+            {/* Support */}
+            <div className="mb-5 sm:mb-8">
+              <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Support</p>
+              <button
+                onClick={() => router.push('/settings/help')}
+                className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                  <div className="text-left">
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Get Help</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
+              </button>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="mb-5 sm:mb-8">
+              <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-red-600 mb-3 sm:mb-4 font-light">Danger Zone</p>
+              <button
+                onClick={() => router.push('/settings/delete-account')}
+                className="w-full border border-red-200 p-3 sm:p-4 bg-white hover:border-red-500 transition-all flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" strokeWidth={1} />
+                  <div className="text-left">
+                    <p className="font-serif text-sm sm:text-base font-light text-red-600">Delete Account</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 group-hover:text-red-700 transition-colors" strokeWidth={1} />
+              </button>
+            </div>
+
+            {/* Log Out */}
+            <div>
+              <button
+                onClick={handleLogout}
+                className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
+                  <div className="text-left">
+                    <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Log Out</p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
               </button>
             </div>
           </div>
+        )}
 
-          {/* Billing & Subscription */}
-          <div className="mb-5 sm:mb-8">
-            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Billing & Subscription</p>
-            <button
-              onClick={() => router.push('/billing')}
-              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3 sm:gap-4">
-                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
-                <div className="text-left">
-                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Manage Subscription</p>
-                  <p className="text-[10px] sm:text-xs text-[#6B6B6B] font-light">
-                    {subscriptionTier !== 'free' && subscriptionStatus === 'active' 
-                      ? `${subscriptionTier === 'pro' ? 'Pro' : 'Business'} Plan` 
-                      : 'Basic Plan'}
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
-            </button>
-          </div>
-
-          {/* Credits */}
-          <div className="mb-5 sm:mb-8">
-            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Credits</p>
-            <button
-              onClick={() => router.push('/settings/credits')}
-              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3 sm:gap-4">
-                <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
-                <div className="text-left">
-                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Credits & Referrals</p>
-                  <p className="text-[10px] sm:text-xs text-[#6B6B6B] font-light">
-                    {credits !== null ? `${credits} credits available` : 'Loading...'}
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
-            </button>
-          </div>
-
-          {/* Preferences */}
-          <div className="mb-5 sm:mb-8">
-            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Preferences</p>
-            <button
-              onClick={() => router.push('/settings/notifications')}
-              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3 sm:gap-4">
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
-                <div className="text-left">
-                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Notifications</p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
-            </button>
-          </div>
-
-          {/* Support */}
-          <div className="mb-5 sm:mb-8">
-            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Support</p>
-            <button
-              onClick={() => router.push('/settings/help')}
-              className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3 sm:gap-4">
-                <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B]" strokeWidth={1} />
-                <div className="text-left">
-                  <p className="font-serif text-sm sm:text-base font-light text-[#1A1A1A]">Get Help</p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
-            </button>
-          </div>
-
-          {/* Danger Zone */}
-          <div className="mb-5 sm:mb-8">
-            <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-red-600 mb-3 sm:mb-4 font-light">Danger Zone</p>
-            <button
-              onClick={() => router.push('/settings/delete-account')}
-              className="w-full border border-red-200 p-3 sm:p-4 bg-white hover:border-red-500 transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3 sm:gap-4">
-                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" strokeWidth={1} />
-                <div className="text-left">
-                  <p className="font-serif text-sm sm:text-base font-light text-red-600">Delete Account</p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 group-hover:text-red-700 transition-colors" strokeWidth={1} />
-            </button>
-          </div>
-
-          {/* Log Out */}
-          <div>
+        {/* Log Out button for tech users (since settings section is hidden) */}
+        {userType === "tech" && (
+          <div className="border border-[#E8E8E8] p-5 sm:p-10 lg:p-12 mb-5 sm:mb-10 bg-white shadow-sm hover:shadow-lg transition-all duration-700">
             <button
               onClick={handleLogout}
               className="w-full border border-[#E8E8E8] p-3 sm:p-4 bg-white hover:border-[#8B7355] transition-all flex items-center justify-between group"
@@ -658,7 +678,7 @@ export default function ProfilePage() {
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#6B6B6B] group-hover:text-[#8B7355] transition-colors" strokeWidth={1} />
             </button>
           </div>
-        </div>
+        )}
       </main>
 
       {/* Bottom Navigation */}
