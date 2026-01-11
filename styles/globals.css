@@ -124,6 +124,15 @@
   }
 }
 
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; /* Standard property for compatibility */
+}
+
 /* Prevent overscroll/rubber-band effect on iOS */
 html, body {
   overscroll-behavior-y: none;

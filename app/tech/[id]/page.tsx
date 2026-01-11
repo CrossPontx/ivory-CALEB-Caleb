@@ -4,10 +4,29 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Star, Phone, Globe, Instagram, DollarSign, Clock, Navigation, Sparkles, UserPlus, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MapPin, Star, Phone, Globe, Instagram, DollarSign, Clock, Navigation, Sparkles, UserPlus, ExternalLink, Palette, Scissors, Brush } from 'lucide-react';
 import { TechLocationMap } from '@/components/tech-location-map';
 import { BottomNav } from '@/components/bottom-nav';
 import Image from 'next/image';
+
+// Helper function to get service icons based on service name
+const getServiceIcon = (serviceName: string) => {
+  const name = serviceName.toLowerCase();
+  
+  if (name.includes('full set') || name.includes('acrylic') || name.includes('gel set')) {
+    return Palette;
+  } else if (name.includes('manicure') || name.includes('mani')) {
+    return Brush;
+  } else if (name.includes('pedicure') || name.includes('pedi')) {
+    return Sparkles;
+  } else if (name.includes('removal') || name.includes('cut') || name.includes('trim')) {
+    return Scissors;
+  } else if (name.includes('design') || name.includes('art') || name.includes('custom')) {
+    return Palette;
+  } else {
+    return Brush; // Default icon
+  }
+};
 
 // Helper function to get social media URLs and icons
 const getSocialMediaInfo = (platform: string, handle: string) => {
@@ -359,50 +378,151 @@ export default function TechProfilePage() {
               <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-4 font-light">
                 Services
               </p>
-              <h3 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em]">
+              <h3 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-4">
                 What We Offer
               </h3>
+              <p className="text-base sm:text-lg text-[#6B6B6B] font-light max-w-2xl mx-auto leading-relaxed">
+                Professional nail services crafted with precision and artistry
+              </p>
             </div>
-            <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
-              {tech.services && tech.services.length > 0 ? (
-                tech.services.map((service: any) => (
-                  <div 
-                    key={service.id} 
-                    className="border border-[#E8E8E8] p-8 sm:p-10 hover:border-[#8B7355] hover:shadow-2xl hover:shadow-[#8B7355]/5 transition-all duration-700 group"
-                  >
-                    <div className="space-y-6">
-                      <div>
-                        <h4 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight mb-3">
-                          {service.name}
-                        </h4>
-                        <p className="text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                          {service.description}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between pt-6 border-t border-[#E8E8E8]">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-6 w-6 text-[#8B7355]" strokeWidth={1.5} />
-                          <span className="text-3xl font-serif font-light text-[#1A1A1A]">{service.price}</span>
+            
+            {tech.services && tech.services.length > 0 ? (
+              <div className="space-y-8">
+                {/* Featured/Popular Services */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                  {tech.services.slice(0, 3).map((service: any, index: number) => {
+                    const ServiceIcon = getServiceIcon(service.name);
+                    return (
+                      <div 
+                        key={service.id} 
+                        className="group relative overflow-hidden bg-gradient-to-br from-white to-[#F8F7F5] border border-[#E8E8E8] hover:border-[#8B7355] transition-all duration-700 hover:shadow-2xl hover:shadow-[#8B7355]/10 hover:-translate-y-1"
+                      >
+                        {/* Service Icon Background */}
+                        <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-10 transition-opacity duration-700">
+                          <ServiceIcon className="w-20 h-20" strokeWidth={0.5} />
                         </div>
-                        <div className="flex items-center gap-2 text-base text-[#6B6B6B] font-light">
-                          <Clock className="h-5 w-5" strokeWidth={1.5} />
-                          <span>{service.duration} min</span>
+                        
+                        <div className="relative p-8 sm:p-10">
+                          {/* Popular Badge */}
+                          {index === 0 && (
+                            <div className="absolute -top-3 -right-3 bg-[#8B7355] text-white px-4 py-1 text-[9px] tracking-[0.2em] uppercase font-light transform rotate-12">
+                              Popular
+                            </div>
+                          )}
+                          
+                          {/* Service Icon */}
+                          <div className="mb-6">
+                            <div className="w-14 h-14 bg-[#8B7355]/10 rounded-full flex items-center justify-center group-hover:bg-[#8B7355]/20 transition-colors duration-700">
+                              <ServiceIcon className="w-7 h-7 text-[#8B7355]" strokeWidth={1.5} />
+                            </div>
+                          </div>
+                          
+                          {/* Service Details */}
+                          <div className="space-y-4">
+                            <h4 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight leading-tight">
+                              {service.name}
+                            </h4>
+                            
+                            <p className="text-base text-[#6B6B6B] font-light leading-relaxed tracking-wide">
+                              {service.description || 'Professional nail service with attention to detail and quality.'}
+                            </p>
+                            
+                            {/* Price and Duration */}
+                            <div className="flex items-center justify-between pt-6 border-t border-[#E8E8E8]/50">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
+                                  <DollarSign className="w-4 h-4 text-[#8B7355]" strokeWidth={2} />
+                                </div>
+                                <span className="text-2xl font-serif font-light text-[#1A1A1A]">{service.price}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-sm text-[#6B6B6B] font-light">
+                                <Clock className="w-4 h-4" strokeWidth={1.5} />
+                                <span>{service.duration} min</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Additional Services */}
+                {tech.services.length > 3 && (
+                  <div className="mt-12">
+                    <div className="text-center mb-8">
+                      <h4 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight mb-2">
+                        Additional Services
+                      </h4>
+                      <p className="text-sm text-[#6B6B6B] font-light tracking-wide">
+                        More ways we can help you look your best
+                      </p>
+                    </div>
+                    
+                    <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                      {tech.services.slice(3).map((service: any) => {
+                        const ServiceIcon = getServiceIcon(service.name);
+                        return (
+                          <div 
+                            key={service.id} 
+                            className="group flex items-center gap-6 p-6 bg-white border border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-lg transition-all duration-500"
+                          >
+                            {/* Service Icon */}
+                            <div className="w-12 h-12 bg-[#8B7355]/10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-[#8B7355]/20 transition-colors duration-500">
+                              <ServiceIcon className="w-6 h-6 text-[#8B7355]" strokeWidth={1.5} />
+                            </div>
+                            
+                            {/* Service Info */}
+                            <div className="flex-1 min-w-0">
+                              <h5 className="font-serif text-xl font-light text-[#1A1A1A] tracking-tight mb-1">
+                                {service.name}
+                              </h5>
+                              <p className="text-sm text-[#6B6B6B] font-light leading-relaxed mb-3 line-clamp-2">
+                                {service.description || 'Professional service with quality results.'}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xl font-serif font-light text-[#1A1A1A]">${service.price}</span>
+                                <span className="text-xs text-[#6B6B6B] font-light">{service.duration} min</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="col-span-2 py-20 text-center">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-8 border border-[#E8E8E8] flex items-center justify-center">
-                    <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-[#E8E8E8]" strokeWidth={1} />
+                )}
+                
+                {/* Call to Action */}
+                <div className="mt-12 text-center">
+                  <div className="inline-flex items-center gap-4 p-8 bg-gradient-to-r from-[#F8F7F5] to-white border border-[#E8E8E8] max-w-2xl mx-auto">
+                    <div className="w-16 h-16 bg-[#8B7355] rounded-full flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-8 h-8 text-white" strokeWidth={1.5} />
+                    </div>
+                    <div className="text-left">
+                      <h4 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-2">
+                        Ready to Book?
+                      </h4>
+                      <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
+                        Schedule your appointment today and experience professional nail care
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-base text-[#6B6B6B] font-light tracking-wide">
-                    No services listed yet
-                  </p>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="py-20 text-center">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-8 border border-[#E8E8E8] flex items-center justify-center">
+                  <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-[#E8E8E8]" strokeWidth={1} />
+                </div>
+                <h4 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight mb-4">
+                  Services Coming Soon
+                </h4>
+                <p className="text-base text-[#6B6B6B] font-light tracking-wide max-w-md mx-auto">
+                  This nail technician is setting up their service menu. Check back soon for available treatments.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
