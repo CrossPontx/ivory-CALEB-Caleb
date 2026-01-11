@@ -374,14 +374,14 @@ export default function TechProfilePage() {
         {/* Services Tab */}
         {activeTab === 'services' && (
           <div>
-            <div className="mb-12 sm:mb-16 text-center">
-              <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-4 font-light">
+            <div className="mb-8 sm:mb-12 lg:mb-16 text-center">
+              <p className="text-[10px] sm:text-xs tracking-[0.35em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">
                 Services
               </p>
-              <h3 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-4">
+              <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light text-[#1A1A1A] tracking-[-0.01em] mb-3 sm:mb-4">
                 What We Offer
               </h3>
-              <p className="text-base sm:text-lg text-[#6B6B6B] font-light max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm sm:text-base lg:text-lg text-[#6B6B6B] font-light max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
                 Professional nail services crafted with precision and artistry
               </p>
             </div>
@@ -389,7 +389,7 @@ export default function TechProfilePage() {
             {tech.services && tech.services.length > 0 ? (
               <div className="space-y-8">
                 {/* Featured/Popular Services */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                   {tech.services.slice(0, 3).map((service: any, index: number) => {
                     const ServiceIcon = getServiceIcon(service.name);
                     return (
@@ -398,46 +398,46 @@ export default function TechProfilePage() {
                         className="group relative overflow-hidden bg-gradient-to-br from-white to-[#F8F7F5] border border-[#E8E8E8] hover:border-[#8B7355] transition-all duration-700 hover:shadow-2xl hover:shadow-[#8B7355]/10 hover:-translate-y-1"
                       >
                         {/* Service Icon Background */}
-                        <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-10 transition-opacity duration-700">
-                          <ServiceIcon className="w-20 h-20" strokeWidth={0.5} />
+                        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 opacity-5 group-hover:opacity-10 transition-opacity duration-700">
+                          <ServiceIcon className="w-16 h-16 sm:w-20 sm:h-20" strokeWidth={0.5} />
                         </div>
                         
-                        <div className="relative p-8 sm:p-10">
+                        <div className="relative p-6 sm:p-8 lg:p-10">
                           {/* Popular Badge */}
                           {index === 0 && (
-                            <div className="absolute -top-3 -right-3 bg-[#8B7355] text-white px-4 py-1 text-[9px] tracking-[0.2em] uppercase font-light transform rotate-12">
+                            <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#8B7355] text-white px-3 py-1 sm:px-4 sm:py-1 text-[8px] sm:text-[9px] tracking-[0.2em] uppercase font-light transform rotate-12">
                               Popular
                             </div>
                           )}
                           
                           {/* Service Icon */}
-                          <div className="mb-6">
-                            <div className="w-14 h-14 bg-[#8B7355]/10 rounded-full flex items-center justify-center group-hover:bg-[#8B7355]/20 transition-colors duration-700">
-                              <ServiceIcon className="w-7 h-7 text-[#8B7355]" strokeWidth={1.5} />
+                          <div className="mb-4 sm:mb-6">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#8B7355]/10 rounded-full flex items-center justify-center group-hover:bg-[#8B7355]/20 transition-colors duration-700">
+                              <ServiceIcon className="w-6 h-6 sm:w-7 sm:h-7 text-[#8B7355]" strokeWidth={1.5} />
                             </div>
                           </div>
                           
                           {/* Service Details */}
-                          <div className="space-y-4">
-                            <h4 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight leading-tight">
+                          <div className="space-y-3 sm:space-y-4">
+                            <h4 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-tight leading-tight">
                               {service.name}
                             </h4>
                             
-                            <p className="text-base text-[#6B6B6B] font-light leading-relaxed tracking-wide">
+                            <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-relaxed tracking-wide">
                               {service.description || 'Professional nail service with attention to detail and quality.'}
                             </p>
                             
                             {/* Price and Duration */}
-                            <div className="flex items-center justify-between pt-6 border-t border-[#E8E8E8]/50">
+                            <div className="flex items-center justify-between pt-4 sm:pt-6 border-t border-[#E8E8E8]/50">
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
-                                  <DollarSign className="w-4 h-4 text-[#8B7355]" strokeWidth={2} />
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
+                                  <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B7355]" strokeWidth={2} />
                                 </div>
-                                <span className="text-2xl font-serif font-light text-[#1A1A1A]">{service.price}</span>
+                                <span className="text-xl sm:text-2xl font-serif font-light text-[#1A1A1A]">{service.price}</span>
                               </div>
                               
-                              <div className="flex items-center gap-2 text-sm text-[#6B6B6B] font-light">
-                                <Clock className="w-4 h-4" strokeWidth={1.5} />
+                              <div className="flex items-center gap-2 text-xs sm:text-sm text-[#6B6B6B] font-light">
+                                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.5} />
                                 <span>{service.duration} min</span>
                               </div>
                             </div>
@@ -450,39 +450,39 @@ export default function TechProfilePage() {
                 
                 {/* Additional Services */}
                 {tech.services.length > 3 && (
-                  <div className="mt-12">
-                    <div className="text-center mb-8">
-                      <h4 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] tracking-tight mb-2">
+                  <div className="mt-8 sm:mt-12">
+                    <div className="text-center mb-6 sm:mb-8">
+                      <h4 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-tight mb-2">
                         Additional Services
                       </h4>
-                      <p className="text-sm text-[#6B6B6B] font-light tracking-wide">
+                      <p className="text-xs sm:text-sm text-[#6B6B6B] font-light tracking-wide px-4 sm:px-0">
                         More ways we can help you look your best
                       </p>
                     </div>
                     
-                    <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                       {tech.services.slice(3).map((service: any) => {
                         const ServiceIcon = getServiceIcon(service.name);
                         return (
                           <div 
                             key={service.id} 
-                            className="group flex items-center gap-6 p-6 bg-white border border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-lg transition-all duration-500"
+                            className="group flex items-center gap-4 sm:gap-6 p-4 sm:p-6 bg-white border border-[#E8E8E8] hover:border-[#8B7355] hover:shadow-lg transition-all duration-500"
                           >
                             {/* Service Icon */}
-                            <div className="w-12 h-12 bg-[#8B7355]/10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-[#8B7355]/20 transition-colors duration-500">
-                              <ServiceIcon className="w-6 h-6 text-[#8B7355]" strokeWidth={1.5} />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#8B7355]/10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-[#8B7355]/20 transition-colors duration-500">
+                              <ServiceIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8B7355]" strokeWidth={1.5} />
                             </div>
                             
                             {/* Service Info */}
                             <div className="flex-1 min-w-0">
-                              <h5 className="font-serif text-xl font-light text-[#1A1A1A] tracking-tight mb-1">
+                              <h5 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] tracking-tight mb-1">
                                 {service.name}
                               </h5>
-                              <p className="text-sm text-[#6B6B6B] font-light leading-relaxed mb-3 line-clamp-2">
+                              <p className="text-xs sm:text-sm text-[#6B6B6B] font-light leading-relaxed mb-2 sm:mb-3 line-clamp-2">
                                 {service.description || 'Professional service with quality results.'}
                               </p>
                               <div className="flex items-center justify-between">
-                                <span className="text-xl font-serif font-light text-[#1A1A1A]">${service.price}</span>
+                                <span className="text-lg sm:text-xl font-serif font-light text-[#1A1A1A]">${service.price}</span>
                                 <span className="text-xs text-[#6B6B6B] font-light">{service.duration} min</span>
                               </div>
                             </div>
@@ -492,23 +492,7 @@ export default function TechProfilePage() {
                     </div>
                   </div>
                 )}
-                
-                {/* Call to Action */}
-                <div className="mt-12 text-center">
-                  <div className="inline-flex items-center gap-4 p-8 bg-gradient-to-r from-[#F8F7F5] to-white border border-[#E8E8E8] max-w-2xl mx-auto">
-                    <div className="w-16 h-16 bg-[#8B7355] rounded-full flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-8 h-8 text-white" strokeWidth={1.5} />
-                    </div>
-                    <div className="text-left">
-                      <h4 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] tracking-tight mb-2">
-                        Ready to Book?
-                      </h4>
-                      <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
-                        Schedule your appointment today and experience professional nail care
-                      </p>
-                    </div>
-                  </div>
-                </div>
+
               </div>
             ) : (
               <div className="py-20 text-center">
