@@ -4,10 +4,60 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Star, Phone, Globe, Instagram, DollarSign, Clock, Navigation, Sparkles } from 'lucide-react';
+import { ArrowLeft, MapPin, Star, Phone, Globe, Instagram, DollarSign, Clock, Navigation, Sparkles, UserPlus, ExternalLink } from 'lucide-react';
 import { TechLocationMap } from '@/components/tech-location-map';
 import { BottomNav } from '@/components/bottom-nav';
 import Image from 'next/image';
+
+// Helper function to get social media URLs and icons
+const getSocialMediaInfo = (platform: string, handle: string) => {
+  const platformLower = platform.toLowerCase();
+  
+  switch (platformLower) {
+    case 'instagram':
+      return {
+        url: `https://instagram.com/${handle.replace('@', '')}`,
+        icon: Instagram,
+        displayName: `@${handle.replace('@', '')}`
+      };
+    case 'tiktok':
+      return {
+        url: `https://tiktok.com/@${handle.replace('@', '')}`,
+        icon: ExternalLink, // TikTok icon not available in Lucide
+        displayName: `@${handle.replace('@', '')}`
+      };
+    case 'facebook':
+      return {
+        url: `https://facebook.com/${handle}`,
+        icon: ExternalLink, // Facebook icon not available in Lucide
+        displayName: handle
+      };
+    case 'youtube':
+      return {
+        url: `https://youtube.com/@${handle.replace('@', '')}`,
+        icon: ExternalLink,
+        displayName: `@${handle.replace('@', '')}`
+      };
+    case 'pinterest':
+      return {
+        url: `https://pinterest.com/${handle.replace('@', '')}`,
+        icon: ExternalLink,
+        displayName: handle
+      };
+    case 'linkedin':
+      return {
+        url: `https://linkedin.com/in/${handle}`,
+        icon: ExternalLink,
+        displayName: handle
+      };
+    default:
+      return {
+        url: handle.startsWith('http') ? handle : `https://${handle}`,
+        icon: ExternalLink,
+        displayName: platform
+      };
+  }
+};
 
 export default function TechProfilePage() {
   const router = useRouter();
@@ -16,10 +66,21 @@ export default function TechProfilePage() {
   const [tech, setTech] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('services');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     fetchTechProfile();
+    checkAuthStatus();
   }, [techId]);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/session');
+      setIsAuthenticated(response.ok);
+    } catch (error) {
+      setIsAuthenticated(false);
+    }
+  };
 
   const fetchTechProfile = async () => {
     try {
@@ -144,51 +205,125 @@ export default function TechProfilePage() {
                 </div>
               )}
 
-              {/* Contact Info */}
-              <div className="flex flex-wrap gap-6">
-                {tech.phoneNumber && (
-                  <a 
-                    href={`tel:${tech.phoneNumber}`} 
-                    className="flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light"
-                  >
-                    <Phone className="h-5 w-5" strokeWidth={1.5} />
-                    <span className="hidden sm:inline">{tech.phoneNumber}</span>
-                    <span className="sm:hidden">Call</span>
-                  </a>
-                )}
-                {tech.website && (
-                  <a 
-                    href={tech.website} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light"
-                  >
-                    <Globe className="h-5 w-5" strokeWidth={1.5} />
-                    Website
-                  </a>
-                )}
-                {tech.instagramHandle && (
-                  <a 
-                    href={`https://instagram.com/${tech.instagramHandle}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light"
-                  >
-                    <Instagram className="h-5 w-5" strokeWidth={1.5} />
-                    @{tech.instagramHandle}
-                  </a>
+              {/* Contact & Social Info */}
+              <div className="space-y-4">
+                {/* Primary Contact */}
+                <div className="flex flex-wrap gap-4">
+                  {tech.phoneNumber && (
+                    <a 
+                      href={`tel:${tech.phoneNumber}`} 
+                      className="flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light"
+                    >
+                      <Phone className="h-4 w-4" strokeWidth={1.5} />
+                      <span className="hidden sm:inline">{tech.phoneNumber}</span>
+                      <span className="sm:hidden">Call</span>
+                    </a>
+                  )}
+                  {tech.website && (
+                    <a 
+                      href={tech.website.startsWith('http') ? tech.website : `https://${tech.website}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center gap-2 text-[11px] tracking-[0.25em] uppercase text-[#1A1A1A] hover:text-[#8B7355] transition-colors duration-500 font-light"
+                    >
+                      <Globe className="h-4 w-4" strokeWidth={1.5} />
+                      Website
+                    </a>
+                  )}
+                </div>
+
+                {/* Social Media - Subtle grouped display */}
+                {(tech.instagramHandle || tech.tiktokHandle || tech.facebookHandle || (tech.otherSocialLinks && tech.otherSocialLinks.length > 0)) && (
+                  <div>
+                    <p className="text-[9px] tracking-[0.3em] uppercase text-[#8B8B8B] mb-2 font-light">Follow</p>
+                    <div className="flex flex-wrap gap-3">
+                      {tech.instagramHandle && (
+                        <a 
+                          href={`https://instagram.com/${tech.instagramHandle.replace('@', '')}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 text-xs text-[#6B6B6B] hover:text-[#8B7355] transition-colors duration-500 font-light"
+                        >
+                          <Instagram className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <span>@{tech.instagramHandle.replace('@', '')}</span>
+                        </a>
+                      )}
+                      {tech.tiktokHandle && (
+                        <a 
+                          href={`https://tiktok.com/@${tech.tiktokHandle.replace('@', '')}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 text-xs text-[#6B6B6B] hover:text-[#8B7355] transition-colors duration-500 font-light"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <span>TikTok</span>
+                        </a>
+                      )}
+                      {tech.facebookHandle && (
+                        <a 
+                          href={`https://facebook.com/${tech.facebookHandle}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 text-xs text-[#6B6B6B] hover:text-[#8B7355] transition-colors duration-500 font-light"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <span>Facebook</span>
+                        </a>
+                      )}
+                      {tech.otherSocialLinks && tech.otherSocialLinks.length > 0 && (
+                        tech.otherSocialLinks.map((link: any, index: number) => {
+                          if (!link.platform || (!link.handle && !link.url)) return null;
+                          
+                          const socialInfo = getSocialMediaInfo(link.platform, link.handle || link.url);
+                          const Icon = socialInfo.icon;
+                          
+                          return (
+                            <a 
+                              key={index}
+                              href={link.url || socialInfo.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="flex items-center gap-1.5 text-xs text-[#6B6B6B] hover:text-[#8B7355] transition-colors duration-500 font-light"
+                            >
+                              <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
+                              <span>{link.platform}</span>
+                            </a>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* CTA */}
             <div className="flex items-start justify-center lg:justify-end">
-              <Button 
-                onClick={() => router.push(`/book/${techId}`)}
-                className="w-full sm:w-auto bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-14 sm:h-16 px-10 sm:px-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Book Appointment
-              </Button>
+              {isAuthenticated ? (
+                <Button 
+                  onClick={() => router.push(`/book/${techId}`)}
+                  className="w-full sm:w-auto bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-14 sm:h-16 px-10 sm:px-16 text-[11px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Book Appointment
+                </Button>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <Button 
+                    onClick={() => router.push('/')}
+                    className="w-full sm:w-auto bg-[#1A1A1A] hover:bg-[#8B7355] text-white h-14 sm:h-16 px-8 sm:px-12 text-[11px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                    Sign Up to Book
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => router.push('/')}
+                    className="w-full sm:w-auto border-[#1A1A1A] hover:border-[#8B7355] hover:bg-transparent text-[#1A1A1A] hover:text-[#8B7355] h-14 sm:h-16 px-8 sm:px-12 text-[11px] tracking-[0.25em] uppercase rounded-none font-light transition-all duration-700"
+                  >
+                    Browse More Techs
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -477,7 +612,9 @@ export default function TechProfilePage() {
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav onCenterAction={() => router.push('/capture')} centerActionLabel="Create" />
+      {isAuthenticated && (
+        <BottomNav onCenterAction={() => router.push('/capture')} centerActionLabel="Create" />
+      )}
     </div>
   );
 }

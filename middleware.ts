@@ -5,10 +5,16 @@ import { jwtVerify } from 'jose';
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-in-production');
 
 // Routes that require authentication
-const protectedRoutes = ['/home', '/capture', '/look', '/profile', '/send-to-tech', '/tech', '/billing', '/settings'];
+const protectedRoutes = ['/home', '/capture', '/look', '/profile', '/send-to-tech', '/billing', '/settings'];
 
 // Public routes that don't require authentication (browsable without account per Apple Guideline 5.1.1)
 const publicRoutes = ['/shared', '/explore', '/privacy-policy', '/terms'];
+
+// Tech profile routes that should be public (like Instagram profiles)
+const publicTechRoutes = ['/tech/'];
+
+// Protected tech routes that require authentication
+const protectedTechRoutes = ['/tech/dashboard', '/tech/bookings', '/tech/settings', '/tech/profile-setup', '/tech/availability', '/tech/request', '/tech/review'];
 
 
 
@@ -17,8 +23,10 @@ export async function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get('session')?.value;
 
   // Check if route requires authentication
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route)) ||
+                          protectedTechRoutes.some(route => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route)) ||
+                       publicTechRoutes.some(route => pathname.startsWith(route));
 
   // Verify session token and extract user info
   let isAuthenticated = false;

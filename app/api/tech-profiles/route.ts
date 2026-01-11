@@ -1,134 +1,97 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { techProfiles, users } from '@/db/schema';
+import { techProfiles } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function GET(request: Request) {
+// GET - Fetch tech profile by userId
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
-    if (userId) {
-      const profile = await db
-        .select()
-        .from(techProfiles)
-        .where(eq(techProfiles.userId, parseInt(userId)));
-      return NextResponse.json(profile[0] || null);
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // Get all tech profiles with user info
-    const profiles = await db
-      .select({
-        id: techProfiles.id,
-        userId: techProfiles.userId,
-        businessName: techProfiles.businessName,
-        location: techProfiles.location,
-        bio: techProfiles.bio,
-        rating: techProfiles.rating,
-        totalReviews: techProfiles.totalReviews,
-        isVerified: techProfiles.isVerified,
-        username: users.username,
-        avatar: users.avatar,
-      })
-      .from(techProfiles)
-      .leftJoin(users, eq(techProfiles.userId, users.id));
+    const profile = await db.query.techProfiles.findFirst({
+      where: eq(techProfiles.userId, parseInt(userId)),
+    });
 
-    return NextResponse.json(profiles);
+    return NextResponse.json(profile);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch tech profiles' }, { status: 500 });
+    console.error('Error fetching tech profile:', error);
+    return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
   }
 }
 
-export async function POST(request: Request) {
+// POST - Create or update tech profile
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      userId, 
-      businessName, 
-      location, 
-      bio, 
-      phoneNumber, 
-      website, 
+    const {
+      userId,
+      businessName,
+      phoneNumber,
+      website,
       instagramHandle,
+      tiktokHandle,
+      facebookHandle,
+      otherSocialLinks,
+      bio,
+      location,
       noShowFeeEnabled,
       noShowFeePercent,
       cancellationWindowHours,
     } = body;
 
     if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // Check if profile already exists
-    const existing = await db
-      .select()
-      .from(techProfiles)
-      .where(eq(techProfiles.userId, parseInt(userId)))
-      .limit(1);
+    // Check if profile exists
+    const existingProfile = await db.query.techProfiles.findFirst({
+      where: eq(techProfiles.userId, userId),
+    });
 
-    if (existing.length > 0) {
+    const profileData = {
+      userId,
+      businessName,
+      phoneNumber,
+      website,
+      instagramHandle,
+      tiktokHandle,
+      facebookHandle,
+      otherSocialLinks,
+      bio,
+      location,
+      noShowFeeEnabled: noShowFeeEnabled || false,
+      noShowFeePercent: noShowFeePercent || 50,
+      cancellationWindowHours: cancellationWindowHours || 24,
+      updatedAt: new Date(),
+    };
+
+    let profile;
+    if (existingProfile) {
       // Update existing profile
-      const updated = await db
+      [profile] = await db
         .update(techProfiles)
-        .set({
-          businessName,
-          location,
-          bio,
-          phoneNumber,
-          website,
-          instagramHandle,
-          noShowFeeEnabled: noShowFeeEnabled ?? existing[0].noShowFeeEnabled,
-          noShowFeePercent: noShowFeePercent ?? existing[0].noShowFeePercent,
-          cancellationWindowHours: cancellationWindowHours ?? existing[0].cancellationWindowHours,
-          updatedAt: new Date(),
-        })
-        .where(eq(techProfiles.userId, parseInt(userId)))
+        .set(profileData)
+        .where(eq(techProfiles.userId, userId))
         .returning();
-
-      return NextResponse.json(updated[0], { status: 200 });
+    } else {
+      // Create new profile
+      [profile] = await db
+        .insert(techProfiles)
+        .values({
+          ...profileData,
+          createdAt: new Date(),
+        })
+        .returning();
     }
 
-    // Create new profile
-    const newProfile = await db
-      .insert(techProfiles)
-      .values({
-        userId: parseInt(userId),
-        businessName,
-        location,
-        bio,
-        phoneNumber,
-        website,
-        instagramHandle,
-        noShowFeeEnabled: noShowFeeEnabled ?? false,
-        noShowFeePercent: noShowFeePercent ?? 50,
-        cancellationWindowHours: cancellationWindowHours ?? 24,
-      })
-      .returning();
-
-    return NextResponse.json(newProfile[0], { status: 201 });
-  } catch (error: any) {
-    console.error('Tech profile error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to create tech profile' }, { status: 500 });
-  }
-}
-
-export async function PATCH(request: Request) {
-  try {
-    const body = await request.json();
-    const { userId, ...updates } = body;
-
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
-    }
-
-    const updated = await db
-      .update(techProfiles)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(techProfiles.userId, parseInt(userId)))
-      .returning();
-
-    return NextResponse.json(updated[0]);
+    return NextResponse.json({ profile });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update tech profile' }, { status: 500 });
+    console.error('Error saving tech profile:', error);
+    return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 });
   }
 }

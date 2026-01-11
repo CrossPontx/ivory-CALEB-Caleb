@@ -53,6 +53,9 @@ export const techProfiles = pgTable('tech_profiles', {
   phoneNumber: varchar('phone_number', { length: 50 }),
   website: varchar('website', { length: 255 }),
   instagramHandle: varchar('instagram_handle', { length: 100 }),
+  tiktokHandle: varchar('tiktok_handle', { length: 100 }),
+  facebookHandle: varchar('facebook_handle', { length: 100 }),
+  otherSocialLinks: jsonb('other_social_links'), // Array of {platform: string, handle: string, url: string}
   isVerified: boolean('is_verified').default(false),
   // No-show fee settings (optional)
   noShowFeeEnabled: boolean('no_show_fee_enabled').default(false),

@@ -3,7 +3,7 @@ import { db } from '@/db';
 import { techProfiles } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-// GET - Fetch tech profile details
+// GET - Fetch tech profile details (PUBLIC - no auth required)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -11,6 +11,10 @@ export async function GET(
   try {
     const { id } = await params;
     const techId = parseInt(id);
+
+    if (isNaN(techId)) {
+      return NextResponse.json({ error: 'Invalid tech ID' }, { status: 400 });
+    }
 
     const tech = await db.query.techProfiles.findFirst({
       where: eq(techProfiles.id, techId),
@@ -26,6 +30,7 @@ export async function GET(
         portfolioImages: true,
         reviews: {
           limit: 10,
+          orderBy: (reviews, { desc }) => [desc(reviews.createdAt)],
           with: {
             client: {
               columns: {

@@ -27,6 +27,11 @@ export default function TechProfileSetupPage() {
   const [userId, setUserId] = useState<number | null>(null)
   const [businessName, setBusinessName] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
+  const [website, setWebsite] = useState("")
+  const [instagramHandle, setInstagramHandle] = useState("")
+  const [tiktokHandle, setTiktokHandle] = useState("")
+  const [facebookHandle, setFacebookHandle] = useState("")
+  const [otherSocialLinks, setOtherSocialLinks] = useState<Array<{platform: string, handle: string, url: string}>>([])
   const [bio, setBio] = useState("")
   const [location, setLocation] = useState("")
   const [portfolioImages, setPortfolioImages] = useState<string[]>([])
@@ -60,6 +65,11 @@ export default function TechProfileSetupPage() {
           if (profile) {
             setBusinessName(profile.businessName || "")
             setPhoneNumber(profile.phoneNumber || "")
+            setWebsite(profile.website || "")
+            setInstagramHandle(profile.instagramHandle || "")
+            setTiktokHandle(profile.tiktokHandle || "")
+            setFacebookHandle(profile.facebookHandle || "")
+            setOtherSocialLinks(profile.otherSocialLinks || [])
             setBio(profile.bio || "")
             setLocation(profile.location || "")
             setNoShowFeeEnabled(profile.noShowFeeEnabled || false)
@@ -111,6 +121,20 @@ export default function TechProfileSetupPage() {
 
   const updateService = (id: string, field: "name" | "price" | "duration" | "description", value: string) => {
     setServices(services.map((s) => (s.id === id ? { ...s, [field]: value } : s)))
+  }
+
+  const addOtherSocialLink = () => {
+    setOtherSocialLinks([...otherSocialLinks, { platform: "", handle: "", url: "" }])
+  }
+
+  const removeOtherSocialLink = (index: number) => {
+    setOtherSocialLinks(otherSocialLinks.filter((_, i) => i !== index))
+  }
+
+  const updateOtherSocialLink = (index: number, field: "platform" | "handle" | "url", value: string) => {
+    setOtherSocialLinks(otherSocialLinks.map((link, i) => 
+      i === index ? { ...link, [field]: value } : link
+    ))
   }
 
   const handleImageUpload = async (url: string) => {
@@ -208,6 +232,11 @@ export default function TechProfileSetupPage() {
           userId,
           businessName,
           phoneNumber,
+          website,
+          instagramHandle,
+          tiktokHandle,
+          facebookHandle,
+          otherSocialLinks,
           bio,
           location,
           noShowFeeEnabled,
@@ -224,6 +253,11 @@ export default function TechProfileSetupPage() {
         localStorage.setItem("techProfile", JSON.stringify({
           businessName,
           phoneNumber,
+          website,
+          instagramHandle,
+          tiktokHandle,
+          facebookHandle,
+          otherSocialLinks,
           bio,
           location,
         }))
@@ -375,6 +409,134 @@ export default function TechProfileSetupPage() {
                   className="h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
                 />
                 <p className="text-xs text-[#6B6B6B] mt-2 font-light tracking-wide">Clients can call you to discuss appointments</p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-2 sm:mb-3 font-light">
+                  Website
+                </label>
+                <Input
+                  type="url"
+                  placeholder="https://yourwebsite.com"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  className="h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                />
+                <p className="text-xs text-[#6B6B6B] mt-2 font-light tracking-wide">Your personal or business website (optional)</p>
+              </div>
+
+              {/* Social Media Handles - Grouped */}
+              <div>
+                <label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-4 font-light">
+                  Social Media
+                </label>
+                <p className="text-xs text-[#6B6B6B] mb-4 font-light tracking-wide">Connect your social profiles (all optional)</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Instagram */}
+                  <div>
+                    <label className="block text-[10px] tracking-[0.2em] uppercase text-[#8B8B8B] mb-2 font-light">
+                      Instagram
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B8B] text-sm font-light">
+                        @
+                      </span>
+                      <Input
+                        placeholder="username"
+                        value={instagramHandle}
+                        onChange={(e) => setInstagramHandle(e.target.value.replace('@', ''))}
+                        className="pl-6 h-11 text-sm border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+
+                  {/* TikTok */}
+                  <div>
+                    <label className="block text-[10px] tracking-[0.2em] uppercase text-[#8B8B8B] mb-2 font-light">
+                      TikTok
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B8B] text-sm font-light">
+                        @
+                      </span>
+                      <Input
+                        placeholder="username"
+                        value={tiktokHandle}
+                        onChange={(e) => setTiktokHandle(e.target.value.replace('@', ''))}
+                        className="pl-6 h-11 text-sm border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Facebook */}
+                  <div>
+                    <label className="block text-[10px] tracking-[0.2em] uppercase text-[#8B8B8B] mb-2 font-light">
+                      Facebook
+                    </label>
+                    <Input
+                      placeholder="page or username"
+                      value={facebookHandle}
+                      onChange={(e) => setFacebookHandle(e.target.value)}
+                      className="h-11 text-sm border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                    />
+                  </div>
+
+                  {/* Add Other Link Button */}
+                  <div className="flex items-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addOtherSocialLink}
+                      className="h-11 w-full border-[#E8E8E8] hover:border-[#8B7355] hover:bg-transparent text-[#6B6B6B] hover:text-[#8B7355] rounded-none text-[10px] tracking-[0.2em] uppercase font-light transition-all duration-700"
+                    >
+                      <Plus className="w-3 h-3 mr-2" strokeWidth={1} />
+                      Add Other
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Other Social Links */}
+                {otherSocialLinks.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#8B8B8B] font-light">Other Platforms</p>
+                    {otherSocialLinks.map((link, index) => (
+                      <div key={index} className="flex gap-3 p-3 border border-[#F0F0F0] bg-[#FAFAFA] group hover:border-[#E8E8E8] transition-all duration-300">
+                        <div className="flex-1 grid grid-cols-2 gap-3">
+                          <Input
+                            placeholder="Platform (e.g., YouTube)"
+                            value={link.platform}
+                            onChange={(e) => updateOtherSocialLink(index, "platform", e.target.value)}
+                            className="h-9 text-xs border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light bg-white"
+                          />
+                          <Input
+                            placeholder="Username or URL"
+                            value={link.handle || link.url}
+                            onChange={(e) => {
+                              if (e.target.value.startsWith('http')) {
+                                updateOtherSocialLink(index, "url", e.target.value);
+                                updateOtherSocialLink(index, "handle", "");
+                              } else {
+                                updateOtherSocialLink(index, "handle", e.target.value);
+                                updateOtherSocialLink(index, "url", "");
+                              }
+                            }}
+                            className="h-9 text-xs border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light bg-white"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeOtherSocialLink(index)}
+                          className="h-9 w-9 flex-shrink-0 hover:bg-red-50 hover:text-red-500 rounded-none opacity-0 group-hover:opacity-100 transition-all duration-300"
+                        >
+                          <X className="w-3 h-3" strokeWidth={1.5} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
