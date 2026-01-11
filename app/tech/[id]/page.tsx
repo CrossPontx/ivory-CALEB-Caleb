@@ -349,7 +349,7 @@ export default function TechProfilePage() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="sticky top-20 sm:top-24 z-40 bg-white border-b border-[#E8E8E8]">
+      <div className="sticky top-[90px] sm:top-[110px] z-40 bg-white border-b border-[#E8E8E8]">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
           <div className="flex gap-8 sm:gap-12 overflow-x-auto scrollbar-hide">
             {['services', 'portfolio', 'reviews', 'location'].map((tab) => (
