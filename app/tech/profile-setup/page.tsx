@@ -26,6 +26,7 @@ export default function TechProfileSetupPage() {
   const [saving, setSaving] = useState(false)
   const [userId, setUserId] = useState<number | null>(null)
   const [businessName, setBusinessName] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
   const [bio, setBio] = useState("")
   const [location, setLocation] = useState("")
   const [portfolioImages, setPortfolioImages] = useState<string[]>([])
@@ -58,6 +59,7 @@ export default function TechProfileSetupPage() {
           const profile = await profileRes.json()
           if (profile) {
             setBusinessName(profile.businessName || "")
+            setPhoneNumber(profile.phoneNumber || "")
             setBio(profile.bio || "")
             setLocation(profile.location || "")
             setNoShowFeeEnabled(profile.noShowFeeEnabled || false)
@@ -205,6 +207,7 @@ export default function TechProfileSetupPage() {
         body: JSON.stringify({
           userId,
           businessName,
+          phoneNumber,
           bio,
           location,
           noShowFeeEnabled,
@@ -220,6 +223,7 @@ export default function TechProfileSetupPage() {
         // Store in localStorage as fallback
         localStorage.setItem("techProfile", JSON.stringify({
           businessName,
+          phoneNumber,
           bio,
           location,
         }))
@@ -357,6 +361,20 @@ export default function TechProfileSetupPage() {
                   onChange={(e) => setBusinessName(e.target.value)}
                   className="h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-2 sm:mb-3 font-light">
+                  Business Phone Number
+                </label>
+                <Input
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                />
+                <p className="text-xs text-[#6B6B6B] mt-2 font-light tracking-wide">Clients can call you to discuss appointments</p>
               </div>
 
               <div>
