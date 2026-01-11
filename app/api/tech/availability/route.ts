@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { techAvailability, techTimeOff, techProfiles } from '@/db/schema';
-import { eq, and, gte, lte } from 'drizzle-orm';
+import { eq, and, gte } from 'drizzle-orm';
 
 // GET - Fetch tech availability
 export async function GET(request: NextRequest) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
-    if (session.user.userType !== 'tech') {
+    if ((session.user as any).userType !== 'tech') {
       return NextResponse.json({ error: 'Only nail techs can set availability' }, { status: 403 });
     }
 
