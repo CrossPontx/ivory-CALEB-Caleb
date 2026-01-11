@@ -263,6 +263,28 @@ class WebViewModel: ObservableObject {
                     
                     this.call('getDeviceToken', { callbackId });
                 });
+            },
+            
+            // Onboarding Methods
+            resetOnboarding: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('resetOnboarding', { callbackId });
+                });
+            },
+            
+            // Debug: Force show onboarding (for testing)
+            forceShowOnboarding: function() {
+                return new Promise((resolve, reject) => {
+                    window._nativeCallbacks = window._nativeCallbacks || {};
+                    const callbackId = this._generateCallbackId();
+                    window._nativeCallbacks[callbackId] = { resolve, reject };
+                    
+                    this.call('forceShowOnboarding', { callbackId });
+                });
             }
         };
         
@@ -388,6 +410,30 @@ class WebViewModel: ObservableObject {
         
         messageHandlers["getDeviceToken"] = { [weak self] data in
             NotificationManager.shared.getDeviceToken(data: data, viewModel: self)
+        }
+        
+        // Onboarding handlers
+        messageHandlers["resetOnboarding"] = { [weak self] data in
+            OnboardingManager.shared.resetOnboarding()
+            if let callbackId = data["callbackId"] {
+                self?.resolveCallback(callbackId: callbackId, result: ["success": true])
+            }
+        }
+        
+        // Debug: Force show onboarding
+        messageHandlers["forceShowOnboarding"] = { [weak self] data in
+            OnboardingManager.shared.resetOnboarding()
+            // Trigger app restart or reload
+            DispatchQueue.main.async {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    // This will trigger ContentView to re-evaluate onboarding state
+                    window.rootViewController?.viewDidLoad()
+                }
+            }
+            if let callbackId = data["callbackId"] {
+                self?.resolveCallback(callbackId: callbackId, result: ["success": true])
+            }
         }
     }
     

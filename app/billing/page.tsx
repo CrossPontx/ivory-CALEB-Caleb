@@ -447,6 +447,26 @@ export default function BillingPage() {
               </div>
             </div>
           </div>
+          
+          {/* Legal Links */}
+          <div className="mt-8 pt-6 border-t border-[#E8E8E8]">
+            <p className="text-xs text-center text-[#6B6B6B] font-light">
+              By using our services, you agree to our{' '}
+              <button 
+                onClick={() => router.push('/terms')}
+                className="underline hover:text-[#8B7355] text-[#6B6B6B] cursor-pointer"
+              >
+                Terms of Use
+              </button>
+              {' '}and{' '}
+              <button 
+                onClick={() => router.push('/privacy-policy')}
+                className="underline hover:text-[#8B7355] text-[#6B6B6B] cursor-pointer"
+              >
+                Privacy Policy
+              </button>
+            </p>
+          </div>
         </div>
       </main>
     </div>

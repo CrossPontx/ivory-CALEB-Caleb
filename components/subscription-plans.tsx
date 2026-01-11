@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Check, Loader2, Sparkles, Zap } from 'lucide-react';
+import { Check, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { CLIENT_SUBSCRIPTION_PLANS, TECH_SUBSCRIPTION_PLANS, getClientPlans, getTechPlans } from '@/lib/stripe-config';
+import { getClientPlans, getTechPlans } from '@/lib/stripe-config';
 import { iapManager, IAP_PRODUCT_IDS } from '@/lib/iap';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -20,6 +19,7 @@ interface SubscriptionPlansProps {
 }
 
 export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inactive', isNative = false, userType = 'client' }: SubscriptionPlansProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [iapProducts, setIapProducts] = useState<any[]>([]);
   const [iapLoading, setIapLoading] = useState(false);
@@ -480,13 +480,19 @@ export function SubscriptionPlans({ currentTier = 'free', currentStatus = 'inact
                 )}
                 <p className="text-xs text-center text-[#6B6B6B] font-light">
                   By subscribing, you agree to our{' '}
-                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#8B7355]">
+                  <button 
+                    onClick={() => router.push('/terms')}
+                    className="underline hover:text-[#8B7355] text-[#6B6B6B] cursor-pointer"
+                  >
                     Terms of Use
-                  </a>
+                  </button>
                   {' '}and{' '}
-                  <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#8B7355]">
+                  <button 
+                    onClick={() => router.push('/privacy-policy')}
+                    className="underline hover:text-[#8B7355] text-[#6B6B6B] cursor-pointer"
+                  >
                     Privacy Policy
-                  </a>
+                  </button>
                 </p>
               </div>
             )}

@@ -179,6 +179,23 @@ export default function ClientSettingsPage() {
           </div>
         </div>
 
+        {/* Legal */}
+        <div className="mt-6">
+          <p className="px-4 pb-2 text-[10px] tracking-[0.25em] uppercase text-[#8B7355] font-light">Legal</p>
+          <div className="bg-white">
+            <SettingItem
+              icon={Shield}
+              title="Terms of Use"
+              onClick={() => router.push('/terms')}
+            />
+            <SettingItem
+              icon={Lock}
+              title="Privacy Policy"
+              onClick={() => router.push('/privacy-policy')}
+            />
+          </div>
+        </div>
+
         {/* Danger Zone */}
         <div className="mt-6 mb-6">
           <p className="px-4 pb-2 text-[10px] tracking-[0.25em] uppercase text-red-600 font-light">Danger Zone</p>

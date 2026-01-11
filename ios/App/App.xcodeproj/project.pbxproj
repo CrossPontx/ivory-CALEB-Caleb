@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		030776732F1270F30099579A /* ivory - Made with Clipchamp.mov in Resources */ = {isa = PBXBuildFile; fileRef = 030776722F1270F30099579A /* ivory - Made with Clipchamp.mov */; };
+		03110E982F127EC800578438 /* OnboardingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03110E962F127EC800578438 /* OnboardingManager.swift */; };
+		03110E992F127EC800578438 /* OnboardingVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03110E972F127EC800578438 /* OnboardingVideoView.swift */; };
 		034EDB062EF20FF800BA022C /* ivory Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 034EDAFC2EF20FF700BA022C /* ivory Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		0378E48E2F1066D100F5DF8C /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0378E4842F1066D100F5DF8C /* IAPManager.swift */; };
 		037B97362F10B6C5005FF62D /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037B97302F10B6C5005FF62D /* NotificationManager.swift */; };
@@ -57,6 +60,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		030776722F1270F30099579A /* ivory - Made with Clipchamp.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "ivory - Made with Clipchamp.mov"; sourceTree = "<group>"; };
+		03110E962F127EC800578438 /* OnboardingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManager.swift; sourceTree = "<group>"; };
+		03110E972F127EC800578438 /* OnboardingVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingVideoView.swift; sourceTree = "<group>"; };
 		034EDAFC2EF20FF700BA022C /* ivory Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ivory Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0378E4842F1066D100F5DF8C /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
 		037B972B2F10B6C5005FF62D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
@@ -120,6 +126,9 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				03110E962F127EC800578438 /* OnboardingManager.swift */,
+				03110E972F127EC800578438 /* OnboardingVideoView.swift */,
+				030776722F1270F30099579A /* ivory - Made with Clipchamp.mov */,
 				037B972B2F10B6C5005FF62D /* CameraManager.swift */,
 				037B972C2F10B6C5005FF62D /* ContentView.swift */,
 				037B972D2F10B6C5005FF62D /* DeviceInfoManager.swift */,
@@ -271,6 +280,7 @@
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
+				030776732F1270F30099579A /* ivory - Made with Clipchamp.mov in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -293,6 +303,8 @@
 				03A334C92F08D1C500684786 /* IAPPlugin.swift in Sources */,
 				037B97362F10B6C5005FF62D /* NotificationManager.swift in Sources */,
 				037B97372F10B6C5005FF62D /* ContentView.swift in Sources */,
+				03110E982F127EC800578438 /* OnboardingManager.swift in Sources */,
+				03110E992F127EC800578438 /* OnboardingVideoView.swift in Sources */,
 				037B97382F10B6C5005FF62D /* DeviceInfoManager.swift in Sources */,
 				037B97392F10B6C5005FF62D /* WebViewModel.swift in Sources */,
 				037B973A2F10B6C5005FF62D /* NotificationPlugin.swift in Sources */,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Capacitor } from '@capacitor/core';
 import {
@@ -25,6 +26,7 @@ interface BuyCreditsDialogProps {
 }
 
 export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const [isDeveloper, setIsDeveloper] = useState(false);
@@ -328,13 +330,19 @@ export function BuyCreditsDialog({ children }: BuyCreditsDialogProps) {
             </p>
             <p className="text-xs text-center text-muted-foreground">
               By purchasing, you agree to our{' '}
-              <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+              <button 
+                onClick={() => router.push('/terms')}
+                className="underline hover:text-primary cursor-pointer"
+              >
                 Terms of Use
-              </a>
+              </button>
               {' '}and{' '}
-              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+              <button 
+                onClick={() => router.push('/privacy-policy')}
+                className="underline hover:text-primary cursor-pointer"
+              >
                 Privacy Policy
-              </a>
+              </button>
             </p>
           </div>
         </div>
