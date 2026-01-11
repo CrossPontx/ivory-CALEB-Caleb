@@ -84,7 +84,7 @@ function CreditsContent() {
             <span className="font-serif text-xl text-[#6B6B6B] font-light">Credits</span>
           </div>
           <p className="text-sm text-[#6B6B6B] font-light mb-6">
-            Use credits to generate AI nail designs
+            Use credits to generate AI nail designs. Monthly subscription credits reset each billing cycle and don't roll over.
           </p>
           <button
             onClick={() => router.push('/settings?tab=billing')}

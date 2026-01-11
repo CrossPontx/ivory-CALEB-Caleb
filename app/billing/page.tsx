@@ -179,6 +179,13 @@ export default function BillingPage() {
               </p>
             </div>
           </div>
+          {isPaidPlan && (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-sm">
+              <p className="text-sm text-amber-800 font-light">
+                <strong>Important:</strong> Monthly subscription credits reset each billing cycle and don't roll over. Use them before your next renewal date.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Platform Notice for iOS */}
@@ -276,8 +283,8 @@ export default function BillingPage() {
                       <p className="text-xs text-[#6B6B6B] font-light">Starting at 5 credits</p>
                     </div>
                     <div className="border border-[#E8E8E8] p-4 bg-white">
-                      <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Credits Roll Over</p>
-                      <p className="text-xs text-[#6B6B6B] font-light">Never lose credits</p>
+                      <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Credits Don't Roll Over</p>
+                      <p className="text-xs text-[#6B6B6B] font-light">Use monthly credits before renewal</p>
                     </div>
                   </div>
                 </div>
@@ -449,8 +456,8 @@ export default function BillingPage() {
                 <History className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
               </div>
               <div>
-                <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Never Expire</p>
-                <p className="text-sm text-[#6B6B6B] font-light">Your credits last forever</p>
+                <p className="font-serif text-base font-light text-[#1A1A1A] mb-1">Purchased Credits Never Expire</p>
+                <p className="text-sm text-[#6B6B6B] font-light">Only subscription credits reset monthly</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
