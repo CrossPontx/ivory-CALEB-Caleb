@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BuyCreditsDialog } from '@/components/buy-credits-dialog';
 import { SubscriptionPlans } from '@/components/subscription-plans';
-import { ArrowLeft, Coins, CreditCard, History, Sparkles, Crown, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Coins, CreditCard, History, Sparkles, Crown, ExternalLink, Shield, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { CREDIT_PACKAGES } from '@/lib/stripe-config';
 import { toast } from 'sonner';
@@ -406,6 +406,31 @@ export default function BillingPage() {
           </TabsContent>
         </Tabs>
 
+        {/* Legal Links Section */}
+        <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-white">
+          <div className="text-center">
+            <p className="text-sm text-[#6B6B6B] font-light mb-4">
+              By using our services, you agree to our legal terms
+            </p>
+            <div className="flex items-center justify-center gap-6">
+              <button 
+                onClick={() => router.push('/terms')}
+                className="flex items-center gap-2 text-[#8B7355] hover:text-[#1A1A1A] transition-colors font-light underline decoration-1 underline-offset-4 hover:decoration-2"
+              >
+                <Shield className="w-4 h-4" strokeWidth={1} />
+                <span>Terms of Use</span>
+              </button>
+              <button 
+                onClick={() => router.push('/privacy-policy')}
+                className="flex items-center gap-2 text-[#8B7355] hover:text-[#1A1A1A] transition-colors font-light underline decoration-1 underline-offset-4 hover:decoration-2"
+              >
+                <Lock className="w-4 h-4" strokeWidth={1} />
+                <span>Privacy Policy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Info Section */}
         <div className="border border-[#E8E8E8] p-6 sm:p-8 bg-[#F8F7F5]">
           <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-6 tracking-tight">About Credits</h3>
@@ -446,26 +471,6 @@ export default function BillingPage() {
                 <p className="text-sm text-[#6B6B6B] font-light">Powered by Stripe</p>
               </div>
             </div>
-          </div>
-          
-          {/* Legal Links */}
-          <div className="mt-8 pt-6 border-t border-[#E8E8E8]">
-            <p className="text-xs text-center text-[#6B6B6B] font-light">
-              By using our services, you agree to our{' '}
-              <button 
-                onClick={() => router.push('/terms')}
-                className="underline hover:text-[#8B7355] text-[#6B6B6B] cursor-pointer"
-              >
-                Terms of Use
-              </button>
-              {' '}and{' '}
-              <button 
-                onClick={() => router.push('/privacy-policy')}
-                className="underline hover:text-[#8B7355] text-[#6B6B6B] cursor-pointer"
-              >
-                Privacy Policy
-              </button>
-            </p>
           </div>
         </div>
       </main>
