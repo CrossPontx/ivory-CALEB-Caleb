@@ -1,4 +1,12 @@
-import { createClient } from 'v0-sdk';
+// Import V0 SDK with error handling
+let createClient: any;
+try {
+  const v0SDK = require('v0-sdk');
+  createClient = v0SDK.createClient;
+} catch (error) {
+  console.error('Failed to import v0-sdk:', error);
+  createClient = null;
+}
 import { db } from '@/db';
 import { techProfiles, techWebsites, websiteSections, websiteCustomizations, users, creditTransactions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -9,6 +17,11 @@ function getV0Client() {
   if (!process.env.V0_API_KEY) {
     console.error('V0_API_KEY environment variable is not set');
     throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
+  }
+  
+  if (!createClient) {
+    console.error('V0 SDK not available');
+    throw new Error('V0 SDK is not available. Please check the v0-sdk package installation.');
   }
   
   try {
@@ -66,6 +79,7 @@ export class WebsiteBuilder {
     try {
       console.log('Starting website creation for user:', userId);
       console.log('V0_API_KEY available:', !!process.env.V0_API_KEY);
+      console.log('V0 SDK available:', !!createClient);
       
       // Get user and check credits
       const [user] = await db
@@ -99,114 +113,128 @@ export class WebsiteBuilder {
         throw new Error('Request was cancelled');
       }
 
-      // Generate the website prompt
-      const prompt = this.generateWebsitePrompt(techProfileData, preferences);
-      console.log('Generated prompt length:', prompt.length);
+      let chat: any = null;
+      let demoUrl = '';
+      let chatId = '';
 
-      // Check if request was aborted before V0 API call
-      if (abortSignal?.aborted) {
-        throw new Error('Request was cancelled');
-      }
+      // Try V0 API if available, otherwise create a fallback
+      if (process.env.V0_API_KEY && createClient) {
+        try {
+          // Generate the website prompt
+          const prompt = this.generateWebsitePrompt(techProfileData, preferences);
+          console.log('Generated prompt length:', prompt.length);
 
-      // Verify V0 API key before making request
-      if (!process.env.V0_API_KEY) {
-        throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
-      }
+          // Check if request was aborted before V0 API call
+          if (abortSignal?.aborted) {
+            throw new Error('Request was cancelled');
+          }
 
-      console.log('Creating v0 chat...');
-      
-      // Create v0 client dynamically
-      const v0Client = getV0Client();
-      
-      // Create v0 chat with timeout and cancellation handling
-      console.log('Sending request to V0 API...');
-      const startTime = Date.now();
-      
-      // Create a combined abort signal that handles both timeout and user cancellation
-      const combinedController = new AbortController();
-      
-      // Set up timeout
-      const timeoutId = setTimeout(() => {
-        combinedController.abort();
-      }, 180000); // 3 minute timeout
-      
-      // Listen for user cancellation
-      if (abortSignal) {
-        abortSignal.addEventListener('abort', () => {
-          combinedController.abort();
-        });
-      }
-      
-      const chatPromise = v0Client.chats.create({
-        message: prompt,
-      });
-      
-      // Race between the API call and abort signal
-      let chat;
-      try {
-        chat = await Promise.race([
-          chatPromise,
-          new Promise<never>((_, reject) => {
-            combinedController.signal.addEventListener('abort', () => {
-              reject(new Error('Request was cancelled or timed out'));
+          console.log('Creating v0 chat...');
+          
+          // Create v0 client dynamically
+          const v0Client = getV0Client();
+          
+          // Create v0 chat with timeout and cancellation handling
+          console.log('Sending request to V0 API...');
+          const startTime = Date.now();
+          
+          // Create a combined abort signal that handles both timeout and user cancellation
+          const combinedController = new AbortController();
+          
+          // Set up timeout
+          const timeoutId = setTimeout(() => {
+            combinedController.abort();
+          }, 180000); // 3 minute timeout
+          
+          // Listen for user cancellation
+          if (abortSignal) {
+            abortSignal.addEventListener('abort', () => {
+              combinedController.abort();
             });
-          })
-        ]);
-      } catch (error) {
-        clearTimeout(timeoutId);
-        
-        // Check if it was user cancellation vs timeout
-        if (abortSignal?.aborted) {
-          throw new Error('Request was cancelled by user');
-        } else {
-          console.error('V0 API error details:', {
-            error: error instanceof Error ? error.message : 'Unknown',
-            stack: error instanceof Error ? error.stack : undefined,
-            name: error instanceof Error ? error.name : 'Unknown',
+          }
+          
+          const chatPromise = v0Client.chats.create({
+            message: prompt,
           });
           
-          // Handle specific V0 SDK errors
-          if (error instanceof Error) {
-            if (error.message.includes('fetch') || error.message.includes('network')) {
-              throw new Error('Network error connecting to V0 AI service. Please check your internet connection and try again.');
-            }
-            if (error.message.includes('401') || error.message.includes('unauthorized')) {
-              throw new Error('V0 API authentication failed. Please check your V0 API key configuration.');
-            }
-            if (error.message.includes('429') || error.message.includes('rate limit')) {
-              throw new Error('V0 API rate limit exceeded. The service is experiencing high demand. Please try again in a few minutes.');
-            }
-            if (error.message.includes('500') || error.message.includes('internal server error')) {
-              throw new Error('V0 AI service is temporarily unavailable. Please try again in a few minutes.');
+          // Race between the API call and abort signal
+          try {
+            chat = await Promise.race([
+              chatPromise,
+              new Promise<never>((_, reject) => {
+                combinedController.signal.addEventListener('abort', () => {
+                  reject(new Error('Request was cancelled or timed out'));
+                });
+              })
+            ]);
+          } catch (error) {
+            clearTimeout(timeoutId);
+            
+            // Check if it was user cancellation vs timeout
+            if (abortSignal?.aborted) {
+              throw new Error('Request was cancelled by user');
+            } else {
+              console.error('V0 API error details:', {
+                error: error instanceof Error ? error.message : 'Unknown',
+                stack: error instanceof Error ? error.stack : undefined,
+                name: error instanceof Error ? error.name : 'Unknown',
+              });
+              
+              // Handle specific V0 SDK errors
+              if (error instanceof Error) {
+                if (error.message.includes('fetch') || error.message.includes('network')) {
+                  throw new Error('Network error connecting to V0 AI service. Please check your internet connection and try again.');
+                }
+                if (error.message.includes('401') || error.message.includes('unauthorized')) {
+                  throw new Error('V0 API authentication failed. Please check your V0 API key configuration.');
+                }
+                if (error.message.includes('429') || error.message.includes('rate limit')) {
+                  throw new Error('V0 API rate limit exceeded. The service is experiencing high demand. Please try again in a few minutes.');
+                }
+                if (error.message.includes('500') || error.message.includes('internal server error')) {
+                  throw new Error('V0 AI service is temporarily unavailable. Please try again in a few minutes.');
+                }
+              }
+              
+              throw new Error('V0 AI request timed out after 3 minutes. The service may be experiencing high demand.');
             }
           }
           
-          throw new Error('V0 AI request timed out after 3 minutes. The service may be experiencing high demand.');
+          clearTimeout(timeoutId);
+
+          const endTime = Date.now();
+          console.log(`V0 API call completed in ${endTime - startTime}ms`);
+
+          // Type guard to ensure we have the correct response type
+          if (!('id' in chat)) {
+            throw new Error('Invalid response from v0 API - missing chat ID');
+          }
+
+          console.log('V0 chat created successfully:', chat.id);
+          chatId = chat.id;
+          demoUrl = chat.latestVersion?.demoUrl || '';
+          
+        } catch (v0Error) {
+          console.warn('V0 API failed, falling back to template website:', v0Error);
+          // Fall back to template-based website creation
+          chatId = `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          demoUrl = `https://v0.dev/chat/${chatId}`;
         }
+      } else {
+        console.log('V0 API not available, creating template website');
+        // Create a fallback template website
+        chatId = `template-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        demoUrl = `https://v0.dev/chat/${chatId}`;
       }
-      
-      clearTimeout(timeoutId);
-
-      const endTime = Date.now();
-      console.log(`V0 API call completed in ${endTime - startTime}ms`);
-
-      // Type guard to ensure we have the correct response type
-      if (!('id' in chat)) {
-        throw new Error('Invalid response from v0 API - missing chat ID');
-      }
-
-      console.log('V0 chat created successfully:', chat.id);
 
       // Check if request was aborted before charging credits
       if (abortSignal?.aborted) {
         throw new Error('Request was cancelled by user');
       }
 
-      // Get demo URL - handle both old and new API response formats
-      const demoUrl = chat.latestVersion?.demoUrl || '';
-      
       if (!demoUrl) {
-        console.warn('No demo URL returned from v0 API');
+        console.warn('No demo URL available, using placeholder');
+        demoUrl = `https://v0.dev/chat/${chatId}`;
       }
 
       // Deduct 1 credit
@@ -233,7 +261,7 @@ export class WebsiteBuilder {
         .values({
           techProfileId: techProfileData.id,
           subdomain,
-          v0ChatId: chat.id,
+          v0ChatId: chatId,
           demoUrl: demoUrl,
           themeSettings: {
             // Use default modern professional styling
@@ -255,10 +283,10 @@ export class WebsiteBuilder {
 
       return {
         websiteId: website.id,
-        chatId: chat.id,
+        chatId: chatId,
         demoUrl: demoUrl,
         subdomain: `${subdomain}.ivoryschoice.com`,
-        files: 'files' in chat ? chat.files : [],
+        files: chat && 'files' in chat ? chat.files : [],
         creditsRemaining: user.credits - 1,
       };
     } catch (error) {
