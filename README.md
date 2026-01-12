@@ -6,6 +6,8 @@ AI-powered nail design platform connecting clients with professional nail techni
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-green)
 
+<!-- Deployment trigger: 2025-01-12 -->
+
 ## Features
 
 ### For Clients
