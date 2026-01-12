@@ -111,7 +111,17 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
     }
 
     setIsCreating(true);
+    
+    // Show progress toast
+    const progressToast = toast.loading('Creating your website with AI... This may take 30-60 seconds.', {
+      duration: 120000, // 2 minutes
+    });
+
     try {
+      // Create AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+
       const response = await fetch('/api/websites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +129,11 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
           subdomain,
           preferences,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+      toast.dismiss(progressToast);
 
       if (!response.ok) {
         const error = await response.json();
@@ -132,7 +146,13 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
       onComplete(websiteData);
     } catch (error) {
       console.error('Error creating website:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create website');
+      toast.dismiss(progressToast);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        toast.error('Website creation timed out. Please try again.');
+      } else {
+        toast.error(error instanceof Error ? error.message : 'Failed to create website');
+      }
     } finally {
       setIsCreating(false);
     }
@@ -445,12 +465,12 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
                 <Button 
                   onClick={handleCreateWebsite} 
                   disabled={isCreating}
-                  className="h-12 sm:h-14 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 px-8 sm:px-10 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98] min-w-[180px]"
+                  className="h-12 sm:h-14 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 px-8 sm:px-10 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98] min-w-[200px]"
                 >
                   {isCreating ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                      Creating...
+                      Creating with AI...
                     </>
                   ) : (
                     'Create Website'

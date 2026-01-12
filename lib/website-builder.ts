@@ -1,6 +1,6 @@
 import { createClient } from 'v0-sdk';
 import { db } from '@/db';
-import { techProfiles, techWebsites, websiteSections, websiteCustomizations, services, portfolioImages, users, creditTransactions } from '@/db/schema';
+import { techProfiles, techWebsites, websiteSections, websiteCustomizations, users, creditTransactions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 // Create V0 client dynamically when needed
@@ -101,11 +101,24 @@ export class WebsiteBuilder {
       // Create v0 client dynamically
       const v0Client = getV0Client();
       
-      // Create v0 chat - for now, images are referenced in the prompt
-      // TODO: Investigate proper way to pass images to v0 SDK
-      const chat = await v0Client.chats.create({
+      // Create v0 chat with timeout handling
+      console.log('Sending request to V0 API...');
+      const startTime = Date.now();
+      
+      // Create a promise that rejects after 90 seconds
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('V0 API request timed out after 90 seconds')), 90000);
+      });
+      
+      const chatPromise = v0Client.chats.create({
         message: prompt,
       });
+      
+      // Race between the API call and timeout
+      const chat = await Promise.race([chatPromise, timeoutPromise]);
+
+      const endTime = Date.now();
+      console.log(`V0 API call completed in ${endTime - startTime}ms`);
 
       // Type guard to ensure we have the correct response type
       if (!('id' in chat)) {
@@ -115,7 +128,7 @@ export class WebsiteBuilder {
       console.log('V0 chat created successfully:', chat.id);
 
       // Get demo URL - handle both old and new API response formats
-      const demoUrl = chat.latestVersion?.demoUrl || ('demo' in chat && chat.demo) || ('url' in chat && chat.url) || '';
+      const demoUrl = chat.latestVersion?.demoUrl || '';
       
       if (!demoUrl) {
         console.warn('No demo URL returned from v0 API');
@@ -161,7 +174,7 @@ export class WebsiteBuilder {
         .returning();
 
       // Create default sections
-      await this.createDefaultSections(website.id, techProfileData, preferences);
+      await this.createDefaultSections(website.id, techProfileData);
 
       console.log('Website created successfully:', website.id);
 
@@ -281,7 +294,7 @@ export class WebsiteBuilder {
       });
 
       // Update website demo URL if changed
-      const demoUrl = response.latestVersion?.demoUrl || ('demo' in response && response.demo) || ('url' in response && response.url) || null;
+      const demoUrl = response.latestVersion?.demoUrl || null;
       if (demoUrl && demoUrl !== website.demoUrl) {
         await db
           .update(techWebsites)
@@ -470,6 +483,219 @@ export class WebsiteBuilder {
       throw error;
     }
   }
+  /**
+   * Get chat history for a website
+   */
+  async getChatHistory(websiteId: number, userId: number) {
+    try {
+      console.log('Getting chat history for website:', websiteId);
+      
+      // Get user
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Get website data and verify ownership
+      const [website] = await db
+        .select({
+          id: techWebsites.id,
+          v0ChatId: techWebsites.v0ChatId,
+          techProfileId: techWebsites.techProfileId,
+        })
+        .from(techWebsites)
+        .innerJoin(techProfiles, eq(techWebsites.techProfileId, techProfiles.id))
+        .where(
+          eq(techWebsites.id, websiteId) && 
+          eq(techProfiles.userId, userId)
+        )
+        .limit(1);
+
+      if (!website) {
+        throw new Error('Website not found or access denied');
+      }
+
+      // Verify V0 API key before making request
+      if (!process.env.V0_API_KEY) {
+        throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
+      }
+
+      console.log('Fetching chat history from V0...');
+
+      // Create v0 client dynamically
+      const v0Client = getV0Client();
+
+      // Get chat details including history
+      const chat = await v0Client.chats.getById({ chatId: website.v0ChatId });
+
+      console.log('Chat history retrieved successfully');
+
+      // Get versions for this chat
+      const versionsResponse = await v0Client.chats.findVersions({ chatId: website.v0ChatId });
+
+      // Get customization history from database
+      const customizations = await db
+        .select()
+        .from(websiteCustomizations)
+        .where(eq(websiteCustomizations.websiteId, websiteId))
+        .orderBy(websiteCustomizations.createdAt);
+
+      return {
+        chatId: website.v0ChatId,
+        chat: chat,
+        customizations: customizations,
+        versions: versionsResponse.data || [],
+        currentVersion: chat.latestVersion || null,
+      };
+    } catch (error) {
+      console.error('Error getting chat history:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Navigate to a specific version in the V0 chat
+   */
+  async navigateToVersion(websiteId: number, versionId: string, userId: number) {
+    try {
+      console.log('Navigating to version:', versionId, 'for website:', websiteId);
+      
+      // Get user
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Get website data and verify ownership
+      const [website] = await db
+        .select({
+          id: techWebsites.id,
+          v0ChatId: techWebsites.v0ChatId,
+          techProfileId: techWebsites.techProfileId,
+        })
+        .from(techWebsites)
+        .innerJoin(techProfiles, eq(techWebsites.techProfileId, techProfiles.id))
+        .where(
+          eq(techWebsites.id, websiteId) && 
+          eq(techProfiles.userId, userId)
+        )
+        .limit(1);
+
+      if (!website) {
+        throw new Error('Website not found or access denied');
+      }
+
+      // Verify V0 API key before making request
+      if (!process.env.V0_API_KEY) {
+        throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
+      }
+
+      console.log('Getting version details from V0...');
+
+      // Create v0 client dynamically
+      const v0Client = getV0Client();
+
+      // Get the specific version
+      const version = await v0Client.chats.getVersion({ 
+        chatId: website.v0ChatId, 
+        versionId: versionId 
+      });
+
+      // Update website demo URL to the selected version
+      const demoUrl = version.demoUrl || null;
+      if (demoUrl) {
+        await db
+          .update(techWebsites)
+          .set({ 
+            demoUrl: demoUrl,
+            updatedAt: new Date(),
+          })
+          .where(eq(techWebsites.id, websiteId));
+      }
+
+      console.log('Successfully navigated to version:', versionId);
+
+      return {
+        versionId: versionId,
+        demoUrl: demoUrl,
+        version: version,
+      };
+    } catch (error) {
+      console.error('Error navigating to version:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Undo last customization (go back one version)
+   */
+  async undoLastCustomization(websiteId: number, userId: number) {
+    try {
+      console.log('Undoing last customization for website:', websiteId);
+      
+      // Get chat history
+      const history = await this.getChatHistory(websiteId, userId);
+      
+      if (!history.versions || history.versions.length < 2) {
+        throw new Error('No previous version available to undo to');
+      }
+
+      // Get the second-to-last version (previous version)
+      const previousVersion = history.versions[history.versions.length - 2];
+      
+      // Navigate to the previous version
+      const result = await this.navigateToVersion(websiteId, previousVersion.id, userId);
+
+      return {
+        ...result,
+        message: 'Successfully undid last customization',
+      };
+    } catch (error) {
+      console.error('Error undoing customization:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Redo customization (go forward one version)
+   */
+  async redoCustomization(websiteId: number, userId: number) {
+    try {
+      console.log('Redoing customization for website:', websiteId);
+      
+      // Get chat history
+      const history = await this.getChatHistory(websiteId, userId);
+      
+      if (!history.versions || history.versions.length === 0) {
+        throw new Error('No versions available');
+      }
+
+      // Navigate to the latest version
+      const latestVersion = history.versions[history.versions.length - 1];
+      
+      // Navigate to the latest version
+      const result = await this.navigateToVersion(websiteId, latestVersion.id, userId);
+
+      return {
+        ...result,
+        message: 'Successfully redid to latest version',
+      };
+    } catch (error) {
+      console.error('Error redoing customization:', error);
+      throw error;
+    }
+  }
+
   async checkSubdomainAvailability(subdomain: string): Promise<boolean> {
     try {
       const existing = await db
@@ -484,10 +710,6 @@ export class WebsiteBuilder {
       return false;
     }
   }
-
-  /**
-   * Generate AI prompt for website creation
-   */
   private generateWebsitePrompt(
     techProfile: TechProfileData, 
     preferences: WebsitePreferences
@@ -576,8 +798,7 @@ Focus on building trust and showcasing professionalism.
    */
   private async createDefaultSections(
     websiteId: number, 
-    techProfile: TechProfileData, 
-    preferences: WebsitePreferences
+    techProfile: TechProfileData
   ) {
     const sections = [
       {

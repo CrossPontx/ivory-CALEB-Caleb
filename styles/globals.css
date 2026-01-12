@@ -636,79 +636,160 @@ html {
 }
 
 
-/* Custom range slider styles for drawing canvas */
+/* Custom range slider styles - Conventional Design */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #E8E8E8;
   outline: none;
+  margin: 12px 0;
 }
 
+/* Conventional rectangular slider thumb */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px; /* Slightly rounded corners, not circular */
   background: #8B7355;
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px; /* Slightly rounded corners, not circular */
   background: #8B7355;
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+/* Hover and active states */
+input[type="range"]:hover::-webkit-slider-thumb {
+  background: #1A1A1A;
+  transform: scale(1.1);
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+  background: #1A1A1A;
+  transform: scale(1.1);
 }
 
 input[type="range"]:active::-webkit-slider-thumb {
   transform: scale(1.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 input[type="range"]:active::-moz-range-thumb {
   transform: scale(1.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Custom slider styles to show only gradient backgrounds */
+/* Track styling */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #E8E8E8;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #E8E8E8;
+  cursor: pointer;
+  border: none;
+}
+
+/* Focus state for accessibility */
+input[type="range"]:focus::-webkit-slider-thumb {
+  outline: 2px solid #8B7355;
+  outline-offset: 2px;
+}
+
+input[type="range"]:focus::-moz-range-thumb {
+  outline: 2px solid #8B7355;
+  outline-offset: 2px;
+}
+
+/* Custom slider styles for UI components - Conventional Design */
 [role="slider"] {
-  width: 24px !important;
-  height: 24px !important;
+  width: 20px !important;
+  height: 20px !important;
   background: white !important;
-  border: 3px solid #8B7355 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(139, 115, 85, 0.1) !important;
+  border: 2px solid #8B7355 !important;
+  border-radius: 4px !important; /* Rectangular with slight rounding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   cursor: grab !important;
+}
+
+[role="slider"]:hover {
+  background: #8B7355 !important;
+  border-color: #1A1A1A !important;
+  transform: scale(1.1) !important;
 }
 
 [role="slider"]:active {
   cursor: grabbing !important;
   transform: scale(1.2) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 5px rgba(139, 115, 85, 0.15) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25) !important;
+  background: #1A1A1A !important;
 }
 
 /* Mobile touch optimization */
 @media (max-width: 640px) {
+  input[type="range"] {
+    height: 8px;
+    margin: 16px 0;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 8px;
+  }
+  
+  input[type="range"]::-moz-range-track {
+    height: 8px;
+  }
+  
   [role="slider"] {
-    width: 28px !important;
-    height: 28px !important;
+    width: 24px !important;
+    height: 24px !important;
   }
 }
 
-/* Hide the default slider track */
+/* Hide the default slider track for custom components */
 .slider-transparent [data-orientation="horizontal"] {
   background: transparent !important;
   height: 100% !important;
 }
 
-/* Make slider thumb more visible */
+/* Focus state for accessibility */
 [role="slider"]:focus-visible {
-  outline: 3px solid #8B7355;
+  outline: 2px solid #8B7355;
   outline-offset: 2px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 5px rgba(139, 115, 85, 0.2) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 0 4px rgba(139, 115, 85, 0.2) !important;
 }
 
 /* Smooth slider track interaction */
@@ -717,122 +798,25 @@ input[type="range"]:active::-moz-range-thumb {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Konva canvas touch optimization */
-.konvajs-content {
-  touch-action: none !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
-}
-
-/* Improve Konva transformer anchors on mobile */
-@media (max-width: 768px) {
-  .konvajs-content canvas {
-    touch-action: none !important;
-  }
-  
-  /* Increase touch target for transformer anchors */
-  .konvajs-content .konvajs-transformer {
-    cursor: move !important;
-  }
-}
-
-/* Better cursor feedback for transforming */
-.konvajs-content canvas {
-  cursor: grab;
-}
-
-.konvajs-content canvas:active {
-  cursor: grabbing;
-}
-
-/* Enhanced mobile-friendly range input styling */
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-  width: 100%;
-  padding: 8px 0;
-  margin: 8px 0;
-}
-
-/* Larger, easier-to-grab thumb for mobile */
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: white;
-  border: 3px solid #8B7355;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 4px rgba(139, 115, 85, 0.1);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
-  z-index: 10;
-}
-
-input[type="range"]::-webkit-slider-thumb:active {
-  transform: scale(1.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 6px rgba(139, 115, 85, 0.2);
-}
-
-input[type="range"]::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: white;
-  border: 3px solid #8B7355;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 4px rgba(139, 115, 85, 0.1);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-input[type="range"]::-moz-range-thumb:active {
-  transform: scale(1.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 6px rgba(139, 115, 85, 0.2);
-}
-
-/* Thicker track for easier interaction */
-input[type="range"]::-webkit-slider-runnable-track {
-  height: 32px;
-  border-radius: 16px;
-  cursor: pointer;
-}
-
-input[type="range"]::-moz-range-track {
-  height: 32px;
-  border-radius: 16px;
-  cursor: pointer;
-}
-
 /* Even larger touch targets on mobile devices */
 @media (hover: none) and (pointer: coarse) {
   input[type="range"] {
-    padding: 12px 0;
-    margin: 12px 0;
+    margin: 20px 0;
   }
   
   input[type="range"]::-webkit-slider-thumb {
-    width: 36px;
-    height: 36px;
-    border-width: 4px;
+    width: 28px;
+    height: 28px;
   }
   
   input[type="range"]::-moz-range-thumb {
-    width: 36px;
-    height: 36px;
-    border-width: 4px;
+    width: 28px;
+    height: 28px;
   }
   
-  input[type="range"]::-webkit-slider-runnable-track {
-    height: 40px;
-    border-radius: 20px;
-  }
-  
-  input[type="range"]::-moz-range-track {
-    height: 40px;
-    border-radius: 20px;
+  [role="slider"] {
+    width: 28px !important;
+    height: 28px !important;
   }
 }
 
