@@ -37,10 +37,7 @@ export default function TechProfileSetupPage() {
   const [bio, setBio] = useState("")
   const [location, setLocation] = useState("")
   const [portfolioImages, setPortfolioImages] = useState<string[]>([])
-  const [services, setServices] = useState<Service[]>([
-    { id: "1", name: "Full Set", price: "60", duration: "90", description: "Complete acrylic or gel nail set" },
-    { id: "2", name: "Gel Manicure", price: "45", duration: "60", description: "Gel polish application with nail care" },
-  ])
+  const [services, setServices] = useState<Service[]>([]);
   
   // No-show fee settings
   const [noShowFeeEnabled, setNoShowFeeEnabled] = useState(false)
@@ -783,92 +780,115 @@ export default function TechProfileSetupPage() {
                 <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight leading-[1.1]">Services & Pricing</h2>
                 <p className="text-sm sm:text-base text-[#6B6B6B] font-light mt-2 leading-[1.7] tracking-wide">Define what you offer</p>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={addService}
-                className="h-11 sm:h-12 lg:h-14 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-transparent text-[#1A1A1A] rounded-none text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-700 px-5 sm:px-6 lg:px-8 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
-              >
-                <Plus className="w-4 h-4 mr-2" strokeWidth={1} />
-                Add Service
-              </Button>
+              {services.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  onClick={addService}
+                  className="h-11 sm:h-12 lg:h-14 border-[#E8E8E8] hover:border-[#8B7355] hover:bg-transparent text-[#1A1A1A] rounded-none text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-700 px-5 sm:px-6 lg:px-8 hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+                >
+                  <Plus className="w-4 h-4 mr-2" strokeWidth={1} />
+                  Add Service
+                </Button>
+              )}
             </div>
 
             <div className="space-y-5 sm:space-y-6">
-              {services.map((service, index) => (
-                <div key={service.id} className="border border-[#E8E8E8] p-5 sm:p-6 lg:p-7 group hover:border-[#8B7355]/30 transition-all duration-700">
-                  <div className="flex items-start justify-between mb-4 sm:mb-5">
-                    <p className="text-[10px] tracking-[0.25em] uppercase text-[#8B7355] font-light">Service {index + 1}</p>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => removeService(service.id)}
-                      className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 rounded-none opacity-60 group-hover:opacity-100"
-                    >
-                      <X className="w-4 h-4" strokeWidth={1} />
-                    </Button>
+              {services.length === 0 ? (
+                <div className="text-center py-12 sm:py-16 lg:py-20">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center">
+                    <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-[#8B7355]" strokeWidth={1} />
                   </div>
-                  
-                  <div className="space-y-4 sm:space-y-5">
-                    <div>
-                      <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
-                        Service Name
-                      </label>
-                      <Input
-                        placeholder="e.g., Full Set, Gel Manicure"
-                        value={service.name}
-                        onChange={(e) => updateServiceWithAutoSave(service.id, "name", e.target.value)}
-                        className="h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
-                      />
+                  <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] mb-3 sm:mb-4 tracking-tight">
+                    Add Your Services
+                  </h3>
+                  <p className="text-sm sm:text-base text-[#6B6B6B] font-light mb-6 sm:mb-8 max-w-md mx-auto leading-[1.7] tracking-wide">
+                    Start by adding the nail services you offer. Include pricing and duration to help clients book appointments.
+                  </p>
+                  <Button 
+                    onClick={addService}
+                    className="h-12 sm:h-14 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 px-6 sm:px-8 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Plus className="w-4 h-4 mr-2" strokeWidth={1} />
+                    Add Your First Service
+                  </Button>
+                </div>
+              ) : (
+                services.map((service, index) => (
+                  <div key={service.id} className="border border-[#E8E8E8] p-5 sm:p-6 lg:p-7 group hover:border-[#8B7355]/30 transition-all duration-700">
+                    <div className="flex items-start justify-between mb-4 sm:mb-5">
+                      <p className="text-[10px] tracking-[0.25em] uppercase text-[#8B7355] font-light">Service {index + 1}</p>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removeService(service.id)}
+                        className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 hover:bg-[#F8F7F5] active:scale-95 transition-all duration-300 rounded-none opacity-60 group-hover:opacity-100"
+                      >
+                        <X className="w-4 h-4" strokeWidth={1} />
+                      </Button>
                     </div>
-
-                    <div>
-                      <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
-                        Description
-                      </label>
-                      <Textarea
-                        placeholder="Brief description of what's included..."
-                        value={service.description}
-                        onChange={(e) => updateServiceWithAutoSave(service.id, "description", e.target.value)}
-                        rows={2}
-                        className="text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 resize-none font-light leading-[1.7] tracking-wide transition-all duration-300"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    
+                    <div className="space-y-4 sm:space-y-5">
                       <div>
                         <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
-                          Price
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] text-sm sm:text-base font-light">
-                            $
-                          </span>
-                          <Input
-                            placeholder="0"
-                            type="number"
-                            value={service.price}
-                            onChange={(e) => updateServiceWithAutoSave(service.id, "price", e.target.value)}
-                            className="pl-6 sm:pl-7 h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
-                          Duration (min)
+                          Service Name
                         </label>
                         <Input
-                          placeholder="60"
-                          type="number"
-                          value={service.duration}
-                          onChange={(e) => updateServiceWithAutoSave(service.id, "duration", e.target.value)}
+                          placeholder="e.g., Full Set, Gel Manicure"
+                          value={service.name}
+                          onChange={(e) => updateServiceWithAutoSave(service.id, "name", e.target.value)}
                           className="h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
                         />
                       </div>
+
+                      <div>
+                        <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
+                          Description
+                        </label>
+                        <Textarea
+                          placeholder="Brief description of what's included..."
+                          value={service.description}
+                          onChange={(e) => updateServiceWithAutoSave(service.id, "description", e.target.value)}
+                          rows={2}
+                          className="text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 resize-none font-light leading-[1.7] tracking-wide transition-all duration-300"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
+                            Price
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] text-sm sm:text-base font-light">
+                              $
+                            </span>
+                            <Input
+                              placeholder="0"
+                              type="number"
+                              value={service.price}
+                              onChange={(e) => updateServiceWithAutoSave(service.id, "price", e.target.value)}
+                              className="pl-6 sm:pl-7 h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 font-light">
+                            Duration (min)
+                          </label>
+                          <Input
+                            placeholder="60"
+                            type="number"
+                            value={service.duration}
+                            onChange={(e) => updateServiceWithAutoSave(service.id, "duration", e.target.value)}
+                            className="h-12 sm:h-14 text-sm sm:text-base border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -964,9 +984,6 @@ export default function TechProfileSetupPage() {
                       />
                       <span className="text-sm text-[#6B6B6B]">% of service price</span>
                     </div>
-                    <p className="text-xs text-[#6B6B6B] mt-2 font-light">
-                      Common values: 25%, 50%, or 100%
-                    </p>
                   </div>
 
                   {/* Cancellation Window */}
@@ -985,9 +1002,6 @@ export default function TechProfileSetupPage() {
                       />
                       <span className="text-sm text-[#6B6B6B]">hours before appointment</span>
                     </div>
-                    <p className="text-xs text-[#6B6B6B] mt-2 font-light">
-                      Clients can cancel for free if they do so at least this many hours before their appointment
-                    </p>
                   </div>
 
                   {/* Preview */}
@@ -1020,7 +1034,7 @@ export default function TechProfileSetupPage() {
                   Professional Website
                 </h2>
                 <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                  Create a stunning website to showcase your work and accept bookings
+                  Create a professional website to book customers with in seconds
                 </p>
               </div>
 
@@ -1062,25 +1076,11 @@ export default function TechProfileSetupPage() {
                     <div className="flex-1">
                       <h3 className="text-sm font-medium text-[#1A1A1A] mb-2 flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-[#8B7355] animate-pulse" />
-                        Create Your Website with AI
+                        Create Your Professional Website
                       </h3>
-                      <p className="text-xs text-[#6B6B6B] font-light leading-relaxed mb-3">
-                        Build a professional website in minutes using AI. Showcase your work, accept bookings, and grow your business with your existing profile information.
+                      <p className="text-xs text-[#6B6B6B] font-light leading-relaxed mb-4">
+                        Create a professional website to book customers with in seconds.
                       </p>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="flex items-center gap-2 text-xs text-[#8B7355]">
-                          <Check className="w-3 h-3" strokeWidth={2} />
-                          <span>Uses your profile info</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-[#8B7355]">
-                          <Check className="w-3 h-3" strokeWidth={2} />
-                          <span>AI-powered design</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-[#8B7355]">
-                          <Check className="w-3 h-3" strokeWidth={2} />
-                          <span>Mobile optimized</span>
-                        </div>
-                      </div>
                       <Button
                         type="button"
                         onClick={() => router.push('/tech/website')}

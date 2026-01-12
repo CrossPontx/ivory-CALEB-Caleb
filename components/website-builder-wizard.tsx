@@ -315,9 +315,6 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
                   }`}
                   required
                 />
-                <p className="text-xs text-[#6B6B6B] mt-3 font-light leading-relaxed">
-                  <span className="text-red-500">*Required:</span> Describe the visual style and mood you want for your website.
-                </p>
                 {!preferences.customPrompt?.trim() && (
                   <p className="text-xs text-red-500 mt-2 font-light">
                     Please describe your website vision to continue
