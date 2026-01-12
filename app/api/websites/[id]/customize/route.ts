@@ -21,7 +21,29 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid website ID' }, { status: 400 });
     }
 
-    const { prompt } = await request.json();
+    // Handle both JSON and FormData requests
+    let prompt: string;
+    let attachedFiles: File[] = [];
+
+    const contentType = request.headers.get('content-type');
+    
+    if (contentType?.includes('multipart/form-data')) {
+      // Handle FormData (with file uploads)
+      const formData = await request.formData();
+      prompt = formData.get('prompt') as string;
+      
+      // Extract uploaded files
+      for (const [key, value] of formData.entries()) {
+        if (key.startsWith('file_') && value instanceof File) {
+          attachedFiles.push(value);
+        }
+      }
+    } else {
+      // Handle JSON request (backward compatibility)
+      const body = await request.json();
+      prompt = body.prompt;
+    }
+
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       return NextResponse.json({ error: 'Customization prompt is required' }, { status: 400 });
     }
@@ -71,7 +93,7 @@ export async function POST(
     }
 
     // Use the website builder to customize the website
-    const result = await websiteBuilder.customizeWebsite(websiteId, prompt, session.id);
+    const result = await websiteBuilder.customizeWebsite(websiteId, prompt, session.id, attachedFiles);
 
     return NextResponse.json(result);
 

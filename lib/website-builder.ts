@@ -2,6 +2,7 @@ import { createClient } from 'v0-sdk';
 import { db } from '@/db';
 import { techProfiles, techWebsites, websiteSections, websiteCustomizations, users, creditTransactions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { uploadFile, generateFilename } from '@/lib/storage';
 
 // Create V0 client dynamically when needed
 function getV0Client() {
@@ -210,7 +211,7 @@ export class WebsiteBuilder {
    * Customize an existing website with AI
    * Requires 1 credit
    */
-  async customizeWebsite(websiteId: number, customizationPrompt: string, userId: number) {
+  async customizeWebsite(websiteId: number, customizationPrompt: string, userId: number, attachedFiles?: File[]) {
     try {
       console.log('Starting website customization for user:', userId);
       
@@ -251,11 +252,55 @@ export class WebsiteBuilder {
       // Create v0 client dynamically
       const v0Client = getV0Client();
 
-      // Send customization message to v0
-      const response = await v0Client.chats.sendMessage({
+      // Prepare the message with file attachments if any
+      let messageOptions: any = {
         chatId: website.v0ChatId,
         message: customizationPrompt,
-      });
+      };
+
+      // If there are attached files, upload them first and include URLs in the request
+      if (attachedFiles && attachedFiles.length > 0) {
+        console.log(`Uploading ${attachedFiles.length} file(s) to storage...`);
+        
+        try {
+          // Upload files to storage and get URLs
+          const uploadedFiles = await Promise.all(
+            attachedFiles.map(async (file) => {
+              const filename = generateFilename(file.name, 'website-ref');
+              const { url } = await uploadFile(file, filename, {
+                folder: 'website-references',
+                contentType: file.type,
+              });
+              
+              return {
+                url: url,
+                name: file.name,
+                contentType: file.type,
+              };
+            })
+          );
+
+          console.log(`Successfully uploaded ${uploadedFiles.length} file(s)`);
+
+          // Add file attachments to the message
+          messageOptions.attachments = uploadedFiles.map(file => ({
+            url: file.url,
+            name: file.name,
+            contentType: file.contentType,
+          }));
+          
+          // Enhance the prompt to mention the reference images
+          messageOptions.message = `${customizationPrompt}
+
+REFERENCE IMAGES: I've attached ${attachedFiles.length} reference image(s) for inspiration. Please analyze these images and use them to inform the design changes, color schemes, layouts, or styling elements that should be incorporated into the website.`;
+        } catch (uploadError) {
+          console.error('Error uploading files:', uploadError);
+          throw new Error(`Failed to upload reference images: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
+        }
+      }
+
+      // Send customization message to v0
+      const response = await v0Client.chats.sendMessage(messageOptions);
 
       console.log('V0 customization response received');
 
@@ -290,6 +335,7 @@ export class WebsiteBuilder {
         changesApplied: {
           timestamp: new Date().toISOString(),
           prompt: customizationPrompt,
+          filesAttached: attachedFiles ? attachedFiles.length : 0,
         },
       });
 

@@ -4,47 +4,74 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ImageUpload } from '@/components/image-upload';
-import { Loader2, Check, X, Globe, Sparkles, CreditCard, Image, MessageSquare } from 'lucide-react';
+import { Loader2, Check, X, Globe, Sparkles, CreditCard, User, MapPin, Phone, Instagram } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface WebsiteBuilderWizardProps {
   onComplete: (websiteData: any) => void;
 }
 
-interface WebsitePreferences {
-  customPrompt?: string;
-  websiteImages: string[];
+interface TechProfile {
+  businessName?: string;
+  location?: string;
+  bio?: string;
+  phoneNumber?: string;
+  instagramHandle?: string;
+  services: Array<{
+    name: string;
+    description?: string;
+    price: string;
+    duration?: number;
+  }>;
+  portfolioImages: Array<{
+    imageUrl: string;
+    caption?: string;
+  }>;
 }
 
 export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) {
-  const [step, setStep] = useState(1);
   const [subdomain, setSubdomain] = useState('');
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
-  const [preferences, setPreferences] = useState<WebsitePreferences>({
-    customPrompt: '',
-    websiteImages: [],
-  });
   const [isCreating, setIsCreating] = useState(false);
   const [userCredits, setUserCredits] = useState<number | null>(null);
+  const [techProfile, setTechProfile] = useState<TechProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
-  // Check user credits on mount
+  // Load user profile and credits on mount
   useEffect(() => {
-    const checkUserStatus = async () => {
+    const loadUserData = async () => {
       try {
-        const response = await fetch('/api/user/status');
-        if (response.ok) {
-          const data = await response.json();
-          setUserCredits(data.credits);
+        // Load user status (credits)
+        const statusResponse = await fetch('/api/user/status');
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          setUserCredits(statusData.credits);
+        }
+
+        // Load tech profile
+        const profileResponse = await fetch('/api/tech/profile');
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setTechProfile(profileData);
+          
+          // Auto-suggest subdomain based on business name or username
+          if (profileData.businessName) {
+            const suggested = profileData.businessName
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, '')
+              .substring(0, 20);
+            setSubdomain(suggested);
+          }
         }
       } catch (error) {
-        console.error('Error checking user status:', error);
+        console.error('Error loading user data:', error);
+      } finally {
+        setIsLoadingProfile(false);
       }
     };
     
-    checkUserStatus();
+    loadUserData();
   }, []);
 
   // Check subdomain availability with debounce
@@ -80,28 +107,9 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
     setSubdomain(cleaned);
   };
 
-  const handleImageUpload = (url: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      websiteImages: [...prev.websiteImages, url]
-    }));
-  };
-
-  const handleImageRemove = (url: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      websiteImages: prev.websiteImages.filter(img => img !== url)
-    }));
-  };
-
   const handleCreateWebsite = async () => {
     if (subdomainStatus !== 'available') {
       toast.error('Please choose an available subdomain');
-      return;
-    }
-
-    if (!preferences.customPrompt || preferences.customPrompt.trim().length === 0) {
-      toast.error('Please describe your website vision before creating');
       return;
     }
 
@@ -110,10 +118,15 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
       return;
     }
 
+    if (!techProfile) {
+      toast.error('Unable to load your profile information. Please try again.');
+      return;
+    }
+
     setIsCreating(true);
     
     // Show progress toast
-    const progressToast = toast.loading('Creating your website with AI... This may take 30-60 seconds.', {
+    const progressToast = toast.loading('Creating your professional website... This may take 30-60 seconds.', {
       duration: 120000, // 2 minutes
     });
 
@@ -127,7 +140,11 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subdomain,
-          preferences,
+          // Use profile data automatically - no custom preferences needed
+          preferences: {
+            customPrompt: `Create a professional, modern nail technician website that showcases my services and portfolio. Use a clean, elegant design that builds trust and makes it easy for clients to book appointments.`,
+            websiteImages: [], // Will use portfolio images from profile
+          },
         }),
         signal: controller.signal,
       });
@@ -158,31 +175,44 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
     }
   };
 
-  const canProceedToStep2 = subdomain.length >= 3 && subdomainStatus === 'available';
-  const canProceedToStep3 = preferences.customPrompt && preferences.customPrompt.trim().length > 0;
-  const canCreateWebsite = userCredits !== null && userCredits >= 1;
+  const canCreateWebsite = subdomain.length >= 3 && 
+                          subdomainStatus === 'available' && 
+                          userCredits !== null && 
+                          userCredits >= 1 &&
+                          techProfile;
+
+  if (isLoadingProfile) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#8B7355] mx-auto mb-4" strokeWidth={1.5} />
+          <p className="text-[#6B6B6B] font-light">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white">
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-[#F8F7F5] to-white py-12 sm:py-16 lg:py-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center">
-            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-[#8B7355]" strokeWidth={1} />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center shadow-sm">
+            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-[#8B7355]" strokeWidth={1.5} />
           </div>
           <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">AI Website Builder</p>
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] mb-4 sm:mb-6 tracking-tight leading-[1.1]">
             Create Your Professional Website
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-[#6B6B6B] font-light max-w-2xl mx-auto leading-[1.7] tracking-wide">
-            Build a stunning website in minutes using AI. Showcase your work, accept bookings, and grow your business.
+          <p className="text-base sm:text-lg lg:text-xl text-[#6B6B6B] font-light max-w-3xl mx-auto leading-[1.7] tracking-wide">
+            We'll use your profile information to create a stunning website automatically. Just choose your domain name.
           </p>
         </div>
       </div>
 
       {/* Credits Alert */}
       {userCredits !== null && userCredits < 1 && (
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
           <Alert className="border-red-200 bg-red-50">
             <CreditCard className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
@@ -197,8 +227,8 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
 
       {/* Credits Display */}
       {userCredits !== null && (
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-          <div className="flex items-center justify-between p-4 sm:p-5 bg-blue-50 border border-blue-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+          <div className="flex items-center justify-between p-4 sm:p-5 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center space-x-3">
               <CreditCard className="h-5 w-5 text-blue-600" />
               <span className="text-sm sm:text-base font-medium text-blue-800">
@@ -209,277 +239,171 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
         </div>
       )}
 
-      {/* Progress Steps */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
-        <div className="flex items-center justify-center space-x-6 sm:space-x-8">
-          <div className={`flex items-center space-x-3 ${step >= 1 ? 'text-[#1A1A1A]' : 'text-[#6B6B6B]'}`}>
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-all duration-500 ${
-              step >= 1 ? 'bg-[#1A1A1A] text-white' : 'bg-[#F8F7F5] text-[#6B6B6B]'
-            }`}>
-              {step > 1 ? <Check className="w-5 h-5" strokeWidth={1.5} /> : '1'}
-            </div>
-            <span className="text-sm sm:text-base font-light tracking-wide">Domain</span>
-          </div>
-          <div className={`w-12 h-px transition-all duration-500 ${step >= 2 ? 'bg-[#1A1A1A]' : 'bg-[#E8E8E8]'}`} />
-          <div className={`flex items-center space-x-3 ${step >= 2 ? 'text-[#1A1A1A]' : 'text-[#6B6B6B]'}`}>
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-all duration-500 ${
-              step >= 2 ? 'bg-[#1A1A1A] text-white' : 'bg-[#F8F7F5] text-[#6B6B6B]'
-            }`}>
-              {step > 2 ? <Check className="w-5 h-5" strokeWidth={1.5} /> : '2'}
-            </div>
-            <span className="text-sm sm:text-base font-light tracking-wide">Design</span>
-          </div>
-          <div className={`w-12 h-px transition-all duration-500 ${step >= 3 ? 'bg-[#1A1A1A]' : 'bg-[#E8E8E8]'}`} />
-          <div className={`flex items-center space-x-3 ${step >= 3 ? 'text-[#1A1A1A]' : 'text-[#6B6B6B]'}`}>
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-all duration-500 ${
-              step >= 3 ? 'bg-[#8B7355] text-white' : 'bg-[#F8F7F5] text-[#6B6B6B]'
-            }`}>
-              <Sparkles className="w-5 h-5" strokeWidth={1.5} />
-            </div>
-            <span className="text-sm sm:text-base font-light tracking-wide">Create</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
-        {/* Step 1: Domain Selection */}
-        {step === 1 && (
-          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-8 sm:p-10 lg:p-12">
-            <div className="mb-8 sm:mb-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Left: Domain Selection */}
+          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 shadow-sm">
+            <div className="mb-6 sm:mb-8">
               <div className="flex items-center gap-3 mb-4">
-                <Globe className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
-                <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Step 1</p>
+                <Globe className="w-6 h-6 text-[#8B7355]" strokeWidth={1.5} />
+                <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Website Domain</p>
               </div>
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
+              <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
                 Choose Your Website Address
               </h2>
-              <p className="text-base sm:text-lg text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                Pick a unique subdomain for your professional website
+              <p className="text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
+                Pick a unique domain for your professional website
               </p>
             </div>
 
-            <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-6">
               <div>
-                <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 sm:mb-4 font-light">
+                <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 font-light">
                   Subdomain
                 </Label>
-                <div className="flex items-center">
+                <div className="flex items-center gap-3">
                   <Input
                     placeholder="yourname"
                     value={subdomain}
                     onChange={(e) => handleSubdomainChange(e.target.value)}
-                    className="flex-1 h-14 sm:h-16 text-base sm:text-lg border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
+                    className="flex-1 h-12 sm:h-14 text-base border-[#E8E8E8] rounded-lg focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 font-light transition-all duration-300"
                   />
-                  <div className="flex items-center gap-3 ml-4">
-                    <span className="text-[#6B6B6B] font-light">.ivoryschoice.com</span>
-                    {subdomainStatus === 'checking' && <Loader2 className="w-5 h-5 animate-spin text-[#8B7355]" />}
+                  <div className="flex items-center gap-2">
+                    {subdomainStatus === 'checking' && <Loader2 className="w-5 h-5 animate-spin text-[#8B7355]" strokeWidth={1.5} />}
                     {subdomainStatus === 'available' && <Check className="w-5 h-5 text-green-500" strokeWidth={1.5} />}
                     {subdomainStatus === 'taken' && <X className="w-5 h-5 text-red-500" strokeWidth={1.5} />}
                   </div>
                 </div>
+                <p className="text-sm text-[#6B6B6B] mt-2 font-light">
+                  .ivoryschoice.com
+                </p>
                 {subdomain && (
                   <p className="text-sm text-[#6B6B6B] mt-3 font-light">
-                    Your website will be available at: <strong className="text-[#1A1A1A]">{subdomain}.ivoryschoice.com</strong>
+                    Your website: <strong className="text-[#1A1A1A]">{subdomain}.ivoryschoice.com</strong>
                   </p>
                 )}
                 {subdomainStatus === 'taken' && (
-                  <p className="text-sm text-red-500 mt-3 font-light">This subdomain is already taken</p>
+                  <p className="text-sm text-red-500 mt-2 font-light">This domain is already taken</p>
                 )}
               </div>
 
-              <div className="flex justify-end pt-6">
-                <Button 
-                  onClick={() => setStep(2)} 
-                  disabled={!canProceedToStep2}
-                  className="h-12 sm:h-14 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-700 px-8 sm:px-10 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Next: Design Options
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Design Preferences */}
-        {step === 2 && (
-          <div className="space-y-8 sm:space-y-12">
-            {/* Custom Prompt */}
-            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-8 sm:p-10 lg:p-12">
-              <div className="mb-8 sm:mb-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <MessageSquare className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
-                  <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Step 2A</p>
-                </div>
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
-                  Describe Your Vision
-                </h2>
-                <p className="text-base sm:text-lg text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                  We have your profile info. Describe how you want your website to look and feel.
-                </p>
-              </div>
-
-              <div>
-                <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-4 sm:mb-6 font-light">
-                  Website Style & Feel <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  placeholder="How do you want your website to look and feel? For example: 'Modern and minimalist with soft colors' or 'Bold and vibrant with lots of personality' or 'Elegant and luxurious with gold accents'"
-                  value={preferences.customPrompt}
-                  onChange={(e) => setPreferences(prev => ({ ...prev, customPrompt: e.target.value }))}
-                  rows={3}
-                  className={`text-sm sm:text-base rounded-none focus:ring-0 resize-none font-light leading-[1.7] tracking-wide transition-all duration-300 ${
-                    preferences.customPrompt?.trim() 
-                      ? 'border-[#E8E8E8] focus:border-[#8B7355]' 
-                      : 'border-red-200 focus:border-red-400'
-                  }`}
-                  required
-                />
-                {!preferences.customPrompt?.trim() && (
-                  <p className="text-xs text-red-500 mt-2 font-light">
-                    Please describe your website vision to continue
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Website Images */}
-            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-8 sm:p-10 lg:p-12">
-              <div className="mb-8 sm:mb-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <Image className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
-                  <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Step 2B</p>
-                </div>
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
-                  Website Images
-                </h2>
-                <p className="text-base sm:text-lg text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                  Add specific images you want featured on your website (optional)
-                </p>
-              </div>
-
-              <div>
-                <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-4 sm:mb-6 font-light">
-                  Featured Images (Optional)
-                </Label>
-                <ImageUpload
-                  onUpload={handleImageUpload}
-                  onRemove={handleImageRemove}
-                  images={preferences.websiteImages}
-                  buttonText="Add Website Images"
-                  multiple={true}
-                />
-                <p className="text-xs text-[#6B6B6B] mt-3 font-light leading-relaxed">
-                  These images will be featured prominently on your website. Your portfolio images from your profile will also be included automatically.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-between">
-              <Button 
-                variant="outline" 
-                onClick={() => setStep(1)}
-                className="h-12 sm:h-14 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-none text-[11px] tracking-[0.25em] uppercase font-light px-8 sm:px-10 transition-all duration-700"
-              >
-                Back
-              </Button>
-              <Button 
-                onClick={() => setStep(3)} 
-                disabled={!canProceedToStep3 || !canCreateWebsite}
-                className="h-12 sm:h-14 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-700 px-8 sm:px-10 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Next: Create Website
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Create Website */}
-        {step === 3 && (
-          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-8 sm:p-10 lg:p-12">
-            <div className="mb-8 sm:mb-10">
-              <div className="flex items-center gap-3 mb-4">
-                <Sparkles className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
-                <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Step 3</p>
-              </div>
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
-                Create Your Website
-              </h2>
-              <p className="text-base sm:text-lg text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                Review your choices and create your professional website
-              </p>
-            </div>
-
-            <div className="space-y-8 sm:space-y-10">
-              <div className="grid grid-cols-1 gap-6 sm:gap-8">
-                <div className="p-6 sm:p-8 bg-[#F8F7F5] border border-[#E8E8E8]">
-                  <Label className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 block font-light">Website Address</Label>
-                  <p className="font-mono text-lg sm:text-xl text-[#1A1A1A] font-light">{subdomain}.ivoryschoice.com</p>
-                </div>
-              </div>
-
-              {preferences.customPrompt && (
-                <div className="p-6 sm:p-8 bg-[#F8F7F5] border border-[#E8E8E8]">
-                  <Label className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 block font-light">Website Vision</Label>
-                  <p className="text-sm sm:text-base text-[#1A1A1A] font-light leading-relaxed">{preferences.customPrompt}</p>
-                </div>
-              )}
-
-              {preferences.websiteImages.length > 0 && (
-                <div className="p-6 sm:p-8 bg-[#F8F7F5] border border-[#E8E8E8]">
-                  <Label className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-4 block font-light">Website Images</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {preferences.websiteImages.map((image, index) => (
-                      <div key={index} className="aspect-square bg-white border border-[#E8E8E8] overflow-hidden">
-                        <img 
-                          src={image} 
-                          alt={`Website image ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="p-4 sm:p-5 bg-blue-50 border border-blue-200">
-                <div className="flex items-start gap-3">
-                  <Sparkles className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <div>
-                    <p className="text-sm font-medium text-blue-800 mb-1">Mobile-Optimized Website</p>
-                    <p className="text-xs text-blue-700 leading-relaxed">
-                      Your website will be fully optimized for mobile devices with all essential sections: Hero, Services, Portfolio Gallery, About, and Contact & Booking.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-between pt-6">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setStep(2)}
-                  className="h-12 sm:h-14 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-none text-[11px] tracking-[0.25em] uppercase font-light px-8 sm:px-10 transition-all duration-700"
-                >
-                  Back
-                </Button>
+              <div className="pt-4">
                 <Button 
                   onClick={handleCreateWebsite} 
-                  disabled={isCreating}
-                  className="h-12 sm:h-14 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 px-8 sm:px-10 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98] min-w-[200px]"
+                  disabled={!canCreateWebsite || isCreating}
+                  className="w-full h-12 sm:h-14 bg-gradient-to-br from-[#8B7355] to-[#6B5B47] hover:from-[#1A1A1A] hover:to-[#2A2A2A] text-white rounded-lg text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isCreating ? (
                     <>
-                      <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                      Creating with AI...
+                      <Loader2 className="w-5 h-5 mr-3 animate-spin" strokeWidth={1.5} />
+                      Creating Website...
                     </>
                   ) : (
-                    'Create Website'
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                      Create My Website
+                    </>
                   )}
                 </Button>
               </div>
             </div>
           </div>
-        )}
+
+          {/* Right: Profile Preview */}
+          {techProfile && (
+            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 shadow-sm">
+              <div className="mb-6 sm:mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <User className="w-6 h-6 text-[#8B7355]" strokeWidth={1.5} />
+                  <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Your Profile</p>
+                </div>
+                <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
+                  Website Content
+                </h2>
+                <p className="text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
+                  We'll use this information to create your website
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {techProfile.businessName && (
+                  <div className="flex items-center gap-3 p-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg">
+                    <div className="w-8 h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-[#8B7355]" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wide">Business Name</p>
+                      <p className="text-sm text-[#1A1A1A] font-light">{techProfile.businessName}</p>
+                    </div>
+                  </div>
+                )}
+
+                {techProfile.location && (
+                  <div className="flex items-center gap-3 p-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg">
+                    <div className="w-8 h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-[#8B7355]" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wide">Location</p>
+                      <p className="text-sm text-[#1A1A1A] font-light">{techProfile.location}</p>
+                    </div>
+                  </div>
+                )}
+
+                {techProfile.phoneNumber && (
+                  <div className="flex items-center gap-3 p-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg">
+                    <div className="w-8 h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
+                      <Phone className="w-4 h-4 text-[#8B7355]" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wide">Phone</p>
+                      <p className="text-sm text-[#1A1A1A] font-light">{techProfile.phoneNumber}</p>
+                    </div>
+                  </div>
+                )}
+
+                {techProfile.instagramHandle && (
+                  <div className="flex items-center gap-3 p-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg">
+                    <div className="w-8 h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
+                      <Instagram className="w-4 h-4 text-[#8B7355]" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wide">Instagram</p>
+                      <p className="text-sm text-[#1A1A1A] font-light">@{techProfile.instagramHandle}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg">
+                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wide mb-2">Services</p>
+                  <p className="text-sm text-[#1A1A1A] font-light">
+                    {techProfile.services.length} service{techProfile.services.length !== 1 ? 's' : ''} configured
+                  </p>
+                </div>
+
+                <div className="p-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg">
+                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wide mb-2">Portfolio</p>
+                  <p className="text-sm text-[#1A1A1A] font-light">
+                    {techProfile.portfolioImages.length} portfolio image{techProfile.portfolioImages.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 mb-1">Automatic Website Creation</p>
+                    <p className="text-xs text-blue-700 leading-relaxed">
+                      Your website will include all essential sections: Hero, Services, Portfolio, About, and Contact with booking functionality.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
