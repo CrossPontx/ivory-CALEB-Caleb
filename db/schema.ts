@@ -109,7 +109,7 @@ export const techTimeOff = pgTable('tech_time_off', {
 // Bookings/Appointments
 export const bookings = pgTable('bookings', {
   id: serial('id').primaryKey(),
-  clientId: integer('client_id').references(() => users.id).notNull(),
+  clientId: integer('client_id').references(() => users.id), // Made nullable for guest bookings
   techProfileId: integer('tech_profile_id').references(() => techProfiles.id).notNull(),
   serviceId: integer('service_id').references(() => services.id).notNull(),
   lookId: integer('look_id').references(() => looks.id), // Design they want
@@ -133,6 +133,10 @@ export const bookings = pgTable('bookings', {
   // No-show fee tracking
   noShowFeeCharged: boolean('no_show_fee_charged').default(false),
   noShowFeeAmount: decimal('no_show_fee_amount', { precision: 10, scale: 2 }),
+  // Guest booking fields for V0 website bookings
+  guestEmail: varchar('guest_email', { length: 255 }),
+  guestPhone: varchar('guest_phone', { length: 50 }),
+  guestName: varchar('guest_name', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

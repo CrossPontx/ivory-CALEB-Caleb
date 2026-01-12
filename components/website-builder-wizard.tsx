@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Check, X, Globe, Sparkles, CreditCard, User, MapPin, Phone, Instagram } from 'lucide-react';
+import { Loader2, Check, X, Globe, Sparkles, CreditCard, User, MapPin, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface WebsiteBuilderWizardProps {
@@ -34,6 +34,9 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
   const [subdomain, setSubdomain] = useState('');
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [isCreating, setIsCreating] = useState(false);
+  const [creationProgress, setCreationProgress] = useState(0);
+  const [creationStage, setCreationStage] = useState('');
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [techProfile, setTechProfile] = useState<TechProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -107,6 +110,17 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
     setSubdomain(cleaned);
   };
 
+  const handleCancelCreation = () => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+      setIsCreating(false);
+      setCreationProgress(0);
+      setCreationStage('');
+      toast.info('Website creation cancelled. No credits were charged.');
+    }
+  };
+
   const handleCreateWebsite = async () => {
     if (subdomainStatus !== 'available') {
       toast.error('Please choose an available subdomain');
@@ -124,16 +138,37 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
     }
 
     setIsCreating(true);
+    setCreationProgress(0);
+    setCreationStage('Initializing...');
     
-    // Show progress toast
-    const progressToast = toast.loading('Creating your professional website... This may take 30-60 seconds.', {
-      duration: 120000, // 2 minutes
-    });
+    // Create AbortController for cancellation
+    const controller = new AbortController();
+    setAbortController(controller);
+    
+    // Simulate progress stages
+    const progressStages = [
+      { progress: 10, stage: 'Analyzing your profile...', duration: 1000 },
+      { progress: 25, stage: 'Connecting to V0 AI...', duration: 2000 },
+      { progress: 40, stage: 'Generating website structure...', duration: 3000 },
+      { progress: 60, stage: 'Creating beautiful design...', duration: 4000 },
+      { progress: 80, stage: 'Optimizing for mobile...', duration: 2000 },
+      { progress: 95, stage: 'Finalizing your website...', duration: 1000 },
+    ];
+
+    // Start progress animation
+    let currentStageIndex = 0;
+    const progressInterval = setInterval(() => {
+      if (currentStageIndex < progressStages.length) {
+        const stage = progressStages[currentStageIndex];
+        setCreationProgress(stage.progress);
+        setCreationStage(stage.stage);
+        currentStageIndex++;
+      }
+    }, 3000);
 
     try {
-      // Create AbortController for timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      // Create AbortController for timeout handling - increased to 3 minutes
+      const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout
 
       const response = await fetch('/api/websites', {
         method: 'POST',
@@ -150,28 +185,54 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
       });
 
       clearTimeout(timeoutId);
-      toast.dismiss(progressToast);
+      clearInterval(progressInterval);
 
       if (!response.ok) {
         const error = await response.json();
+        
+        // Handle cancellation specifically
+        if (response.status === 499 || error.cancelled) {
+          // Don't show error for user-initiated cancellation
+          return;
+        }
+        
         throw new Error(error.error || 'Failed to create website');
       }
 
       const websiteData = await response.json();
-      toast.success('Website created successfully!');
-      setUserCredits(websiteData.creditsRemaining);
-      onComplete(websiteData);
+      
+      // Complete the progress
+      setCreationProgress(100);
+      setCreationStage('Website created successfully!');
+      
+      // Small delay to show completion
+      setTimeout(() => {
+        toast.success('Website created successfully!');
+        setUserCredits(websiteData.creditsRemaining);
+        onComplete(websiteData);
+      }, 500);
+      
     } catch (error) {
       console.error('Error creating website:', error);
-      toast.dismiss(progressToast);
+      clearInterval(progressInterval);
       
       if (error instanceof Error && error.name === 'AbortError') {
-        toast.error('Website creation timed out. Please try again.');
+        // Check if it was user cancellation or timeout
+        if (controller.signal.aborted) {
+          toast.info('Website creation was cancelled. No credits were charged.');
+        } else {
+          toast.error('Website creation timed out. The V0 AI service is experiencing high demand. Please try again in a few minutes.');
+        }
       } else {
         toast.error(error instanceof Error ? error.message : 'Failed to create website');
       }
     } finally {
-      setIsCreating(false);
+      setAbortController(null);
+      setTimeout(() => {
+        setIsCreating(false);
+        setCreationProgress(0);
+        setCreationStage('');
+      }, 1000);
     }
   };
 
@@ -289,23 +350,79 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
               </div>
 
               <div className="pt-4">
-                <Button 
-                  onClick={handleCreateWebsite} 
-                  disabled={!canCreateWebsite || isCreating}
-                  className="w-full h-12 sm:h-14 bg-gradient-to-br from-[#8B7355] to-[#6B5B47] hover:from-[#1A1A1A] hover:to-[#2A2A2A] text-white rounded-lg text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isCreating ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-3 animate-spin" strokeWidth={1.5} />
-                      Creating Website...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                      Create My Website
-                    </>
-                  )}
-                </Button>
+                {isCreating ? (
+                  <div className="w-full space-y-4">
+                    {/* Progress Bar */}
+                    <div className="w-full bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg overflow-hidden">
+                      <div 
+                        className="h-3 bg-gradient-to-r from-[#8B7355] to-[#6B5B47] transition-all duration-1000 ease-out"
+                        style={{ width: `${creationProgress}%` }}
+                      />
+                    </div>
+                    
+                    {/* Loading Animation */}
+                    <div className="flex items-center justify-center p-6 bg-gradient-to-br from-[#F8F7F5] to-white border border-[#E8E8E8] rounded-lg">
+                      <div className="text-center">
+                        {/* Animated Sparkles */}
+                        <div className="relative mb-4">
+                          <div className="w-16 h-16 mx-auto relative">
+                            <div className="absolute inset-0 rounded-full border-4 border-[#8B7355]/20"></div>
+                            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#8B7355] animate-spin"></div>
+                            <div className="absolute inset-2 rounded-full border-2 border-transparent border-t-[#6B5B47] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+                            <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#8B7355] animate-pulse" strokeWidth={1.5} />
+                          </div>
+                        </div>
+                        
+                        {/* Progress Text */}
+                        <h3 className="font-serif text-lg font-light text-[#1A1A1A] mb-2 tracking-tight">
+                          Creating Your Website
+                        </h3>
+                        <p className="text-sm text-[#6B6B6B] font-light mb-3 animate-pulse">
+                          {creationStage}
+                        </p>
+                        <p className="text-xs text-[#8B7355] font-light">
+                          {creationProgress}% Complete
+                        </p>
+                        
+                        {/* Cancel Button */}
+                        <div className="mt-4">
+                          <Button
+                            onClick={handleCancelCreation}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs text-[#6B6B6B] border-[#E8E8E8] hover:border-red-300 hover:text-red-600 hover:bg-red-50 transition-all duration-300"
+                          >
+                            <X className="w-3 h-3 mr-1" strokeWidth={1.5} />
+                            Cancel
+                          </Button>
+                        </div>
+                        
+                        {/* Floating Elements Animation */}
+                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-[#8B7355]/30 rounded-full animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }}></div>
+                          <div className="absolute top-1/3 right-1/4 w-1.5 h-1.5 bg-[#6B5B47]/40 rounded-full animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2.5s' }}></div>
+                          <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-[#8B7355]/50 rounded-full animate-bounce" style={{ animationDelay: '1s', animationDuration: '3s' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Tips */}
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-xs text-blue-700 text-center font-light">
+                        💡 <strong>Tip:</strong> V0 AI is analyzing your profile and creating a custom website design. This process can take 1-3 minutes depending on server load.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={handleCreateWebsite} 
+                    disabled={!canCreateWebsite}
+                    className="w-full h-12 sm:h-14 bg-gradient-to-br from-[#8B7355] to-[#6B5B47] hover:from-[#1A1A1A] hover:to-[#2A2A2A] text-white rounded-lg text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                    Create My Website
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -366,7 +483,7 @@ export function WebsiteBuilderWizard({ onComplete }: WebsiteBuilderWizardProps) 
                 {techProfile.instagramHandle && (
                   <div className="flex items-center gap-3 p-3 bg-[#F8F7F5] border border-[#E8E8E8] rounded-lg">
                     <div className="w-8 h-8 bg-[#8B7355]/10 rounded-full flex items-center justify-center">
-                      <Instagram className="w-4 h-4 text-[#8B7355]" strokeWidth={1.5} />
+                      <User className="w-4 h-4 text-[#8B7355]" strokeWidth={1.5} />
                     </div>
                     <div>
                       <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wide">Instagram</p>

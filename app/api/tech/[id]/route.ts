@@ -12,8 +12,18 @@ export async function GET(
     const { id } = await params;
     const techId = parseInt(id);
 
+    // Enhanced logging for debugging
+    console.log(`Tech API called with ID: "${id}"`);
+    console.log(`Request URL: ${request.url}`);
+    console.log(`Request headers:`, Object.fromEntries(request.headers.entries()));
+
     if (isNaN(techId)) {
-      return NextResponse.json({ error: 'Invalid tech ID' }, { status: 400 });
+      console.log(`Invalid tech ID received: "${id}" - this should be a number`);
+      return NextResponse.json({ 
+        error: 'Invalid tech ID', 
+        received: id,
+        expected: 'numeric ID' 
+      }, { status: 400 });
     }
 
     const tech = await db.query.techProfiles.findFirst({

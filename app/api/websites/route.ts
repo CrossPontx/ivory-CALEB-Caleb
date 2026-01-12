@@ -24,6 +24,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if request was aborted early
+    if (request.signal?.aborted) {
+      return NextResponse.json(
+        { error: 'Request was cancelled' },
+        { status: 499 } // Client Closed Request
+      );
+    }
+
     // Check user credits
     const [user] = await db
       .select()
@@ -105,7 +113,8 @@ export async function POST(request: NextRequest) {
       },
       preferences,
       subdomain,
-      session.id
+      session.id,
+      request.signal // Pass the abort signal
     );
 
     return NextResponse.json(result);
@@ -117,6 +126,21 @@ export async function POST(request: NextRequest) {
       v0KeyAvailable: !!process.env.V0_API_KEY,
       nodeEnv: process.env.NODE_ENV,
     });
+    
+    // Handle cancellation specifically
+    if (error instanceof Error && (
+      error.message.includes('cancelled') || 
+      error.message.includes('Request was cancelled') ||
+      request.signal?.aborted
+    )) {
+      return NextResponse.json(
+        { 
+          error: 'Website creation was cancelled',
+          cancelled: true
+        },
+        { status: 499 } // Client Closed Request
+      );
+    }
     
     return NextResponse.json(
       { 

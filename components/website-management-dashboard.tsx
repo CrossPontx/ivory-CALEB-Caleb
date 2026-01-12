@@ -1,35 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Globe, 
-  Edit3, 
   Eye, 
-  Settings, 
   BarChart3, 
   Loader2, 
   ExternalLink,
-  CreditCard,
-  Sparkles,
-  Search,
-  Undo2,
-  Redo2,
-  History,
   Monitor,
   Tablet,
   Smartphone,
-  Send,
-  Paperclip,
-  Image,
-  X,
-  MessageSquare,
-  Bot
+  RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -56,310 +39,8 @@ export function WebsiteManagementDashboard({
   websiteData, 
   onUpdate 
 }: WebsiteManagementDashboardProps) {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [customizationPrompt, setCustomizationPrompt] = useState('');
-  const [isCustomizing, setIsCustomizing] = useState(false);
-  const [userCredits, setUserCredits] = useState<number | null>(null);
-  const [chatHistory, setChatHistory] = useState<any>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
-  const [chatMessages, setChatMessages] = useState<Array<{
-    id: string;
-    role: 'user' | 'assistant';
-    content: string;
-    timestamp: Date;
-    attachments?: Array<{ type: 'image'; url: string; name: string }>;
-  }>>([]);
-  const [currentMessage, setCurrentMessage] = useState('');
-  const [isChatLoading, setIsChatLoading] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  const [seoSettings, setSeoSettings] = useState<{
-    title?: string;
-    description?: string;
-    keywords?: string[];
-  }>(websiteData.seoSettings || {});
-
-  // Load chat history when customize tab is opened
-  useEffect(() => {
-    if (activeTab === 'customize' && !chatHistory) {
-      loadChatHistory();
-    }
-  }, [activeTab]);
-
-  const loadChatHistory = async () => {
-    try {
-      const response = await fetch(`/api/websites/${websiteData.id}/history`);
-      if (response.ok) {
-        const history = await response.json();
-        setChatHistory(history);
-      }
-    } catch (error) {
-      console.error('Error loading chat history:', error);
-    }
-  };
-
-  const handleNavigateVersion = async (versionId?: string, action?: 'undo' | 'redo') => {
-    setIsNavigating(true);
-    try {
-      const response = await fetch(`/api/websites/${websiteData.id}/navigate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ versionId, action }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to navigate version');
-      }
-
-      const result = await response.json();
-      
-      // Update the demo URL
-      const updatedData = {
-        ...websiteData,
-        demoUrl: result.demoUrl || websiteData.demoUrl,
-      };
-      
-      onUpdate(updatedData);
-      
-      // Reload chat history to get updated state
-      await loadChatHistory();
-      
-      toast.success(result.message || 'Successfully navigated to version');
-    } catch (error) {
-      console.error('Error navigating version:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to navigate version');
-    } finally {
-      setIsNavigating(false);
-    }
-  };
-
-  // Auto-scroll chat to bottom
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
-
-  // Initialize chat with welcome message
-  useEffect(() => {
-    if (chatMessages.length === 0) {
-      setChatMessages([{
-        id: '1',
-        role: 'assistant',
-        content: "Hi! I'm your website assistant. I can help you customize your website by making changes to the design, content, layout, and more. Just describe what you'd like to change or upload reference images for inspiration!",
-        timestamp: new Date(),
-      }]);
-    }
-  }, []);
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    setAttachedFiles(prev => [...prev, ...imageFiles]);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const sendChatMessage = async () => {
-    if (!currentMessage.trim() && attachedFiles.length === 0) return;
-    
-    if (userCredits === null || userCredits < 1) {
-      toast.error('Insufficient credits. Website customization requires 1 credit.');
-      return;
-    }
-
-    const messageId = Date.now().toString();
-    const userMessage = {
-      id: messageId,
-      role: 'user' as const,
-      content: currentMessage,
-      timestamp: new Date(),
-      attachments: attachedFiles.map(file => ({
-        type: 'image' as const,
-        url: URL.createObjectURL(file),
-        name: file.name,
-      })),
-    };
-
-    setChatMessages(prev => [...prev, userMessage]);
-    setCurrentMessage('');
-    setAttachedFiles([]);
-    setIsChatLoading(true);
-
-    try {
-      // Create FormData for file uploads
-      const formData = new FormData();
-      formData.append('prompt', currentMessage);
-      attachedFiles.forEach((file, index) => {
-        formData.append(`file_${index}`, file);
-      });
-
-      const response = await fetch(`/api/websites/${websiteData.id}/customize`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to customize website');
-      }
-
-      const result = await response.json();
-      
-      // Update credits
-      if (result.creditsRemaining !== undefined) {
-        setUserCredits(result.creditsRemaining);
-      }
-
-      // Update the demo URL
-      const updatedData = {
-        ...websiteData,
-        demoUrl: result.demoUrl || websiteData.demoUrl,
-      };
-      
-      onUpdate(updatedData);
-      
-      // Refresh the preview
-      setIsPreviewLoading(true);
-      const iframe = document.querySelector('iframe[title="Website Preview"]') as HTMLIFrameElement;
-      if (iframe) {
-        setTimeout(() => {
-          iframe.src = result.demoUrl || iframe.src;
-        }, 1000);
-      }
-
-      // Add assistant response
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant' as const,
-        content: `Great! I've updated your website based on your request. The changes should be visible in the preview now. What else would you like to modify?`,
-        timestamp: new Date(),
-      };
-
-      setChatMessages(prev => [...prev, assistantMessage]);
-      toast.success('Website updated successfully!');
-
-    } catch (error) {
-      console.error('Error in chat:', error);
-      
-      const errorMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant' as const,
-        content: `Sorry, I encountered an error while updating your website: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
-        timestamp: new Date(),
-      };
-
-      setChatMessages(prev => [...prev, errorMessage]);
-      toast.error('Failed to update website');
-    } finally {
-      setIsChatLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendChatMessage();
-    }
-  };
-  useEffect(() => {
-    const checkUserStatus = async () => {
-      try {
-        const response = await fetch('/api/user/status');
-        if (response.ok) {
-          const data = await response.json();
-          setUserCredits(data.credits);
-        }
-      } catch (error) {
-        console.error('Error checking user status:', error);
-      }
-    };
-    
-    checkUserStatus();
-  }, []);
-
-  const handleCustomization = async () => {
-    if (!customizationPrompt.trim()) {
-      toast.error('Please enter a customization request');
-      return;
-    }
-
-    if (userCredits === null || userCredits < 1) {
-      toast.error('Insufficient credits. Website customization requires 1 credit.');
-      return;
-    }
-
-    setIsCustomizing(true);
-    
-    // Show progress toast
-    const progressToast = toast.loading('Customizing your website with AI... This may take 30-60 seconds.', {
-      duration: 120000, // 2 minutes
-    });
-
-    try {
-      // Create AbortController for timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-
-      const response = await fetch(`/api/websites/${websiteData.id}/customize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: customizationPrompt }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      toast.dismiss(progressToast);
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to customize website');
-      }
-
-      const result = await response.json();
-      
-      // Update credits
-      if (result.creditsRemaining !== undefined) {
-        setUserCredits(result.creditsRemaining);
-      }
-
-      // Update the demo URL
-      const updatedData = {
-        ...websiteData,
-        demoUrl: result.demoUrl || websiteData.demoUrl,
-      };
-      
-      onUpdate(updatedData);
-      setCustomizationPrompt('');
-      
-      // Refresh the preview if it exists
-      setIsPreviewLoading(true);
-      const iframe = document.querySelector('iframe[title="Website Preview"]') as HTMLIFrameElement;
-      if (iframe) {
-        // Small delay to ensure the new demo URL is ready
-        setTimeout(() => {
-          iframe.src = result.demoUrl || iframe.src;
-        }, 1000);
-      }
-      
-      toast.success('Website updated successfully!');
-    } catch (error) {
-      console.error('Error customizing website:', error);
-      toast.dismiss(progressToast);
-      
-      if (error instanceof Error && error.name === 'AbortError') {
-        toast.error('Website customization timed out. Please try again.');
-      } else {
-        toast.error(error instanceof Error ? error.message : 'Failed to customize website');
-      }
-    } finally {
-      setIsCustomizing(false);
-    }
-  };
 
   const handlePublishToggle = async (published: boolean) => {
     try {
@@ -375,18 +56,12 @@ export function WebsiteManagementDashboard({
 
       const updatedData = { ...websiteData, isPublished: published };
       onUpdate(updatedData);
-      toast.success(published ? 'Website published!' : 'Website unpublished');
+      toast.success(`Website ${published ? 'published' : 'unpublished'} successfully!`);
     } catch (error) {
       console.error('Error updating publish status:', error);
       toast.error('Failed to update publish status');
     }
   };
-
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: Globe },
-    { id: 'customize', label: 'Customize', icon: Edit3 },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
 
   return (
     <div className="bg-white min-h-screen">
@@ -399,417 +74,131 @@ export function WebsiteManagementDashboard({
                 <Eye className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
                 <span className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Live Preview</span>
               </div>
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] mb-4 tracking-tight leading-[1.1]">
-                Website Preview
-              </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-[#6B6B6B] font-light leading-[1.7] tracking-wide max-w-2xl">
-                See how your website looks to visitors across all devices
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-2 tracking-tight leading-[1.1]">
+                    Website Preview
+                  </h2>
+                  <p className="text-sm sm:text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
+                    {websiteData.fullUrl}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#6B6B6B] font-light">Published</span>
+                    <Switch
+                      checked={websiteData.isPublished}
+                      onCheckedChange={handlePublishToggle}
+                      className="data-[state=checked]:bg-[#8B7355]"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => window.open(websiteData.fullUrl, '_blank')}
+                    variant="outline"
+                    className="h-10 sm:h-12 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-none text-[11px] tracking-[0.25em] uppercase font-light px-4 sm:px-6 transition-all duration-700"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" strokeWidth={1} />
+                    Visit Site
+                  </Button>
+                </div>
+              </div>
             </div>
-            
+
             {websiteData.demoUrl ? (
-              <div className="grid lg:grid-cols-5 gap-4 lg:gap-6">
-                {/* AI Chat Assistant - Left Side */}
-                <div className="lg:col-span-2 order-2 lg:order-1">
-                  <div className="bg-white border border-[#E8E8E8] h-[600px] lg:h-[700px] flex flex-col shadow-sm">
-                    {/* Chat Header */}
-                    <div className="p-3 sm:p-4 border-b border-[#E8E8E8] bg-gradient-to-r from-[#F8F7F5] to-white">
+              <div className="w-full">
+                {/* Website Preview - Full Width */}
+                <div className="bg-white border border-[#E8E8E8] shadow-sm">
+                  {/* Preview Header */}
+                  <div className="p-3 sm:p-4 border-b border-[#E8E8E8] bg-gradient-to-r from-[#F8F7F5] to-white">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#8B7355] to-[#6B5B47] rounded-full flex items-center justify-center shadow-sm">
-                          <Bot className="w-5 h-5 text-white" strokeWidth={1.5} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-serif text-base sm:text-lg font-light text-[#1A1A1A] tracking-tight">AI Assistant</h3>
-                          <p className="text-xs text-[#6B6B6B] font-light tracking-wide">Customize your website with prompts & images</p>
-                        </div>
-                        <div className="hidden sm:block">
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Chat Messages */}
-                    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-white to-[#FAFAF9]">
-                      {chatMessages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[85%] sm:max-w-[80%] p-3 sm:p-4 text-sm sm:text-base leading-relaxed transition-all duration-300 ${
-                              message.role === 'user'
-                                ? 'bg-gradient-to-br from-[#8B7355] to-[#6B5B47] text-white shadow-sm'
-                                : 'bg-white text-[#1A1A1A] border border-[#E8E8E8] shadow-sm'
-                            }`}
-                            style={{
-                              borderRadius: message.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px'
-                            }}
-                          >
-                            {message.attachments && message.attachments.length > 0 && (
-                              <div className="mb-3 space-y-2">
-                                {message.attachments.map((attachment, index) => (
-                                  <div key={index} className="relative">
-                                    <img
-                                      src={attachment.url}
-                                      alt={attachment.name}
-                                      className="max-w-full h-auto rounded-lg border border-white/20"
-                                      style={{ maxHeight: '120px' }}
-                                    />
-                                    <p className="text-xs opacity-75 mt-1 font-light">{attachment.name}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <p className="font-light leading-[1.6] tracking-wide">{message.content}</p>
-                            <p className={`text-xs mt-2 opacity-75 font-light ${
-                              message.role === 'user' ? 'text-white' : 'text-[#6B6B6B]'
-                            }`}>
-                              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {isChatLoading && (
-                        <div className="flex justify-start">
-                          <div className="bg-white border border-[#E8E8E8] p-4 shadow-sm" style={{ borderRadius: '18px 18px 18px 4px' }}>
-                            <div className="flex items-center gap-3">
-                              <div className="flex space-x-1">
-                                <div className="w-2 h-2 bg-[#8B7355] rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-[#8B7355] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                <div className="w-2 h-2 bg-[#8B7355] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                              </div>
-                              <span className="text-sm text-[#6B6B6B] font-light">Updating your website...</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div ref={chatEndRef} />
-                    </div>
-
-                    {/* Chat Input */}
-                    <div className="p-3 sm:p-4 border-t border-[#E8E8E8] bg-gradient-to-r from-[#F8F7F5] to-white">
-                      {/* File Attachments Preview */}
-                      {attachedFiles.length > 0 && (
-                        <div className="mb-3 flex flex-wrap gap-2">
-                          {attachedFiles.map((file, index) => (
-                            <div key={index} className="relative bg-white border border-[#E8E8E8] p-2 rounded-lg text-xs shadow-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-[#8B7355]/10 rounded flex items-center justify-center">
-                                  <Image className="w-2.5 h-2.5 text-[#8B7355]" strokeWidth={1.5} />
-                                </div>
-                                <span className="truncate max-w-[80px] font-light">{file.name}</span>
-                                <button
-                                  onClick={() => removeAttachment(index)}
-                                  className="text-red-400 hover:text-red-600 transition-colors p-0.5 rounded-full hover:bg-red-50"
-                                >
-                                  <X className="w-3 h-3" strokeWidth={1.5} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 sm:gap-3">
-                        <div className="flex-1 relative">
-                          <Textarea
-                            value={currentMessage}
-                            onChange={(e) => setCurrentMessage(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            placeholder="Describe changes or upload reference images..."
-                            className="resize-none text-sm border-[#E8E8E8] focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 rounded-lg pr-10 font-light leading-relaxed placeholder:text-[#9B9B9B] transition-all duration-300"
-                            rows={2}
-                          />
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="absolute right-2 top-2 text-[#6B6B6B] hover:text-[#8B7355] transition-all duration-300 p-1 rounded-full hover:bg-[#8B7355]/10"
-                          >
-                            <Paperclip className="w-4 h-4" strokeWidth={1.5} />
-                          </button>
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleFileUpload}
-                            className="hidden"
-                          />
-                        </div>
-                        <Button
-                          onClick={sendChatMessage}
-                          disabled={isChatLoading || (!currentMessage.trim() && attachedFiles.length === 0) || (userCredits !== null && userCredits < 1)}
-                          className="h-auto bg-gradient-to-br from-[#8B7355] to-[#6B5B47] hover:from-[#1A1A1A] hover:to-[#2A2A2A] text-white rounded-lg px-3 py-2 shadow-sm transition-all duration-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Send className="w-4 h-4" strokeWidth={1.5} />
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#E8E8E8]/50">
-                        <p className="text-xs text-[#6B6B6B] font-light tracking-wide">
-                          1 credit per message
-                        </p>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-[#8B7355] rounded-full"></div>
-                          <p className="text-xs text-[#6B6B6B] font-light">
-                            {userCredits || 0} credits
-                          </p>
+                          <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                          <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                         </div>
+                        <div className="text-xs text-[#6B6B6B] font-light tracking-wide">
+                          {websiteData.fullUrl}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className="flex border border-[#E8E8E8] rounded-lg overflow-hidden">
+                          <button
+                            onClick={() => setPreviewDevice('desktop')}
+                            className={`p-2 transition-colors ${
+                              previewDevice === 'desktop' 
+                                ? 'bg-[#8B7355] text-white' 
+                                : 'text-[#6B6B6B] hover:bg-[#F8F7F5]'
+                            }`}
+                          >
+                            <Monitor className="w-4 h-4" strokeWidth={1.5} />
+                          </button>
+                          <button
+                            onClick={() => setPreviewDevice('tablet')}
+                            className={`p-2 transition-colors ${
+                              previewDevice === 'tablet' 
+                                ? 'bg-[#8B7355] text-white' 
+                                : 'text-[#6B6B6B] hover:bg-[#F8F7F5]'
+                            }`}
+                          >
+                            <Tablet className="w-4 h-4" strokeWidth={1.5} />
+                          </button>
+                          <button
+                            onClick={() => setPreviewDevice('mobile')}
+                            className={`p-2 transition-colors ${
+                              previewDevice === 'mobile' 
+                                ? 'bg-[#8B7355] text-white' 
+                                : 'text-[#6B6B6B] hover:bg-[#F8F7F5]'
+                            }`}
+                          >
+                            <Smartphone className="w-4 h-4" strokeWidth={1.5} />
+                          </button>
+                        </div>
+                        
+                        <Button
+                          onClick={() => {
+                            setIsPreviewLoading(true);
+                            const iframe = document.querySelector('iframe[title="Website Preview"]') as HTMLIFrameElement;
+                            if (iframe) {
+                              iframe.src = iframe.src;
+                            }
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="border-[#E8E8E8] hover:border-[#8B7355] text-[#6B6B6B] hover:text-[#8B7355]"
+                        >
+                          <RefreshCw className="w-4 h-4" strokeWidth={1.5} />
+                        </Button>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Website Preview - Right Side */}
-                <div className="lg:col-span-3 order-1 lg:order-2">
-                  <div className="bg-gradient-to-br from-[#F8F7F5] to-[#F0F0EE] border border-[#E8E8E8] p-3 sm:p-4 lg:p-6 shadow-sm">
-                    <div className="mb-4 sm:mb-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <div className="flex gap-1">
-                            <div className="w-3 h-3 bg-red-400 rounded-full shadow-sm"></div>
-                            <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-sm"></div>
-                            <div className="w-3 h-3 bg-green-400 rounded-full shadow-sm"></div>
-                          </div>
-                          <div className="flex-1 bg-white border border-[#E8E8E8] px-3 py-1.5 text-xs text-[#6B6B6B] font-mono rounded-md shadow-sm">
-                            {websiteData.isPublished ? `https://${websiteData.subdomain}.ivoryschoice.com` : 'Preview Mode'}
-                          </div>
+                  
+                  {/* Preview Content */}
+                  <div className="relative bg-[#F8F7F5] p-4 sm:p-6">
+                    <div className={`mx-auto bg-white shadow-lg transition-all duration-300 ${
+                      previewDevice === 'desktop' ? 'w-full' :
+                      previewDevice === 'tablet' ? 'w-[768px] max-w-full' :
+                      'w-[375px] max-w-full'
+                    }`}>
+                      {isPreviewLoading && (
+                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                          <Loader2 className="w-6 h-6 animate-spin text-[#8B7355]" strokeWidth={1.5} />
                         </div>
-                        
-                        <div className="flex gap-1 sm:gap-2">
-                          <Button
-                            variant={previewDevice === 'desktop' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPreviewDevice('desktop')}
-                            className="h-8 w-8 p-0 rounded-lg transition-all duration-300 hover:scale-105"
-                          >
-                            <Monitor className="w-3.5 h-3.5" strokeWidth={1.5} />
-                          </Button>
-                          <Button
-                            variant={previewDevice === 'tablet' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPreviewDevice('tablet')}
-                            className="h-8 w-8 p-0 rounded-lg transition-all duration-300 hover:scale-105"
-                          >
-                            <Tablet className="w-3.5 h-3.5" strokeWidth={1.5} />
-                          </Button>
-                          <Button
-                            variant={previewDevice === 'mobile' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPreviewDevice('mobile')}
-                            className="h-8 w-8 p-0 rounded-lg transition-all duration-300 hover:scale-105"
-                          >
-                            <Smartphone className="w-3.5 h-3.5" strokeWidth={1.5} />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-center">
-                      <div 
-                        className={`bg-white border border-[#E8E8E8] overflow-hidden transition-all duration-500 relative shadow-lg rounded-lg ${
-                          previewDevice === 'desktop' ? 'w-full h-[500px] sm:h-[600px]' :
-                          previewDevice === 'tablet' ? 'w-full max-w-[600px] h-[500px] sm:h-[600px]' :
-                          'w-full max-w-[320px] h-[500px] sm:h-[600px]'
-                        }`}
-                      >
-                        {isPreviewLoading && (
-                          <div className="absolute inset-0 bg-white flex items-center justify-center z-10 rounded-lg">
-                            <div className="text-center">
-                              <div className="w-12 h-12 border-4 border-[#8B7355]/20 border-t-[#8B7355] rounded-full animate-spin mx-auto mb-4"></div>
-                              <p className="text-sm text-[#6B6B6B] font-light tracking-wide">Loading preview...</p>
-                            </div>
-                          </div>
-                        )}
-                        <iframe
-                          src={websiteData.demoUrl}
-                          className="w-full h-full border-0 rounded-lg"
-                          title="Website Preview"
-                          sandbox="allow-scripts allow-same-origin allow-forms"
-                          loading="lazy"
-                          onLoad={() => setIsPreviewLoading(false)}
-                          onError={() => setIsPreviewLoading(false)}
-                        />
-                      </div>
+                      )}
+                      <iframe
+                        src={websiteData.demoUrl}
+                        title="Website Preview"
+                        className="w-full h-[600px] lg:h-[700px] border-0"
+                        onLoad={() => setIsPreviewLoading(false)}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="grid lg:grid-cols-5 gap-4 lg:gap-6">
-                {/* AI Chat Assistant - Left Side */}
-                <div className="lg:col-span-2 order-2 lg:order-1">
-                  <div className="bg-white border border-[#E8E8E8] h-[600px] lg:h-[700px] flex flex-col shadow-sm">
-                    {/* Chat Header */}
-                    <div className="p-3 sm:p-4 border-b border-[#E8E8E8] bg-gradient-to-r from-[#F8F7F5] to-white">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#8B7355] to-[#6B5B47] rounded-full flex items-center justify-center shadow-sm">
-                          <Bot className="w-5 h-5 text-white" strokeWidth={1.5} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-serif text-base sm:text-lg font-light text-[#1A1A1A] tracking-tight">AI Assistant</h3>
-                          <p className="text-xs text-[#6B6B6B] font-light tracking-wide">Customize your website with prompts & images</p>
-                        </div>
-                        <div className="hidden sm:block">
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Chat Messages */}
-                    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-white to-[#FAFAF9]">
-                      {chatMessages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[85%] sm:max-w-[80%] p-3 sm:p-4 text-sm sm:text-base leading-relaxed transition-all duration-300 ${
-                              message.role === 'user'
-                                ? 'bg-gradient-to-br from-[#8B7355] to-[#6B5B47] text-white shadow-sm'
-                                : 'bg-white text-[#1A1A1A] border border-[#E8E8E8] shadow-sm'
-                            }`}
-                            style={{
-                              borderRadius: message.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px'
-                            }}
-                          >
-                            {message.attachments && message.attachments.length > 0 && (
-                              <div className="mb-3 space-y-2">
-                                {message.attachments.map((attachment, index) => (
-                                  <div key={index} className="relative">
-                                    <img
-                                      src={attachment.url}
-                                      alt={attachment.name}
-                                      className="max-w-full h-auto rounded-lg border border-white/20"
-                                      style={{ maxHeight: '120px' }}
-                                    />
-                                    <p className="text-xs opacity-75 mt-1 font-light">{attachment.name}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <p className="font-light leading-[1.6] tracking-wide">{message.content}</p>
-                            <p className={`text-xs mt-2 opacity-75 font-light ${
-                              message.role === 'user' ? 'text-white' : 'text-[#6B6B6B]'
-                            }`}>
-                              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {isChatLoading && (
-                        <div className="flex justify-start">
-                          <div className="bg-white border border-[#E8E8E8] p-4 shadow-sm" style={{ borderRadius: '18px 18px 18px 4px' }}>
-                            <div className="flex items-center gap-3">
-                              <div className="flex space-x-1">
-                                <div className="w-2 h-2 bg-[#8B7355] rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-[#8B7355] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                <div className="w-2 h-2 bg-[#8B7355] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                              </div>
-                              <span className="text-sm text-[#6B6B6B] font-light">Updating your website...</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div ref={chatEndRef} />
-                    </div>
-
-                    {/* Chat Input */}
-                    <div className="p-3 sm:p-4 border-t border-[#E8E8E8] bg-gradient-to-r from-[#F8F7F5] to-white">
-                      {/* File Attachments Preview */}
-                      {attachedFiles.length > 0 && (
-                        <div className="mb-3 flex flex-wrap gap-2">
-                          {attachedFiles.map((file, index) => (
-                            <div key={index} className="relative bg-white border border-[#E8E8E8] p-2 rounded-lg text-xs shadow-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-[#8B7355]/10 rounded flex items-center justify-center">
-                                  <Image className="w-2.5 h-2.5 text-[#8B7355]" strokeWidth={1.5} />
-                                </div>
-                                <span className="truncate max-w-[80px] font-light">{file.name}</span>
-                                <button
-                                  onClick={() => removeAttachment(index)}
-                                  className="text-red-400 hover:text-red-600 transition-colors p-0.5 rounded-full hover:bg-red-50"
-                                >
-                                  <X className="w-3 h-3" strokeWidth={1.5} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 sm:gap-3">
-                        <div className="flex-1 relative">
-                          <Textarea
-                            value={currentMessage}
-                            onChange={(e) => setCurrentMessage(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            placeholder="Describe changes or upload reference images..."
-                            className="resize-none text-sm border-[#E8E8E8] focus:border-[#8B7355] focus:ring-1 focus:ring-[#8B7355]/20 rounded-lg pr-10 font-light leading-relaxed placeholder:text-[#9B9B9B] transition-all duration-300"
-                            rows={2}
-                          />
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="absolute right-2 top-2 text-[#6B6B6B] hover:text-[#8B7355] transition-all duration-300 p-1 rounded-full hover:bg-[#8B7355]/10"
-                          >
-                            <Paperclip className="w-4 h-4" strokeWidth={1.5} />
-                          </button>
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleFileUpload}
-                            className="hidden"
-                          />
-                        </div>
-                        <Button
-                          onClick={sendChatMessage}
-                          disabled={isChatLoading || (!currentMessage.trim() && attachedFiles.length === 0) || (userCredits !== null && userCredits < 1)}
-                          className="h-auto bg-gradient-to-br from-[#8B7355] to-[#6B5B47] hover:from-[#1A1A1A] hover:to-[#2A2A2A] text-white rounded-lg px-3 py-2 shadow-sm transition-all duration-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Send className="w-4 h-4" strokeWidth={1.5} />
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#E8E8E8]/50">
-                        <p className="text-xs text-[#6B6B6B] font-light tracking-wide">
-                          1 credit per message
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-[#8B7355] rounded-full"></div>
-                          <p className="text-xs text-[#6B6B6B] font-light">
-                            {userCredits || 0} credits
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Preview Not Available - Right Side */}
-                <div className="lg:col-span-3 order-1 lg:order-2">
-                  <div className="bg-gradient-to-br from-[#F8F7F5] to-[#F0F0EE] border border-[#E8E8E8] p-6 sm:p-8 text-center shadow-sm rounded-lg">
-                    <div className="w-16 h-16 mx-auto mb-6 bg-white border border-[#E8E8E8] flex items-center justify-center rounded-lg shadow-sm">
-                      <Eye className="w-6 h-6 text-[#6B6B6B]" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-3 tracking-tight">Preview Not Available</h3>
-                    <p className="text-sm sm:text-base text-[#6B6B6B] font-light mb-6 leading-relaxed tracking-wide max-w-md mx-auto">
-                      Your website is being generated. The preview will appear here once it's ready.
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.location.reload()}
-                      className="h-10 sm:h-12 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-lg text-xs tracking-[0.2em] uppercase font-light px-6 transition-all duration-300 hover:shadow-sm"
-                    >
-                      Refresh Page
-                    </Button>
-                  </div>
-                </div>
+              <div className="text-center py-12">
+                <p className="text-[#6B6B6B] font-light">No preview available</p>
               </div>
             )}
           </div>
@@ -817,447 +206,108 @@ export function WebsiteManagementDashboard({
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-white to-[#F8F7F5] py-12 sm:py-16 lg:py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center">
-              <Globe className="w-7 h-7 sm:w-8 sm:h-8 text-[#8B7355]" strokeWidth={1} />
-            </div>
-            <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Website Management</p>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] mb-4 sm:mb-6 tracking-tight leading-[1.1]">
-              Your Professional Website
-            </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-[#6B6B6B] font-light max-w-2xl mx-auto leading-[1.7] tracking-wide">
-              Manage, customize, and optimize your online presence
-            </p>
+      <div className="bg-gradient-to-b from-white to-[#F8F7F5] py-16 sm:py-20 lg:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center shadow-sm">
+            <Globe className="w-7 h-7 sm:w-8 sm:h-8 text-[#8B7355]" strokeWidth={1} />
           </div>
+          <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] mb-3 sm:mb-4 font-light">Website Management</p>
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-[#1A1A1A] mb-4 sm:mb-6 tracking-tight leading-[1.1]">
+            Your Professional Website
+          </h1>
+          <p className="text-base sm:text-lg lg:text-xl text-[#6B6B6B] font-light max-w-2xl mx-auto leading-[1.7] tracking-wide">
+            Manage and optimize your online presence
+          </p>
+        </div>
+      </div>
 
-          {/* Website Status Card */}
-          <div className="max-w-4xl mx-auto border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 bg-white">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-8">
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${websiteData.isPublished ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                  <span className="text-[11px] tracking-[0.25em] uppercase font-light text-[#6B6B6B]">
-                    {websiteData.isPublished ? 'Live' : 'Draft'}
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
+        <div className="space-y-8 sm:space-y-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* Quick Stats */}
+            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <BarChart3 className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
+                <span className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Analytics</span>
+              </div>
+              <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                Website Stats
+              </h3>
+              <p className="text-sm text-[#6B6B6B] font-light leading-[1.7] tracking-wide mb-4">
+                Monitor your website performance
+              </p>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-[#6B6B6B] font-light">Status</span>
+                  <span className={`text-xs font-light ${websiteData.isPublished ? 'text-green-600' : 'text-orange-600'}`}>
+                    {websiteData.isPublished ? 'Published' : 'Draft'}
                   </span>
                 </div>
-                <div>
-                  <p className="text-sm text-[#6B6B6B] font-light mb-1">Your website address</p>
-                  <p className="font-mono text-lg sm:text-xl text-[#1A1A1A] font-light mb-2">{websiteData.fullUrl}</p>
-                  {websiteData.isPublished ? (
-                    <p className="text-xs text-green-600 font-light">
-                      ✓ Live and accessible to visitors
-                    </p>
-                  ) : (
-                    <p className="text-xs text-yellow-600 font-light">
-                      ⚠ Not published - only you can see the preview
-                    </p>
-                  )}
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-[#6B6B6B] font-light">Domain</span>
+                  <span className="text-xs text-[#1A1A1A] font-light">{websiteData.subdomain}.ivoryschoice.com</span>
                 </div>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                {websiteData.demoUrl ? (
-                  <Button 
-                    variant="outline" 
-                    asChild
-                    className="h-12 sm:h-14 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-none text-[11px] tracking-[0.25em] uppercase font-light px-6 sm:px-8 transition-all duration-700"
-                  >
-                    <a 
-                      href={websiteData.isPublished ? `https://${websiteData.subdomain}.ivoryschoice.com` : websiteData.demoUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      <Eye className="w-4 h-4 mr-2" strokeWidth={1} />
-                      {websiteData.isPublished ? 'View Live Site' : 'Preview'}
-                      <ExternalLink className="w-3 h-3 ml-2" strokeWidth={1} />
-                    </a>
-                  </Button>
-                ) : (
-                  <div className="h-12 sm:h-14 border border-[#E8E8E8] bg-gray-50 text-gray-400 rounded-none text-[11px] tracking-[0.25em] uppercase font-light px-6 sm:px-8 flex items-center justify-center">
-                    <Eye className="w-4 h-4 mr-2" strokeWidth={1} />
-                    Preview Unavailable
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-3 px-4 py-3 bg-[#F8F7F5] border border-[#E8E8E8]">
+            </div>
+
+            {/* Quick Actions */}
+            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Globe className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
+                <span className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Quick Actions</span>
+              </div>
+              <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                Manage Site
+              </h3>
+              <p className="text-sm text-[#6B6B6B] font-light leading-[1.7] tracking-wide mb-4">
+                Essential website controls
+              </p>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => window.open(websiteData.fullUrl, '_blank')}
+                  variant="outline"
+                  className="w-full h-10 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-none text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-700"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" strokeWidth={1} />
+                  Visit Website
+                </Button>
+                <div className="flex items-center justify-between p-3 bg-[#F8F7F5] border border-[#E8E8E8]">
+                  <span className="text-xs text-[#6B6B6B] font-light">Published</span>
                   <Switch
                     checked={websiteData.isPublished}
                     onCheckedChange={handlePublishToggle}
+                    className="data-[state=checked]:bg-[#8B7355]"
                   />
-                  <span className="text-sm font-light text-[#1A1A1A]">Publish</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Website Info */}
+            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Eye className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
+                <span className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Website Info</span>
+              </div>
+              <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
+                Site Details
+              </h3>
+              <p className="text-sm text-[#6B6B6B] font-light leading-[1.7] tracking-wide mb-4">
+                Your website information
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-xs text-[#6B6B6B] font-light block mb-1">URL</span>
+                  <p className="text-xs text-[#1A1A1A] font-light break-all">{websiteData.fullUrl}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-[#6B6B6B] font-light block mb-1">Sections</span>
+                  <p className="text-xs text-[#1A1A1A] font-light">{websiteData.sections?.length || 0} sections</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Credits Section */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12">
-        {userCredits !== null && userCredits < 1 && (
-          <Alert className="border-red-200 bg-red-50 mb-6">
-            <CreditCard className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              <strong>Insufficient Credits:</strong> Website customization requires 1 credit. You have {userCredits} credits remaining.
-              <Button variant="link" className="p-0 h-auto text-red-800 underline ml-1">
-                Buy credits
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {userCredits !== null && (
-          <div className="flex items-center justify-between p-4 sm:p-5 bg-blue-50 border border-blue-200">
-            <div className="flex items-center space-x-3">
-              <CreditCard className="h-5 w-5 text-blue-600" />
-              <span className="text-sm sm:text-base font-medium text-blue-800">
-                Credits: {userCredits} • Website customization costs 1 credit
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12">
-        <div className="border-b border-[#E8E8E8]">
-          <div className="flex overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 sm:px-8 py-4 sm:py-5 text-[11px] tracking-[0.25em] uppercase font-light transition-all duration-500 whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'text-[#1A1A1A] border-b-2 border-[#8B7355]'
-                      : 'text-[#6B6B6B] hover:text-[#1A1A1A]'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" strokeWidth={1} />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-8 sm:space-y-12">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {/* Quick Stats */}
-              <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <BarChart3 className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
-                  <span className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Analytics</span>
-                </div>
-                <p className="text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-2">0</p>
-                <p className="text-sm text-[#6B6B6B] font-light">Total page views</p>
-              </div>
-
-              {/* Customizations */}
-              <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <Edit3 className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
-                  <span className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Updates</span>
-                </div>
-                <p className="text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-2">{websiteData.customizations?.length || 0}</p>
-                <p className="text-sm text-[#6B6B6B] font-light">AI customizations applied</p>
-              </div>
-
-              {/* Status */}
-              <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 sm:col-span-2 lg:col-span-1">
-                <div className="flex items-center gap-3 mb-4">
-                  <Globe className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
-                  <span className="text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] font-light">Status</span>
-                </div>
-                <p className="text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-2">
-                  {websiteData.isPublished ? 'Live' : 'Draft'}
-                </p>
-                <p className="text-sm text-[#6B6B6B] font-light">
-                  {websiteData.isPublished ? 'Visible to everyone' : 'Only visible to you'}
-                </p>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            {websiteData.customizations && websiteData.customizations.length > 0 && (
-              <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10">
-                <div className="mb-6 sm:mb-8">
-                  <h2 className="font-serif text-2xl sm:text-3xl font-light text-[#1A1A1A] mb-3 tracking-tight">Recent Updates</h2>
-                  <p className="text-base text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                    Your latest website customizations
-                  </p>
-                </div>
-                
-                <div className="space-y-4 sm:space-y-6">
-                  {websiteData.customizations.slice(-3).map((customization, index) => (
-                    <div key={index} className="flex gap-4 p-4 sm:p-6 bg-[#F8F7F5] border border-[#E8E8E8]">
-                      <div className="w-2 h-2 bg-[#8B7355] rounded-full mt-2 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm sm:text-base text-[#1A1A1A] font-light leading-[1.7] mb-2">{customization.prompt}</p>
-                        <p className="text-xs text-[#6B6B6B] font-light tracking-wide">
-                          {new Date(customization.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Customize Tab */}
-        {activeTab === 'customize' && (
-          <div className="space-y-8 sm:space-y-12">
-            {/* Version History Navigation */}
-            {chatHistory && chatHistory.versions && chatHistory.versions.length > 1 && (
-              <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8">
-                <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <History className="w-5 h-5 text-[#8B7355]" strokeWidth={1} />
-                    <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Version History</p>
-                  </div>
-                  <h3 className="font-serif text-xl sm:text-2xl font-light text-[#1A1A1A] mb-2 tracking-tight">
-                    Navigate Versions
-                  </h3>
-                  <p className="text-sm text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                    Go back and forth through your website versions
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <Button
-                    onClick={() => handleNavigateVersion(undefined, 'undo')}
-                    disabled={isNavigating || !chatHistory.versions || chatHistory.versions.length < 2}
-                    variant="outline"
-                    className="h-10 sm:h-12 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-none text-[11px] tracking-[0.25em] uppercase font-light px-4 sm:px-6 transition-all duration-700"
-                  >
-                    <Undo2 className="w-4 h-4 mr-2" strokeWidth={1} />
-                    Undo
-                  </Button>
-                  
-                  <Button
-                    onClick={() => handleNavigateVersion(undefined, 'redo')}
-                    disabled={isNavigating}
-                    variant="outline"
-                    className="h-10 sm:h-12 border-[#E8E8E8] hover:border-[#1A1A1A] hover:bg-transparent text-[#1A1A1A] rounded-none text-[11px] tracking-[0.25em] uppercase font-light px-4 sm:px-6 transition-all duration-700"
-                  >
-                    <Redo2 className="w-4 h-4 mr-2" strokeWidth={1} />
-                    Redo
-                  </Button>
-
-                  <div className="flex-1 text-center">
-                    <p className="text-xs text-[#6B6B6B] font-light">
-                      Version {chatHistory.versions.length} of {chatHistory.versions.length}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Version Timeline */}
-                {chatHistory.versions.length > 1 && (
-                  <div className="mt-6 p-4 bg-[#F8F7F5] border border-[#E8E8E8]">
-                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                      {chatHistory.versions.map((version: any, index: number) => (
-                        <button
-                          key={version.id}
-                          onClick={() => handleNavigateVersion(version.id)}
-                          disabled={isNavigating}
-                          className={`flex-shrink-0 w-8 h-8 rounded-full border-2 transition-all duration-300 ${
-                            index === chatHistory.versions.length - 1
-                              ? 'bg-[#8B7355] border-[#8B7355] text-white'
-                              : 'bg-white border-[#E8E8E8] text-[#6B6B6B] hover:border-[#8B7355]'
-                          }`}
-                        >
-                          {index + 1}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* AI Customization */}
-            <div className="max-w-4xl mx-auto">
-              <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-8 sm:p-10 lg:p-12">
-                <div className="mb-8 sm:mb-10">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Sparkles className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
-                    <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">AI Customization</p>
-                  </div>
-                  <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
-                    Customize Your Website
-                  </h2>
-                  <p className="text-base sm:text-lg text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                    Describe the changes you want to make and our AI will update your website
-                  </p>
-                </div>
-
-                <div className="space-y-6 sm:space-y-8">
-                  <div>
-                    <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 sm:mb-4 font-light">
-                      What would you like to change? <span className="text-red-500">*</span>
-                    </Label>
-                    <Textarea
-                      placeholder="e.g., Change the hero section background to a soft pink color, add a testimonials section, make the booking button more prominent, update the color scheme to be more modern..."
-                      value={customizationPrompt}
-                      onChange={(e) => setCustomizationPrompt(e.target.value)}
-                      rows={4}
-                      className={`text-sm sm:text-base rounded-none focus:ring-0 resize-none font-light leading-[1.7] tracking-wide transition-all duration-300 ${
-                        customizationPrompt?.trim() 
-                          ? 'border-[#E8E8E8] focus:border-[#8B7355]' 
-                          : 'border-red-200 focus:border-red-400'
-                      }`}
-                      required
-                    />
-                    {!customizationPrompt?.trim() && (
-                      <p className="text-xs text-red-500 mt-2 font-light">
-                        Please describe your customization request
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex justify-end pt-6">
-                    <Button 
-                      onClick={handleCustomization} 
-                      disabled={isCustomizing || !customizationPrompt.trim() || (userCredits !== null && userCredits < 1)}
-                      className="h-12 sm:h-14 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 px-8 sm:px-10 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98] min-w-[200px]"
-                    >
-                      {isCustomizing ? (
-                        <>
-                          <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                          Updating with AI...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" strokeWidth={1} />
-                          Update Website
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {activeTab === 'settings' && (
-          <div className="space-y-8 sm:space-y-12">
-            {/* SEO Settings */}
-            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-8 sm:p-10 lg:p-12">
-              <div className="mb-8 sm:mb-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <Search className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
-                  <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Search Optimization</p>
-                </div>
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
-                  SEO Settings
-                </h2>
-                <p className="text-base sm:text-lg text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                  Optimize your website for search engines
-                </p>
-              </div>
-
-              <div className="space-y-6 sm:space-y-8">
-                <div>
-                  <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 sm:mb-4 font-light">
-                    Page Title
-                  </Label>
-                  <Input
-                    value={seoSettings.title || ''}
-                    onChange={(e) => setSeoSettings(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Your Business Name - Professional Nail Services"
-                    className="h-12 sm:h-14 text-base sm:text-lg border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
-                  />
-                </div>
-                
-                <div>
-                  <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 sm:mb-4 font-light">
-                    Meta Description
-                  </Label>
-                  <Textarea
-                    value={seoSettings.description || ''}
-                    onChange={(e) => setSeoSettings(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Book professional nail services with expert nail technician..."
-                    rows={3}
-                    className="text-sm sm:text-base rounded-none focus:ring-0 resize-none font-light leading-[1.7] tracking-wide border-[#E8E8E8] focus:border-[#8B7355] transition-all duration-300"
-                  />
-                </div>
-                
-                <div>
-                  <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 sm:mb-4 font-light">
-                    Keywords
-                  </Label>
-                  <Input
-                    value={seoSettings.keywords?.join(', ') || ''}
-                    onChange={(e) => setSeoSettings(prev => ({ 
-                      ...prev, 
-                      keywords: e.target.value.split(',').map(k => k.trim()).filter(Boolean)
-                    }))}
-                    placeholder="nail tech, nail art, manicure, pedicure"
-                    className="h-12 sm:h-14 text-base sm:text-lg border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Domain Settings */}
-            <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-8 sm:p-10 lg:p-12">
-              <div className="mb-8 sm:mb-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <Globe className="w-6 h-6 text-[#8B7355]" strokeWidth={1} />
-                  <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#8B7355] font-light">Domain Management</p>
-                </div>
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] mb-3 tracking-tight leading-[1.1]">
-                  Domain Settings
-                </h2>
-                <p className="text-base sm:text-lg text-[#6B6B6B] font-light leading-[1.7] tracking-wide">
-                  Manage your website domain and URL
-                </p>
-              </div>
-
-              <div className="space-y-6 sm:space-y-8">
-                <div>
-                  <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 sm:mb-4 font-light">
-                    Current Domain
-                  </Label>
-                  <div className="p-4 sm:p-5 bg-[#F8F7F5] border border-[#E8E8E8]">
-                    <p className="font-mono text-sm sm:text-base text-[#1A1A1A] font-light">{websiteData.fullUrl}</p>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label className="block text-[11px] tracking-[0.25em] uppercase text-[#6B6B6B] mb-3 sm:mb-4 font-light">
-                    Custom Domain (Optional)
-                  </Label>
-                  <Input
-                    placeholder="www.yourbusiness.com"
-                    value={websiteData.customDomain || ''}
-                    disabled
-                    className="h-12 sm:h-14 text-base sm:text-lg border-[#E8E8E8] rounded-none focus:border-[#8B7355] focus:ring-0 font-light transition-all duration-300 bg-[#F8F7F5]"
-                  />
-                  <p className="text-xs text-[#6B6B6B] mt-3 font-light leading-relaxed">
-                    Custom domains are available with Pro plan
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -217,7 +217,7 @@ export default function ExplorePage() {
                 {techs.map((tech) => (
                   <div
                     key={tech.id}
-                    onClick={() => router.push(`/tech/${tech.userId}`)}
+                    onClick={() => router.push(`/tech/${tech.id}`)}
                     className="bg-white border border-[#E8E8E8] p-6 cursor-pointer hover:border-[#8B7355] transition-all"
                   >
                     <h3 className="text-lg font-light text-[#1A1A1A] mb-2">

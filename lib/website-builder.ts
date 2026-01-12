@@ -55,7 +55,8 @@ export class WebsiteBuilder {
     techProfileData: TechProfileData, 
     preferences: WebsitePreferences,
     subdomain: string,
-    userId: number
+    userId: number,
+    abortSignal?: AbortSignal
   ) {
     try {
       console.log('Starting website creation for user:', userId);
@@ -88,9 +89,19 @@ export class WebsiteBuilder {
         throw new Error('Subdomain already taken');
       }
 
+      // Check if request was aborted before starting expensive operations
+      if (abortSignal?.aborted) {
+        throw new Error('Request was cancelled');
+      }
+
       // Generate the website prompt
       const prompt = this.generateWebsitePrompt(techProfileData, preferences);
       console.log('Generated prompt length:', prompt.length);
+
+      // Check if request was aborted before V0 API call
+      if (abortSignal?.aborted) {
+        throw new Error('Request was cancelled');
+      }
 
       // Verify V0 API key before making request
       if (!process.env.V0_API_KEY) {
@@ -102,21 +113,52 @@ export class WebsiteBuilder {
       // Create v0 client dynamically
       const v0Client = getV0Client();
       
-      // Create v0 chat with timeout handling
+      // Create v0 chat with timeout and cancellation handling
       console.log('Sending request to V0 API...');
       const startTime = Date.now();
       
-      // Create a promise that rejects after 90 seconds
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('V0 API request timed out after 90 seconds')), 90000);
-      });
+      // Create a combined abort signal that handles both timeout and user cancellation
+      const combinedController = new AbortController();
+      
+      // Set up timeout
+      const timeoutId = setTimeout(() => {
+        combinedController.abort();
+      }, 180000); // 3 minute timeout
+      
+      // Listen for user cancellation
+      if (abortSignal) {
+        abortSignal.addEventListener('abort', () => {
+          combinedController.abort();
+        });
+      }
       
       const chatPromise = v0Client.chats.create({
         message: prompt,
       });
       
-      // Race between the API call and timeout
-      const chat = await Promise.race([chatPromise, timeoutPromise]);
+      // Race between the API call and abort signal
+      let chat;
+      try {
+        chat = await Promise.race([
+          chatPromise,
+          new Promise<never>((_, reject) => {
+            combinedController.signal.addEventListener('abort', () => {
+              reject(new Error('Request was cancelled or timed out'));
+            });
+          })
+        ]);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        
+        // Check if it was user cancellation vs timeout
+        if (abortSignal?.aborted) {
+          throw new Error('Request was cancelled by user');
+        } else {
+          throw new Error('V0 API request timed out after 3 minutes. The service may be experiencing high demand.');
+        }
+      }
+      
+      clearTimeout(timeoutId);
 
       const endTime = Date.now();
       console.log(`V0 API call completed in ${endTime - startTime}ms`);
@@ -127,6 +169,11 @@ export class WebsiteBuilder {
       }
 
       console.log('V0 chat created successfully:', chat.id);
+
+      // Check if request was aborted before charging credits
+      if (abortSignal?.aborted) {
+        throw new Error('Request was cancelled by user');
+      }
 
       // Get demo URL - handle both old and new API response formats
       const demoUrl = chat.latestVersion?.demoUrl || '';
@@ -190,6 +237,14 @@ export class WebsiteBuilder {
     } catch (error) {
       console.error('Error creating tech website:', error);
       
+      // Don't charge credits if the request was cancelled by user
+      if (error instanceof Error && (
+        error.message.includes('cancelled by user') || 
+        error.message.includes('Request was cancelled')
+      )) {
+        throw new Error('Website creation was cancelled. No credits were charged.');
+      }
+      
       // Provide more specific error messages
       if (error instanceof Error) {
         if (error.message.includes('401') || error.message.includes('Unauthorized')) {
@@ -199,7 +254,10 @@ export class WebsiteBuilder {
           throw new Error('V0 API endpoint not found. Please verify the v0-sdk version and API configuration.');
         }
         if (error.message.includes('rate limit') || error.message.includes('429')) {
-          throw new Error('V0 API rate limit exceeded. Please try again in a few minutes.');
+          throw new Error('V0 API rate limit exceeded. The service is experiencing high demand. Please try again in a few minutes.');
+        }
+        if (error.message.includes('timed out')) {
+          throw new Error('Website creation is taking longer than expected due to high demand. Please try again in a few minutes.');
         }
       }
       
@@ -813,8 +871,19 @@ Required Sections:
    - Certifications/credentials
    - Professional photo placeholder
 
-5. Contact & Booking:
-   - Contact form optimized for mobile
+5. Booking Section (CRITICAL):
+   - Dedicated booking section with the following EXACT HTML code:
+   
+   <div id="ivory-booking-widget" data-tech-id="${techProfile.id}"></div>
+   <script src="https://ivoryschoice.com/booking-widget.js"></script>
+   
+   - This widget provides real-time availability and booking functionality
+   - Style the container to match the website design
+   - Add a heading like "Book Your Appointment" above the widget
+   - Ensure the widget is prominently placed and mobile-optimized
+
+6. Contact & Information:
+   - Contact form for general inquiries (separate from booking)
    - Business hours
    - Location map placeholder
    - Social media links
@@ -829,13 +898,22 @@ Technical Requirements:
 - Touch-friendly buttons and interactions
 - Accessibility compliant (WCAG 2.1)
 - Optimized for mobile performance
+- MUST include the booking widget HTML exactly as specified above
 
 Color Scheme: Use modern, professional nail salon appropriate colors with clean aesthetics
+
+CRITICAL BOOKING INTEGRATION:
+- The booking widget (id="ivory-booking-widget" data-tech-id="${techProfile.id}") MUST be included
+- This connects to the live booking system with real availability
+- All "Book Now" buttons should scroll to or link to this booking section
+- The widget handles service selection, scheduling, and customer information
+- Style the booking section to be prominent and trustworthy
 
 CRITICAL: This website MUST be optimized for mobile devices first. Ensure all elements are touch-friendly, text is readable on small screens, and the layout works perfectly on mobile phones.
 
 Make it conversion-optimized for booking appointments with clear CTAs throughout.
 Focus on building trust and showcasing professionalism.
+The booking widget is the primary conversion tool - make it prominent and accessible.
     `.trim();
   }
 
