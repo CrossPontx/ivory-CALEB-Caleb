@@ -7,6 +7,7 @@ export const requestStatusEnum = pgEnum('request_status', ['pending', 'approved'
 export const authProviderEnum = pgEnum('auth_provider', ['email', 'google', 'apple']);
 export const bookingStatusEnum = pgEnum('booking_status', ['pending', 'confirmed', 'cancelled', 'completed', 'no_show']);
 export const dayOfWeekEnum = pgEnum('day_of_week', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+export const websiteSectionTypeEnum = pgEnum('website_section_type', ['hero', 'services', 'gallery', 'booking', 'contact', 'about', 'reviews']);
 
 // Users table - both clients and nail techs
 export const users: any = pgTable('users', {
@@ -118,7 +119,7 @@ export const bookings = pgTable('bookings', {
   clientNotes: text('client_notes'),
   techNotes: text('tech_notes'),
   servicePrice: decimal('service_price', { precision: 10, scale: 2 }).notNull(), // Original service price
-  serviceFee: decimal('service_fee', { precision: 10, scale: 2 }).notNull(), // 12.5% platform fee
+  serviceFee: decimal('service_fee', { precision: 10, scale: 2 }).notNull(), // 15% platform fee
   totalPrice: decimal('total_price', { precision: 10, scale: 2 }).notNull(), // servicePrice + serviceFee
   paymentStatus: varchar('payment_status', { length: 50 }).default('pending'), // pending, paid, refunded
   stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
@@ -380,6 +381,10 @@ export const techProfilesRelations = relations(techProfiles, ({ one, many }) => 
   availability: many(techAvailability),
   timeOff: many(techTimeOff),
   bookings: many(bookings),
+  website: one(techWebsites, {
+    fields: [techProfiles.id],
+    references: [techWebsites.techProfileId],
+  }),
 }));
 
 export const servicesRelations = relations(services, ({ one, many }) => ({
@@ -635,6 +640,46 @@ export const bookingMessages = pgTable('booking_messages', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Website Builder Tables
+export const techWebsites = pgTable('tech_websites', {
+  id: serial('id').primaryKey(),
+  techProfileId: integer('tech_profile_id').references(() => techProfiles.id).notNull(),
+  subdomain: varchar('subdomain', { length: 100 }).notNull().unique(), // yourname.ivoryschoice.com
+  customDomain: varchar('custom_domain', { length: 255 }), // optional custom domain
+  v0ChatId: varchar('v0_chat_id', { length: 255 }).notNull(), // v0 chat session ID
+  v0ProjectId: varchar('v0_project_id', { length: 255 }), // v0 project ID for deployments
+  demoUrl: text('demo_url').notNull(), // v0 demo URL
+  deploymentUrl: text('deployment_url'), // production deployment URL
+  isPublished: boolean('is_published').default(false),
+  sslEnabled: boolean('ssl_enabled').default(true),
+  themeSettings: jsonb('theme_settings'), // colors, fonts, layout preferences
+  seoSettings: jsonb('seo_settings'), // meta tags, descriptions
+  analyticsEnabled: boolean('analytics_enabled').default(false),
+  googleAnalyticsId: varchar('google_analytics_id', { length: 100 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const websiteSections = pgTable('website_sections', {
+  id: serial('id').primaryKey(),
+  websiteId: integer('website_id').references(() => techWebsites.id).notNull(),
+  sectionType: websiteSectionTypeEnum('section_type').notNull(),
+  content: jsonb('content').notNull(), // section-specific content
+  isEnabled: boolean('is_enabled').default(true),
+  orderIndex: integer('order_index').default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const websiteCustomizations = pgTable('website_customizations', {
+  id: serial('id').primaryKey(),
+  websiteId: integer('website_id').references(() => techWebsites.id).notNull(),
+  v0MessageId: varchar('v0_message_id', { length: 255 }).notNull(),
+  prompt: text('prompt').notNull(),
+  changesApplied: jsonb('changes_applied'), // what was changed
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 export const bookingMessagesRelations = relations(bookingMessages, ({ one }) => ({
   booking: one(bookings, {
     fields: [bookingMessages.bookingId],
@@ -643,5 +688,29 @@ export const bookingMessagesRelations = relations(bookingMessages, ({ one }) => 
   sender: one(users, {
     fields: [bookingMessages.senderId],
     references: [users.id],
+  }),
+}));
+
+// Website Builder Relations
+export const techWebsitesRelations = relations(techWebsites, ({ one, many }) => ({
+  techProfile: one(techProfiles, {
+    fields: [techWebsites.techProfileId],
+    references: [techProfiles.id],
+  }),
+  sections: many(websiteSections),
+  customizations: many(websiteCustomizations),
+}));
+
+export const websiteSectionsRelations = relations(websiteSections, ({ one }) => ({
+  website: one(techWebsites, {
+    fields: [websiteSections.websiteId],
+    references: [techWebsites.id],
+  }),
+}));
+
+export const websiteCustomizationsRelations = relations(websiteCustomizations, ({ one }) => ({
+  website: one(techWebsites, {
+    fields: [websiteCustomizations.websiteId],
+    references: [techWebsites.id],
   }),
 }));

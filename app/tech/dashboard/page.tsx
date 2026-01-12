@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Check, MessageCircle, Plus, Sparkles, Clock, CheckCircle2, Coins, Calendar, User, Eye } from "lucide-react"
+import { Check, MessageCircle, Plus, Sparkles, Clock, CheckCircle2, Coins, Calendar, User, Eye, Globe } from "lucide-react"
 import Image from "next/image"
 import { BottomNav } from "@/components/bottom-nav"
 import { CreditsDisplay } from "@/components/credits-display"
@@ -165,6 +165,36 @@ export default function TechDashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-5 sm:py-8 lg:py-10 pb-safe">
+        
+        {/* Website Builder CTA */}
+        <Card className="mb-6 sm:mb-8 border border-[#E8E8E8] bg-gradient-to-r from-[#F8F7F5] to-white shadow-sm rounded-none overflow-hidden">
+          <CardContent className="p-5 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#8B7355] flex items-center justify-center rounded-none flex-shrink-0">
+                  <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={1} />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg sm:text-xl font-light text-[#1A1A1A] mb-2 tracking-[-0.01em]">
+                    Create Your Professional Website
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#6B6B6B] font-light leading-relaxed tracking-wide max-w-lg">
+                    Build a stunning website for your nail tech business in minutes with AI. Get bookings 24/7 with integrated scheduling.
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => router.push('/tech/website')}
+                size="sm"
+                className="h-10 sm:h-11 px-5 sm:px-6 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 whitespace-nowrap text-[10px] tracking-[0.2em] uppercase font-light hover:scale-[1.02] active:scale-[0.98] rounded-none"
+              >
+                <Globe className="w-3.5 h-3.5 mr-1.5" strokeWidth={1} />
+                Build Website
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-5 sm:mb-8 grid grid-cols-4 h-auto bg-white border border-[#E8E8E8] p-0 rounded-none shadow-sm">
 

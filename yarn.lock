@@ -6703,6 +6703,11 @@ uuid@^7.0.3:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-7.0.3.tgz#c5c9f2c8cf25dc0a372c4df1441c41f5bd0c680b"
   integrity sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==
 
+v0-sdk@^0.15.3:
+  version "0.15.3"
+  resolved "https://registry.yarnpkg.com/v0-sdk/-/v0-sdk-0.15.3.tgz#5593ea6ed407a140cd0ab9f0c15e314b8cc612ed"
+  integrity sha512-5bjDWTt9OTdOWaT4iH0wtyi9Cji8R4woV+fYxsz1sfRFvi9GzZ0t1LwwIgphatSXhT2n9VjuTWeYjn3EVz0YKA==
+
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz#6336e8d71965cb3d35a1bbb7868445a7c05264bf"
