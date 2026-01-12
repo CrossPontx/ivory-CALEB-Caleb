@@ -592,7 +592,7 @@ export default function TechProfileSetupPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         <div className="space-y-8 sm:space-y-12 lg:space-y-16">
           {/* Business Info */}
-          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10">
+          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white to-[#FAFAF8]">
             <div className="mb-6 sm:mb-8 lg:mb-10">
               <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Section I</p>
               <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight leading-[1.1]">Business Information</h2>
@@ -773,7 +773,7 @@ export default function TechProfileSetupPage() {
           </div>
 
           {/* Services & Prices */}
-          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10">
+          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white to-[#FAFAF8]">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-8 lg:mb-10 gap-4">
               <div className="flex-1">
                 <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Section II</p>
@@ -794,8 +794,8 @@ export default function TechProfileSetupPage() {
 
             <div className="space-y-5 sm:space-y-6">
               {services.length === 0 ? (
-                <div className="text-center py-12 sm:py-16 lg:py-20">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-[#F8F7F5] flex items-center justify-center">
+                <div className="text-center py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-[#FAFAF8] to-white border border-[#E8E8E8]">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 border border-[#E8E8E8] bg-white flex items-center justify-center">
                     <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-[#8B7355]" strokeWidth={1} />
                   </div>
                   <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-light text-[#1A1A1A] mb-3 sm:mb-4 tracking-tight">
@@ -806,15 +806,15 @@ export default function TechProfileSetupPage() {
                   </p>
                   <Button 
                     onClick={addService}
-                    className="h-12 sm:h-14 bg-[#8B7355] text-white hover:bg-[#1A1A1A] transition-all duration-700 px-6 sm:px-8 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
+                    className="h-12 sm:h-14 bg-[#1A1A1A] text-white hover:bg-[#8B7355] transition-all duration-700 px-8 sm:px-12 text-[11px] tracking-[0.25em] uppercase rounded-none font-light hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <Plus className="w-4 h-4 mr-2" strokeWidth={1} />
+                    <Plus className="w-4 h-4 mr-3" strokeWidth={1} />
                     Add Your First Service
                   </Button>
                 </div>
               ) : (
                 services.map((service, index) => (
-                  <div key={service.id} className="border border-[#E8E8E8] p-5 sm:p-6 lg:p-7 group hover:border-[#8B7355]/30 transition-all duration-700">
+                  <div key={service.id} className="border border-[#E8E8E8] p-5 sm:p-6 lg:p-7 group hover:border-[#8B7355]/30 transition-all duration-700 bg-gradient-to-br from-white to-[#FAFAF8]">
                     <div className="flex items-start justify-between mb-4 sm:mb-5">
                       <p className="text-[10px] tracking-[0.25em] uppercase text-[#8B7355] font-light">Service {index + 1}</p>
                       <Button 
@@ -893,7 +893,7 @@ export default function TechProfileSetupPage() {
           </div>
 
           {/* Portfolio Gallery */}
-          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10">
+          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white to-[#FAFAF8]">
             <div className="mb-6 sm:mb-8 lg:mb-10">
               <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Section III</p>
               <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-2 leading-[1.1]">
@@ -910,8 +910,8 @@ export default function TechProfileSetupPage() {
             />
           </div>
 
-          {/* Cancellation & No-Show Policy */}
-          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10">
+          {/* Availability & Schedule */}
+          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white to-[#FAFAF8]">
             <div className="mb-6 sm:mb-8 lg:mb-10">
               <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Section IV</p>
               <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-2 leading-[1.1]">
@@ -941,8 +941,8 @@ export default function TechProfileSetupPage() {
             </div>
           </div>
 
-          {/* Cancellation & No-Show Policy */}
-          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10">
+          {/* Cancellation Policy */}
+          <div className="border border-[#E8E8E8] hover:border-[#8B7355]/30 transition-all duration-700 p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white to-[#FAFAF8]">
             <div className="mb-6 sm:mb-8 lg:mb-10">
               <p className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#8B7355] mb-2 sm:mb-3 font-light">Section V</p>
               <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light text-[#1A1A1A] tracking-tight mb-2 leading-[1.1]">

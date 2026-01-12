@@ -1,7 +1,18 @@
-import { v0 } from 'v0-sdk';
+import { createClient } from 'v0-sdk';
 import { db } from '@/db';
 import { techProfiles, techWebsites, websiteSections, websiteCustomizations, services, portfolioImages, users, creditTransactions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+
+// Create V0 client with explicit API key - only if API key is available
+let v0Client: ReturnType<typeof createClient> | null = null;
+
+if (process.env.V0_API_KEY) {
+  v0Client = createClient({
+    apiKey: process.env.V0_API_KEY
+  });
+} else {
+  console.error('V0_API_KEY environment variable is not set');
+}
 
 export interface WebsitePreferences {
   customPrompt?: string;
@@ -45,6 +56,9 @@ export class WebsiteBuilder {
     userId: number
   ) {
     try {
+      console.log('Starting website creation for user:', userId);
+      console.log('V0_API_KEY available:', !!process.env.V0_API_KEY);
+      
       // Get user and check credits
       const [user] = await db
         .select()
@@ -74,16 +88,33 @@ export class WebsiteBuilder {
 
       // Generate the website prompt
       const prompt = this.generateWebsitePrompt(techProfileData, preferences);
+      console.log('Generated prompt length:', prompt.length);
 
+      // Verify V0 API key before making request
+      if (!process.env.V0_API_KEY || !v0Client) {
+        throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
+      }
+
+      console.log('Creating v0 chat...');
+      
       // Create v0 chat - for now, images are referenced in the prompt
       // TODO: Investigate proper way to pass images to v0 SDK
-      const chat = await v0.chats.create({
+      const chat = await v0Client.chats.create({
         message: prompt,
       });
 
       // Type guard to ensure we have the correct response type
-      if (!('id' in chat) || !('demo' in chat)) {
-        throw new Error('Invalid response from v0 API');
+      if (!('id' in chat)) {
+        throw new Error('Invalid response from v0 API - missing chat ID');
+      }
+
+      console.log('V0 chat created successfully:', chat.id);
+
+      // Get demo URL - handle both old and new API response formats
+      const demoUrl = chat.latestVersion?.demoUrl || ('demo' in chat && chat.demo) || ('url' in chat && chat.url) || '';
+      
+      if (!demoUrl) {
+        console.warn('No demo URL returned from v0 API');
       }
 
       // Deduct 1 credit
@@ -111,7 +142,7 @@ export class WebsiteBuilder {
           techProfileId: techProfileData.id,
           subdomain,
           v0ChatId: chat.id,
-          demoUrl: chat.demo || '',
+          demoUrl: demoUrl,
           themeSettings: {
             // Use default modern professional styling
             colorScheme: 'modern',
@@ -128,16 +159,32 @@ export class WebsiteBuilder {
       // Create default sections
       await this.createDefaultSections(website.id, techProfileData, preferences);
 
+      console.log('Website created successfully:', website.id);
+
       return {
         websiteId: website.id,
         chatId: chat.id,
-        demoUrl: chat.demo,
+        demoUrl: demoUrl,
         subdomain: `${subdomain}.ivoryschoice.com`,
         files: 'files' in chat ? chat.files : [],
         creditsRemaining: user.credits - 1,
       };
     } catch (error) {
       console.error('Error creating tech website:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+          throw new Error('V0 API authentication failed. Please check your V0 API key configuration.');
+        }
+        if (error.message.includes('404')) {
+          throw new Error('V0 API endpoint not found. Please verify the v0-sdk version and API configuration.');
+        }
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          throw new Error('V0 API rate limit exceeded. Please try again in a few minutes.');
+        }
+      }
+      
       throw error;
     }
   }
@@ -148,6 +195,8 @@ export class WebsiteBuilder {
    */
   async customizeWebsite(websiteId: number, customizationPrompt: string, userId: number) {
     try {
+      console.log('Starting website customization for user:', userId);
+      
       // Get user and check credits
       const [user] = await db
         .select()
@@ -175,11 +224,20 @@ export class WebsiteBuilder {
         throw new Error('Website not found');
       }
 
+      // Verify V0 API key before making request
+      if (!process.env.V0_API_KEY || !v0Client) {
+        throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
+      }
+
+      console.log('Sending customization message to v0...');
+
       // Send customization message to v0
-      const response = await v0.chats.sendMessage({
+      const response = await v0Client.chats.sendMessage({
         chatId: website.v0ChatId,
         message: customizationPrompt,
       });
+
+      console.log('V0 customization response received');
 
       // Type guard to ensure we have the correct response type
       if (!('id' in response)) {
@@ -216,7 +274,7 @@ export class WebsiteBuilder {
       });
 
       // Update website demo URL if changed
-      const demoUrl = 'demo' in response ? response.demo : null;
+      const demoUrl = response.latestVersion?.demoUrl || ('demo' in response && response.demo) || ('url' in response && response.url) || null;
       if (demoUrl && demoUrl !== website.demoUrl) {
         await db
           .update(techWebsites)
@@ -235,6 +293,20 @@ export class WebsiteBuilder {
       };
     } catch (error) {
       console.error('Error customizing website:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+          throw new Error('V0 API authentication failed. Please check your V0 API key configuration.');
+        }
+        if (error.message.includes('404')) {
+          throw new Error('V0 API endpoint not found or chat not found. Please verify the configuration.');
+        }
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          throw new Error('V0 API rate limit exceeded. Please try again in a few minutes.');
+        }
+      }
+      
       throw error;
     }
   }

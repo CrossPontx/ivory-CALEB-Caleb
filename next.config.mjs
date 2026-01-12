@@ -28,6 +28,8 @@ const nextConfig = {
     R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
     // OpenAI
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    // V0 Platform API
+    V0_API_KEY: process.env.V0_API_KEY,
     // Vercel Blob
     BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
     // Database
