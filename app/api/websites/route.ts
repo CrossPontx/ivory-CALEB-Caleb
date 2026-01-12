@@ -7,6 +7,9 @@ import { getSession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Website creation request received');
+    console.log('V0_API_KEY available:', !!process.env.V0_API_KEY);
+    
     const session = await getSession();
     if (!session?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -108,8 +111,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error creating website:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      v0KeyAvailable: !!process.env.V0_API_KEY,
+      nodeEnv: process.env.NODE_ENV,
+    });
+    
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create website' },
+      { 
+        error: error instanceof Error ? error.message : 'Failed to create website',
+        debug: process.env.NODE_ENV === 'development' ? {
+          v0KeyAvailable: !!process.env.V0_API_KEY,
+          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+        } : undefined
+      },
       { status: 500 }
     );
   }

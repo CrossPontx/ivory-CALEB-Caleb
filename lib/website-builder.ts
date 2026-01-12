@@ -3,15 +3,16 @@ import { db } from '@/db';
 import { techProfiles, techWebsites, websiteSections, websiteCustomizations, services, portfolioImages, users, creditTransactions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-// Create V0 client with explicit API key - only if API key is available
-let v0Client: ReturnType<typeof createClient> | null = null;
-
-if (process.env.V0_API_KEY) {
-  v0Client = createClient({
+// Create V0 client dynamically when needed
+function getV0Client() {
+  if (!process.env.V0_API_KEY) {
+    console.error('V0_API_KEY environment variable is not set');
+    throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
+  }
+  
+  return createClient({
     apiKey: process.env.V0_API_KEY
   });
-} else {
-  console.error('V0_API_KEY environment variable is not set');
 }
 
 export interface WebsitePreferences {
@@ -91,11 +92,14 @@ export class WebsiteBuilder {
       console.log('Generated prompt length:', prompt.length);
 
       // Verify V0 API key before making request
-      if (!process.env.V0_API_KEY || !v0Client) {
+      if (!process.env.V0_API_KEY) {
         throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
       }
 
       console.log('Creating v0 chat...');
+      
+      // Create v0 client dynamically
+      const v0Client = getV0Client();
       
       // Create v0 chat - for now, images are referenced in the prompt
       // TODO: Investigate proper way to pass images to v0 SDK
@@ -225,11 +229,14 @@ export class WebsiteBuilder {
       }
 
       // Verify V0 API key before making request
-      if (!process.env.V0_API_KEY || !v0Client) {
+      if (!process.env.V0_API_KEY) {
         throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
       }
 
       console.log('Sending customization message to v0...');
+
+      // Create v0 client dynamically
+      const v0Client = getV0Client();
 
       // Send customization message to v0
       const response = await v0Client.chats.sendMessage({
