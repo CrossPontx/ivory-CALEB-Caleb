@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { websiteBuilder } from '@/lib/website-builder';
+import { templateWebsiteGenerator } from '@/lib/template-website-generator';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if subdomain is available
-    const available = await websiteBuilder.checkSubdomainAvailability(subdomain);
+    const available = await templateWebsiteGenerator.checkSubdomainAvailability(subdomain);
 
     return NextResponse.json({ 
       available,

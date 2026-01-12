@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { techProfiles, services, portfolioImages, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { websiteBuilder } from '@/lib/website-builder';
+import { templateWebsiteGenerator } from '@/lib/template-website-generator';
 import { getSession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
       .from(portfolioImages)
       .where(eq(portfolioImages.techProfileId, techProfile.id));
 
-    // Create website
-    const result = await websiteBuilder.createTechWebsite(
+    // Create website using template generator (reliable, no external dependencies)
+    const result = await templateWebsiteGenerator.createTechWebsite(
       {
         ...techProfile,
         services: techServices.map(s => ({
@@ -222,8 +222,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get website data
-    const websiteData = await websiteBuilder.getWebsiteData(techProfile.id);
+    // Get website data using template generator
+    const websiteData = await templateWebsiteGenerator.getWebsiteData ? 
+      await templateWebsiteGenerator.getWebsiteData(techProfile.id) :
+      null;
 
     if (!websiteData) {
       // No website exists yet - this is normal for new users
