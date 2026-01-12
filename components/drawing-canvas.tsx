@@ -76,6 +76,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
   const [showDrawing, setShowDrawing] = useState(true)
   const lastTouchDistanceRef = useRef<number>(0)
   const [showZoomIndicator, setShowZoomIndicator] = useState(false)
+  const [minZoom, setMinZoom] = useState(0.5)
 
   // Load and setup canvas
   useEffect(() => {
@@ -107,6 +108,13 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
           height = containerHeight
           width = containerHeight * imgAspect
         }
+        
+        // Calculate minimum zoom to ensure image always fills the canvas area
+        // This prevents black space around the image when zoomed out
+        const minZoomX = containerWidth / width
+        const minZoomY = containerHeight / height
+        const calculatedMinZoom = Math.max(minZoomX, minZoomY, 0.8) // At least 0.8 to prevent too much zoom out
+        setMinZoom(calculatedMinZoom)
         
         setCanvasDimensions({ width, height })
         
@@ -462,7 +470,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
   }
 
   const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.5, 0.5))
+    setZoom(prev => Math.max(prev - 0.5, minZoom))
     setShowZoomIndicator(true)
     setTimeout(() => setShowZoomIndicator(false), 1500)
   }
@@ -502,7 +510,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
       if (lastTouchDistanceRef.current > 0) {
         const delta = distance - lastTouchDistanceRef.current
         const zoomChange = delta * 0.01
-        setZoom(prev => Math.min(Math.max(prev + zoomChange, 0.5), 5))
+        setZoom(prev => Math.min(Math.max(prev + zoomChange, minZoom), 5))
       }
 
       lastTouchDistanceRef.current = distance
@@ -518,7 +526,7 @@ export function DrawingCanvas({ imageUrl, onSave, onClose }: DrawingCanvasProps)
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault()
     const delta = e.deltaY > 0 ? -0.1 : 0.1
-    setZoom(prev => Math.min(Math.max(prev + delta, 0.5), 5))
+    setZoom(prev => Math.min(Math.max(prev + delta, minZoom), 5))
     setShowZoomIndicator(true)
     setTimeout(() => setShowZoomIndicator(false), 1500)
   }

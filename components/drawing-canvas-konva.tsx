@@ -103,6 +103,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
   const lastTouchDistanceRef = useRef<number>(0)
   const lastTouchCenterRef = useRef<{ x: number; y: number } | null>(null)
   const lastTapTimeRef = useRef<number>(0)
+  const [minZoom, setMinZoom] = useState(0.5)
   
   // Sticker pinch-to-resize state
   const stickerPinchDistanceRef = useRef<number>(0)
@@ -156,6 +157,13 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
           height = containerHeight
           width = containerHeight * imgAspect
         }
+        
+        // Calculate minimum zoom to ensure image always fills the canvas area
+        // This prevents black space around the image when zoomed out
+        const minZoomX = containerWidth / width
+        const minZoomY = containerHeight / height
+        const calculatedMinZoom = Math.max(minZoomX, minZoomY, 0.8) // At least 0.8 to prevent too much zoom out
+        setMinZoom(calculatedMinZoom)
         
         setCanvasDimensions({ width, height })
         setImage(img)
@@ -334,7 +342,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
         const delta = distance - lastTouchDistanceRef.current
         const scaleBy = 1 + delta * 0.01
         const oldScale = stage.scaleX()
-        const newScale = Math.min(Math.max(oldScale * scaleBy, 0.5), 5)
+        const newScale = Math.min(Math.max(oldScale * scaleBy, minZoom), 5)
 
         // Calculate pan (movement of center point)
         const centerDelta = {
@@ -917,7 +925,7 @@ export function DrawingCanvasKonva({ imageUrl, onSave, onClose }: DrawingCanvasP
     const scaleBy = 1.05 // Smaller increment for smoother zoom
     const newScale = direction > 0 
       ? Math.min(oldScale * scaleBy, 5) 
-      : Math.max(oldScale / scaleBy, 0.5)
+      : Math.max(oldScale / scaleBy, minZoom)
     
     setZoom(newScale)
     
