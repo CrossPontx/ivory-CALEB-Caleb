@@ -125,6 +125,8 @@ export async function POST(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
       v0KeyAvailable: !!process.env.V0_API_KEY,
       nodeEnv: process.env.NODE_ENV,
+      errorName: error instanceof Error ? error.name : 'Unknown',
+      errorConstructor: error instanceof Error ? error.constructor.name : 'Unknown',
     });
     
     // Handle cancellation specifically
@@ -141,13 +143,57 @@ export async function POST(request: NextRequest) {
         { status: 499 } // Client Closed Request
       );
     }
+
+    // Handle specific V0 API errors
+    if (error instanceof Error) {
+      // V0 SDK errors
+      if (error.message.includes('V0 API key is not configured')) {
+        return NextResponse.json(
+          { error: 'Website builder service is temporarily unavailable. Please try again later.' },
+          { status: 503 }
+        );
+      }
+      
+      // Network/timeout errors
+      if (error.message.includes('timeout') || error.message.includes('timed out')) {
+        return NextResponse.json(
+          { error: 'Website creation is taking longer than expected due to high demand. Please try again in a few minutes.' },
+          { status: 408 }
+        );
+      }
+      
+      // Rate limiting
+      if (error.message.includes('rate limit') || error.message.includes('429')) {
+        return NextResponse.json(
+          { error: 'The AI service is experiencing high demand. Please try again in a few minutes.' },
+          { status: 429 }
+        );
+      }
+      
+      // Authentication errors
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        return NextResponse.json(
+          { error: 'Website builder service authentication failed. Please try again later.' },
+          { status: 503 }
+        );
+      }
+      
+      // Generic API errors
+      if (error.message.includes('API') || error.message.includes('v0')) {
+        return NextResponse.json(
+          { error: 'Website creation service is temporarily unavailable. Please try again in a few minutes.' },
+          { status: 503 }
+        );
+      }
+    }
     
     return NextResponse.json(
       { 
-        error: error instanceof Error ? error.message : 'Failed to create website',
+        error: 'Website creation is taking longer than expected due to high demand. Please try again in a few minutes.',
         debug: process.env.NODE_ENV === 'development' ? {
           v0KeyAvailable: !!process.env.V0_API_KEY,
           errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
         } : undefined
       },
       { status: 500 }

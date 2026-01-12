@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getSession } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,12 +11,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user data
     const [user] = await db
       .select({
+        id: users.id,
         credits: users.credits,
-        subscriptionTier: users.subscriptionTier,
+        userType: users.userType,
         subscriptionStatus: users.subscriptionStatus,
+        subscriptionTier: users.subscriptionTier,
       })
       .from(users)
       .where(eq(users.id, session.id))
@@ -26,11 +27,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    return NextResponse.json({
+      credits: user.credits,
+      userType: user.userType,
+      subscriptionStatus: user.subscriptionStatus,
+      subscriptionTier: user.subscriptionTier,
+    });
   } catch (error) {
-    console.error('Error getting user status:', error);
+    console.error('Error fetching user status:', error);
     return NextResponse.json(
-      { error: 'Failed to get user status' },
+      { error: 'Failed to fetch user status' },
       { status: 500 }
     );
   }

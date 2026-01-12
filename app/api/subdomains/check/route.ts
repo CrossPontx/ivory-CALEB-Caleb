@@ -17,15 +17,22 @@ export async function GET(request: NextRequest) {
     const subdomainRegex = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$|^[a-z0-9]$/;
     if (!subdomainRegex.test(subdomain)) {
       return NextResponse.json(
-        { available: false, error: 'Invalid subdomain format' },
-        { status: 200 }
+        { 
+          available: false, 
+          error: 'Invalid subdomain format. Use only lowercase letters, numbers, and hyphens.' 
+        },
+        { status: 400 }
       );
     }
 
-    // Check availability
+    // Check if subdomain is available
     const available = await websiteBuilder.checkSubdomainAvailability(subdomain);
 
-    return NextResponse.json({ available });
+    return NextResponse.json({ 
+      available,
+      subdomain,
+      fullDomain: `${subdomain}.ivoryschoice.com`
+    });
   } catch (error) {
     console.error('Error checking subdomain availability:', error);
     return NextResponse.json(

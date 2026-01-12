@@ -11,9 +11,14 @@ function getV0Client() {
     throw new Error('V0 API key is not configured. Please check V0_API_KEY environment variable.');
   }
   
-  return createClient({
-    apiKey: process.env.V0_API_KEY
-  });
+  try {
+    return createClient({
+      apiKey: process.env.V0_API_KEY
+    });
+  } catch (error) {
+    console.error('Error creating V0 client:', error);
+    throw new Error('Failed to initialize V0 AI service. Please try again later.');
+  }
 }
 
 export interface WebsitePreferences {
@@ -154,7 +159,29 @@ export class WebsiteBuilder {
         if (abortSignal?.aborted) {
           throw new Error('Request was cancelled by user');
         } else {
-          throw new Error('V0 API request timed out after 3 minutes. The service may be experiencing high demand.');
+          console.error('V0 API error details:', {
+            error: error instanceof Error ? error.message : 'Unknown',
+            stack: error instanceof Error ? error.stack : undefined,
+            name: error instanceof Error ? error.name : 'Unknown',
+          });
+          
+          // Handle specific V0 SDK errors
+          if (error instanceof Error) {
+            if (error.message.includes('fetch') || error.message.includes('network')) {
+              throw new Error('Network error connecting to V0 AI service. Please check your internet connection and try again.');
+            }
+            if (error.message.includes('401') || error.message.includes('unauthorized')) {
+              throw new Error('V0 API authentication failed. Please check your V0 API key configuration.');
+            }
+            if (error.message.includes('429') || error.message.includes('rate limit')) {
+              throw new Error('V0 API rate limit exceeded. The service is experiencing high demand. Please try again in a few minutes.');
+            }
+            if (error.message.includes('500') || error.message.includes('internal server error')) {
+              throw new Error('V0 AI service is temporarily unavailable. Please try again in a few minutes.');
+            }
+          }
+          
+          throw new Error('V0 AI request timed out after 3 minutes. The service may be experiencing high demand.');
         }
       }
       
